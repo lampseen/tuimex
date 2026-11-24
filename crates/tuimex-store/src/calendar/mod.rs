@@ -46,7 +46,7 @@ CREATE TABLE resources (
 
 /// The directory under the data directory that holds local events. An
 /// account's name cannot begin with a dot, so no account's mail is here.
-const LOCAL: &str = ".calendars";
+pub const LOCAL: &str = ".calendars";
 
 /// One calendar as last fetched.
 #[derive(Debug, Clone, PartialEq, Eq)]

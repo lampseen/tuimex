@@ -107,7 +107,7 @@ const STEPS: [(&str, Step); 6] = [
     // The account's own events go with its mail (ADR-055).
     ("moving the mail", |at, old, new| {
         moved(&at.data.join(old), &at.data.join(new))?;
-        let events = at.data.join(".calendars");
+        let events = at.data.join(tuimex_store::calendar::LOCAL);
         moved(&events.join(old), &events.join(new)).map(|()| None)
     }),
     ("moving the pinned certificate", |at, old, new| {
