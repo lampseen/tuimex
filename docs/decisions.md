@@ -1744,3 +1744,93 @@ against a measurement.
 **What it costs.** The third budget record, and the first written ahead of
 the code it pays for. The table is what makes it more than a number going
 up: each stage's pull request states its own count beside its line here.
+
+## ADR-060 — A repeating event is expanded by hand, for the rules people use
+
+ADR-021 showed a recurrence as its rule in words. A calendar has to place
+each occurrence on its day, so the rule is now worked out. `tuimex-core`
+expands `FREQ` of daily, weekly, monthly and yearly with `INTERVAL`,
+`COUNT`, `UNTIL`, `BYDAY` (with a position in monthly rules, as in "the
+second Tuesday") and `BYMONTHDAY`, leaves out each `EXDATE`, and lets an
+event carrying a `RECURRENCE-ID` stand in for the occurrence it names.
+Expansion is asked for a range of days and returns what falls in it; it
+never walks a rule from its start to the end of time.
+
+A rule outside that set is not guessed at. The event is shown on its first
+day, and says it repeats in a way tuimex does not work out.
+
+The strongest argument against is that recurrence is where calendar
+programs are wrong, and a crate (`rrule`) has already been wrong and fixed
+more often than this code will be. It brings a zone database with it, and
+ADR-049 left the binary 0.9 MiB of room. The set above is what the reviewed
+feeds and invitations use, it is a pure function over days, and its test is
+a table of rules with the days each must give, which a crate would need
+too.
+
+**What it costs.** An event with a rule outside the set appears once. That
+is visible on the event and not in the month grid, where a missing
+occurrence looks like a free day.
+
+## ADR-061 — A time zone comes from the calendar, then the system, and is never guessed
+
+PLAN §1 has `chrono` for the clock only, and no zone database is linked.
+An event's time is resolved in this order:
+
+1. UTC, or a time with no zone, which is the wall clock wherever the user
+   is: no conversion.
+2. The `VTIMEZONE` the calendar itself carries for that zone name, which
+   `tuimex-content` already reads.
+3. The system's zone files, by the zone's name, read by the engine and
+   handed to the pure code as plain rules. `tuimex-content` still opens no
+   file (ADR-007). A name is used only if it is made of the characters zone
+   names have and resolves under the zone directory: it is hostile text and
+   would otherwise be a path.
+4. Neither: the time is shown as written, with the zone's name beside it,
+   and is not placed on the clock of the week view as though it were local.
+
+The local zone, to show times in, is the system's, as it is for mail.
+
+The strongest argument against is that step 4 exists at all: a linked
+database would never reach it. Calendars from Google and Proton carry
+their zones, and Linux and macOS both ship the files, so step 4 is a
+calendar that names a zone it does not define on a machine without zone
+files. Saying so is better than a meeting shown an hour off.
+
+**What it costs.** A reader for the system's zone-file format, and one
+more thing that differs between the two platforms CI proves.
+
+## ADR-062 — Google's calendar is CalDAV with the app password, and `roxmltree` reads the answers
+
+ADR-056's note is the reason: Google's older address accepts the app
+password an account already keeps. So an account whose calendar is
+`kind = "caldav"` is read with `PROPFIND` and `REPORT` and, once writing
+is proven, written with `PUT` and `DELETE`, each conditional on the entity
+tag last seen so that a change made elsewhere is never overwritten
+unseen. It signs in with the account's own credential; there is no second
+secret, and the address is not one, so it is in the config. A feed
+(ADR-056) remains the way for a provider with no such door, and for a
+Google account if this door closes.
+
+`ureq` sends the requests: it carries any method once told to allow them,
+refuses anything but `https`, and is told to follow no redirect. Read in
+its source at 3.5.2, not yet run.
+
+A CalDAV answer is XML around iCalendar. `roxmltree` is added to the list
+in PLAN §1, in `tuimex-content`, to read it: a read-only tree, no file or
+network access, one dependency (`memchr`). It replaces a hand-written XML
+reader, which is the thing this project should least write itself: a
+parser for a format with entities and namespaces, facing a server's
+bytes. A document type declaration is refused outright, which removes
+entity expansion as a question. Its cost in the binary is not known until
+it is linked; the figure goes under this record then, and if it does not
+fit, the binary budget is raised by its own record against that
+measurement (ADR-049).
+
+Only what the calendar's own collection lists is fetched. An address
+inside an answer that points at another host is not followed (ADR-008).
+
+**What it costs.** One more crate parsing bytes from outside. Dependence
+on an address Google documents as the old one: it is tried by hand before
+each release (`docs/testing.md`), because no test server behaves as
+Google does. And until the write is proven against a real calendar, the
+Google accounts are read-only like the rest.

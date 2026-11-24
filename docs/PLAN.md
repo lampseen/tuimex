@@ -51,7 +51,7 @@ Each row is settled. The ones with a record are answered by its number.
 | Secrets | `keyring`, or `password_cmd`; never the config | ADR-010 |
 | Gmail | XOAUTH2 with a user-supplied client; token requests through `ureq` | ADR-019 |
 | OpenPGP | the `gpg` binary | ADR-020 |
-| Calendar | Each provider's calendar read as an iCalendar feed over `ureq`; events made here are files; planned, not built | ADR-054 to ADR-058 |
+| Calendar | Google over CalDAV with the app password, any other provider as an iCalendar feed, both through `ureq`; events made here are files; `roxmltree` reads CalDAV's answers; repeats and zones worked out by hand; planned, not built | ADR-054 to ADR-062 |
 | Config | TOML at `$XDG_CONFIG_HOME/tuimex/config.toml`, or `--config`; never the current directory | ADR-011 |
 | Platforms | Linux and macOS, both proven in CI | ADR-022 |
 | Vocabulary | "folder" everywhere; Gmail labels are shown as folders | §4.1 |
@@ -67,7 +67,8 @@ is the dependency ceiling; adding a crate takes a record first (ADR-005):
 `imap`, `lettre`, `rustls` and `rustls-native-certs` (ADR-029), `mail-parser`
 (with `full_encoding`, which brings `encoding_rs`: ADR-044),
 `mail-builder`, `ammonia`, `html2text`, `rusqlite`, `keyring`, `zeroize`,
-`ureq` (token requests, and calendar feeds: ADR-056), `sha2`, `base64`,
+`ureq` (token requests, and calendars: ADR-056, ADR-062), `roxmltree`
+(CalDAV's answers, in `tuimex-content`: ADR-062), `sha2`, `base64`,
 `getrandom` (the last three for PKCE and fingerprints); dev only: `insta`.
 
 Not on the list, deliberately: `tokio`, `reqwest`, `sqlx`, any browser
@@ -867,9 +868,10 @@ The keys, commands, config keys and screens are the design's to state and
 are not listed here until M12 is merged; §6 and §11 are updated by the
 milestone that builds each.
 
-Before M13, by hand: whether Google's older CalDAV address accepts an app
-password (ADR-056). The result is written under that record. If it does,
-CalDAV for Google becomes M17 with a record of its own.
+Google's older CalDAV address accepts an app password (ADR-056's note),
+so CalDAV is how a Google account is read from M13 on and written from
+M14 on (ADR-062). The milestones are built in order on one branch and are
+one pull request (ADR-054's note).
 
 ### M12 — The calendar's design *(no Rust)*
 `design/tui.js` gains the calendar: fixtures (three accounts, an invitation
@@ -890,8 +892,9 @@ Every event of a calendar read in `tuimex-content`; event files and their
 index (ADR-055); feeds fetched from addresses kept as secrets, with the
 setup step that asks for them (ADR-056); the month, week, day and event
 views; `gc` and `gm`; going to a date; finding; narrowing to an account;
-showing and hiding calendars; joining a meeting (ADR-054). Read-only. The
-records ADR-054 leaves open (repeats, time zones) come first.
+showing and hiding calendars; joining a meeting (ADR-054). Calendars are
+read over CalDAV or as a feed (ADR-062), repeats and zones worked out as
+ADR-060 and ADR-061 say. Read-only.
 **Exit:** every calendar output of the design is drawn cell for cell; a
 corpus of hostile calendars, one test each; the secret job finds no feed
 address in any file; a feed that fails says so and keeps what it had.
