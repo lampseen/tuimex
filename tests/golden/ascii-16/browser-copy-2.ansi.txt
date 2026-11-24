@@ -1,0 +1,4 @@
+{default}    {yellow}^ Remote content not loaded{brightblack} - 9 images, 3 hosts - tracker: OpenTrack{default}                                                
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Opening the sealed copy in your browser{brightblack} - nothing remote loads{default}                                                        

@@ -1,0 +1,24 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1             
+                                                                                
+  Today                                                                         
+    work  Imani Castell       Invitation: Q4 roadmap re~         inv   14:05    
+    home  Jonas Becker      > Cabin weekend: who is dri~          5m   13:40    
+    work  Backup Robot        [ops] Nightly backup finished with 2 ~   12:58    
+    work  Priya Raman       > Contract draft v3 for the~       3m 2f   11:32 !  
+    home  Fernway Weekly      This week: winter routes, a gear swap~   10:15    
+    work  Lars Lindqvist      Staging database migratio~          re   09:48    
+>   home  Example Bank        Action needed: confirm your new device   09:02    
+    prot  Mei Tanaka          Payroll corrections for November         08:30 !  
+                                                                                
+  Yesterday                                                                     
+    home  Greta Holm          Photos from Saturday                4f   20:44    
+    home  Parcel Desk         Your parcel is out for delivery          16:20    
+    prot  Olu Adeyemi         New keys for the shared vault            11:05    
+                                                                                
+  Past 7 days                                                                   
+    prot  Imani Castell       Budget numbers for the of~          re  21 Nov    
+    home  Tomas Ferreira      Bike rack: still want it?               21 Nov    
+    work  Hiring Desk         Interview loop: backend c~          1f  21 Nov    
+                                                                                
+  7 of 24 - 1 message                               sending in 6s - 1 not sent  
+  Enter open - e archive - d trash - r reply - ? help                           

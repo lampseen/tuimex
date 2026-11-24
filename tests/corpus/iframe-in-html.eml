@@ -1,0 +1,13 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <iframe-in-html@example.com>
+Subject: A frame
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<iframe src="https://collect.example.net/frame"></iframe>
+<iframe srcdoc="&lt;script&gt;steal()&lt;/script&gt;"></iframe>
+</body></html>

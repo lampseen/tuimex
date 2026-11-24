@@ -1,0 +1,17 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{fg}                                                                                                                        
+{fg}    me and Dmitri are the contacts for support                                                                          
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}  {fg b}Agent{fg}                                                                                                                 
+{fg}    r   {dim}write a reply{fg}                                                                                                   
+{fg}    t   {dim}tidy what I wrote{fg}                                                                                               
+{fg}                                                                                                                        
+{fg}  {dim}nothing is sent until you pick{fg}                                                                                        
+{fg}  Esc {dim}cancel{fg}                                                                                                            

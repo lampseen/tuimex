@@ -1,0 +1,6 @@
+{fg}  {fg b}Links{fg}                                                                                                                 
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel} 1  {fg bg=sel}bank.example.com.device-check.example.net   {dim bg=sel}https://bank.example.com/confirm{fg bg=sel}   {warn bg=sel}▲{fg bg=sel} text says bank.example.com     
+{fg}    {link} 2  {fg}examplebank.example.net                     {dim}Contact us{fg}                                                          
+{fg}                                                                                                                        
+{fg}  {dim}opens{fg} https://bank.example.com.device-check.example.net/confirm                                                       
+{fg}  {warn}▲{fg} Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?{dim}  {fg}y {dim}yes · {fg}n {dim}no · {fg}A {dim}ask the agent{fg}  

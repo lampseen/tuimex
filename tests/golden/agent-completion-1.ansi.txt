@@ -1,0 +1,6 @@
+{fg}  {fg b}:agent link{fg}                                                                                                           
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}1   {fg bg=sel}bank.example.com.device-check.example.net                                                                       
+{fg}    {link}2   {fg}examplebank.example.net                                                                                         
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  :agent link 1{bg bg=acc} {fg}                                                                                                        

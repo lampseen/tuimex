@@ -1,0 +1,12 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <tracker-hidden-image@example.com>
+Subject: An image hidden by style
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<div style="display:none"><img src="https://open.example.net/o/abc.gif"></div>
+</body></html>

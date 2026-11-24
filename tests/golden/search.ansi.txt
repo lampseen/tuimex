@@ -1,0 +1,40 @@
+{fg}  {dim}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}   {acc b}Search{fg} nov                                        
+{fg}                                                                                                                        
+{fg}  {dim b}Today{fg}                                                                                                                 
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 {fg b u}Nov{fg} 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {head}work{fg}       Mei Tanaka              Payroll corrections for {fg b u}Nov{fg}ember                                       {dim} 08:30{fg} {warn}★{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Past 7 days{fg}                                                                                                           
+{fg}    {link}personal{fg}   {dim}City Library{fg}            {dim}Two items are due on 27 {fg b u}Nov{fg}                                            {dim}20 Nov{fg}    
+{fg}                                                                                                                        
+{fg}  {dim b}Earlier{fg}                                                                                                               
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {dim bg=sel}Mei Tanaka{fg bg=sel}              {dim bg=sel}Notes from the vendor call{fg bg=sel}  {dim bg=sel}next review is in {fg bg=sel b u}Nov{dim bg=sel}e…{fg bg=sel}            {agent bg=sel}1 file{fg bg=sel}  {dim bg=sel}14 Nov{fg bg=sel}    
+{fg}    {link}personal{fg}   {dim}to Greta Holm{fg}           {dim}Re: Dinner in {fg b u}Nov{dim}ember?{fg}                                          {agent}Sent{fg}  {dim} 9 Nov{fg}    
+{fg}    {head}work{fg}       {dim}Ana Sousa{fg}               {fg b u}Nov{dim}ember invoice run{fg}                                          {agent}Archive{fg}  {dim} 3 Nov{fg}    
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{fg}  {fg b}Notes from the vendor call{fg}                                                                                            
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Mei Tanaka{fg} {dim}<mei@example.org>{fg}                                                                               
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Files    {fg}vendor-call.md {dim}9 KB{fg}                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}4 of 6 ·{fg} 1 message                                                                        sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}e {dim}archive · {fg}r {dim}reply · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                                                  

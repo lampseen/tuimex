@@ -1,0 +1,5 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  :agent reply agree to 45 days{bg bg=acc} {fg}                                                                                        

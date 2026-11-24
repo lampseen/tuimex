@@ -1,0 +1,40 @@
+{fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
+{fg}                                                                                                                        
+{acc}▌{fg}   {fg b}From     {dim}robin@example.com{fg}   {fg b}robin.vale@example.org{fg}   {dim}desk@example.org{fg}                                              
+{fg}    {dim}To       {fg}Priya Raman {dim}<priya@example.org>{fg}                                                                            
+{fg}    {dim}         {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Cc       {fg}billing@halden.example.com                                                                                 
+{fg}    {dim}Bcc      {fg}                                                                                                           
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}    {dim}Files    {fg}contract-v3-signed.pdf      {dim} 512 KB{fg}                                                                        
+{fg}    {dim}         {fg}schedule-b.xlsx             {dim}  38 KB{fg}                                                                        
+{fg}                                                                                                                        
+{fg}    {agent}◇ Written by an agent{dim} · 23 Nov 13:52{fg}                                                                                
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}    45 days is fine provided the first invoice goes out at signing. Dmitri and I                                        
+{fg}    are the right named contacts for the support clause.                                                                
+{fg}                                                                                                                        
+{fg}    I have attached the signed copy and schedule B. Billing at Halden is copied                                         
+{fg}    so the invoice details reach them directly.                                                                         
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}draft saved 13:58{fg}                                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Tab {dim}next field · {fg}Left Right {dim}identity · {fg}Enter {dim}edit · {fg}A {dim}agent · {fg}^s {dim}send · {fg}Esc {dim}close{fg}                                     

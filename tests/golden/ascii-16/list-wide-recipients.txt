@@ -1,0 +1,45 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                                                                                 
+                                                                                                                                                                                    
+  Today                                                                                                        |  Invitation: Q4 roadmap review, Thu 26 Nov 10:00                   
+>   work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov~            invite   14:05    |                                                                    
+    personal   Jonas Becker          > Cabin weekend: who is driving?                         5 msg   13:40    |    From     Imani Castell <imani@example.org>                      
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                  12:58    |    To       Robin Vale <robin.vale@example.org>,                   
+    work       Priya Raman           > Contract draft v3 for the Halden account     3 msg - 2 files   11:32 !  |             Lars Lindqvist <lars@example.org>, and 2 more          
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure    10:15    |                                                                    
+    work       Lars Lindqvist          Staging database migration window                    replied   09:48    |    The pre-read is the roadmap document from last week. Please     
+    personal   Example Bank            Action needed: confirm your new device                         09:02    |    answer by Wednesday so I can book the right room.               
+    work       Mei Tanaka              Payroll corrections for November                               08:30 !  |                                                                    
+                                                                                                               |                                                                    
+  Yesterday                                                                                                    |                                                                    
+    personal   Greta Holm              Photos from Saturday                                 4 files   20:44    |                                                                    
+    personal   Parcel Desk             Your parcel is out for delivery                                16:20    |                                                                    
+    work       Olu Adeyemi             New keys for the shared vault                                  11:05    |                                                                    
+                                                                                                               |                                                                    
+  Past 7 days                                                                                                  |                                                                    
+    work       Imani Castell           Budget numbers for the offsite                       replied  21 Nov    |                                                                    
+    personal   Tomas Ferreira          Bike rack: still want it?                                     21 Nov    |                                                                    
+    work       Hiring Desk             Interview loop: backend candidate, Tuesday            1 file  21 Nov    |                                                                    
+    personal   City Library            Two items are due on 27 Nov                                   20 Nov    |                                                                    
+    work       Dmitri Volkov           Lunch and learn: reading flame graphs                         20 Nov    |                                                                    
+    work       Ana Sousa               Expense report needs one receipt                              20 Nov !  |                                                                    
+    personal   Wen Zhao                Recipe you asked for                                  1 file  19 Nov    |                                                                    
+    work       Status Page             Resolved: elevated error rate on the API                      19 Nov    |                                                                    
+    personal   Rent Office             December statement                                    1 file  18 Nov    |                                                                    
+    work       Lars Lindqvist          On-call swap for the week of 7 Dec?                           18 Nov    |                                                                    
+    personal   Jonas Becker            Climbing gym: new opening hours                               17 Nov    |                                                                    
+                                                                                                               |                                                                    
+  Earlier                                                                                                      |                                                                    
+    work       Mei Tanaka              Notes from the vendor call                            1 file  14 Nov    |                                                                    
+    personal   Greta Holm              Book club pick for December                          replied  12 Nov    |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                               |                                                                    
+                                                                                                                                                                                    
+  1 of 24 - 1 message                                                                                                                                   sending in 6s - 1 not sent  
+  Enter open - e archive - d trash - r reply - ? help                                                                                                                               

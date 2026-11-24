@@ -1,0 +1,40 @@
+{fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Today{fg}                                                                                                                 
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {link}personal{fg}   {dim}Tomas Ferreira{fg}        {dim}▾{fg} {dim}Cabin weekend: who is driving?{fg}                                         {dim}22 Nov{fg}    
+{fg}    {link}personal{fg}   {dim}Greta Holm{fg}                {dim}I can take three if we leave by four.{fg}                                {dim}22 Nov{fg}    
+{fg}    {link}personal{fg}   {dim}Tomas Ferreira{fg}              {dim}Great. Then I will bring the food for Saturday.{fg}                    {dim}22 Nov{fg}    
+{fg}    {link}personal{fg}   {fg b}Jonas Becker{fg}                  Count me in. Robin, can you take the second car?                 {dim} 13:40{fg}    
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {fg bg=sel b}Wen Zhao{fg bg=sel}                  I cannot make Friday. Could someone collect me on Saturday morning?  {dim bg=sel} 08:15{fg bg=sel}    
+{fg}    {head}work{fg}       {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                          {dim} 12:58{fg}    
+{fg}    {head}work{fg}       {fg b}Priya Raman{fg}           {dim}▸{fg} Contract draft v3 for the Halden account              {agent}3 msg · 2 files{fg}  {dim} 11:32{fg} {warn}★{fg}  
+{fg}    {link}personal{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure            {dim} 10:15{fg}    
+{fg}    {head}work{fg}       {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                             {agent}replied{fg}  {dim} 09:48{fg}    
+{fg}    {link}personal{fg}   {fg b}Example Bank{fg}            Action needed: confirm your new device                                 {dim} 09:02{fg}    
+{fg}    {head}work{fg}       Mei Tanaka              Payroll corrections for November                                       {dim} 08:30{fg} {warn}★{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Yesterday{fg}                                                                                                             
+{fg}    {link}personal{fg}   {fg b}Greta Holm{fg}              Photos from Saturday                                          {agent}4 files{fg}  {dim} 20:44{fg}    
+{fg}    {link}personal{fg}   {dim}Parcel Desk{fg}             {dim}Your parcel is out for delivery{fg}                                        {dim} 16:20{fg}    
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{fg}  {fg b}Re: Cabin weekend: who is driving?{fg}                                                                                    
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Wen Zhao{fg} {dim}<wen@example.com>{fg}                                                                                 
+{fg}    {dim}To       {fg}Tomas Ferreira {dim}<tomas@example.net>{fg}                                                                         
+{fg}    {dim}Cc       {fg}Robin Vale {dim}<robin@example.com>, {fg}Greta Holm {dim}<greta@example.com>, {fg}Jonas Becker {dim}<jonas@example.com>{fg}           
+{fg}                                                                                                                        
+{fg}    I cannot make Friday. Could someone collect me on Saturday morning?                                                 
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}6 of 28 ·{fg} 1 message of the thread                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}zc {dim}fold · {fg}e {dim}archive · {fg}r {dim}reply · {fg}? {dim}help{fg}                                                                   

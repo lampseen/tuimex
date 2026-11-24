@@ -1,0 +1,10 @@
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}                                                                                                                        
+{default}  {brightblack}4 of 21 -{default} 1 message                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {green}+{default} Trashed 3 messages{brightblack} - u to undo{default}                                                                                      

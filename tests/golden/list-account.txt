@@ -1,0 +1,40 @@
+  Inbox 5   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+▌   Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                           invite   14:05    
+    Backup Robot            [ops] Nightly backup finished with 2 warnings                                      12:58    
+    Priya Raman           ▸ Contract draft v3 for the Halden account                    3 messages · 2 files   11:32 ★  
+    Lars Lindqvist          Staging database migration window                                        replied   09:48    
+    Mei Tanaka              Payroll corrections for November                                                   08:30 ★  
+                                                                                                                        
+  Yesterday                                                                                                             
+    Olu Adeyemi             New keys for the shared vault                                                      11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    Imani Castell           Budget numbers for the offsite                                           replied  21 Nov    
+    Hiring Desk             Interview loop: backend candidate, Tuesday                                1 file  21 Nov    
+    Dmitri Volkov           Lunch and learn: reading flame graphs                                             20 Nov    
+    Ana Sousa               Expense report needs one receipt                                                  20 Nov ★  
+    Status Page             Resolved: elevated error rate on the API                                          19 Nov    
+    Lars Lindqvist          On-call swap for the week of 7 Dec?                                               18 Nov    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Invitation: Q4 roadmap review, Thu 26 Nov 10:00                                                                       
+                                                                                                                        
+    From     Imani Castell <imani@example.org>                                                                          
+    To       Robin Vale <robin.vale@example.org>, Lars Lindqvist <lars@example.org>, Mei Tanaka <mei@example.org>,      
+             Dmitri Volkov <dmitri@example.org>                                                                         
+                                                                                                                        
+    The pre-read is the roadmap document from last week. Please answer by                                               
+    Wednesday so I can book the right room.                                                                             
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  work only · 1 of 13 · 1 message                                                           sending in 6s · 1 not sent  
+  Showing work only · gt for the next, :account for all                                                                 

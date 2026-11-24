@@ -1,0 +1,13 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <tracker-pixel-on-a-picture-host@example.com>
+Subject: A pixel on the host that serves a picture
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<img src="https://img.example.net/chart.png" alt="chart" width="560" height="240">
+<img src="https://img.example.net/o/abc.gif" width="1" height="1" alt="">
+</body></html>

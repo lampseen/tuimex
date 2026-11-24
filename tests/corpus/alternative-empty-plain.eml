@@ -1,0 +1,17 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <alternative-empty-plain@example.com>
+Subject: A plain version with nothing in it
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b-alternative-empty-plain"
+
+--b-alternative-empty-plain
+Content-Type: text/plain; charset=utf-8
+
+   
+--b-alternative-empty-plain
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Only the styled version has words.</p></body></html>
+--b-alternative-empty-plain--

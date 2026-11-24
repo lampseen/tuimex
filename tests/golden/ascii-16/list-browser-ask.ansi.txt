@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{magenta}>{default}   {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{default}    {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblue}personal{default}   {default b}Example Bank{default}            Action needed: confirm your new device                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}    {brightyellow}work{default}       {default b}Olu Adeyemi{default}             New keys for the shared vault                                          {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightyellow}work{default}       {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                {cyan}replied{default}  {brightblack}21 Nov{default}    
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                                                           
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                                                                  
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin@example.com>{default}                                                                             
+{default}                                                                                                                        
+{default}    {yellow}^ Remote content not loaded{brightblack} - 9 images, 3 hosts - tracker: OpenTrack{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Fernway Weekly, 23 November{default}                                                                                         
+{default}                                                                                                                        
+{default}    {brightblack}[image: Ridge loop at sunrise]{default}                                                                                      
+{default}                                                                                                                        
+{default}    Winter routes are open. Three of the five marked loops are groomed and the                                          
+{default}    hut at Ridge saddle is staffed at weekends. Route notes and maps {brightblue}[1]{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Route status{default}                                                                                                        
+{default}                                                                                                                        
+{default}    {brightblack}Route             Length   Status               {default}                                                                    
+{default}                                                                                                                        
+{default}  {brightblack}5 of 24 -{default} 1 message                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Load 8 images from img.fernway.example.net, cdn.example.net?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}                                            

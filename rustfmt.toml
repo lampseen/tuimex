@@ -1,0 +1,4 @@
+# As pullpen's. This setting changes what the code budget counts (ADR-004),
+# so it changes only by a record.
+max_width = 120
+use_small_heuristics = "Max"

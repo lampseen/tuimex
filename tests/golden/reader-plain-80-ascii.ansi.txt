@@ -1,0 +1,24 @@
+{default}  {default b}Contract draft v3 for the Halden account{default}                {brightblack}1 of 3 in the thread{default}  
+{default}                                                                                
+{default}    {brightblack}From     {default b}Priya Raman{default} {brightblack}<priya@example.org>{default}                                    
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                
+{default}    {brightblack}Cc       {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                 
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 09:14                                              
+{default}    {brightblack}Files    {default}contract-v3.pdf {brightblack}482 KB{default}                                             
+{default}                                                                                
+{default}    {green}+ Signed by Priya Raman{brightblack} - key 7A1C55E0{default}                                      
+{default}                                                                                
+{default}    Hi Robin,                                                                   
+{default}                                                                                
+{default}    Attached is the third draft of the Halden contract. Legal went through it   
+{default}    on Friday and the changes from v2 are small, but two of them need a         
+{default}    decision from you before I can send it on.                                  
+{default}                                                                                
+{default}    1. Payment terms. Halden asked for 45 days instead of 30. Finance can live  
+{default}    with 45 if the first invoice is issued at signing rather than at delivery.  
+{default}                                                                                
+{default}    2. The support clause. They want named contacts on our side. I have put     
+{default}    you and Dmitri down for now; say if that should be someone else.            
+{default}                                                                                
+{default}  {brightblack}lines 1-11 of 30{default}                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  r {brightblack}reply - {default}e {brightblack}archive - {default}n b {brightblack}next, previous - {default}a {brightblack}files - {default}Esc {brightblack}back{default}                 

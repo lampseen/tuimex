@@ -1,0 +1,8 @@
+{default}    {brightblack}From     {default b}Olu Adeyemi{default} {brightblack}<olu@example.org>{default}                                                                              
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}Date     {default}Sun 22 Nov 2026 11:05                                                                                      
+{default}                                                                                                                        
+{default}    {red}x Bad signature{brightblack} - changed after signing, or not signed by olu@example.org{default}                                           
+{default}                                                                                                                        
+{default}    The vault keys rotate tonight. Install the attached key file before six or                                          
+{default}    you will be locked out.                                                                                             

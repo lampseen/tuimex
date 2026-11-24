@@ -1,0 +1,8 @@
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {fg bg=sel b}Jonas Becker{fg bg=sel}          {dim bg=sel}▸{fg bg=sel} Cabin weekend: who is driving?                                  {agent bg=sel}5 msg{fg bg=sel}  {dim bg=sel} 13:40{fg bg=sel}    
+{fg}    {head}work{fg}       {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                          {dim} 12:58{fg}    
+{fg}    {head}work{fg}       {fg b}Priya Raman{fg}           {dim}▸{fg} Contract draft v3 for the Halden account              {agent}3 msg · 2 files{fg}  {dim} 11:32{fg} {warn}★{fg}  
+{fg}    {link}personal{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure            {dim} 10:15{fg}    
+{fg}                                                                                                                        
+{fg}  {dim}2 of 24 ·{fg} thread of 5                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {err}E :move: no folder "Recipts" in personal{dim} · Tab completes{fg}                                                              

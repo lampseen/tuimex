@@ -1,0 +1,40 @@
+  Help                                                                                                                  
+                                                                                                                        
+    Everywhere                           List                                 Reader                                    
+    :           command line             j k          down, up                j k ^d ^u gg G   scroll                   
+    ?           help; type to filter     gg G         first, last row         n b              thread: next, previous   
+    Esc         back; clear find, marks  ^d ^u        half a page down, up    J K              list: next, previous     
+    h S-Tab     previous section         /            find; Enter: all mail   o                links                    
+    l Tab       next section             n N          next, previous match    a                attachments              
+    1-9         section by position      Space        mark the row            i                answer an invitation     
+    u           undo the last action     V            mark a range            B                sealed browser copy      
+    A           what the agent can do    Enter        open; a draft, to edit  e d s m M r R f  as in the list           
+    ^l          redraw                   p            show or hide preview                                              
+                                         P            preview beside, below   Preview, focused                          
+    Command line                         B            sealed browser copy     j k ^d ^u gg G   scroll                   
+    Tab S-Tab   complete, cycle          Alt-j Alt-l  focus the preview       Alt-k Alt-h      back to the list         
+    Up Down     history, by prefix       gt gT        next, previous account                                            
+    ^w ^u       delete word, line        e            archive                 Links (after o)                           
+    Enter       run                      d            move to Trash           1-9              open that link           
+    Esc         cancel                   s            flag or unflag          j k Enter        choose, then open        
+                                         m            mark read or unread     Esc              close                    
+    Confirm                              M            move to a folder                                                  
+    y Enter     yes                      c            write a new message     Attachments (after a)                     
+    n Esc       no                       r            reply                   j k              choose                   
+    any other   cancels; key dropped     R            reply to everyone       Enter            save to downloads        
+                                         f            forward                 O                open, after asking       
+    Compose                              zo           unfold a thread         Esc              close                    
+    Tab S-Tab   next, previous field     zc           fold a thread                                                     
+    Left Right  identity, on From                                             Agent (after A)                           
+    Enter       edit body in $EDITOR                                          r                write a reply            
+    ^a          attach a file                                                 t                tidy, in compose         
+    ^s          send summary                                                  l                review a link, in links  
+    ^d          save the draft                                                                                          
+    Esc         close; keep or discard                                        Invitation (after i)                      
+                                                                              a                accept                   
+    Help (after ?)                                                            t                tentative                
+    ^d ^u       scroll                                                        d                decline                  
+                                                                                                                        
+                                                                                                                        
+  98 keys and commands - lines 1-35 of 62                                                   sending in 6s - 1 not sent  
+  type to filter - ^d ^u scroll - Esc back                                                                              

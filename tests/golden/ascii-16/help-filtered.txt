@@ -1,0 +1,40 @@
+  Help                                                                                                                  
+                                                                                                                        
+    Everywhere                                                                                                          
+    A                        what the agent can do                                                                      
+                                                                                                                        
+    Agent (after A)                                                                                                     
+    r                        write a reply                                                                              
+    t                        tidy, in compose                                                                           
+    l                        review a link, in links                                                                    
+                                                                                                                        
+    Commands                                                                                                            
+    :agent reply|tidy|link   reply, tidy or link: hand text to the agent                                                
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  5 of 98 shown                                                                             sending in 6s - 1 not sent  
+  /agent                                                                                                                

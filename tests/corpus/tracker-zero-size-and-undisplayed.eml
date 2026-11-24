@@ -1,0 +1,15 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <tracker-zero-size-and-undisplayed@example.com>
+Subject: An image of no size and one that is not displayed
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<img src="https://img.example.net/chart.png" alt="chart">
+<img src="https://zero.example.net/o/abc.gif" width="0" height="0" alt="">
+<img src="https://unshown.example.net/o/def.png" style="display:none" alt="">
+<div hidden><img src="https://within.example.net/o/ghi.png" alt=""></div>
+</body></html>

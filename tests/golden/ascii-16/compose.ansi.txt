@@ -1,0 +1,40 @@
+{default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
+{default}                                                                                                                        
+{magenta}>{default}   {default b}From     {brightblack}robin@example.com{default}   {default b}robin.vale@example.org{default}   {brightblack}desk@example.org{default}                                              
+{default}    {brightblack}To       {default}Priya Raman {brightblack}<priya@example.org>{default}                                                                            
+{default}    {brightblack}         {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}    {brightblack}Cc       {default}billing@halden.example.com                                                                                 
+{default}    {brightblack}Bcc      {default}                                                                                                           
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}    {brightblack}Files    {default}contract-v3-signed.pdf      {brightblack} 512 KB{default}                                                                        
+{default}    {brightblack}         {default}schedule-b.xlsx             {brightblack}  38 KB{default}                                                                        
+{default}                                                                                                                        
+{default}    {cyan}% Written by an agent{brightblack} - 23 Nov 13:52{default}                                                                                
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        
+{default}    45 days is fine provided the first invoice goes out at signing. Dmitri and I                                        
+{default}    are the right named contacts for the support clause.                                                                
+{default}                                                                                                                        
+{default}    I have attached the signed copy and schedule B. Billing at Halden is copied                                         
+{default}    so the invoice details reach them directly.                                                                         
+{default}                                                                                                                        
+{default}    Thanks,                                                                                                             
+{default}    Robin                                                                                                               
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}draft saved 13:58{default}                                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Tab {brightblack}next field - {default}Left Right {brightblack}identity - {default}Enter {brightblack}edit - {default}A {brightblack}agent - {default}^s {brightblack}send - {default}Esc {brightblack}close{default}                                     

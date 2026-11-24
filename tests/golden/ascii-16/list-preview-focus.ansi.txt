@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}  + {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{brightblack}>{default}   {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{default}    {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblue}personal{default}   {default b}Example Bank{default}            Action needed: confirm your new device                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}  + {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}    {brightyellow}work{default}       {default b}Olu Adeyemi{default}             New keys for the shared vault                                          {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightyellow}work{default}       {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                {cyan}replied{default}  {brightblack}21 Nov{default}    
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{magenta}>{default} {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Priya Raman{default} {brightblack}<priya@example.net>{default}                                                                            
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}Files    {default}halden-bank-details.pdf {brightblack}96 KB{default}                                                                              
+{default}                                                                                                                        
+{default}    {yellow}^ Sender differs from the thread{brightblack} - earlier messages came from priya@example.org{default}                                     
+{default}                                                                                                                        
+{default}    Hi Robin,                                                                                                           
+{default}                                                                                                                        
+{default}    One more change before you sign: our bank details have changed, and the new                                         
+{default}    ones are in the attached PDF. Please use them for the first invoice and                                             
+{default}    confirm today, because the board date has moved up.                                                                 
+{default}                                                                                                                        
+{default}    Priya                                                                                                               
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}lines 1-13 of 13{default}                                                                          sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  j k {brightblack}scroll - {default}Alt-k {brightblack}list - {default}Enter {brightblack}open - {default}? {brightblack}help{default}                                                                         

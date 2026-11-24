@@ -1,0 +1,40 @@
+{default}  {brightblack}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {magenta b}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}to Priya Raman, Dmi~{default}    {brightblack}Re: Contract draft v3 for the Halden account{default}          {brightblack}agent{cyan} - 2 files{default}  {brightblack} 13:52{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {brightblack}to Greta Holm{default}           {brightblack}Packing list for the cabin{default}                                             {brightblack} 22:15{default}    
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}1 of 2 -{default} 1 message                                                                        sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}edit - {default}d {brightblack}trash - {default}? {brightblack}help{default}                                                                                         

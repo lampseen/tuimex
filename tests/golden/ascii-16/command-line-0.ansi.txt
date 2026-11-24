@@ -1,0 +1,8 @@
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{magenta}>{default}   {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{default}                                                                                                                        
+{default}  {brightblack}2 of 24 -{default} thread of 5                                                                     sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}zo {brightblack}unfold - {default}e {brightblack}archive - {default}r {brightblack}reply - {default}? {brightblack}help{default}                                                                 

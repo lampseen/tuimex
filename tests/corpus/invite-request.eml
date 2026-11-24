@@ -1,0 +1,55 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <invite-request@example.com>
+Subject: Invitation: Planning
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b-invite-request"
+
+--b-invite-request
+Content-Type: text/plain; charset=utf-8
+
+You are invited to Planning, part two.
+--b-invite-request
+Content-Type: text/calendar; charset=utf-8; method=REQUEST
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Calendar//EN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+DTSTART:19700329T020000
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:19701025T030000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:planning-2026@example.com
+DTSTAMP:20261123T140500Z
+DTSTART;TZID=Europe/Berlin:20261201T100000
+DTEND;TZID=Europe/Berlin:20261201T110000
+SUMMARY:Planning\, part two
+LOCATION:Room 4\; second floor
+ , by the stairs
+DESCRIPTION:Join at https://meet.example.net/planning
+ORGANIZER;CN="Ada Example":mailto:ada@example.com
+ATTENDEE;CN=Grace Example;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:grace@example.org
+ATTENDEE;PARTSTAT=NEEDS-ACTION:MAILTO:mallory@example.net
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH;COUNT=6
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-PT15M
+SUMMARY:Not the event's summary
+END:VALARM
+END:VEVENT
+END:VCALENDAR
+--b-invite-request--

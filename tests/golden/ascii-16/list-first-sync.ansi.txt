@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}8{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}2{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}                                                                
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{magenta}>{default}   {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{default}    {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblue}personal{default}   {default b}Example Bank{default}            Action needed: confirm your new device                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}    {brightyellow}work{default}       {default b}Olu Adeyemi{default}             New keys for the shared vault                                          {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightblue}personal{default}   {brightblack}Tomas Ferreira{default}          {brightblack}Bike rack: still want it?{default}                                              {brightblack}21 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}City Library{default}            {brightblack}Two items are due on 27 Nov{default}                                            {brightblack}20 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}Wen Zhao{default}                {brightblack}Recipe you asked for{default}                                           {cyan}1 file{default}  {brightblack}19 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}Rent Office{default}             {brightblack}December statement{default}                                             {cyan}1 file{default}  {brightblack}18 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}Jonas Becker{default}            {brightblack}Climbing gym: new opening hours{default}                                        {brightblack}17 Nov{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Earlier{default}                                                                                                               
+{default}    {brightblue}personal{default}   {brightblack}Greta Holm{default}              {brightblack}Book club pick for December{default}                                   {cyan}replied{default}  {brightblack}12 Nov{default}    
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}1 of 17 -{default} 1 message                                                                 work first sync{brightblack} - 1,240 of 3,812{default}  
+{default}  Enter {brightblack}open - {default}e {brightblack}archive - {default}d {brightblack}trash - {default}r {brightblack}reply - {default}? {brightblack}help{default}                                                                   

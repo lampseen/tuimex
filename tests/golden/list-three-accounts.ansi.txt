@@ -1,0 +1,40 @@
+{fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Today{fg}                                                                                                                 
+{fg}    {head}gmail-work{fg}   {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00              {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {link}gmail-home{fg}   {fg b}Jonas Becker{fg}          {dim}▸{fg} Cabin weekend: who is driving?                                {agent}5 msg{fg}  {dim} 13:40{fg}    
+{fg}    {head}gmail-work{fg}   {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                        {dim} 12:58{fg}    
+{fg}    {head}gmail-work{fg}   {fg b}Priya Raman{fg}           {dim}▸{fg} Contract draft v3 for the Halden account            {agent}3 msg · 2 files{fg}  {dim} 11:32{fg} {warn}★{fg}  
+{fg}    {link}gmail-home{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure          {dim} 10:15{fg}    
+{fg}    {head}gmail-work{fg}   {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                           {agent}replied{fg}  {dim} 09:48{fg}    
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}gmail-home{fg bg=sel}   {fg bg=sel b}Example Bank{fg bg=sel}            Action needed: confirm your new device                               {dim bg=sel} 09:02{fg bg=sel}    
+{fg}    {ok}proton{fg}       Mei Tanaka              Payroll corrections for November                                     {dim} 08:30{fg} {warn}★{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Yesterday{fg}                                                                                                             
+{fg}    {link}gmail-home{fg}   {fg b}Greta Holm{fg}              Photos from Saturday                                        {agent}4 files{fg}  {dim} 20:44{fg}    
+{fg}    {link}gmail-home{fg}   {dim}Parcel Desk{fg}             {dim}Your parcel is out for delivery{fg}                                      {dim} 16:20{fg}    
+{fg}    {ok}proton{fg}       {fg b}Olu Adeyemi{fg}             New keys for the shared vault                                        {dim} 11:05{fg}    
+{fg}                                                                                                                        
+{fg}  {dim b}Past 7 days{fg}                                                                                                           
+{fg}    {ok}proton{fg}       {dim}Imani Castell{fg}           {dim}Budget numbers for the offsite{fg}                              {agent}replied{fg}  {dim}21 Nov{fg}    
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{fg}  {fg b}Action needed: confirm your new device{fg}                                                                                
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Example Bank{fg} {dim}<security@examplebank.example.net>{fg}                                                            
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin@example.com>{fg}                                                                             
+{fg}                                                                                                                        
+{fg}    We noticed a sign-in from a new device. To keep your account open, confirm                                          
+{fg}    the device within 24 hours:                                                                                         
+{fg}                                                                                                                        
+{fg}    https://bank.example.com/confirm {link}[1]{fg}                                                                                
+{fg}                                                                                                                        
+{fg}    If you do not confirm, your account will be limited. Questions? Contact us                                          
+{fg}    {link}[2]{fg}                                                                                                                 
+{fg}                                                                                                                        
+{fg}    Example Bank Security Team                                                                                          
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}7 of 24 ·{fg} 1 message                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}e {dim}archive · {fg}d {dim}trash · {fg}r {dim}reply · {fg}? {dim}help{fg}                                                                   

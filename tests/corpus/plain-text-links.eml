@@ -1,0 +1,11 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <plain-text-links@example.com>
+Subject: Plain text with addresses in it
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+The notes are at https://www.example.com/notes.
+The old copy (http://archive.example.org/notes?v=1) stays up.
+Not a link: https:// and example.com alone.

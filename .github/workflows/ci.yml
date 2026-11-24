@@ -1,0 +1,199 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only for every job here. Nothing in CI writes to the repository.
+permissions:
+  contents: read
+
+# A push to a pull request makes the run before it worthless. A run on main
+# is never cancelled: each commit there is a record of what passed.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # No test may reach the keyring of the account it runs under (ADR-053).
+  # `make test` sets this itself; the jobs that call cargo directly rely on
+  # it here.
+  TUIMEX_KEYRING: none
+
+jobs:
+  # Whether anything but markdown changed. The build jobs sit out prose-only
+  # changes; `check` never does, because tests/docs.rs reads the markdown and
+  # would go blind on exactly those changes.
+  #
+  # Jobs are skipped with `if:` rather than the workflow being filtered: a
+  # required check whose workflow never runs leaves the PR pending forever,
+  # while a skipped job reports and satisfies it.
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.probe.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: probe
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          # No base to diff against (a new branch, a rewritten history): run
+          # everything, because guessing wrong here skips the build.
+          if ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            echo "code=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed=$(git diff --name-only "$BASE" HEAD)
+          echo "$changed"
+          if printf '%s\n' "$changed" | grep -qv '\.md$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Formatting, clippy with warnings denied, every test, and the budgets
+  # (ADR-004). Never skipped.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      # The tests drive the binary on a pseudo-terminal with python3. Said
+      # here, a missing one is one line and not forty failed tests.
+      - run: python3 --version
+      - run: make check
+
+  # The goldens are generated from design/tui.js (ADR-002). A design change
+  # committed without regenerating them would leave the tests proving the
+  # old design.
+  golden:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: make golden
+      - name: goldens match the design
+        run: |
+          git add -N tests/golden
+          git diff --exit-code --stat tests/golden || {
+            echo "::error::tests/golden is stale; run 'make golden' and commit the result"; exit 1; }
+
+  # ADR-003 as a named gate: the only colour values in the repository are
+  # the built-in palette's. Not skipped for prose, which can carry a colour.
+  # `cargo test` exits 0 when its filter matches nothing, so the test is
+  # asserted to have run.
+  one-palette:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: |
+          set -o pipefail
+          cargo test --locked -p tuimex-ui --test palette only_the_built_in_palette_is_shipped -- --exact | tee palette.log
+          grep -q "test only_the_built_in_palette_is_shipped ... ok" palette.log || {
+            echo "::error::the palette test did not run; the filter has drifted"; exit 1; }
+
+  # The only place macOS is proven (ADR-022). The whole suite, not only a
+  # build: a test that assumes Linux paths or Linux's pseudo-terminals is
+  # green on the runner above and red on every Mac a contributor uses.
+  macos:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: python3 --version
+      # First and by name: this is the system whose keyring has no address
+      # a test could point elsewhere, so the switch is what keeps the suite
+      # below out of the runner's Keychain (ADR-053).
+      - name: the keyring is off before the suite runs
+        run: |
+          set -o pipefail
+          cargo test --locked -p tuimex --test terminal doctor_with_the_keyring_turned_off | tee keyring.log
+          grep -q "doctor_with_the_keyring_turned_off_asks_no_keyring_service_and_says_what_turned_it_off ... ok" keyring.log || {
+            echo "::error::the keyring test did not run; the filter has drifted"; exit 1; }
+      - run: cargo test --workspace --locked
+      - run: cargo build --release --locked && ./target/release/tuimex --version
+
+  # ADR-010 as a named gate: a password the engine was given reaches no file
+  # it writes and nothing it says, and nor does a password, a client secret
+  # or a token that setup, Google's sign-in or doctor handled. ADR-053 with
+  # it: the system keyring, turned off, is asked nothing. Each test is
+  # asserted to have run: a filter that matches no test passes silently.
+  secret:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: |
+          set -o pipefail
+          cargo test --locked -p tuimex-engine --test secret a_secret_never_reaches_a_file | tee secret.log
+          grep -q "a_secret_never_reaches_a_file_or_anything_the_engine_says ... ok" secret.log || {
+            echo "::error::the secret test did not run; the filter has drifted"; exit 1; }
+          cargo test --locked -p tuimex --bin tuimex a_secret_never_reaches_a_file | tee setup-secret.log
+          grep -q "a_secret_never_reaches_a_file_or_anything_setup_or_doctor_says ... ok" setup-secret.log || {
+            echo "::error::the setup secret test did not run; the filter has drifted"; exit 1; }
+          cargo test --locked -p tuimex-engine --lib a_keyring_turned_off -- --nocapture | tee keyring.log
+          grep -q "keyring-off: ran" keyring.log || {
+            echo "::error::the keyring test asked nothing of a keyring that was off; TUIMEX_KEYRING is not set here"; exit 1; }
+
+  # PLAN §9: the IMAP client against real servers. The script starts
+  # GreenMail and Dovecot, runs the ADR-023 spike and the exit tests against
+  # each, and fails if any of them did not say it ran. It names both images
+  # by digest, and needs openssl and python3 beside the container runtime.
+  real-server:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CONTAINER: docker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: docker --version && openssl version && python3 --version
+      - run: make real-server
+
+  # The release profile on the oldest runner image, built as the release
+  # workflow builds it, so the first release is not the first time it is
+  # tried and the binary starts where an older glibc is all there is.
+  release-build:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - uses: Swatinem/rust-cache@v2
+      - run: |
+          set -euo pipefail
+          cargo build --release --locked --target x86_64-unknown-linux-gnu
+          ./target/x86_64-unknown-linux-gnu/release/tuimex --version
+          ./target/x86_64-unknown-linux-gnu/release/tuimex --help >/dev/null

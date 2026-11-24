@@ -1,0 +1,40 @@
+{fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}To       {fg}Priya Raman {dim}<priya@example.org>{fg}                                                                            
+{fg}    {dim}         {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Cc       {fg}billing@halden.example.com                    {warn}▲ not in this thread{fg}                                         
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}    {dim}Files    {fg}contract-v3-signed.pdf      {dim} 512 KB{fg}                                                                        
+{fg}    {dim}         {fg}schedule-b.xlsx             {dim}  38 KB{fg}                                                                        
+{fg}    {dim}         total                       {fg} 550 KB                                                                        
+{fg}    {dim}Signing  {fg}signed{dim} · key 51F09A2C{fg}                                                                                      
+{fg}    {dim}         {fg}not encrypted{dim} · no key for billing@halden.example.com{fg}                                                      
+{fg}                                                                                                                        
+{fg}    {agent}◇ Written by an agent{dim} · 23 Nov 13:52 · files added by you{fg}                                                           
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Send to 3 recipients?{dim}  {fg}y {dim}send, held 10s · {fg}n {dim}back{fg}                                                                      

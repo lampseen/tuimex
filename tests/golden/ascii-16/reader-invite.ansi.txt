@@ -1,0 +1,40 @@
+{default}  {default b}Invitation: Q4 roadmap review, Thu 26 Nov 10:00{default}                                                                       
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Imani Castell{default} {brightblack}<imani@example.org>{default}                                                                          
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>, {default}Lars Lindqvist {brightblack}<lars@example.org>, {default}Mei Tanaka {brightblack}<mei@example.org>,{default}      
+{default}    {brightblack}         {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 14:05                                                                                      
+{default}                                                                                                                        
+{default}    {brightblack}What     {default b}Q4 roadmap review{default}                                                                                          
+{default}    {brightblack}When     {default}Thu 26 Nov 2026, 10:00 to 11:30                                                                            
+{default}    {brightblack}Where    {default}Room Fjord, or the call link {brightblue}[1]{default}                                                                           
+{default}    {brightblack}Who      {default}Imani Castell, you and 3 others                                                                            
+{default}                                                                                                                        
+{default}    The pre-read is the roadmap document from last week. Please answer by                                               
+{default}    Wednesday so I can book the right room.                                                                             
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Answer?{brightblack}  {default}a {brightblack}accept - {default}t {brightblack}tentative - {default}d {brightblack}decline - {default}Esc {brightblack}cancel{default}                                                              

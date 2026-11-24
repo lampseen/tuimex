@@ -1,0 +1,40 @@
+{fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
+{fg}                                                                                                                        
+{fg}    {dim}From     robin@example.com{fg}   {fg b}robin.vale@example.org{fg}   {dim}desk@example.org{fg}                                              
+{fg}    {dim}To       {fg}Priya Raman {dim}<priya@example.org>{fg}                                                                            
+{fg}    {dim}Cc       {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Bcc      {fg}                                                                                                           
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    {agent}◇ Tidied by an agent{dim} · 23 Nov 14:21{fg}                                                                                 
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}  {agent}◇{fg} 45 days is fine, as long as the first invoice goes out at signing.                                                  
+{fg}                                                                                                                        
+{fg}  {agent}◇{fg} Dmitri and I are the right contacts for the support clause.                                                         
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                   {dim}agent saw placeholders for{fg} 3 people  
+{fg}  {ok}✓{fg} Tidied 2 paragraphs{dim} · u for your own text{fg}                                                                           

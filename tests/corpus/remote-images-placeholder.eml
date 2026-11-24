@@ -1,0 +1,14 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <remote-images-placeholder@example.com>
+Subject: Pictures on another host, with their sizes
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<img src="https://cdn.example.net/banner.png" width="560" height="120" alt="Autumn sale">
+<img src="//cdn.example.net/logo.png" width="96" height="32" alt="logo">
+<img src="http://cdn.example.net/chart.png" alt="chart">
+</body></html>

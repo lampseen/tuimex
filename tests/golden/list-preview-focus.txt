@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+    personal   Jonas Becker          ▸ Cabin weekend: who is driving?                                  5 msg   13:40    
+  ▪ work       Backup Robot            [ops] Nightly backup finished with 2 warnings                           12:58    
+▌   work       Priya Raman           ▸ Contract draft v3 for the Halden account              3 msg · 2 files   11:32 ★  
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure             10:15    
+    work       Lars Lindqvist          Staging database migration window                             replied   09:48    
+    personal   Example Bank            Action needed: confirm your new device                                  09:02    
+    work       Mei Tanaka              Payroll corrections for November                                        08:30 ★  
+                                                                                                                        
+  Yesterday                                                                                                             
+    personal   Greta Holm              Photos from Saturday                                          4 files   20:44    
+  ▪ personal   Parcel Desk             Your parcel is out for delivery                                         16:20    
+    work       Olu Adeyemi             New keys for the shared vault                                           11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    work       Imani Castell           Budget numbers for the offsite                                replied  21 Nov    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+▌ Re: Contract draft v3 for the Halden account                                                                          
+                                                                                                                        
+    From     Priya Raman <priya@example.net>                                                                            
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Files    halden-bank-details.pdf 96 KB                                                                              
+                                                                                                                        
+    ▲ Sender differs from the thread · earlier messages came from priya@example.org                                     
+                                                                                                                        
+    Hi Robin,                                                                                                           
+                                                                                                                        
+    One more change before you sign: our bank details have changed, and the new                                         
+    ones are in the attached PDF. Please use them for the first invoice and                                             
+    confirm today, because the board date has moved up.                                                                 
+                                                                                                                        
+    Priya                                                                                                               
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  lines 1-13 of 13                                                                          sending in 6s · 1 not sent  
+  j k scroll · Alt-k list · Enter open · ? help                                                                         

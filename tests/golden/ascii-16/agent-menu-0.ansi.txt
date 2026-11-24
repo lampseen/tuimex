@@ -1,0 +1,9 @@
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{magenta}>{default}   {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}                                                                                                                        
+{default}  {default b}Agent{default}                                                                                                                 
+{default}    r   {brightblack}write a reply{default}                                                                                                   
+{default}                                                                                                                        
+{default}  {brightblack}nothing is sent until you pick{default}                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Esc {brightblack}cancel{default}                                                                                                            

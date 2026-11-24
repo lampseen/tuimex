@@ -1,0 +1,13 @@
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {fg bg=sel b}Jonas Becker{fg bg=sel}          {dim bg=sel}▸{fg bg=sel} Cabin weekend: who is driving?                                  {agent bg=sel}5 msg{fg bg=sel}  {dim bg=sel} 13:40{fg bg=sel}    
+{fg}                                                                                                                        
+{fg}  {fg b}Messages{fg}                                                                                                              
+{fg}    {dim}14:19  {ok}✓{fg} Archived 1 message                                                                                         
+{fg}    {dim}14:12  {err}E :move: no folder "Recipts" in personal{fg}                                                                     
+{fg}    {dim}14:02  {ok}✓{fg} Sent to 1 recipient                                                                                        
+{fg}    {dim}13:05  {err}E send: refused by smtp.example.org: 552 message too large{fg}                                                   
+{fg}    {dim}12:41  {err}E sync: work offline{dim} · retried 4 times{fg}                                                                       
+{fg}    {dim}12:40  {ok}✓{fg} Flagged 1 message                                                                                          
+{fg}                                                                                                                        
+{fg}  {dim}2 of 24 ·{fg} thread of 5                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  j k {dim}scroll · {fg}Esc {dim}back{fg}                                                                                                 

@@ -1,0 +1,8 @@
+{acc bg=sel}▌{fg bg=sel}   {fg bg=sel b}Imani Castell{fg bg=sel}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                           {agent bg=sel}invite{fg bg=sel}  {dim bg=sel} 14:05{fg bg=sel}    
+{fg}    {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                                     {dim} 12:58{fg}    
+{fg}    {fg b}Priya Raman{fg}           {dim}▸{fg} Contract draft v3 for the Halden account                    {agent}3 messages · 2 files{fg}  {dim} 11:32{fg} {warn}★{fg}  
+{fg}    {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                                        {agent}replied{fg}  {dim} 09:48{fg}    
+{fg}    {dim}Hiring Desk{fg}             {dim}Interview loop: backend candidate, Tuesday{fg}                                {agent}1 file{fg}  {dim}21 Nov{fg}    
+{fg}                                                                                                                        
+{fg}  {head}gmail-work{fg} {dim}only ·{fg} {dim}1 of 7 ·{fg} 1 message                                                      sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Showing gmail-work only{dim} · gt for the next, :account for all{fg}                                                           

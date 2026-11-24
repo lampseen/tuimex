@@ -1,0 +1,8 @@
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}bank.example.com.device-check.example.net   {brightblack}https://bank.example.com/confirm{default}   {yellow}^{default} text says bank.example.com     
+{default}    {brightblue} 2  {default}examplebank.example.net                     {brightblack}Contact us{default}                                                          
+{default}                                                                                                                        
+{default}    {cyan}% Asking the agent{brightblack} - it reads the address and the message, and opens nothing{default}                                        
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://bank.example.com.device-check.example.net/confirm     {brightblack}agent saw placeholders for{default} 1 person, 2 addresses  
+{default}  {yellow}^{default} Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}                    

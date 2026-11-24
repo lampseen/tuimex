@@ -1,0 +1,4 @@
+{fg}    {warn}▲ Remote content not loaded{dim} · 9 images, 3 hosts · tracker: OpenTrack{fg}                                                
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Opening the sealed copy in your browser{dim} · nothing remote loads{fg}                                                        

@@ -1,0 +1,8 @@
+    From     Olu Adeyemi <olu@example.org>                                                                              
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Date     Sun 22 Nov 2026 11:05                                                                                      
+                                                                                                                        
+    x Bad signature - changed after signing, or not signed by olu@example.org                                           
+                                                                                                                        
+    The vault keys rotate tonight. Install the attached key file before six or                                          
+    you will be locked out.                                                                                             

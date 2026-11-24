@@ -1,0 +1,19 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <attachment-option-name@example.com>
+Subject: A name that reads as an option
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b-attachment-option-name"
+
+--b-attachment-option-name
+Content-Type: text/plain; charset=utf-8
+
+The file is attached.
+--b-attachment-option-name
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename="-rf"
+Content-Transfer-Encoding: base64
+
+aGVsbG8K
+--b-attachment-option-name--

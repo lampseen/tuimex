@@ -1,0 +1,10 @@
+From: =?ISO-2022-JP?B?GyRCMnE1RCRORnxEeBsoQg==?= <ada@example.org>
+To: grace@example.net
+Subject: =?ISO-2022-JP?B?GyRCMnE1RCRORnxEeBsoQg==?=
+Date: Mon, 23 Nov 2026 09:00:00 +0000
+Message-ID: <charset-iso-2022-jp@example.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+
+来週の会議は火曜日の午後です。

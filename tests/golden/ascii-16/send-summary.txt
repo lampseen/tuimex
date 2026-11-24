@@ -1,0 +1,40 @@
+  Re: Contract draft v3 for the Halden account                                                                          
+                                                                                                                        
+    From     Robin Vale <robin.vale@example.org>                                                                        
+    To       Priya Raman <priya@example.org>                                                                            
+             Dmitri Volkov <dmitri@example.org>                                                                         
+    Cc       billing@halden.example.com                    ^ not in this thread                                         
+    Subject  Re: Contract draft v3 for the Halden account                                                               
+    Files    contract-v3-signed.pdf       512 KB                                                                        
+             schedule-b.xlsx               38 KB                                                                        
+             total                        550 KB                                                                        
+    Signing  signed - key 51F09A2C                                                                                      
+             not encrypted - no key for billing@halden.example.com                                                      
+                                                                                                                        
+    % Written by an agent - 23 Nov 13:52 - files added by you                                                           
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                            sending in 6s - 1 not sent  
+  Send to 3 recipients?  y send, held 10s - n back                                                                      

@@ -1,0 +1,40 @@
+{default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
+{default}                                                                                                                        
+{default}    {brightblack}From     robin@example.com{default}   {default b}robin.vale@example.org{default}   {brightblack}desk@example.org{default}                                              
+{default}    {brightblack}To       {default}Priya Raman {brightblack}<priya@example.org>{default}                                                                            
+{default}    {brightblack}Cc       {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}    {brightblack}Bcc      {default}                                                                                                           
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}                                                                                                                        
+{default}    {cyan}% Written by an agent{brightblack} - 23 Nov 14:21{default}                                                                                
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        
+{default}    45 days is fine provided the first invoice goes out at signing. Dmitri and I                                        
+{default}    are the right named contacts for the support clause.                                                                
+{default}                                                                                                                        
+{default}    I will send the signed copy once the bank details are confirmed by phone.                                           
+{default}                                                                                                                        
+{default}    Thanks,                                                                                                             
+{default}    Robin                                                                                                               
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                      {brightblack}agent saw placeholders for{default} 3 people, 4 addresses  
+{default}  {green}+{default} Reply written{brightblack} - u to undo{default}                                                                                           

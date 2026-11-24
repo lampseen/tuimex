@@ -1,0 +1,8 @@
+{magenta}>{default}   Mei Tanaka              Payroll corrections for November                                                  {brightblack} 08:30{default} {yellow}!{default}  
+{default}    {default b}Olu Adeyemi{default}             New keys for the shared vault                                                     {brightblack} 11:05{default}    
+{default}    {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                           {cyan}replied{default}  {brightblack}21 Nov{default}    
+{default}    {brightblack}Status Page{default}             {brightblack}Resolved: elevated error rate on the API{default}                                          {brightblack}19 Nov{default}    
+{default}    {brightblack}Lars Lindqvist{default}          {brightblack}On-call swap for the week of 7 Dec?{default}                                               {brightblack}18 Nov{default}    
+{default}                                                                                                                        
+{default}  {green}proton{default} {brightblack}only -{default} {brightblack}1 of 6 -{default} 1 message                                                          sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Showing proton only{brightblack} - gt for the next, :account for all{default}                                                               

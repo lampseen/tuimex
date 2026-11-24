@@ -1,0 +1,18 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{fg}                                                                                                                        
+{fg}    me and Dmitri are the contacts for support                                                                          
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}  {fg b}:agent{fg}                                                                                                                
+{acc bg=sel}▌{fg bg=sel}   reply [guidance]        {dim bg=sel}write the body from the thread{fg bg=sel}                                                              
+{fg}    tidy                    {dim}clean up the body you wrote{fg}                                                                 
+{fg}    link <n>                {dim}ask about a link; the agent opens nothing{fg}                                                   
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  :agent reply{bg bg=acc} {fg}                                                                                                         

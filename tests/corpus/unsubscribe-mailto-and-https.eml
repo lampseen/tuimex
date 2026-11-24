@@ -1,0 +1,10 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <unsubscribe-mailto-and-https@example.com>
+Subject: Both ways out
+MIME-Version: 1.0
+List-Unsubscribe: <https://lists.example.org/leave?u=7>, <mailto:leave@lists.example.org?subject=unsubscribe>
+Content-Type: text/plain; charset=utf-8
+
+News.

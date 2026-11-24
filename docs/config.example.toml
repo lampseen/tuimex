@@ -1,0 +1,84 @@
+# tuimex reads this from ~/.config/tuimex/config.toml, or the file --config
+# names, and never from the current directory. A key it does not know is an
+# error naming the key and its line. Nothing here holds a password: that is
+# the keyring's, or a command's (ADR-010).
+
+[[account]]
+name = "personal"
+address = "you@example.com"
+# identities = ["You <you@example.com>", "alias@example.com"]
+imap = { host = "imap.example.com", port = 993 }
+smtp = { host = "smtp.example.com", port = 465 }
+# auth = "password"            # password (keyring) | command | gmail-oauth
+# password_cmd = ["pass", "show", "mail/personal"]
+# folders = { archive = "Archive" }   # only roles the mapping could not fill
+# color = "head"              # link | head | ok | warn: this account's colour in the list, in place of its turn
+
+[account.agent]                # absent means no agent access
+read = true
+folders = ["INBOX"]
+draft = true
+
+[sync]
+bodies = "30d"
+max_body = "10MB"
+folders = []                   # besides every folder with a role
+
+[send]
+delay = "10s"
+
+[ui]
+glyphs = "unicode"             # unicode | ascii | nerd
+colors = "auto"                # auto | 16 | 256 | true
+# palette = "~/.config/tuimex/palette.toml"
+preview = "auto"
+
+[notify]
+bell = true
+osc9 = true
+
+[pgp]
+sign = "never"                 # never | always | ask
+# key = "0xABCDEF"
+
+[paths]
+# downloads = "~/Downloads"
+
+[keys]
+# "list.archive" = "e"
+
+[[section]]
+name  = "Inbox"
+short = "Inbox"
+query = "in:inbox"
+
+# `:agent reply`, `:agent tidy` and `:agent link` write a prompt to an
+# agent's standard input and read text from its standard output (ADR-031).
+# Names, addresses and numbers are replaced by placeholders first, and the
+# status line says what was. Without this table there is no `:agent`.
+#
+# The built-in agent, `use = "claude"`, is the Claude CLI found on PATH.
+# tuimex supplies its arguments, so they are not written here: it answers
+# once and exits, with
+# no built-in tool, no MCP server, no skill or slash command, nothing saved
+# to disk and anything that would ask refused. It can read what it is
+# handed and answer, and nothing else, which is what keeps an agent from
+# opening a link. The text goes to Anthropic, and only when `:agent` is
+# typed. `tuimex setup` offers this, and `tuimex doctor` says whether the
+# program is there.
+#
+# Any other program is given as its words, which no shell reads, in place
+# of `use`:
+#
+#   command = ["my-agent", "--answer-only"]
+#
+# tuimex hands that program text and takes text back; it cannot see what
+# the program then does, so give it one that can only answer.
+#
+# Either runs in an empty directory under the cache, and is stopped after
+# `timeout` (120s when left out; `90s` or `2m`). No test runs the Claude
+# CLI, because running it sends text to a provider.
+#
+# [agent]
+# use = "claude"
+# timeout = "120s"

@@ -1,0 +1,40 @@
+  This week: winter routes, a gear swap and one trail closure                                                           
+                                                                                                                        
+    From     Fernway Weekly <news@fernway.example.net>                                                                  
+    To       Robin Vale <robin@example.com>                                                                             
+    Date     Mon 23 Nov 2026 10:15                                                                                      
+                                                                                                                        
+    ^ Remote content not loaded - 9 images, 3 hosts - tracker: OpenTrack                                                
+                                                                                                                        
+    Fernway Weekly, 23 November                                                                                         
+                                                                                                                        
+    [image: Ridge loop at sunrise]                                                                                      
+                                                                                                                        
+    Winter routes are open. Three of the five marked loops are groomed and the                                          
+    hut at Ridge saddle is staffed at weekends. Route notes and maps [1]                                                
+                                                                                                                        
+    Route status                                                                                                        
+                                                                                                                        
+    Route             Length   Status                                                                                   
+    Ridge loop        12 km    groomed                                                                                  
+    Saddle traverse   18 km    groomed                                                                                  
+    Mill creek        7 km     closed until 5 Dec                                                                       
+                                                                                                                        
+    Gear swap, 5 December                                                                                               
+                                                                                                                        
+    Bring what you have outgrown and take home what fits. Sign up for a table                                           
+    [2]                                                                                                                 
+                                                                                                                        
+    | We cleared forty pairs of skis last year and nobody went home with what                                           
+    | they brought. (Marta, swap organiser)                                                                             
+                                                                                                                        
+                                                                                                                        
+  Links                                                                                                                 
+>    1  fernway.example.net           Route notes and maps   tracking removed                                           
+     2  shop.example.net              Sign up for a table                                                               
+     3  fernway.example.net           Details and the detour                                                            
+     4  fernway.example.net           Unsubscribe                                                                       
+     5  click.opentrack.example.net   view it in a browser   tracking service                                           
+                                                                                                                        
+  opens https://fernway.example.net/routes/winter                                                                       
+  1-9 open - j k Enter choose - A agent - Esc close                                                                     

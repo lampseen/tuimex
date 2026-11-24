@@ -1,0 +1,9 @@
+{fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.net>{fg}                                                                            
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Date     {fg}Mon 23 Nov 2026 11:32                                                                                      
+{fg}    {dim}Files    {fg}halden-bank-details.pdf {dim}96 KB{fg}                                                                              
+{fg}                                                                                                                        
+{fg}    {warn}▲ Sender differs from the thread{dim} · earlier messages came from priya@example.org{fg}                                     
+{fg}                                                                                                                        
+{fg}    Hi Robin,                                                                                                           
+{fg}                                                                                                                        

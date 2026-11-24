@@ -1,0 +1,45 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                                                                                 
+                                                                                                                                                                                    
+  Today                                                                                                        │▌ Staging database migration window                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov…            invite   14:05    │                                                                    
+    personal   Jonas Becker          ▸ Cabin weekend: who is driving?                         5 msg   13:40    │    fallback, though a Friday change leaves the weekend to find     
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                  12:58    │    out what we missed.                                             
+    work       Priya Raman           ▸ Contract draft v3 for the Halden account     3 msg · 2 files   11:32 ★  │                                                                    
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure    10:15    │    Before the window                                               
+▌   work       Lars Lindqvist          Staging database migration window                    replied   09:48    │                                                                    
+    personal   Example Bank            Action needed: confirm your new device                         09:02    │    · Freeze schema changes on staging from Wednesday noon          
+    work       Mei Tanaka              Payroll corrections for November                               08:30 ★  │    · Take a full dump and restore it on the new cluster as a       
+                                                                                                               │      rehearsal                                                     
+  Yesterday                                                                                                    │    · Compare row counts and checksums table by table               
+    personal   Greta Holm              Photos from Saturday                                 4 files   20:44    │    · Point one internal service at the rehearsal copy for a day    
+    personal   Parcel Desk             Your parcel is out for delivery                                16:20    │                                                                    
+    work       Olu Adeyemi             New keys for the shared vault                                  11:05    │    The rehearsal matters more than the rest. Last time the         
+                                                                                                               │    restore itself was fine and the surprise was a collation        
+  Past 7 days                                                                                                  │    difference that changed the order of two reports. If the        
+    work       Imani Castell           Budget numbers for the offsite                       replied  21 Nov    │    checksums match and the reports read the same, I am             
+    personal   Tomas Ferreira          Bike rack: still want it?                                     21 Nov    │    comfortable.                                                    
+    work       Hiring Desk             Interview loop: backend candidate, Tuesday            1 file  21 Nov    │                                                                    
+    personal   City Library            Two items are due on 27 Nov                                   20 Nov    │    During the window                                               
+    work       Dmitri Volkov           Lunch and learn: reading flame graphs                         20 Nov    │                                                                    
+    work       Ana Sousa               Expense report needs one receipt                              20 Nov ★  │    · 20:00 stop writers and take the final dump                    
+    personal   Wen Zhao                Recipe you asked for                                  1 file  19 Nov    │    · 20:20 restore on the new cluster                              
+    work       Status Page             Resolved: elevated error rate on the API                      19 Nov    │    · 21:10 run the comparison again                                
+    personal   Rent Office             December statement                                    1 file  18 Nov    │    · 21:30 switch the connection strings and restart the services  
+    work       Lars Lindqvist          On-call swap for the week of 7 Dec?                           18 Nov    │    · 22:00 smoke tests, then an hour of watching                   
+    personal   Jonas Becker            Climbing gym: new opening hours                               17 Nov    │                                                                    
+                                                                                                               │    If the comparison at 21:10 fails we stop there, start the       
+  Earlier                                                                                                      │    writers again on the old cluster and try another night.         
+    work       Mei Tanaka              Notes from the vendor call                            1 file  14 Nov    │    Nothing has been switched at that point, so going back costs    
+    personal   Greta Holm              Book club pick for December                          replied  12 Nov    │    ten minutes.                                                    
+                                                                                                               │                                                                    
+                                                                                                               │    After                                                           
+                                                                                                               │                                                                    
+                                                                                                               │    The old cluster stays up, read-only, for a week. After that I   
+                                                                                                               │    will ask you before it is removed. The backup job needs its     
+                                                                                                               │    target changed the same night, or the first nightly run will    
+                                                                                                               │    dump an idle database and report success.                       
+                                                                                                               │                                                                    
+                                                                                                               │    What I need from you                                            
+                                                                                                                                                                                    
+  lines 15-52 of 59                                                                                                                                     sending in 6s · 1 not sent  
+  j k scroll · Alt-h list · Enter open · ? help                                                                                                                                     

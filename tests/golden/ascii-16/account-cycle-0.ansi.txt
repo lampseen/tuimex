@@ -1,0 +1,8 @@
+{magenta}>{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                        {cyan}5 messages{default}  {brightblack} 13:40{default}    
+{default}    {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure                       {brightblack} 10:15{default}    
+{default}    {default b}Example Bank{default}            Action needed: confirm your new device                                            {brightblack} 09:02{default}    
+{default}    {default b}Greta Holm{default}              Photos from Saturday                                                     {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                                   {brightblack} 16:20{default}    
+{default}                                                                                                                        
+{default}  {brightblue}gmail-home{default} {brightblack}only -{default} {brightblack}1 of 11 -{default} thread of 5                                                   sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Showing gmail-home only{brightblack} - gt for the next, :account for all{default}                                                           

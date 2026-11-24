@@ -1,0 +1,5 @@
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  :agent reply agree to 45 days{black bg=magenta} {default}                                                                                        

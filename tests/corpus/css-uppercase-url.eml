@@ -1,0 +1,11 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <css-uppercase-url@example.com>
+Subject: An upper-case url()
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p style="background:URL(HTTPS://cdn.example.net/bg.png)">Quarterly numbers below.</p>
+</body></html>

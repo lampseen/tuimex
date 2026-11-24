@@ -1,0 +1,40 @@
+{default}  {default b}Action needed: confirm your new device{default}                                                                                
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Example Bank{default} {brightblack}<security@examplebank.example.net>{default}                                                            
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin@example.com>{default}                                                                             
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 09:02                                                                                      
+{default}                                                                                                                        
+{default}    We noticed a sign-in from a new device. To keep your account open, confirm                                          
+{default}    the device within 24 hours:                                                                                         
+{default}                                                                                                                        
+{default}    https://bank.example.com/confirm {brightblue}[1]{default}                                                                                
+{default}                                                                                                                        
+{default}    If you do not confirm, your account will be limited. Questions? Contact us                                          
+{default}    {brightblue}[2]{default}                                                                                                                 
+{default}                                                                                                                        
+{default}    Example Bank Security Team                                                                                          
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}bank.example.com.device-check.example.net   {brightblack}https://bank.example.com/confirm{default}   {yellow}^{default} text says bank.example.com     
+{default}    {brightblue} 2  {default}examplebank.example.net                     {brightblack}Contact us{default}                                                          
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://bank.example.com.device-check.example.net/confirm                                                       
+{default}  {yellow}^{default} Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no - {default}A {brightblack}ask the agent{default}  

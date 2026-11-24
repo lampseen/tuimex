@@ -1,0 +1,10 @@
+    From     Robin Vale <robin.vale@example.org>                                                                        
+    To       Priya Raman <priya@example.org>, Dmitri Volkov <dmitri@example.org>                                        
+    Cc       billing@halden.example.com                                                                                 
+    Date     Mon 23 Nov 2026 13:52                                                                                      
+    Files    contract-v3-signed.pdf 512 KB, schedule-b.xlsx 38 KB                                                       
+                                                                                                                        
+    % Written by an agent - 23 Nov 13:52                                                                                
+                                                                                                                        
+    Hi Priya,                                                                                                           
+                                                                                                                        

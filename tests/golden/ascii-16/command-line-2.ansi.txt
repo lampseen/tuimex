@@ -1,0 +1,9 @@
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}                                                                                                                        
+{default}  {default b}Commands{default}                                                                                                              
+{magenta}>{default}   archive                 {brightblack}archive what is selected{default}                                                                    
+{default}    account [name]          {brightblack}show one account only; alone, every account{default}                                                 
+{default}    agent reply|tidy|link   {brightblack}reply, tidy or link: hand text to the agent{default}                                                 
+{default}                                                                                                                        
+{default}  {brightblack}2 of 24 -{default} thread of 5                                                                     sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  :archive{black bg=magenta} {default}                                                                                                             

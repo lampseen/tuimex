@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+    personal   Jonas Becker          ▸ Cabin weekend: who is driving?                                  5 msg   13:40    
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                           12:58    
+    work       Priya Raman           ▸ Contract draft v3 for the Halden account              3 msg · 2 files   11:32 ★  
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure             10:15    
+▌   work       Lars Lindqvist          Staging database migration window                             replied   09:48    
+    personal   Example Bank            Action needed: confirm your new device                                  09:02    
+    work       Mei Tanaka              Payroll corrections for November                                        08:30 ★  
+                                                                                                                        
+  Yesterday                                                                                                             
+    personal   Greta Holm              Photos from Saturday                                          4 files   20:44    
+    personal   Parcel Desk             Your parcel is out for delivery                                         16:20    
+    work       Olu Adeyemi             New keys for the shared vault                                           11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    work       Imani Castell           Budget numbers for the offsite                                replied  21 Nov    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+▌ Staging database migration window                                                                                     
+                                                                                                                        
+    weekend to find out what we missed.                                                                                 
+                                                                                                                        
+    Before the window                                                                                                   
+                                                                                                                        
+    · Freeze schema changes on staging from Wednesday noon                                                              
+    · Take a full dump and restore it on the new cluster as a rehearsal                                                 
+    · Compare row counts and checksums table by table                                                                   
+    · Point one internal service at the rehearsal copy for a day                                                        
+                                                                                                                        
+    The rehearsal matters more than the rest. Last time the restore itself was                                          
+    fine and the surprise was a collation difference that changed the order of                                          
+    two reports. If the checksums match and the reports read the same, I am                                             
+    comfortable.                                                                                                        
+                                                                                                                        
+    During the window                                                                                                   
+                                                                                                                        
+  lines 15-29 of 55                                                                         sending in 6s · 1 not sent  
+  j k scroll · Alt-k list · Enter open · ? help                                                                         

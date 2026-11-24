@@ -1,0 +1,40 @@
+{default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                                                           
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                                                                  
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin@example.com>{default}                                                                             
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 10:15                                                                                      
+{default}                                                                                                                        
+{default}    {yellow}^ Remote content not loaded{brightblack} - 9 images, 3 hosts - tracker: OpenTrack{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Fernway Weekly, 23 November{default}                                                                                         
+{default}                                                                                                                        
+{default}    {brightblack}[image: Ridge loop at sunrise]{default}                                                                                      
+{default}                                                                                                                        
+{default}    Winter routes are open. Three of the five marked loops are groomed and the                                          
+{default}    hut at Ridge saddle is staffed at weekends. Route notes and maps {brightblue}[1]{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Route status{default}                                                                                                        
+{default}                                                                                                                        
+{default}    {brightblack}Route             Length   Status               {default}                                                                    
+{default}    Ridge loop        12 km    groomed                                                                                  
+{default}    Saddle traverse   18 km    groomed                                                                                  
+{default}    Mill creek        7 km     closed until 5 Dec                                                                       
+{default}                                                                                                                        
+{default}    {default b}Gear swap, 5 December{default}                                                                                               
+{default}                                                                                                                        
+{default}    Bring what you have outgrown and take home what fits. Sign up for a table                                           
+{default}    {brightblue}[2]{default}                                                                                                                 
+{default}                                                                                                                        
+{default}    {brightblack}| We cleared forty pairs of skis last year and nobody went home with what{default}                                           
+{default}    {brightblack}| they brought. (Marta, swap organiser){default}                                                                             
+{default}                                                                                                                        
+{default}    {brightblack}- {default}Doors at 10:00                                                                                                    
+{default}    {brightblack}- {default}Cash or card                                                                                                      
+{default}    {brightblack}- {default}Leftovers go to the school club                                                                                   
+{default}                                                                                                                        
+{default}    Mill creek is closed for bridge work. Details and the detour {brightblue}[3]{default}                                                    
+{default}                                                                                                                        
+{default}    {brightblack}You get this because you joined Fernway in 2023. Unsubscribe {brightblue}[4]{brightblack} or view it{default}                                         
+{default}                                                                                                                        
+{default}  {brightblack}lines 1-29 of 30{default}                                                                          sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Load 8 images from img.fernway.example.net, cdn.example.net?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}                                            

@@ -1,0 +1,4 @@
+{default}    {yellow}^ Remote content not loaded{brightblack} - 9 images, 3 hosts - tracker: OpenTrack{default}                                                
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Load 8 images from img.fernway.example.net, cdn.example.net?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}                                            

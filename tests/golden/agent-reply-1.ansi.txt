@@ -1,0 +1,6 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    {agent}◇ Writing a reply{dim} · from the 3 messages of the thread{fg}                                                               
+{fg}                                                                                                                        
+{fg}                                                                      {dim}agent saw placeholders for{fg} 3 people, 4 addresses  
+{fg}  Esc {dim}cancel{fg}                                                                                                            

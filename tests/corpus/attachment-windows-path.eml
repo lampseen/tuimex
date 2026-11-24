@@ -1,0 +1,19 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <attachment-windows-path@example.com>
+Subject: A name with backslashes
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b-attachment-windows-path"
+
+--b-attachment-windows-path
+Content-Type: text/plain; charset=utf-8
+
+The file is attached.
+--b-attachment-windows-path
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename="..\\..\\Startup\\run.bat"
+Content-Transfer-Encoding: base64
+
+aGVsbG8K
+--b-attachment-windows-path--

@@ -1,0 +1,12 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <base-href@example.com>
+Subject: A base that re-homes every relative link
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<base href="https://collect.example.net/">
+<p>Quarterly numbers below. <a href="/login">Sign in</a></p>
+</body></html>

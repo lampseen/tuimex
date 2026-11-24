@@ -1,0 +1,12 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <emphasis-nested-bold@example.com>
+Subject: Bold inside bold inside a styled span
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Read about the <b><strong><span style="font-weight:bold">three kinds of rock</span></strong></b> and how each forms.</p>
+<p><strong><b><span style="font-weight:700">A closer look at granite</span></b></strong></p>
+</body></html>

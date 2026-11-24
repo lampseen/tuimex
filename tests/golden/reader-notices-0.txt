@@ -1,0 +1,10 @@
+    From     Priya Raman <priya@example.org>                                                                            
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Cc       Dmitri Volkov <dmitri@example.org>                                                                         
+    Date     Mon 23 Nov 2026 09:14                                                                                      
+    Files    contract-v3.pdf 482 KB                                                                                     
+                                                                                                                        
+    ✓ Signed by Priya Raman · key 7A1C55E0                                                                              
+                                                                                                                        
+    Hi Robin,                                                                                                           
+                                                                                                                        

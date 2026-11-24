@@ -1,0 +1,11 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <link-tracking-parameters@example.com>
+Subject: A link that reports the click
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p><a href="https://www.example.com/offer?id=7&amp;utm_source=mail&amp;fbclid=abc123">See the offer</a>.</p>
+</body></html>

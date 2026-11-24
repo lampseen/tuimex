@@ -1,0 +1,9 @@
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+                                                                                                                        
+  Commands                                                                                                              
+>   archive                 archive what is selected                                                                    
+    account [name]          show one account only; alone, every account                                                 
+    agent reply|tidy|link   reply, tidy or link: hand text to the agent                                                 
+                                                                                                                        
+  2 of 24 - thread of 5                                                                     sending in 6s - 1 not sent  
+  :archive                                                                                                              

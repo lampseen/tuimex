@@ -1,0 +1,40 @@
+{default}  {default b}Help{default}                                                                                                                  
+{default}                                                                                                                        
+{default}    {default b}Everywhere{default}                                                                                                          
+{default}    A                        {brightblack}what the {default b u}agent{brightblack} can do{default}                                                                      
+{default}                                                                                                                        
+{default}    {default b u}Agent{default b} (after A){default}                                                                                                     
+{default}    r                        {brightblack}write a reply{default}                                                                              
+{default}    t                        {brightblack}tidy, in compose{default}                                                                           
+{default}    l                        {brightblack}review a link, in links{default}                                                                    
+{default}                                                                                                                        
+{default}    {default b}Commands{default}                                                                                                            
+{default}    :{default b u}agent{default} reply|tidy|link   {brightblack}reply, tidy or link: hand text to the {default b u}agent{default}                                                
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}5 of 98 shown{default}                                                                             sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  /agent{black bg=magenta} {default}                                                                                                               

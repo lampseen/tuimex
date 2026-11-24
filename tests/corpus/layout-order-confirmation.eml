@@ -1,0 +1,24 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <layout-order-confirmation@example.com>
+Subject: An order confirmation laid out with tables
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><head>
+<style>
+/* what a shop's mailer writes */
+.wrap { width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Arial, sans-serif }
+.col { width: 50%; vertical-align: top }
+.Total { font-weight: bold; text-align: right; color: #222 }
+@media (max-width: 600px) { .wrap { width: 100% } .col { display: block; width: 100% } }
+</style>
+</head><body bgcolor="#eee">
+<table class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#fff">
+<tr><td colspan="2" align="center" height="48"><h1>Order 1042</h1></td></tr>
+<tr><td class="col" width="50%" valign="top">Quarterly numbers below.</td>
+<td class="col" width="50%" valign="top" align="right" nowrap>2 items</td></tr>
+<tr><td>Subtotal</td><td class="Total" id="sum">48.00</td></tr>
+</table>
+</body></html>

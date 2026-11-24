@@ -1,0 +1,4 @@
+{fg}    {warn}▲ Remote content not loaded{dim} · 9 images, 3 hosts · tracker: OpenTrack{fg}                                                
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Load 8 images from img.fernway.example.net, cdn.example.net?{dim}  {fg}y {dim}yes · {fg}n {dim}no{fg}                                            

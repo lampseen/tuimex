@@ -1,0 +1,23 @@
+[package]
+name = "tuimex-content"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+readme.workspace = true
+description = "Hostile message bytes to plain data, with no I/O (ADR-007)"
+publish = false
+
+[lints]
+workspace = true
+
+# Parsers and nothing else: no entry here opens a file or a socket
+# (ADR-007), and tests/no_io.rs fails on one that is not on its list.
+[dependencies]
+tuimex-core.workspace = true
+ammonia.workspace = true
+base64.workspace = true
+html2text.workspace = true
+mail-parser.workspace = true
+thiserror.workspace = true

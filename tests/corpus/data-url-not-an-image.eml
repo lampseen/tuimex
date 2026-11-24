@@ -1,0 +1,14 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <data-url-not-an-image@example.com>
+Subject: A data: URL that is a page
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<img src="data:text/html;base64,PHNjcmlwdD5zdGVhbCgpPC9zY3JpcHQ+" alt="chart">
+<img src="data:image/svg+xml;base64,PHN2Zy8+" alt="logo">
+<a href="data:text/html,%3Cscript%3Esteal()%3C/script%3E">Open the report</a>
+</body></html>

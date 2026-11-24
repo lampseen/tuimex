@@ -1,0 +1,62 @@
+name: Bug report
+description: tuimex did the wrong thing, or refused to do the right one
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `tuimex doctor --redact` answers most of what would otherwise need
+        a follow-up question. Please include it. It never prints a password
+        or a token, and `--redact` replaces your account names, addresses,
+        server hosts, certificate fingerprints and home directory with
+        placeholders; still read it before you post it.
+
+        **Do not paste a message's text, its headers, or anyone's address.**
+        This tracker is public. Describe the message instead ("an HTML
+        newsletter with a table"), and if a particular message is the bug,
+        say so and a way to share it privately can be arranged.
+
+        Something that looks like a security hole goes through the private
+        form in SECURITY.md, not here.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What you did, and what happened
+      description: The keys or command, what tuimex did, and what you expected instead. The line it printed, if it printed one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: tuimex doctor --redact
+      description: Its whole output.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: tuimex --version
+      placeholder: "tuimex 0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: where
+    attributes:
+      label: Operating system and terminal
+      placeholder: "Fedora 44, Ghostty; or macOS 26, iTerm2"
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: Mail provider, if it matters
+      description: The kind of server, not your address.
+      placeholder: "Gmail with an app password; Proton Bridge; Dovecot"
+    validations:
+      required: false

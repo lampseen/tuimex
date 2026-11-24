@@ -1,0 +1,10 @@
+{fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.org>{fg}                                                                            
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Cc       {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Date     {fg}Mon 23 Nov 2026 09:14                                                                                      
+{fg}    {dim}Files    {fg}contract-v3.pdf {dim}482 KB{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}    {ok}✓ Signed by Priya Raman{dim} · key 7A1C55E0{fg}                                                                              
+{fg}                                                                                                                        
+{fg}    Hi Robin,                                                                                                           
+{fg}                                                                                                                        

@@ -1,0 +1,12 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <emphasis-across-inline@example.com>
+Subject: Bold, italic, code and small raised text across inline elements
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>The <b>first <i>and second</i> <span>and third</span></b> words, <em>leaning</em>, <code>make check</code> on the 1<sup>st</sup>.</p>
+<p>Was <s>forty</s> now thirty.</p>
+</body></html>

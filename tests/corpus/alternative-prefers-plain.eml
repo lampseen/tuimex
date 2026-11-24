@@ -1,0 +1,17 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <alternative-prefers-plain@example.com>
+Subject: Two versions that differ
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b-alternative-prefers-plain"
+
+--b-alternative-prefers-plain
+Content-Type: text/plain; charset=utf-8
+
+Hi Grace, the plain version is the one you read.
+--b-alternative-prefers-plain
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>The styled version says something else.</p><img src="https://cdn.example.net/open.gif" width="1" height="1"></body></html>
+--b-alternative-prefers-plain--

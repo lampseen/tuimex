@@ -1,0 +1,6 @@
+  :agent link                                                                                                           
+>   1   bank.example.com.device-check.example.net                                                                       
+    2   examplebank.example.net                                                                                         
+                                                                                                                        
+                                                                                            sending in 6s - 1 not sent  
+  :agent link 1                                                                                                         

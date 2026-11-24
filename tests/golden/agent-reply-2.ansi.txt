@@ -1,0 +1,16 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    {agent}◇ Written by an agent{dim} · 23 Nov 14:21{fg}                                                                                
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}    45 days is fine provided the first invoice goes out at signing. Dmitri and I                                        
+{fg}    are the right named contacts for the support clause.                                                                
+{fg}                                                                                                                        
+{fg}    I will send the signed copy once the bank details are confirmed by phone.                                           
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                      {dim}agent saw placeholders for{fg} 3 people, 4 addresses  
+{fg}  {ok}✓{fg} Reply written{dim} · u to undo{fg}                                                                                           

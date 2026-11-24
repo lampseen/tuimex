@@ -1,0 +1,10 @@
+{default}    {brightblack}From     {default b}Robin Vale{default} {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}To       {default}Priya Raman {brightblack}<priya@example.org>, {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                        
+{default}    {brightblack}Cc       {default}billing@halden.example.com                                                                                 
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 13:52                                                                                      
+{default}    {brightblack}Files    {default}contract-v3-signed.pdf {brightblack}512 KB, {default}schedule-b.xlsx {brightblack}38 KB{default}                                                       
+{default}                                                                                                                        
+{default}    {cyan}% Written by an agent{brightblack} - 23 Nov 13:52{default}                                                                                
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        

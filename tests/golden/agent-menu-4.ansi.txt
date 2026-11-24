@@ -1,0 +1,8 @@
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {link}personal{fg}   {fg b}Jonas Becker{fg}          {dim}▸{fg} Cabin weekend: who is driving?                                  {agent}5 msg{fg}  {dim} 13:40{fg}    
+{fg}    {head}work{fg}       {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                          {dim} 12:58{fg}    
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {fg bg=sel b}Priya Raman{fg bg=sel}           {dim bg=sel}▸{fg bg=sel} Contract draft v3 for the Halden account              {agent bg=sel}3 msg · 2 files{fg bg=sel}  {dim bg=sel} 11:32{fg bg=sel} {warn bg=sel}★{fg bg=sel}  
+{fg}    {link}personal{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure            {dim} 10:15{fg}    
+{fg}                                                                                                                        
+{fg}  {dim}4 of 24 ·{fg} thread of 3                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {err}E A: no agent is set up{dim} · add an [agent] table to the config{fg}                                                          

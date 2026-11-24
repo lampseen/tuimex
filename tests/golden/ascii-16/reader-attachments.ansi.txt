@@ -1,0 +1,40 @@
+{default}  {default b}Photos from Saturday{default}                                                                                                  
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Greta Holm{default} {brightblack}<greta@example.com>{default}                                                                             
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin@example.com>{default}                                                                             
+{default}    {brightblack}Date     {default}Sun 22 Nov 2026 20:44                                                                                      
+{default}    {brightblack}Files    {default}ridge-01.jpg {brightblack}2.4 MB, {default}ridge-02.jpg {brightblack}3.1 MB, {default}group-shot.heic {brightblack}1.8 MB, {default}route.gpx {brightblack}84 KB{default}                          
+{default}                                                                                                                        
+{default}    Here are the ones that came out. The first is the view from the saddle; the                                         
+{default}    full set follows once I have sorted them.                                                                           
+{default}                                                                                                                        
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::: ridge-01.jpg  1600x1067 ::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
+{default}                                                                                                                        
+{default}    G.                                                                                                                  
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {default b}Files{default}                                                                                                                 
+{magenta}>{default}   {brightblack} 1  {default}ridge-01.jpg      {brightblack} 2.4 MB   image/jpeg   shown above{default}                                                            
+{default}    {brightblack} 2  {default}ridge-02.jpg      {brightblack} 3.1 MB   image/jpeg{default}                                                                          
+{default}    {brightblack} 3  {default}group-shot.heic   {brightblack} 1.8 MB   image/heic{default}                                                                          
+{default}    {brightblack} 4  {default}route.gpx         {brightblack}  84 KB   application/gpx+xml{default}                                                                 
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}save - {default}O {brightblack}open - {default}Esc {brightblack}close{default}                                                                                       

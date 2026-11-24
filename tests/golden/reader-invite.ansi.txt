@@ -1,0 +1,40 @@
+{fg}  {fg b}Invitation: Q4 roadmap review, Thu 26 Nov 10:00{fg}                                                                       
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Imani Castell{fg} {dim}<imani@example.org>{fg}                                                                          
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>, {fg}Lars Lindqvist {dim}<lars@example.org>, {fg}Mei Tanaka {dim}<mei@example.org>,{fg}      
+{fg}    {dim}         {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Date     {fg}Mon 23 Nov 2026 14:05                                                                                      
+{fg}                                                                                                                        
+{fg}    {dim}What     {fg b}Q4 roadmap review{fg}                                                                                          
+{fg}    {dim}When     {fg}Thu 26 Nov 2026, 10:00 to 11:30                                                                            
+{fg}    {dim}Where    {fg}Room Fjord, or the call link {link}[1]{fg}                                                                           
+{fg}    {dim}Who      {fg}Imani Castell, you and 3 others                                                                            
+{fg}                                                                                                                        
+{fg}    The pre-read is the roadmap document from last week. Please answer by                                               
+{fg}    Wednesday so I can book the right room.                                                                             
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Answer?{dim}  {fg}a {dim}accept · {fg}t {dim}tentative · {fg}d {dim}decline · {fg}Esc {dim}cancel{fg}                                                              

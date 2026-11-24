@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{brightblack}>{default}   {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblue}personal{default}   {default b}Example Bank{default}            Action needed: confirm your new device                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}    {brightyellow}work{default}       {default b}Olu Adeyemi{default}             New keys for the shared vault                                          {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightyellow}work{default}       {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                {cyan}replied{default}  {brightblack}21 Nov{default}    
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{magenta}>{default} {default b}Staging database migration window{default}                                                                                     
+{default}                                                                                                                        
+{default}    weekend to find out what we missed.                                                                                 
+{default}                                                                                                                        
+{default}    {default b}Before the window{default}                                                                                                   
+{default}                                                                                                                        
+{default}    {brightblack}- {default}Freeze schema changes on staging from Wednesday noon                                                              
+{default}    {brightblack}- {default}Take a full dump and restore it on the new cluster as a rehearsal                                                 
+{default}    {brightblack}- {default}Compare row counts and checksums table by table                                                                   
+{default}    {brightblack}- {default}Point one internal service at the rehearsal copy for a day                                                        
+{default}                                                                                                                        
+{default}    The rehearsal matters more than the rest. Last time the restore itself was                                          
+{default}    fine and the surprise was a collation difference that changed the order of                                          
+{default}    two reports. If the checksums match and the reports read the same, I am                                             
+{default}    comfortable.                                                                                                        
+{default}                                                                                                                        
+{default}    {default b}During the window{default}                                                                                                   
+{default}                                                                                                                        
+{default}  {brightblack}lines 15-29 of 55{default}                                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  j k {brightblack}scroll - {default}Alt-k {brightblack}list - {default}Enter {brightblack}open - {default}? {brightblack}help{default}                                                                         

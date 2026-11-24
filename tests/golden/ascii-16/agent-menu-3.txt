@@ -1,0 +1,9 @@
+  Links                                                                                                                 
+>    1  bank.example.com.device-check.example.net   https://bank.example.com/confirm   ^ text says bank.example.com     
+     2  examplebank.example.net                     Contact us                                                          
+                                                                                                                        
+  Agent                                                                                                                 
+    l   review this link                                                                                                
+                                                                                                                        
+  nothing is sent until you pick                                                                                        
+  Esc cancel                                                                                                            

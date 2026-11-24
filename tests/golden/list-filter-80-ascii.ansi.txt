@@ -1,0 +1,24 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}             
+{default}                                                                                
+{default}  {brightblack b}Today{default}                                                                         
+{magenta}>{default}   {brightyellow}work{default}  {default b}Imani Castell{default}       Invitation: Q4 roadmap re~         {cyan}inv{default}  {brightblack} 14:05{default}    
+{default}    {brightblack}pers{default}  {brightblack}Jonas Becker{default}      {brightblack}>{default} {brightblack}Cabin weekend: who is dri~{default}          {brightblack}5m{default}  {brightblack} 13:40{default}    
+{default}    {brightblack}work{default}  {brightblack}Backup Robot{default}        {brightblack}[ops] Nightly backup finished with 2 ~{default}  {brightblack} 12:58{default}    
+{default}    {brightblack}work{default}  {brightblack}Priya Raman{default}       {brightblack}>{default} {brightblack}Contract draft v3 for the~{default}       {brightblack}3m 2f{default}  {brightblack} 11:32{default} {brightblack}!{default}  
+{default}    {brightblack}pers{default}  {brightblack}Fernway Weekly{default}      {brightblack}This week: winter routes, a gear swap~{default}  {brightblack} 10:15{default}    
+{default}    {brightblack}work{default}  {brightblack}Lars Lindqvist{default}      {brightblack}Staging database migratio~{default}          {brightblack}re{default}  {brightblack} 09:48{default}    
+{default}    {brightblack}pers{default}  {brightblack}Example Bank{default}        {brightblack}Action needed: confirm your new device{default}  {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}  Mei Tanaka          Payroll corrections for {default b u}Nov{default}ember        {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                
+{default}  {brightblack b}Yesterday{default}                                                                     
+{default}    {brightblack}pers{default}  {brightblack}Greta Holm{default}          {brightblack}Photos from Saturday{default}                {brightblack}4f{default}  {brightblack} 20:44{default}    
+{default}    {brightblack}pers{default}  {brightblack}Parcel Desk{default}         {brightblack}Your parcel is out for delivery{default}         {brightblack} 16:20{default}    
+{default}    {brightblack}work{default}  {brightblack}Olu Adeyemi{default}         {brightblack}New keys for the shared vault{default}           {brightblack} 11:05{default}    
+{default}                                                                                
+{default}  {brightblack b}Past 7 days{default}                                                                   
+{default}    {brightblack}work{default}  {brightblack}Imani Castell{default}       {brightblack}Budget numbers for the of~{default}          {brightblack}re{default}  {brightblack}21 Nov{default}    
+{default}    {brightblack}pers{default}  {brightblack}Tomas Ferreira{default}      {brightblack}Bike rack: still want it?{default}               {brightblack}21 Nov{default}    
+{default}    {brightblack}work{default}  {brightblack}Hiring Desk{default}         {brightblack}Interview loop: backend c~{default}          {brightblack}1f{default}  {brightblack}21 Nov{default}    
+{default}                                                                                
+{default}  {brightblack}3 here -{default} Enter {brightblack}searches all mail{default}                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  /nov{black bg=magenta} {default}                                                                         

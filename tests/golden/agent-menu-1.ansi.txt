@@ -1,0 +1,7 @@
+{fg}    {ok}✓ Signed by Priya Raman{dim} · key 7A1C55E0{fg}                                                                              
+{fg}                                                                                                                        
+{fg}  {fg b}Agent{fg}                                                                                                                 
+{fg}    r   {dim}write a reply{fg}                                                                                                   
+{fg}                                                                                                                        
+{fg}  {dim}nothing is sent until you pick{fg}                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Esc {dim}cancel{fg}                                                                                                            

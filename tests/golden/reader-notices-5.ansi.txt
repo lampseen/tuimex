@@ -1,0 +1,10 @@
+{fg}    {dim}From     {fg b}Robin Vale{fg} {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}To       {fg}Priya Raman {dim}<priya@example.org>, {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                        
+{fg}    {dim}Cc       {fg}billing@halden.example.com                                                                                 
+{fg}    {dim}Date     {fg}Mon 23 Nov 2026 13:52                                                                                      
+{fg}    {dim}Files    {fg}contract-v3-signed.pdf {dim}512 KB, {fg}schedule-b.xlsx {dim}38 KB{fg}                                                       
+{fg}                                                                                                                        
+{fg}    {agent}◇ Written by an agent{dim} · 23 Nov 13:52{fg}                                                                                
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        

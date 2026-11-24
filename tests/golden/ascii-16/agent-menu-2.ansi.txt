@@ -1,0 +1,17 @@
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        
+{default}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{default}                                                                                                                        
+{default}    me and Dmitri are the contacts for support                                                                          
+{default}                                                                                                                        
+{default}    Thanks,                                                                                                             
+{default}    Robin                                                                                                               
+{default}                                                                                                                        
+{default}  {default b}Agent{default}                                                                                                                 
+{default}    r   {brightblack}write a reply{default}                                                                                                   
+{default}    t   {brightblack}tidy what I wrote{default}                                                                                               
+{default}                                                                                                                        
+{default}  {brightblack}nothing is sent until you pick{default}                                                                                        
+{default}  Esc {brightblack}cancel{default}                                                                                                            

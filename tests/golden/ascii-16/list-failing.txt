@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00        stale - invite   14:05    
+>   personal   Jonas Becker          > Cabin weekend: who is driving?                                  5 msg   13:40    
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                   stale   12:58    
+    work       Priya Raman           > Contract draft v3 for the Halden account                stale - 3 msg   11:32 !  
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure             10:15    
+    work       Lars Lindqvist          Staging database migration window                     stale - replied   09:48    
+    personal   Example Bank            Action needed: confirm your new device                                  09:02    
+    work       Mei Tanaka              Payroll corrections for November                                stale   08:30 !  
+                                                                                                                        
+  Yesterday                                                                                                             
+    personal   Greta Holm              Photos from Saturday                                          4 files   20:44    
+    personal   Parcel Desk             Your parcel is out for delivery                                         16:20    
+    work       Olu Adeyemi             New keys for the shared vault                                   stale   11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    work       Imani Castell           Budget numbers for the offsite                        stale - replied  21 Nov    
+------------------------------------------------------------------------------------------------------------------------
+  Re: Cabin weekend: who is driving?                                                                                    
+                                                                                                                        
+    From     Jonas Becker <jonas@example.com>                                                                           
+    To       Tomas Ferreira <tomas@example.net>                                                                         
+    Cc       Robin Vale <robin@example.com>, Greta Holm <greta@example.com>, Wen Zhao <wen@example.com>                 
+                                                                                                                        
+    Count me in. Robin, can you take the second car? I will split the fuel, and                                         
+    I can bring the roof box if yours is still at your brother's.                                                       
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  2 of 24 - thread of 5                                                work offline - retry in 16s - last synced 12:41  
+  Enter open - zo unfold - e archive - r reply - ? help                                                                 

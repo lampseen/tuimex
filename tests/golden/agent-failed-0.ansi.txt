@@ -1,0 +1,13 @@
+{fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
+{fg}                                                                                                                        
+{fg}    Hi Priya,                                                                                                           
+{fg}                                                                                                                        
+{fg}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{fg}                                                                                                                        
+{fg}    me and Dmitri are the contacts for support                                                                          
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Robin                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                                   {dim}agent saw placeholders for{fg} 3 people  
+{fg}  {err}E :agent tidy: the agent command exited with 1{dim} · nothing changed{fg}                                                      

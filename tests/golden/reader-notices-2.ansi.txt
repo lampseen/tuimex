@@ -1,0 +1,7 @@
+{fg}    {dim}From     {fg b}Imani Castell{fg} {dim}<imani@example.org>{fg}                                                                          
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Date     {fg}Sat 21 Nov 2026 17:36                                                                                      
+{fg}                                                                                                                        
+{fg}    {warn}▲ Signature not checked{dim} · gpg has no key 9D2E41B7{fg}                                                                   
+{fg}                                                                                                                        
+{fg}    The numbers are in the sheet. Tell me if the travel line looks low.                                                 

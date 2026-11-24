@@ -1,0 +1,40 @@
+  Action needed: confirm your new device                                                                                
+                                                                                                                        
+    From     Example Bank <security@examplebank.example.net>                                                            
+    To       Robin Vale <robin@example.com>                                                                             
+    Date     Mon 23 Nov 2026 09:02                                                                                      
+                                                                                                                        
+    We noticed a sign-in from a new device. To keep your account open, confirm                                          
+    the device within 24 hours:                                                                                         
+                                                                                                                        
+    https://bank.example.com/confirm [1]                                                                                
+                                                                                                                        
+    If you do not confirm, your account will be limited. Questions? Contact us                                          
+    [2]                                                                                                                 
+                                                                                                                        
+    Example Bank Security Team                                                                                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  Links                                                                                                                 
+>    1  bank.example.com.device-check.example.net   https://bank.example.com/confirm   ^ text says bank.example.com     
+     2  examplebank.example.net                     Contact us                                                          
+                                                                                                                        
+  opens https://bank.example.com.device-check.example.net/confirm                                                       
+  ^ Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?  y yes - n no - A ask the agent  

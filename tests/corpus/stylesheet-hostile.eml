@@ -1,0 +1,23 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <stylesheet-hostile@example.com>
+Subject: A stylesheet that tries everything
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><head>
+<style>
+@import url(https://cdn.example.net/a.css);
+@font-face { font-family: x; src: url(https://cdn.example.net/f.woff) }
+body::before { display: none !important }
+.a { background: url(https://cdn.example.net/a.png); color: red }
+.b { b\61 ckground: u\72l(https://cdn.example.net/b.png) }
+.c { width: expression(steal()); height: 10px }
+.d { color: red</style><script>steal()</script><style> }
+.e[title^="x"] { color: blue }
+.f { position: fixed; top: 0; margin: 4px }
+</style>
+</head><body>
+<p class="a">Quarterly numbers below.</p>
+</body></html>

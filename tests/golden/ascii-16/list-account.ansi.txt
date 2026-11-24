@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}5{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{magenta}>{default}   {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                           {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                                     {brightblack} 12:58{default}    
+{default}    {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account                    {cyan}3 messages - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                                        {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    Mei Tanaka              Payroll corrections for November                                                  {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {default b}Olu Adeyemi{default}             New keys for the shared vault                                                     {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                           {cyan}replied{default}  {brightblack}21 Nov{default}    
+{default}    {brightblack}Hiring Desk{default}             {brightblack}Interview loop: backend candidate, Tuesday{default}                                {cyan}1 file{default}  {brightblack}21 Nov{default}    
+{default}    {brightblack}Dmitri Volkov{default}           {brightblack}Lunch and learn: reading flame graphs{default}                                             {brightblack}20 Nov{default}    
+{default}    {default b}Ana Sousa{default}               Expense report needs one receipt                                                  {brightblack}20 Nov{default} {yellow}!{default}  
+{default}    {brightblack}Status Page{default}             {brightblack}Resolved: elevated error rate on the API{default}                                          {brightblack}19 Nov{default}    
+{default}    {brightblack}Lars Lindqvist{default}          {brightblack}On-call swap for the week of 7 Dec?{default}                                               {brightblack}18 Nov{default}    
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{default}  {default b}Invitation: Q4 roadmap review, Thu 26 Nov 10:00{default}                                                                       
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Imani Castell{default} {brightblack}<imani@example.org>{default}                                                                          
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>, {default}Lars Lindqvist {brightblack}<lars@example.org>, {default}Mei Tanaka {brightblack}<mei@example.org>,{default}      
+{default}    {brightblack}         {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}                                                                                                                        
+{default}    The pre-read is the roadmap document from last week. Please answer by                                               
+{default}    Wednesday so I can book the right room.                                                                             
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightyellow}work{default} {brightblack}only -{default} {brightblack}1 of 13 -{default} 1 message                                                           sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Showing work only{brightblack} - gt for the next, :account for all{default}                                                                 

@@ -1,0 +1,11 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <link-scheme-file@example.com>
+Subject: A link to a local file
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Please <a href="file:///etc/passwd">open the report</a>.</p>
+</body></html>

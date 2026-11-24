@@ -1,0 +1,13 @@
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{magenta}>{default}   {brightblue}personal{default}   {default b}Jonas Becker{default}          {brightblack}>{default} Cabin weekend: who is driving?                                  {cyan}5 msg{default}  {brightblack} 13:40{default}    
+{default}                                                                                                                        
+{default}  {default b}Messages{default}                                                                                                              
+{default}    {brightblack}14:19  {green}+{default} Archived 1 message                                                                                         
+{default}    {brightblack}14:12  {red}E :move: no folder "Recipts" in personal{default}                                                                     
+{default}    {brightblack}14:02  {green}+{default} Sent to 1 recipient                                                                                        
+{default}    {brightblack}13:05  {red}E send: refused by smtp.example.org: 552 message too large{default}                                                   
+{default}    {brightblack}12:41  {red}E sync: work offline{brightblack} - retried 4 times{default}                                                                       
+{default}    {brightblack}12:40  {green}+{default} Flagged 1 message                                                                                          
+{default}                                                                                                                        
+{default}  {brightblack}2 of 24 -{default} thread of 5                                                                     sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  j k {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                                                 

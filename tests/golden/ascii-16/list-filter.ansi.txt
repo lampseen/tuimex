@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{magenta}>{default}   {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 {default b u}Nov{default} 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblack}personal{default}   {brightblack}Jonas Becker{default}          {brightblack}>{default} {brightblack}Cabin weekend: who is driving?{default}                                  {brightblack}5 msg{default}  {brightblack} 13:40{default}    
+{default}    {brightblack}work{default}       {brightblack}Backup Robot{default}            {brightblack}[ops] Nightly backup finished with 2 warnings{default}                          {brightblack} 12:58{default}    
+{default}    {brightblack}work{default}       {brightblack}Priya Raman{default}           {brightblack}>{default} {brightblack}Contract draft v3 for the Halden account{default}              {brightblack}3 msg - 2 files{default}  {brightblack} 11:32{default} {brightblack}!{default}  
+{default}    {brightblack}personal{default}   {brightblack}Fernway Weekly{default}          {brightblack}This week: winter routes, a gear swap and one trail closure{default}            {brightblack} 10:15{default}    
+{default}    {brightblack}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {brightblack}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblack}personal{default}   {brightblack}Example Bank{default}            {brightblack}Action needed: confirm your new device{default}                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for {default b u}Nov{default}ember                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblack}personal{default}   {brightblack}Greta Holm{default}              {brightblack}Photos from Saturday{default}                                          {brightblack}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblack}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{default}    {brightblack}work{default}       {brightblack}Olu Adeyemi{default}             {brightblack}New keys for the shared vault{default}                                          {brightblack} 11:05{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightblack}work{default}       {brightblack}Imani Castell{default}           {brightblack}Budget numbers for the offsite{default}                                {brightblack}replied{default}  {brightblack}21 Nov{default}    
+{default}    {brightblack}personal{default}   {brightblack}Tomas Ferreira{default}          {brightblack}Bike rack: still want it?{default}                                              {brightblack}21 Nov{default}    
+{default}    {brightblack}work{default}       {brightblack}Hiring Desk{default}             {brightblack}Interview loop: backend candidate, Tuesday{default}                     {brightblack}1 file{default}  {brightblack}21 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}City Library{default}            {brightblack}Two items are due on 27 {default b u}Nov{default}                                            {brightblack}20 Nov{default}    
+{default}    {brightblack}work{default}       {brightblack}Dmitri Volkov{default}           {brightblack}Lunch and learn: reading flame graphs{default}                                  {brightblack}20 Nov{default}    
+{default}    {brightblack}work{default}       {brightblack}Ana Sousa{default}               {brightblack}Expense report needs one receipt{default}                                       {brightblack}20 Nov{default} {brightblack}!{default}  
+{default}    {brightblack}personal{default}   {brightblack}Wen Zhao{default}                {brightblack}Recipe you asked for{default}                                           {brightblack}1 file{default}  {brightblack}19 Nov{default}    
+{default}    {brightblack}work{default}       {brightblack}Status Page{default}             {brightblack}Resolved: elevated error rate on the API{default}                               {brightblack}19 Nov{default}    
+{default}    {brightblack}personal{default}   {brightblack}Rent Office{default}             {brightblack}December statement{default}                                             {brightblack}1 file{default}  {brightblack}18 Nov{default}    
+{default}    {brightblack}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}On-call swap for the week of 7 Dec?{default}                                    {brightblack}18 Nov{default}    
+{default}    {brightblack}personal{default}   {brightblack}Jonas Becker{default}            {brightblack}Climbing gym: new opening hours{default}                                        {brightblack}17 Nov{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Earlier{default}                                                                                                               
+{default}    {brightblack}work{default}       {brightblack}Mei Tanaka{default}              {brightblack}Notes from the vendor call{default}                                     {brightblack}1 file{default}  {brightblack}14 Nov{default}    
+{default}    {brightblack}personal{default}   {brightblack}Greta Holm{default}              {brightblack}Book club pick for December{default}                                   {brightblack}replied{default}  {brightblack}12 Nov{default}    
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}3 here -{default} Enter {brightblack}searches all mail{default}                                                          sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  /nov{black bg=magenta} {default}                                                                                                                 

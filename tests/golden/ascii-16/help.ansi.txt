@@ -1,0 +1,40 @@
+{default}  {default b}Help{default}                                                                                                                  
+{default}                                                                                                                        
+{default}    {default b}Everywhere{default}                           {default b}List{default}                                 {default b}Reader{default}                                    
+{default}    :           {brightblack}command line{default}             j k          {brightblack}down, up{default}                j k ^d ^u gg G   {brightblack}scroll{default}                   
+{default}    ?           {brightblack}help; type to filter{default}     gg G         {brightblack}first, last row{default}         n b              {brightblack}thread: next, previous{default}   
+{default}    Esc         {brightblack}back; clear find, marks{default}  ^d ^u        {brightblack}half a page down, up{default}    J K              {brightblack}list: next, previous{default}     
+{default}    h S-Tab     {brightblack}previous section{default}         /            {brightblack}find; Enter: all mail{default}   o                {brightblack}links{default}                    
+{default}    l Tab       {brightblack}next section{default}             n N          {brightblack}next, previous match{default}    a                {brightblack}attachments{default}              
+{default}    1-9         {brightblack}section by position{default}      Space        {brightblack}mark the row{default}            i                {brightblack}answer an invitation{default}     
+{default}    u           {brightblack}undo the last action{default}     V            {brightblack}mark a range{default}            B                {brightblack}sealed browser copy{default}      
+{default}    A           {brightblack}what the agent can do{default}    Enter        {brightblack}open; a draft, to edit{default}  e d s m M r R f  {brightblack}as in the list{default}           
+{default}    ^l          {brightblack}redraw{default}                   p            {brightblack}show or hide preview{default}                                              
+{default}                                         P            {brightblack}preview beside, below{default}   {default b}Preview, focused{default}                          
+{default}    {default b}Command line{default}                         B            {brightblack}sealed browser copy{default}     j k ^d ^u gg G   {brightblack}scroll{default}                   
+{default}    Tab S-Tab   {brightblack}complete, cycle{default}          Alt-j Alt-l  {brightblack}focus the preview{default}       Alt-k Alt-h      {brightblack}back to the list{default}         
+{default}    Up Down     {brightblack}history, by prefix{default}       gt gT        {brightblack}next, previous account{default}                                            
+{default}    ^w ^u       {brightblack}delete word, line{default}        e            {brightblack}archive{default}                 {default b}Links (after o){default}                           
+{default}    Enter       {brightblack}run{default}                      d            {brightblack}move to Trash{default}           1-9              {brightblack}open that link{default}           
+{default}    Esc         {brightblack}cancel{default}                   s            {brightblack}flag or unflag{default}          j k Enter        {brightblack}choose, then open{default}        
+{default}                                         m            {brightblack}mark read or unread{default}     Esc              {brightblack}close{default}                    
+{default}    {default b}Confirm{default}                              M            {brightblack}move to a folder{default}                                                  
+{default}    y Enter     {brightblack}yes{default}                      c            {brightblack}write a new message{default}     {default b}Attachments (after a){default}                     
+{default}    n Esc       {brightblack}no{default}                       r            {brightblack}reply{default}                   j k              {brightblack}choose{default}                   
+{default}    any other   {brightblack}cancels; key dropped{default}     R            {brightblack}reply to everyone{default}       Enter            {brightblack}save to downloads{default}        
+{default}                                         f            {brightblack}forward{default}                 O                {brightblack}open, after asking{default}       
+{default}    {default b}Compose{default}                              zo           {brightblack}unfold a thread{default}         Esc              {brightblack}close{default}                    
+{default}    Tab S-Tab   {brightblack}next, previous field{default}     zc           {brightblack}fold a thread{default}                                                     
+{default}    Left Right  {brightblack}identity, on From{default}                                             {default b}Agent (after A){default}                           
+{default}    Enter       {brightblack}edit body in $EDITOR{default}                                          r                {brightblack}write a reply{default}            
+{default}    ^a          {brightblack}attach a file{default}                                                 t                {brightblack}tidy, in compose{default}         
+{default}    ^s          {brightblack}send summary{default}                                                  l                {brightblack}review a link, in links{default}  
+{default}    ^d          {brightblack}save the draft{default}                                                                                          
+{default}    Esc         {brightblack}close; keep or discard{default}                                        {default b}Invitation (after i){default}                      
+{default}                                                                              a                {brightblack}accept{default}                   
+{default}    {default b}Help (after ?){default}                                                            t                {brightblack}tentative{default}                
+{default}    ^d ^u       {brightblack}scroll{default}                                                        d                {brightblack}decline{default}                  
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}98 keys and commands - lines 1-35 of 62{default}                                                   sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

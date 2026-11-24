@@ -1,0 +1,88 @@
+"""Plays everyone else on the mail server `make real-server` started: another
+client adding a message, or looking at what a folder holds.
+
+    mail_server.py USER append FOLDER SUBJECT
+    mail_server.py USER holds FOLDER SUBJECT COUNT
+    mail_server.py USER create FOLDER
+    mail_server.py USER delete FOLDER
+    mail_server.py USER absent FOLDER
+    mail_server.py USER put FOLDER FILE
+    mail_server.py USER header FOLDER SUBJECT TEXT
+
+The server is the one TUIMEX_SERVER_HOST, _PORT, _PASSWORD and _CA name, as
+`crates/tuimex-engine/tests/spike.rs` lists them; the user TUIMEX_SERVER_USER3
+names signs in with TUIMEX_SERVER_PASSWORD3. `holds` waits until FOLDER is there and has
+COUNT messages with SUBJECT that are not marked deleted, and fails when it
+never does. `put` appends the message in FILE as it is. `header` waits until
+a message with SUBJECT in FOLDER has TEXT among its headers. `absent` deletes
+FOLDER if it is there, where `delete` fails when it is not.
+"""
+
+import imaplib
+import os
+import ssl
+import sys
+import time
+
+user, verb, folder = sys.argv[1:4]
+context = ssl.create_default_context(cafile=os.environ["TUIMEX_SERVER_CA"])
+server = imaplib.IMAP4_SSL(os.environ["TUIMEX_SERVER_HOST"], int(os.environ["TUIMEX_SERVER_PORT"]), ssl_context=context)
+third = user == os.environ.get("TUIMEX_SERVER_USER3")
+server.login(user, os.environ["TUIMEX_SERVER_PASSWORD3" if third else "TUIMEX_SERVER_PASSWORD"])
+
+
+def ok(answer):
+    if answer[0] != "OK":
+        sys.exit(f"mail_server: {verb} {folder}: {answer}")
+    return answer[1]
+
+
+if verb == "create":
+    # A folder that is already there is the folder asked for.
+    server.create(folder)
+elif verb == "delete":
+    ok(server.delete(folder))
+elif verb == "absent":
+    server.delete(folder)
+elif verb == "append":
+    subject = sys.argv[4]
+    stamp = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+    message = (
+        f"From: Grace Hopper <grace@example.net>\r\nTo: {user}@example.com\r\nSubject: {subject}\r\n"
+        f"Message-ID: <{subject.replace(' ', '-')}@example.net>\r\nDate: {stamp}\r\n\r\nSent from another client.\r\n"
+    )
+    ok(server.append(folder, None, None, message.encode()))
+elif verb == "holds":
+    subject, count = sys.argv[4], int(sys.argv[5])
+    deadline = time.monotonic() + 30
+    while True:
+        # A folder tuimex is about to make is not there yet: that is
+        # something to wait for, like a message on its way into it.
+        if server.select(folder, readonly=True)[0] == "OK":
+            found = len(ok(server.search(None, "UNDELETED", "SUBJECT", f'"{subject}"'))[0].split())
+        else:
+            found = "no folder to hold any"
+        if found == count:
+            break
+        if time.monotonic() > deadline:
+            sys.exit(f"mail_server: {folder} holds {found} of {subject!r}, not {count}")
+        time.sleep(0.2)
+elif verb == "put":
+    with open(sys.argv[4], "rb") as file:
+        ok(server.append(folder, None, None, file.read()))
+elif verb == "header":
+    subject, text = sys.argv[4], sys.argv[5]
+    deadline = time.monotonic() + 30
+    while True:
+        ok(server.select(folder, readonly=True))
+        found = ok(server.search(None, "UNDELETED", "SUBJECT", f'"{subject}"'))[0].split()
+        heads = [ok(server.fetch(number, "(BODY.PEEK[HEADER])"))[0][1].decode(errors="replace") for number in found]
+        # A long header is folded; unfolded, it reads as it was written.
+        if any(text in head.replace("\r\n ", " ").replace("\r\n\t", " ") for head in heads):
+            break
+        if time.monotonic() > deadline:
+            sys.exit(f"mail_server: no {subject!r} in {folder} has {text!r} in its headers: {heads}")
+        time.sleep(0.2)
+else:
+    sys.exit(f"mail_server: no such verb: {verb}")
+server.logout()

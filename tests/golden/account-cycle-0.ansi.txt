@@ -1,0 +1,8 @@
+{acc bg=sel}▌{fg bg=sel}   {fg bg=sel b}Jonas Becker{fg bg=sel}          {dim bg=sel}▸{fg bg=sel} Cabin weekend: who is driving?                                        {agent bg=sel}5 messages{fg bg=sel}  {dim bg=sel} 13:40{fg bg=sel}    
+{fg}    {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure                       {dim} 10:15{fg}    
+{fg}    {fg b}Example Bank{fg}            Action needed: confirm your new device                                            {dim} 09:02{fg}    
+{fg}    {fg b}Greta Holm{fg}              Photos from Saturday                                                     {agent}4 files{fg}  {dim} 20:44{fg}    
+{fg}    {dim}Parcel Desk{fg}             {dim}Your parcel is out for delivery{fg}                                                   {dim} 16:20{fg}    
+{fg}                                                                                                                        
+{fg}  {link}gmail-home{fg} {dim}only ·{fg} {dim}1 of 11 ·{fg} thread of 5                                                   sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Showing gmail-home only{dim} · gt for the next, :account for all{fg}                                                           

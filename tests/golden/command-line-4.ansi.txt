@@ -1,0 +1,8 @@
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {fg bg=sel b}Backup Robot{fg bg=sel}            [ops] Nightly backup finished with 2 warnings                          {dim bg=sel} 12:58{fg bg=sel}    
+{fg}    {head}work{fg}       {fg b}Priya Raman{fg}           {dim}▸{fg} Contract draft v3 for the Halden account              {agent}3 msg · 2 files{fg}  {dim} 11:32{fg} {warn}★{fg}  
+{fg}    {link}personal{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure            {dim} 10:15{fg}    
+{fg}    {head}work{fg}       {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                             {agent}replied{fg}  {dim} 09:48{fg}    
+{fg}                                                                                                                        
+{fg}  {dim}2 of 23 ·{fg} 1 message                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {ok}✓{fg} Archived 5 messages{dim} · u to undo{fg}                                                                                     

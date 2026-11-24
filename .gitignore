@@ -1,0 +1,13 @@
+/target/
+
+# Editor scratch files.
+*.swp
+*.swo
+*~
+
+# What a run leaves behind: a saved `make check`, Python's compiled copies
+# of the pty harnesses, and other checkouts of this repository.
+*.log
+__pycache__/
+*.pyc
+.worktrees/

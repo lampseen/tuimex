@@ -1,0 +1,40 @@
+{fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Today{fg}                                                                                                                 
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {fg bg=sel b}Imani Castell{fg bg=sel}           Invitation: Q4 roadmap review, Thu 26 {fg bg=sel b u}Nov{fg bg=sel} 10:00                {agent bg=sel}invite{fg bg=sel}  {dim bg=sel} 14:05{fg bg=sel}    
+{fg}    {faint}personal{fg}   {faint}Jonas Becker{fg}          {faint}▸{fg} {faint}Cabin weekend: who is driving?{fg}                                  {faint}5 msg{fg}  {faint} 13:40{fg}    
+{fg}    {faint}work{fg}       {faint}Backup Robot{fg}            {faint}[ops] Nightly backup finished with 2 warnings{fg}                          {faint} 12:58{fg}    
+{fg}    {faint}work{fg}       {faint}Priya Raman{fg}           {faint}▸{fg} {faint}Contract draft v3 for the Halden account{fg}              {faint}3 msg · 2 files{fg}  {faint} 11:32{fg} {faint}★{fg}  
+{fg}    {faint}personal{fg}   {faint}Fernway Weekly{fg}          {faint}This week: winter routes, a gear swap and one trail closure{fg}            {faint} 10:15{fg}    
+{fg}    {faint}work{fg}       {faint}Lars Lindqvist{fg}          {faint}Staging database migration window{fg}                             {faint}replied{fg}  {faint} 09:48{fg}    
+{fg}    {faint}personal{fg}   {faint}Example Bank{fg}            {faint}Action needed: confirm your new device{fg}                                 {faint} 09:02{fg}    
+{fg}    {head}work{fg}       Mei Tanaka              Payroll corrections for {fg b u}Nov{fg}ember                                       {dim} 08:30{fg} {warn}★{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Yesterday{fg}                                                                                                             
+{fg}    {faint}personal{fg}   {faint}Greta Holm{fg}              {faint}Photos from Saturday{fg}                                          {faint}4 files{fg}  {faint} 20:44{fg}    
+{fg}    {faint}personal{fg}   {faint}Parcel Desk{fg}             {faint}Your parcel is out for delivery{fg}                                        {faint} 16:20{fg}    
+{fg}    {faint}work{fg}       {faint}Olu Adeyemi{fg}             {faint}New keys for the shared vault{fg}                                          {faint} 11:05{fg}    
+{fg}                                                                                                                        
+{fg}  {dim b}Past 7 days{fg}                                                                                                           
+{fg}    {faint}work{fg}       {faint}Imani Castell{fg}           {faint}Budget numbers for the offsite{fg}                                {faint}replied{fg}  {faint}21 Nov{fg}    
+{fg}    {faint}personal{fg}   {faint}Tomas Ferreira{fg}          {faint}Bike rack: still want it?{fg}                                              {faint}21 Nov{fg}    
+{fg}    {faint}work{fg}       {faint}Hiring Desk{fg}             {faint}Interview loop: backend candidate, Tuesday{fg}                     {faint}1 file{fg}  {faint}21 Nov{fg}    
+{fg}    {link}personal{fg}   {dim}City Library{fg}            {dim}Two items are due on 27 {fg b u}Nov{fg}                                            {dim}20 Nov{fg}    
+{fg}    {faint}work{fg}       {faint}Dmitri Volkov{fg}           {faint}Lunch and learn: reading flame graphs{fg}                                  {faint}20 Nov{fg}    
+{fg}    {faint}work{fg}       {faint}Ana Sousa{fg}               {faint}Expense report needs one receipt{fg}                                       {faint}20 Nov{fg} {faint}★{fg}  
+{fg}    {faint}personal{fg}   {faint}Wen Zhao{fg}                {faint}Recipe you asked for{fg}                                           {faint}1 file{fg}  {faint}19 Nov{fg}    
+{fg}    {faint}work{fg}       {faint}Status Page{fg}             {faint}Resolved: elevated error rate on the API{fg}                               {faint}19 Nov{fg}    
+{fg}    {faint}personal{fg}   {faint}Rent Office{fg}             {faint}December statement{fg}                                             {faint}1 file{fg}  {faint}18 Nov{fg}    
+{fg}    {faint}work{fg}       {faint}Lars Lindqvist{fg}          {faint}On-call swap for the week of 7 Dec?{fg}                                    {faint}18 Nov{fg}    
+{fg}    {faint}personal{fg}   {faint}Jonas Becker{fg}            {faint}Climbing gym: new opening hours{fg}                                        {faint}17 Nov{fg}    
+{fg}                                                                                                                        
+{fg}  {dim b}Earlier{fg}                                                                                                               
+{fg}    {faint}work{fg}       {faint}Mei Tanaka{fg}              {faint}Notes from the vendor call{fg}                                     {faint}1 file{fg}  {faint}14 Nov{fg}    
+{fg}    {faint}personal{fg}   {faint}Greta Holm{fg}              {faint}Book club pick for December{fg}                                   {faint}replied{fg}  {faint}12 Nov{fg}    
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}3 here ·{fg} Enter {dim}searches all mail{fg}                                                          sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  /nov{bg bg=acc} {fg}                                                                                                                 

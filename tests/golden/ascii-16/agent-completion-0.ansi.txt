@@ -1,0 +1,18 @@
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        
+{default}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{default}                                                                                                                        
+{default}    me and Dmitri are the contacts for support                                                                          
+{default}                                                                                                                        
+{default}    Thanks,                                                                                                             
+{default}    Robin                                                                                                               
+{default}                                                                                                                        
+{default}  {default b}:agent{default}                                                                                                                
+{magenta}>{default}   reply [guidance]        {brightblack}write the body from the thread{default}                                                              
+{default}    tidy                    {brightblack}clean up the body you wrote{default}                                                                 
+{default}    link <n>                {brightblack}ask about a link; the agent opens nothing{default}                                                   
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  :agent reply{black bg=magenta} {default}                                                                                                         

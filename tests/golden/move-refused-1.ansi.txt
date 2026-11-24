@@ -1,0 +1,8 @@
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {link}personal{fg}   {fg b}Jonas Becker{fg}          {dim}▸{fg} Cabin weekend: who is driving?                                  {agent}5 msg{fg}  {dim} 13:40{fg}    
+{fg}    {head}work{fg}       {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                          {dim} 12:58{fg}    
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {fg bg=sel b}Fernway Weekly{fg bg=sel}          This week: winter routes, a gear swap and one trail closure            {dim bg=sel} 10:15{fg bg=sel}    
+{fg}    {head}work{fg}       {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                             {agent}replied{fg}  {dim} 09:48{fg}    
+{fg}                                                                                                                        
+{fg}  {dim}4 of 23 ·{fg} 1 message                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {ok}✓{fg} Moved 3 messages to Archive{dim} · u to undo{fg}                                                                             

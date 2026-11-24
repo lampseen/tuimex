@@ -1,0 +1,87 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# The oldest toolchain the locked dependencies accept: mail-parser asks for
+# this one, and nothing here asks for a newer.
+rust-version = "1.98"
+license = "MIT"
+repository = "https://github.com/lampseen/tuimex"
+readme = "README.md"
+
+# Versions live here so every crate pins the same one; the list itself is the
+# ceiling in docs/PLAN.md §1 (ADR-005).
+[workspace.dependencies]
+tuimex-core = { path = "crates/tuimex-core" }
+tuimex-content = { path = "crates/tuimex-content" }
+tuimex-store = { path = "crates/tuimex-store" }
+tuimex-engine = { path = "crates/tuimex-engine" }
+tuimex-ui = { path = "crates/tuimex-ui" }
+tuimex-fixtures = { path = "crates/tuimex-fixtures" }
+ammonia = "4.2.5"
+anyhow = "1.0.105"
+base64 = "0.23.1"
+# The clock and nothing else: no locale tables, no serde.
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+clap = { version = "4.6.9", features = ["derive"] }
+crossterm = "0.29.0"
+directories = "6.0.0"
+getrandom = "0.4.3"
+html2text = "0.17.4"
+# No default features: the default decoder set is wider than the four
+# formats PLAN §1 allows, and each decoder parses bytes a stranger sent.
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "gif", "webp"] }
+# Pinned exactly (ADR-023). No TLS feature: the engine makes the TLS stream
+# itself and hands it over (ADR-029).
+imap = { version = "=3.0.0-alpha.15", default-features = false }
+insta = "1.49.0"
+keyring = "4.2.0"
+# No `builder`: messages are bytes mail-builder made (PLAN §4.4). No
+# `hostname`: the machine's name is not something a mail server is owed.
+lettre = { version = "0.11.24", default-features = false, features = ["smtp-transport", "rustls", "ring", "rustls-native-certs"] }
+# No `gethostname`, for the same reason as lettre's `hostname`.
+mail-builder = { version = "2.0.1", default-features = false }
+# `full_encoding` is every charset the Encoding Standard names (ADR-044).
+mail-parser = { version = "1.0.2", features = ["full_encoding"] }
+open = "5.4.5"
+ratatui = "0.30.2"
+# No default features: `chafa-dyn` links a system library, and
+# `image-defaults` would bring back every decoder `image` left out.
+ratatui-image = { version = "11.1.0", default-features = false, features = ["crossterm"] }
+rusqlite = { version = "0.43.0", features = ["bundled"] }
+# ring, as lettre and ureq are built with, so one crypto provider is linked.
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+# The system's trust roots, for a server whose certificate is not pinned
+# (ADR-029). The version lettre asks for, so one copy is linked.
+rustls-native-certs = "0.8.5"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+strsim = "0.11.1"
+thiserror = "2.0.21"
+toml = "1.2.2"
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
+unicode-width = "0.2.3"
+ureq = { version = "3.5.2", default-features = false, features = ["rustls"] }
+zeroize = "1.9.2"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+
+# The table above is the whole ceiling, pinned with its features in one
+# place; an entry no crate names yet is waiting for its milestone. A crate
+# naming a dependency it does not use still warns.
+[workspace.lints.cargo]
+unused_workspace_dependencies = "allow"
+
+# Stripped and thin-LTO'd, because this is the binary the budget weighs
+# (ADR-004) and the one that ships.
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 1

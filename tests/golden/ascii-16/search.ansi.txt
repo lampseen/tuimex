@@ -1,0 +1,40 @@
+{default}  {brightblack}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}   {magenta b}Search{default} nov                                        
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 {default b u}Nov{default} 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for {default b u}Nov{default}ember                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Past 7 days{default}                                                                                                           
+{default}    {brightblue}personal{default}   {brightblack}City Library{default}            {brightblack}Two items are due on 27 {default b u}Nov{default}                                            {brightblack}20 Nov{default}    
+{default}                                                                                                                        
+{default}  {brightblack b}Earlier{default}                                                                                                               
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}Mei Tanaka{default}              {brightblack}Notes from the vendor call{default}  {brightblack}next review is in {default b u}Nov{brightblack}e~{default}            {cyan}1 file{default}  {brightblack}14 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}to Greta Holm{default}           {brightblack}Re: Dinner in {default b u}Nov{brightblack}ember?{default}                                          {cyan}Sent{default}  {brightblack} 9 Nov{default}    
+{default}    {brightyellow}work{default}       {brightblack}Ana Sousa{default}               {default b u}Nov{brightblack}ember invoice run{default}                                          {cyan}Archive{default}  {brightblack} 3 Nov{default}    
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{default}  {default b}Notes from the vendor call{default}                                                                                            
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Mei Tanaka{default} {brightblack}<mei@example.org>{default}                                                                               
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}Files    {default}vendor-call.md {brightblack}9 KB{default}                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}4 of 6 -{default} 1 message                                                                        sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}e {brightblack}archive - {default}r {brightblack}reply - {default}Esc {brightblack}back - {default}? {brightblack}help{default}                                                                  

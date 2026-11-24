@@ -1,0 +1,40 @@
+  Contract draft v3 for the Halden account                                                        1 of 3 in the thread  
+                                                                                                                        
+    From     Priya Raman <priya@example.org>                                                                            
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Cc       Dmitri Volkov <dmitri@example.org>                                                                         
+    Date     Mon 23 Nov 2026 09:14                                                                                      
+    Files    contract-v3.pdf 482 KB                                                                                     
+                                                                                                                        
+    + Signed by Priya Raman - key 7A1C55E0                                                                              
+                                                                                                                        
+    Hi Robin,                                                                                                           
+                                                                                                                        
+    Attached is the third draft of the Halden contract. Legal went through it on                                        
+    Friday and the changes from v2 are small, but two of them need a decision                                           
+    from you before I can send it on.                                                                                   
+                                                                                                                        
+    1. Payment terms. Halden asked for 45 days instead of 30. Finance can live                                          
+    with 45 if the first invoice is issued at signing rather than at delivery.                                          
+                                                                                                                        
+    2. The support clause. They want named contacts on our side. I have put you                                         
+    and Dmitri down for now; say if that should be someone else.                                                        
+                                                                                                                        
+    Everything else is wording. The liability cap is unchanged, the term is                                             
+    still twelve months with a renewal notice of sixty days, and schedule B                                             
+    lists the same deliverables as before.                                                                              
+                                                                                                                        
+    If you can reply by Wednesday I will get the signed copy to them before                                             
+    their board meets on the 27th. If either point needs a call, I am free                                              
+    tomorrow after two.                                                                                                 
+                                                                                                                        
+    A note on process: Halden's procurement team will only accept the signed PDF                                        
+    from an address on our domain, so please do not forward this draft from a                                           
+    personal account.                                                                                                   
+                                                                                                                        
+    Thanks,                                                                                                             
+    Priya                                                                                                               
+                                                                                                                        
+                                                                                                                        
+  lines 1-27 of 30                                                                          sending in 6s - 1 not sent  
+  r reply - e archive - n b next, previous - a files - Esc back                                                         

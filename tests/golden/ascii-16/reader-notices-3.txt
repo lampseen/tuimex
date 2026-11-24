@@ -1,0 +1,8 @@
+    From     Mei Tanaka <mei@example.org>                                                                               
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Date     Mon 23 Nov 2026 08:30                                                                                      
+                                                                                                                        
+    + Encrypted to you - key 51F09A2C                                                                                   
+                                                                                                                        
+    Two corrections before the run on Thursday: the overtime for the support                                            
+    rota, and one changed bank account. Both are in the sheet.                                                          

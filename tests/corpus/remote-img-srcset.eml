@@ -1,0 +1,12 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <remote-img-srcset@example.com>
+Subject: An image named only in srcset
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Quarterly numbers below.</p>
+<img srcset="https://cdn.example.net/chart.png 1x, https://img.example.net/chart-2x.png 2x" alt="chart">
+</body></html>

@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+    personal   Tomas Ferreira        ▾ Cabin weekend: who is driving?                                         22 Nov    
+    personal   Greta Holm                I can take three if we leave by four.                                22 Nov    
+    personal   Tomas Ferreira              Great. Then I will bring the food for Saturday.                    22 Nov    
+    personal   Jonas Becker                  Count me in. Robin, can you take the second car?                  13:40    
+▌   personal   Wen Zhao                  I cannot make Friday. Could someone collect me on Saturday morning?   08:15    
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                           12:58    
+    work       Priya Raman           ▸ Contract draft v3 for the Halden account              3 msg · 2 files   11:32 ★  
+    personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure             10:15    
+    work       Lars Lindqvist          Staging database migration window                             replied   09:48    
+    personal   Example Bank            Action needed: confirm your new device                                  09:02    
+    work       Mei Tanaka              Payroll corrections for November                                        08:30 ★  
+                                                                                                                        
+  Yesterday                                                                                                             
+    personal   Greta Holm              Photos from Saturday                                          4 files   20:44    
+    personal   Parcel Desk             Your parcel is out for delivery                                         16:20    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Re: Cabin weekend: who is driving?                                                                                    
+                                                                                                                        
+    From     Wen Zhao <wen@example.com>                                                                                 
+    To       Tomas Ferreira <tomas@example.net>                                                                         
+    Cc       Robin Vale <robin@example.com>, Greta Holm <greta@example.com>, Jonas Becker <jonas@example.com>           
+                                                                                                                        
+    I cannot make Friday. Could someone collect me on Saturday morning?                                                 
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  6 of 28 · 1 message of the thread                                                         sending in 6s · 1 not sent  
+  Enter open · zc fold · e archive · r reply · ? help                                                                   

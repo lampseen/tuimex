@@ -1,0 +1,13 @@
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+▌   personal   Jonas Becker          ▸ Cabin weekend: who is driving?                                  5 msg   13:40    
+                                                                                                                        
+  Messages                                                                                                              
+    14:19  ✓ Archived 1 message                                                                                         
+    14:12  E :move: no folder "Recipts" in personal                                                                     
+    14:02  ✓ Sent to 1 recipient                                                                                        
+    13:05  E send: refused by smtp.example.org: 552 message too large                                                   
+    12:41  E sync: work offline · retried 4 times                                                                       
+    12:40  ✓ Flagged 1 message                                                                                          
+                                                                                                                        
+  2 of 24 · thread of 5                                                                     sending in 6s · 1 not sent  
+  j k scroll · Esc back                                                                                                 

@@ -1,0 +1,13 @@
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}                                                                                                                        
+{default}    Hi Priya,                                                                                                           
+{default}                                                                                                                        
+{default}    45 days is ok i think so long as the 1st invoice goes at signing                                                    
+{default}                                                                                                                        
+{default}    me and Dmitri are the contacts for support                                                                          
+{default}                                                                                                                        
+{default}    Thanks,                                                                                                             
+{default}    Robin                                                                                                               
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {red}E not a command: :agent{brightblack} - no [agent] table in the config{default}                                                              

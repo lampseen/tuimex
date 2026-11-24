@@ -1,0 +1,40 @@
+{default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
+{default}                                                                                                                        
+{default}    {brightblack}From     {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}To       {default}Priya Raman {brightblack}<priya@example.org>{default}                                                                            
+{default}    {brightblack}         {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}    {brightblack}Cc       {default}billing@halden.example.com                    {yellow}^ not in this thread{default}                                         
+{default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
+{default}    {brightblack}Files    {default}contract-v3-signed.pdf      {brightblack} 512 KB{default}                                                                        
+{default}    {brightblack}         {default}schedule-b.xlsx             {brightblack}  38 KB{default}                                                                        
+{default}    {brightblack}         total                       {default} 550 KB                                                                        
+{default}    {brightblack}Signing  {default}signed{brightblack} - key 51F09A2C{default}                                                                                      
+{default}    {brightblack}         {default}not encrypted{brightblack} - no key for billing@halden.example.com{default}                                                      
+{default}                                                                                                                        
+{default}    {cyan}% Written by an agent{brightblack} - 23 Nov 13:52 - files added by you{default}                                                           
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Send to 3 recipients?{brightblack}  {default}y {brightblack}send, held 10s - {default}n {brightblack}back{default}                                                                      

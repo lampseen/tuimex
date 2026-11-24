@@ -1,0 +1,10 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Mon, 23 Nov 2026 14:05:00 +0000
+Message-ID: <emphasis-literal-asterisks-plain@example.com>
+Subject: Asterisks the author typed in plain text
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Type **two stars** around a word, or *one*, or `ticks`, or ~~tildes~~.
+5 ** 2 is 25.

@@ -1,0 +1,10 @@
+{default}    {brightblack}From     {default b}Priya Raman{default} {brightblack}<priya@example.org>{default}                                                                            
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}Cc       {default}Dmitri Volkov {brightblack}<dmitri@example.org>{default}                                                                         
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 09:14                                                                                      
+{default}    {brightblack}Files    {default}contract-v3.pdf {brightblack}482 KB{default}                                                                                     
+{default}                                                                                                                        
+{default}    {green}+ Signed by Priya Raman{brightblack} - key 7A1C55E0{default}                                                                              
+{default}                                                                                                                        
+{default}    Hi Robin,                                                                                                           
+{default}                                                                                                                        

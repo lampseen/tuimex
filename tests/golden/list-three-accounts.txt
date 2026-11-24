@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    gmail-work   Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00              invite   14:05    
+    gmail-home   Jonas Becker          ▸ Cabin weekend: who is driving?                                5 msg   13:40    
+    gmail-work   Backup Robot            [ops] Nightly backup finished with 2 warnings                         12:58    
+    gmail-work   Priya Raman           ▸ Contract draft v3 for the Halden account            3 msg · 2 files   11:32 ★  
+    gmail-home   Fernway Weekly          This week: winter routes, a gear swap and one trail closure           10:15    
+    gmail-work   Lars Lindqvist          Staging database migration window                           replied   09:48    
+▌   gmail-home   Example Bank            Action needed: confirm your new device                                09:02    
+    proton       Mei Tanaka              Payroll corrections for November                                      08:30 ★  
+                                                                                                                        
+  Yesterday                                                                                                             
+    gmail-home   Greta Holm              Photos from Saturday                                        4 files   20:44    
+    gmail-home   Parcel Desk             Your parcel is out for delivery                                       16:20    
+    proton       Olu Adeyemi             New keys for the shared vault                                         11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    proton       Imani Castell           Budget numbers for the offsite                              replied  21 Nov    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Action needed: confirm your new device                                                                                
+                                                                                                                        
+    From     Example Bank <security@examplebank.example.net>                                                            
+    To       Robin Vale <robin@example.com>                                                                             
+                                                                                                                        
+    We noticed a sign-in from a new device. To keep your account open, confirm                                          
+    the device within 24 hours:                                                                                         
+                                                                                                                        
+    https://bank.example.com/confirm [1]                                                                                
+                                                                                                                        
+    If you do not confirm, your account will be limited. Questions? Contact us                                          
+    [2]                                                                                                                 
+                                                                                                                        
+    Example Bank Security Team                                                                                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  7 of 24 · 1 message                                                                       sending in 6s · 1 not sent  
+  Enter open · e archive · d trash · r reply · ? help                                                                   

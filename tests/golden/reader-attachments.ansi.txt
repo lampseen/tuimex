@@ -1,0 +1,40 @@
+{fg}  {fg b}Photos from Saturday{fg}                                                                                                  
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Greta Holm{fg} {dim}<greta@example.com>{fg}                                                                             
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin@example.com>{fg}                                                                             
+{fg}    {dim}Date     {fg}Sun 22 Nov 2026 20:44                                                                                      
+{fg}    {dim}Files    {fg}ridge-01.jpg {dim}2.4 MB, {fg}ridge-02.jpg {dim}3.1 MB, {fg}group-shot.heic {dim}1.8 MB, {fg}route.gpx {dim}84 KB{fg}                          
+{fg}                                                                                                                        
+{fg}    Here are the ones that came out. The first is the view from the saddle; the                                         
+{fg}    full set follows once I have sorted them.                                                                           
+{fg}                                                                                                                        
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░{dim} ridge-01.jpg  1600x1067 {faint}░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
+{fg}                                                                                                                        
+{fg}    G.                                                                                                                  
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {fg b}Files{fg}                                                                                                                 
+{acc bg=sel}▌{fg bg=sel}   {dim bg=sel} 1  {fg bg=sel}ridge-01.jpg      {dim bg=sel} 2.4 MB   image/jpeg   shown above{fg bg=sel}                                                            
+{fg}    {dim} 2  {fg}ridge-02.jpg      {dim} 3.1 MB   image/jpeg{fg}                                                                          
+{fg}    {dim} 3  {fg}group-shot.heic   {dim} 1.8 MB   image/heic{fg}                                                                          
+{fg}    {dim} 4  {fg}route.gpx         {dim}  84 KB   application/gpx+xml{fg}                                                                 
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}save · {fg}O {dim}open · {fg}Esc {dim}close{fg}                                                                                       

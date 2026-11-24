@@ -1,0 +1,40 @@
+{default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Today{default}                                                                                                                 
+{default}    {brightyellow}work{default}       {default b}Imani Castell{default}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {cyan}invite{default}  {brightblack} 14:05{default}    
+{default}    {brightblue}personal{default}   {brightblack}Tomas Ferreira{default}        {brightblack}v{default} {brightblack}Cabin weekend: who is driving?{default}                                         {brightblack}22 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}Greta Holm{default}                {brightblack}I can take three if we leave by four.{default}                                {brightblack}22 Nov{default}    
+{default}    {brightblue}personal{default}   {brightblack}Tomas Ferreira{default}              {brightblack}Great. Then I will bring the food for Saturday.{default}                    {brightblack}22 Nov{default}    
+{default}    {brightblue}personal{default}   {default b}Jonas Becker{default}                  Count me in. Robin, can you take the second car?                 {brightblack} 13:40{default}    
+{magenta}>{default}   {brightblue}personal{default}   {default b}Wen Zhao{default}                  I cannot make Friday. Could someone collect me on Saturday morning?  {brightblack} 08:15{default}    
+{default}    {brightyellow}work{default}       {default b}Backup Robot{default}            [ops] Nightly backup finished with 2 warnings                          {brightblack} 12:58{default}    
+{default}    {brightyellow}work{default}       {default b}Priya Raman{default}           {brightblack}>{default} Contract draft v3 for the Halden account              {cyan}3 msg - 2 files{default}  {brightblack} 11:32{default} {yellow}!{default}  
+{default}    {brightblue}personal{default}   {default b}Fernway Weekly{default}          This week: winter routes, a gear swap and one trail closure            {brightblack} 10:15{default}    
+{default}    {brightyellow}work{default}       {brightblack}Lars Lindqvist{default}          {brightblack}Staging database migration window{default}                             {cyan}replied{default}  {brightblack} 09:48{default}    
+{default}    {brightblue}personal{default}   {default b}Example Bank{default}            Action needed: confirm your new device                                 {brightblack} 09:02{default}    
+{default}    {brightyellow}work{default}       Mei Tanaka              Payroll corrections for November                                       {brightblack} 08:30{default} {yellow}!{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Yesterday{default}                                                                                                             
+{default}    {brightblue}personal{default}   {default b}Greta Holm{default}              Photos from Saturday                                          {cyan}4 files{default}  {brightblack} 20:44{default}    
+{default}    {brightblue}personal{default}   {brightblack}Parcel Desk{default}             {brightblack}Your parcel is out for delivery{default}                                        {brightblack} 16:20{default}    
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{default}  {default b}Re: Cabin weekend: who is driving?{default}                                                                                    
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Wen Zhao{default} {brightblack}<wen@example.com>{default}                                                                                 
+{default}    {brightblack}To       {default}Tomas Ferreira {brightblack}<tomas@example.net>{default}                                                                         
+{default}    {brightblack}Cc       {default}Robin Vale {brightblack}<robin@example.com>, {default}Greta Holm {brightblack}<greta@example.com>, {default}Jonas Becker {brightblack}<jonas@example.com>{default}           
+{default}                                                                                                                        
+{default}    I cannot make Friday. Could someone collect me on Saturday morning?                                                 
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}6 of 28 -{default} 1 message of the thread                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}zc {brightblack}fold - {default}e {brightblack}archive - {default}r {brightblack}reply - {default}? {brightblack}help{default}                                                                   

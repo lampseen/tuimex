@@ -1,0 +1,9 @@
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}bank.example.com.device-check.example.net   {brightblack}https://bank.example.com/confirm{default}   {yellow}^{default} text says bank.example.com     
+{default}    {brightblue} 2  {default}examplebank.example.net                     {brightblack}Contact us{default}                                                          
+{default}                                                                                                                        
+{default}  {default b}Agent{default}                                                                                                                 
+{default}    l   {brightblack}review this link{default}                                                                                                
+{default}                                                                                                                        
+{default}  {brightblack}nothing is sent until you pick{default}                                                                                        
+{default}  Esc {brightblack}cancel{default}                                                                                                            

@@ -1,0 +1,9 @@
+    From     Priya Raman <priya@example.net>                                                                            
+    To       Robin Vale <robin.vale@example.org>                                                                        
+    Date     Mon 23 Nov 2026 11:32                                                                                      
+    Files    halden-bank-details.pdf 96 KB                                                                              
+                                                                                                                        
+    ^ Sender differs from the thread - earlier messages came from priya@example.org                                     
+                                                                                                                        
+    Hi Robin,                                                                                                           
+                                                                                                                        

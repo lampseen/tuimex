@@ -1,0 +1,40 @@
+{fg}  {fg b}Contract draft v3 for the Halden account{fg}                                                        {dim}1 of 3 in the thread{fg}  
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.org>{fg}                                                                            
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Cc       {fg}Dmitri Volkov {dim}<dmitri@example.org>{fg}                                                                         
+{fg}    {dim}Date     {fg}Mon 23 Nov 2026 09:14                                                                                      
+{fg}    {dim}Files    {fg}contract-v3.pdf {dim}482 KB{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}    {ok}✓ Signed by Priya Raman{dim} · key 7A1C55E0{fg}                                                                              
+{fg}                                                                                                                        
+{fg}    Hi Robin,                                                                                                           
+{fg}                                                                                                                        
+{fg}    Attached is the third draft of the Halden contract. Legal went through it on                                        
+{fg}    Friday and the changes from v2 are small, but two of them need a decision                                           
+{fg}    from you before I can send it on.                                                                                   
+{fg}                                                                                                                        
+{fg}    1. Payment terms. Halden asked for 45 days instead of 30. Finance can live                                          
+{fg}    with 45 if the first invoice is issued at signing rather than at delivery.                                          
+{fg}                                                                                                                        
+{fg}    2. The support clause. They want named contacts on our side. I have put you                                         
+{fg}    and Dmitri down for now; say if that should be someone else.                                                        
+{fg}                                                                                                                        
+{fg}    Everything else is wording. The liability cap is unchanged, the term is                                             
+{fg}    still twelve months with a renewal notice of sixty days, and schedule B                                             
+{fg}    lists the same deliverables as before.                                                                              
+{fg}                                                                                                                        
+{fg}    If you can reply by Wednesday I will get the signed copy to them before                                             
+{fg}    their board meets on the 27th. If either point needs a call, I am free                                              
+{fg}    tomorrow after two.                                                                                                 
+{fg}                                                                                                                        
+{fg}    A note on process: Halden's procurement team will only accept the signed PDF                                        
+{fg}    from an address on our domain, so please do not forward this draft from a                                           
+{fg}    personal account.                                                                                                   
+{fg}                                                                                                                        
+{fg}    Thanks,                                                                                                             
+{fg}    Priya                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}lines 1-27 of 30{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  r {dim}reply · {fg}e {dim}archive · {fg}n b {dim}next, previous · {fg}a {dim}files · {fg}Esc {dim}back{fg}                                                         

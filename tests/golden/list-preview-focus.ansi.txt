@@ -1,0 +1,40 @@
+{fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Today{fg}                                                                                                                 
+{fg}    {head}work{fg}       {fg b}Imani Castell{fg}           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                {agent}invite{fg}  {dim} 14:05{fg}    
+{fg}    {link}personal{fg}   {fg b}Jonas Becker{fg}          {dim}▸{fg} Cabin weekend: who is driving?                                  {agent}5 msg{fg}  {dim} 13:40{fg}    
+{fg}  ▪ {head}work{fg}       {fg b}Backup Robot{fg}            [ops] Nightly backup finished with 2 warnings                          {dim} 12:58{fg}    
+{dim bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {fg bg=sel b}Priya Raman{fg bg=sel}           {dim bg=sel}▸{fg bg=sel} Contract draft v3 for the Halden account              {agent bg=sel}3 msg · 2 files{fg bg=sel}  {dim bg=sel} 11:32{fg bg=sel} {warn bg=sel}★{fg bg=sel}  
+{fg}    {link}personal{fg}   {fg b}Fernway Weekly{fg}          This week: winter routes, a gear swap and one trail closure            {dim} 10:15{fg}    
+{fg}    {head}work{fg}       {dim}Lars Lindqvist{fg}          {dim}Staging database migration window{fg}                             {agent}replied{fg}  {dim} 09:48{fg}    
+{fg}    {link}personal{fg}   {fg b}Example Bank{fg}            Action needed: confirm your new device                                 {dim} 09:02{fg}    
+{fg}    {head}work{fg}       Mei Tanaka              Payroll corrections for November                                       {dim} 08:30{fg} {warn}★{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Yesterday{fg}                                                                                                             
+{fg}    {link}personal{fg}   {fg b}Greta Holm{fg}              Photos from Saturday                                          {agent}4 files{fg}  {dim} 20:44{fg}    
+{fg}  ▪ {link}personal{fg}   {dim}Parcel Desk{fg}             {dim}Your parcel is out for delivery{fg}                                        {dim} 16:20{fg}    
+{fg}    {head}work{fg}       {fg b}Olu Adeyemi{fg}             New keys for the shared vault                                          {dim} 11:05{fg}    
+{fg}                                                                                                                        
+{fg}  {dim b}Past 7 days{fg}                                                                                                           
+{fg}    {head}work{fg}       {dim}Imani Castell{fg}           {dim}Budget numbers for the offsite{fg}                                {agent}replied{fg}  {dim}21 Nov{fg}    
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{acc}▌{fg} {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
+{fg}                                                                                                                        
+{fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.net>{fg}                                                                            
+{fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
+{fg}    {dim}Files    {fg}halden-bank-details.pdf {dim}96 KB{fg}                                                                              
+{fg}                                                                                                                        
+{fg}    {warn}▲ Sender differs from the thread{dim} · earlier messages came from priya@example.org{fg}                                     
+{fg}                                                                                                                        
+{fg}    Hi Robin,                                                                                                           
+{fg}                                                                                                                        
+{fg}    One more change before you sign: our bank details have changed, and the new                                         
+{fg}    ones are in the attached PDF. Please use them for the first invoice and                                             
+{fg}    confirm today, because the board date has moved up.                                                                 
+{fg}                                                                                                                        
+{fg}    Priya                                                                                                               
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}lines 1-13 of 13{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  j k {dim}scroll · {fg}Alt-k {dim}list · {fg}Enter {dim}open · {fg}? {dim}help{fg}                                                                         

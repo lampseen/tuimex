@@ -1,0 +1,40 @@
+{fg}  {fg b}Help{fg}                                                                                                                  
+{fg}                                                                                                                        
+{fg}    {fg b}Everywhere{fg}                                                                                                          
+{fg}    A                        {dim}what the {fg b u}agent{dim} can do{fg}                                                                      
+{fg}                                                                                                                        
+{fg}    {fg b u}Agent{fg b} (after A){fg}                                                                                                     
+{fg}    r                        {dim}write a reply{fg}                                                                              
+{fg}    t                        {dim}tidy, in compose{fg}                                                                           
+{fg}    l                        {dim}review a link, in links{fg}                                                                    
+{fg}                                                                                                                        
+{fg}    {fg b}Commands{fg}                                                                                                            
+{fg}    :{fg b u}agent{fg} reply|tidy|link   {dim}reply, tidy or link: hand text to the {fg b u}agent{fg}                                                
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}5 of 98 shown{fg}                                                                             sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  /agent{bg bg=acc} {fg}                                                                                                               

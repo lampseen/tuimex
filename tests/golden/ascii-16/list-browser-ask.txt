@@ -1,0 +1,40 @@
+  Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
+                                                                                                                        
+  Today                                                                                                                 
+    work       Imani Castell           Invitation: Q4 roadmap review, Thu 26 Nov 10:00                invite   14:05    
+    personal   Jonas Becker          > Cabin weekend: who is driving?                                  5 msg   13:40    
+    work       Backup Robot            [ops] Nightly backup finished with 2 warnings                           12:58    
+    work       Priya Raman           > Contract draft v3 for the Halden account              3 msg - 2 files   11:32 !  
+>   personal   Fernway Weekly          This week: winter routes, a gear swap and one trail closure             10:15    
+    work       Lars Lindqvist          Staging database migration window                             replied   09:48    
+    personal   Example Bank            Action needed: confirm your new device                                  09:02    
+    work       Mei Tanaka              Payroll corrections for November                                        08:30 !  
+                                                                                                                        
+  Yesterday                                                                                                             
+    personal   Greta Holm              Photos from Saturday                                          4 files   20:44    
+    personal   Parcel Desk             Your parcel is out for delivery                                         16:20    
+    work       Olu Adeyemi             New keys for the shared vault                                           11:05    
+                                                                                                                        
+  Past 7 days                                                                                                           
+    work       Imani Castell           Budget numbers for the offsite                                replied  21 Nov    
+------------------------------------------------------------------------------------------------------------------------
+  This week: winter routes, a gear swap and one trail closure                                                           
+                                                                                                                        
+    From     Fernway Weekly <news@fernway.example.net>                                                                  
+    To       Robin Vale <robin@example.com>                                                                             
+                                                                                                                        
+    ^ Remote content not loaded - 9 images, 3 hosts - tracker: OpenTrack                                                
+                                                                                                                        
+    Fernway Weekly, 23 November                                                                                         
+                                                                                                                        
+    [image: Ridge loop at sunrise]                                                                                      
+                                                                                                                        
+    Winter routes are open. Three of the five marked loops are groomed and the                                          
+    hut at Ridge saddle is staffed at weekends. Route notes and maps [1]                                                
+                                                                                                                        
+    Route status                                                                                                        
+                                                                                                                        
+    Route             Length   Status                                                                                   
+                                                                                                                        
+  5 of 24 - 1 message                                                                       sending in 6s - 1 not sent  
+  Load 8 images from img.fernway.example.net, cdn.example.net?  y yes - n no                                            

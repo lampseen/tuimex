@@ -1,0 +1,6 @@
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}bank.example.com.device-check.example.net   {brightblack}https://bank.example.com/confirm{default}   {yellow}^{default} text says bank.example.com     
+{default}    {brightblue} 2  {default}examplebank.example.net                     {brightblack}Contact us{default}                                                          
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://bank.example.com.device-check.example.net/confirm                                                       
+{default}  {yellow}^{default} Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no - {default}A {brightblack}ask the agent{default}  

@@ -1,0 +1,8 @@
+{default}    {brightblack}From     {default b}Mei Tanaka{default} {brightblack}<mei@example.org>{default}                                                                               
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 08:30                                                                                      
+{default}                                                                                                                        
+{default}    {green}+ Encrypted to you{brightblack} - key 51F09A2C{default}                                                                                   
+{default}                                                                                                                        
+{default}    Two corrections before the run on Thursday: the overtime for the support                                            
+{default}    rota, and one changed bank account. Both are in the sheet.                                                          

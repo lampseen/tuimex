@@ -1,0 +1,7 @@
+{default}    {green}+ Signed by Priya Raman{brightblack} - key 7A1C55E0{default}                                                                              
+{default}                                                                                                                        
+{default}  {default b}Agent{default}                                                                                                                 
+{default}    r   {brightblack}write a reply{default}                                                                                                   
+{default}                                                                                                                        
+{default}  {brightblack}nothing is sent until you pick{default}                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Esc {brightblack}cancel{default}                                                                                                            

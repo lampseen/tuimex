@@ -1,0 +1,40 @@
+{default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                                                           
+{default}                                                                                                                        
+{default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                                                                  
+{default}    {brightblack}To       {default}Robin Vale {brightblack}<robin@example.com>{default}                                                                             
+{default}    {brightblack}Date     {default}Mon 23 Nov 2026 10:15                                                                                      
+{default}                                                                                                                        
+{default}    {yellow}^ Remote content not loaded{brightblack} - 9 images, 3 hosts - tracker: OpenTrack{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Fernway Weekly, 23 November{default}                                                                                         
+{default}                                                                                                                        
+{default}    {brightblack}[image: Ridge loop at sunrise]{default}                                                                                      
+{default}                                                                                                                        
+{default}    Winter routes are open. Three of the five marked loops are groomed and the                                          
+{default}    hut at Ridge saddle is staffed at weekends. Route notes and maps {brightblue}[1]{default}                                                
+{default}                                                                                                                        
+{default}    {default b}Route status{default}                                                                                                        
+{default}                                                                                                                        
+{default}    {brightblack}Route             Length   Status               {default}                                                                    
+{default}    Ridge loop        12 km    groomed                                                                                  
+{default}    Saddle traverse   18 km    groomed                                                                                  
+{default}    Mill creek        7 km     closed until 5 Dec                                                                       
+{default}                                                                                                                        
+{default}    {default b}Gear swap, 5 December{default}                                                                                               
+{default}                                                                                                                        
+{default}    Bring what you have outgrown and take home what fits. Sign up for a table                                           
+{default}    {brightblue}[2]{default}                                                                                                                 
+{default}                                                                                                                        
+{default}    {brightblack}| We cleared forty pairs of skis last year and nobody went home with what{default}                                           
+{default}    {brightblack}| they brought. (Marta, swap organiser){default}                                                                             
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}fernway.example.net           {brightblack}Route notes and maps{default}   {brightblack}tracking removed{default}                                           
+{default}    {brightblue} 2  {default}shop.example.net              {brightblack}Sign up for a table{default}                                                               
+{default}    {brightblue} 3  {default}fernway.example.net           {brightblack}Details and the detour{default}                                                            
+{default}    {brightblue} 4  {default}fernway.example.net           {brightblack}Unsubscribe{default}                                                                       
+{default}    {brightblue} 5  {default}click.opentrack.example.net   {brightblack}view it in a browser{default}   {brightblack}tracking service{default}                                           
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://fernway.example.net/routes/winter                                                                       
+{default}  1-9 {brightblack}open - {default}j k Enter {brightblack}choose - {default}A {brightblack}agent - {default}Esc {brightblack}close{default}                                                                     

@@ -1,0 +1,191 @@
+use std::path::Path;
+
+use tuimex_core::{AccountId, Grants};
+use tuimex_ui::palette::Tok;
+
+use super::{Config, path};
+
+const TWO: &str = r#"
+[[account]]
+name = "work"
+address = "ada@example.org"
+[account.agent]
+read = true
+
+[[account]]
+name = "personal"
+address = "ada@example.com"
+"#;
+
+fn error(text: &str) -> String {
+    format!("{:#}", Config::parse(text).unwrap_err())
+}
+
+/// The reference in PLAN §11, as it is printed there.
+fn plan_reference() -> String {
+    let plan = std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/PLAN.md")).unwrap();
+    let section = plan.split("## 11. Config reference").nth(1).expect("PLAN §11 is there");
+    let block = section.split("```toml\n").nth(1).expect("PLAN §11 has a TOML block");
+    block.split("```").next().unwrap().to_string()
+}
+
+#[test]
+fn the_reference_in_the_plan_parses() {
+    let config = Config::parse(&plan_reference()).unwrap();
+    let account = config.account("personal").unwrap();
+    assert_eq!(account.address, "you@example.com");
+    assert_eq!(account.grants(), Grants { read: true, folders: vec!["INBOX".into()], draft: true });
+}
+
+/// The keys the reference shows commented out are part of the schema too.
+#[test]
+fn the_reference_in_the_plan_parses_with_every_optional_key_set() {
+    let all: String =
+        plan_reference().lines().map(|line| line.strip_prefix("# ").unwrap_or(line).to_string() + "\n").collect();
+    assert!(all.contains("\npassword_cmd = "), "the commented keys were uncommented");
+    Config::parse(&all).unwrap();
+}
+
+/// `docs/config.example.toml`, as it is and with every commented key set.
+#[test]
+fn the_example_config_parses_as_written_and_with_every_optional_key_set() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/config.example.toml");
+    let example = std::fs::read_to_string(path).unwrap();
+    assert!(Config::parse(&example).unwrap().agent.is_none(), "the agent is off until its table is uncommented");
+    // A key is commented as `# key = …` or `# [table]`; prose is not TOML.
+    let is_key =
+        |line: &str| line.starts_with("# [") || line.split_once(" = ").is_some_and(|(key, _)| !key[2..].contains(' '));
+    let all: String = example
+        .lines()
+        .map(|line| if line.starts_with("# ") && is_key(line) { &line[2..] } else { line })
+        .map(|line| line.to_string() + "\n")
+        .collect();
+    let config = Config::parse(&all).unwrap();
+    let agent = config.agent.expect("the [agent] table was uncommented");
+    assert_eq!((agent.preset.as_deref(), agent.command), (Some("claude"), None), "no argv is the user's to write");
+    assert_eq!(agent.timeout.as_deref(), Some("120s"));
+    assert!(all.contains("\npassword_cmd = "));
+    assert_eq!(super::colours(&config.accounts).unwrap().len(), 1, "the example's colour is one that is lent");
+}
+
+#[test]
+fn an_account_without_an_agent_table_grants_nothing() {
+    let config = Config::parse(TWO).unwrap();
+    assert_eq!(config.account("personal").unwrap().grants(), Grants::default());
+    assert!(config.account("nobody").is_none());
+}
+
+#[test]
+fn read_covers_the_inbox_unless_folders_says_otherwise() {
+    let config = Config::parse(TWO).unwrap();
+    assert_eq!(
+        config.account("work").unwrap().grants(),
+        Grants { read: true, folders: vec!["INBOX".into()], draft: false }
+    );
+    let narrowed = TWO.replace("read = true", "read = true\nfolders = [\"Archive\"]\ndraft = true");
+    let grants = Config::parse(&narrowed).unwrap().account("work").unwrap().grants();
+    assert_eq!(grants, Grants { read: true, folders: vec!["Archive".into()], draft: true });
+    let nothing = TWO.replace("read = true", "folders = [\"Archive\"]");
+    assert!(!Config::parse(&nothing).unwrap().account("work").unwrap().grants().read);
+}
+
+#[test]
+fn an_empty_file_is_a_config_with_no_accounts() {
+    assert!(Config::parse("").unwrap().accounts.is_empty());
+}
+
+#[test]
+fn an_unknown_key_is_an_error_naming_the_key_and_its_line() {
+    for (text, key, line) in [
+        ("colour = 1\n", "colour", 1),
+        ("[[account]]\nname = \"a\"\naddress = \"a@example.com\"\npassword = \"x\"\n", "password", 4),
+        ("[[account]]\nname = \"a\"\naddress = \"a@example.com\"\n[account.agent]\nsend = true\n", "send", 5),
+        ("[[account]]\nname = \"a\"\naddress = \"a@example.com\"\nimap = { host = \"h\", tls = false }\n", "tls", 4),
+        ("[sync]\nbodies = \"30d\"\n\nskip_tls_verify = true\n", "skip_tls_verify", 4),
+        ("[ui]\ntheme = \"dark\"\n", "theme", 2),
+        ("[notify]\nbell = true\nsound = \"x\"\n", "sound", 3),
+        ("[[section]]\nname = \"n\"\nshort = \"s\"\nquery = \"q\"\ncolour = 1\n", "colour", 5),
+    ] {
+        assert_eq!(error(text), format!("line {line}: unknown key `{key}`"), "{text}");
+    }
+}
+
+/// ADR-010: the config has no key for a secret, and one typed anyway is
+/// not repeated by the error.
+#[test]
+fn an_error_never_quotes_a_value_from_the_file() {
+    for text in [
+        "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\npassword = \"hunter2\"\n",
+        "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\n[account.agent]\nread = \"hunter2\"\n",
+        "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\npassword_cmd = \"hunter2\"\n",
+        "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\nimap = { host = \"h\", port = \"hunter2\" }\n",
+        "[[account]]\nname = \"a\"\naddress = \"hunter2\n",
+        "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\nauth = hunter2\n",
+        "hunter2\n",
+    ] {
+        let error = error(text);
+        assert!(!error.contains("hunter2"), "{error}");
+        assert!(error.starts_with("line "), "{error}");
+    }
+}
+
+#[test]
+fn a_wrong_type_and_a_missing_key_say_what_was_wanted() {
+    let wrong = "[[account]]\nname = \"a\"\naddress = \"a@example.com\"\n[account.agent]\nread = \"yes\"\n";
+    assert_eq!(error(wrong), "line 5: expected a boolean");
+    assert_eq!(error("[[account]]\nname = \"a\"\n"), "line 1: missing key `address`");
+}
+
+#[test]
+fn two_accounts_with_one_name_are_refused() {
+    let twice = TWO.replace("personal", "work");
+    assert_eq!(error(&twice), "two accounts are named work");
+}
+
+#[test]
+fn a_file_that_is_not_there_is_an_error_and_not_an_empty_config() {
+    let missing = Path::new(env!("CARGO_MANIFEST_DIR")).join("no-such-config.toml");
+    let error = format!("{:#}", Config::load(&missing).unwrap_err());
+    assert!(error.starts_with(&format!("reading the config {}", missing.display())), "{error}");
+}
+
+#[test]
+fn the_path_is_the_flag_or_the_config_directory_and_never_the_current_one() {
+    let dir = Path::new("/h/.config/tuimex");
+    assert_eq!(path(None, dir), Path::new("/h/.config/tuimex/config.toml"));
+    assert_eq!(path(Some(Path::new("/elsewhere/c.toml")), dir), Path::new("/elsewhere/c.toml"));
+}
+
+#[test]
+fn ui_preview_is_one_of_four_words_and_auto_when_left_out() {
+    use tuimex_ui::list::Preview;
+    let of = |text: &str| super::preview(Config::parse(text).unwrap().ui.as_ref());
+    assert_eq!(of("").unwrap(), Preview::Auto);
+    assert_eq!(of("[ui]\nglyphs = \"ascii\"\n").unwrap(), Preview::Auto);
+    for (word, preview) in
+        [("auto", Preview::Auto), ("right", Preview::Right), ("below", Preview::Below), ("off", Preview::Off)]
+    {
+        assert_eq!(of(&format!("[ui]\npreview = \"{word}\"\n")).unwrap(), preview);
+    }
+    let refused = format!("{:#}", of("[ui]\npreview = \"beside\"\n").unwrap_err());
+    assert!(refused.contains("ui.preview = \"beside\": it is one of auto, right, below, off"), "{refused}");
+}
+
+#[test]
+fn an_account_s_color_is_one_of_the_four_accents_accounts_take() {
+    let account = |color: &str| format!("[[account]]\nname = \"work\"\naddress = \"a@example.org\"\ncolor = {color}\n");
+    let of = |color: &str| super::colours(&Config::parse(&account(color)).unwrap().accounts);
+    for (word, token) in [("link", Tok::Link), ("head", Tok::Head), ("ok", Tok::Ok), ("warn", Tok::Warn)] {
+        assert_eq!(of(&format!("\"{word}\"")).unwrap(), [(AccountId("work".into()), token)]);
+    }
+    for refused in ["agent", "acc", "err", "fg", "blue", "Link", ""] {
+        let said = format!("{:#}", of(&format!("\"{refused}\"")).unwrap_err());
+        assert!(
+            said.contains("account work: color = ") && said.contains("it is one of link, head, ok, warn"),
+            "{said}"
+        );
+    }
+    assert!(Config::parse(&account("3")).is_err(), "a number is not a colour's name");
+    let none = "[[account]]\nname = \"work\"\naddress = \"a@example.org\"\n";
+    assert_eq!(super::colours(&Config::parse(none).unwrap().accounts).unwrap(), []);
+}
