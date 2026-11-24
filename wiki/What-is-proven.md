@@ -163,7 +163,7 @@ itself.
 | **Sending from the interface through a real provider** | sending is run against servers in containers by `make real-server`, and against no provider's own |
 | **macOS** | the CI job `macos` runs the whole suite on a Mac, and it has passed on `macos-latest` as of 2026-11-24. Nobody has used tuimex on one by hand |
 | **Attesting and publishing a release** | the two steps of [`release.yml`](https://github.com/lampseen/tuimex/blob/main/.github/workflows/release.yml) that a dry run skips. They have never run, so no archive has an attestation to check yet |
-| **An archive started by hand, and the Homebrew formula** | no archive a dry run built is recorded as unpacked and run by a person, and none has been on a Mac. The formula is a template nothing has installed from |
+| **An archive started by hand, and the Homebrew formula** | no archive a dry run built is recorded as unpacked and run by a person, and none has been on a Mac. The formula is a template nothing has installed from. That a download made with `curl` is not stopped by Gatekeeper, as [Installing](Installing) says, is how macOS is documented to behave and has not been tried with this binary |
 | **A picture drawn in a terminal** | tests check what is handed to the terminal's image protocol. None has a terminal to see the result on |
 | **How a browser draws the sealed copy** | tests check what the page contains and what its policy allows. None opens a browser |
 | **The system's opener** | tests check what would be handed to it, and never start a browser or a viewer |
