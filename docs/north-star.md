@@ -23,6 +23,11 @@ and the send summary in the list of who receives what before anything leaves.
 A feature that does not help answer that question, or act on the answer, does
 not belong here.
 
+The calendar is the same question asked about time: *where do I need to be,
+and does this invitation fit?* It is a place beside the mail and not part of
+the list (ADR-054), and the rule for a message holds for an event: it is
+something to read, never something that runs.
+
 ## What that rules in
 
 - Every account in one list, with one vocabulary. Gmail's labels and an IMAP
@@ -37,6 +42,10 @@ not belong here.
 - Conversations: a reply sits with what it answers.
 - Signed and encrypted mail, through the `gpg` you already have (ADR-020),
   and calendar invitations you can read and answer (ADR-021).
+- One calendar across your accounts: each provider's calendar read from an
+  address you give, an answer kept in the calendar of the account the
+  invitation came to, and a reminder while tuimex is open (ADR-054 to
+  ADR-058). Planned and not built.
 - A command line for agents and scripts that can read what you allow and
   write drafts, and nothing else (ADR-016).
 - Degrading honestly. Sixteen colours and ASCII glyphs carry the same
@@ -51,6 +60,8 @@ not belong here.
 - An agent that sends, moves, deletes or flags (ADR-016).
 - Passwords or tokens in the config file (ADR-010), and a switch that turns
   certificate checking off (ADR-012).
+- Anything of tuimex running after it is closed: reminders stop with it
+  (ADR-058).
 - Composing HTML, scripting or plugins, server-side search, JMAP, Microsoft
   365 sign-in and Windows in v1 (ADR-022). The traits stay clean so that
   each can be added later by a record.
@@ -82,3 +93,9 @@ of the engine's code goes.
 **Gmail sign-in needs a client ID you register yourself** (ADR-019). Google
 does not allow a small project to ship one for the mail scope without a paid
 security assessment.
+
+**A provider's calendar is mostly read, not written.** Proton offers a
+program no way to write its calendar, and Google offers one only through
+the same registration (ADR-056). What you answer or create in tuimex for
+such an account is kept by tuimex, marked `local`, and is not on your
+phone.

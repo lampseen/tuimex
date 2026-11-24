@@ -51,6 +51,7 @@ Each row is settled. The ones with a record are answered by its number.
 | Secrets | `keyring`, or `password_cmd`; never the config | ADR-010 |
 | Gmail | XOAUTH2 with a user-supplied client; token requests through `ureq` | ADR-019 |
 | OpenPGP | the `gpg` binary | ADR-020 |
+| Calendar | Each provider's calendar read as an iCalendar feed over `ureq`; events made here are files; planned, not built | ADR-054 to ADR-058 |
 | Config | TOML at `$XDG_CONFIG_HOME/tuimex/config.toml`, or `--config`; never the current directory | ADR-011 |
 | Platforms | Linux and macOS, both proven in CI | ADR-022 |
 | Vocabulary | "folder" everywhere; Gmail labels are shown as folders | §4.1 |
@@ -66,8 +67,8 @@ is the dependency ceiling; adding a crate takes a record first (ADR-005):
 `imap`, `lettre`, `rustls` and `rustls-native-certs` (ADR-029), `mail-parser`
 (with `full_encoding`, which brings `encoding_rs`: ADR-044),
 `mail-builder`, `ammonia`, `html2text`, `rusqlite`, `keyring`, `zeroize`,
-`ureq`, `sha2`, `base64`, `getrandom` (the last three for PKCE and
-fingerprints); dev only: `insta`.
+`ureq` (token requests, and calendar feeds: ADR-056), `sha2`, `base64`,
+`getrandom` (the last three for PKCE and fingerprints); dev only: `insta`.
 
 Not on the list, deliberately: `tokio`, `reqwest`, `sqlx`, any browser
 driver, any Lua, any syntax highlighter.
@@ -559,7 +560,8 @@ a thread it claims to continue; the message is a draft an agent wrote.
 ### 6.6 New mail
 
 `NewMail` in a folder with the Inbox role rings the bell and sends an OSC 9
-notification, both configurable under `[notify]`. Nothing else notifies.
+notification, both configurable under `[notify]`. The one other thing that
+notifies is an event's reminder, while tuimex is open (ADR-058, M15).
 
 ### 6.7 Setup and doctor
 
@@ -750,7 +752,7 @@ checklist for that.
 | An attachment opens in the system's program for its type | M8 |
 
 OpenPGP and invitations (M10) and the polish and release workflow (M11) come
-after it.
+after it, and the calendar (M12 to M16) after those.
 
 ### M0 — Scaffold
 Repository `lampseen/tuimex`; workspace and seven crates with the edges of
@@ -844,10 +846,9 @@ account and a Gmail account set up from nothing, synced, sent from, and
 Proton Bridge pinned.
 
 ### M10 — OpenPGP and invitations
-`gpg` for sign, encrypt, verify, decrypt (ADR-020); the invite card and
-replies (ADR-021).
-**Exit:** round trips against a scratch `GNUPGHOME` made by the test; an
-invitation fixture answered three ways produces three valid `REPLY` parts.
+`gpg` for sign, encrypt, verify, decrypt (ADR-020). The invite card
+(ADR-021) is built; its answers are M14's (ADR-057).
+**Exit:** round trips against a scratch `GNUPGHOME` made by the test.
 
 ### M11 — Polish and release
 `NO_COLOR`; mouse (click row, tab, wheel); `[keys]` remapping; notifications
@@ -858,6 +859,62 @@ copied from pullpen, the weekly dependency check and a Homebrew formula
 template.
 **Exit:** a fresh machine: install, `tuimex setup`, read and answer a
 message.
+
+### The calendar (ADR-054)
+
+Five milestones, each one pull request and each useful without the next.
+The keys, commands, config keys and screens are the design's to state and
+are not listed here until M12 is merged; §6 and §11 are updated by the
+milestone that builds each.
+
+Before M13, by hand: whether Google's older CalDAV address accepts an app
+password (ADR-056). The result is written under that record. If it does,
+CalDAV for Google becomes M17 with a record of its own.
+
+### M12 — The calendar's design *(no Rust)*
+`design/tui.js` gains the calendar: fixtures (three accounts, an invitation
+not yet answered, a repeating event, an all-day event, two that overlap,
+one that is `local`), the key tables, the commands, the wording, and the
+screens and flows: month with the day's agenda, week, day, event, the
+form, the calendars panel, the empty and failing states, and the answer,
+propose, ignore, join, create, delete and reminder flows, each at 120x40
+and at 80x24 in ASCII and sixteen colours. Drafted on a branch and read by
+Bryan as the HTML preview (ADR-024).
+**Exit:** Bryan merges it. No golden is generated before that.
+
+### M13 — See
+Every event of a calendar read in `tuimex-content`; event files and their
+index (ADR-055); feeds fetched from addresses kept as secrets, with the
+setup step that asks for them (ADR-056); the month, week, day and event
+views; `gc` and `gm`; going to a date; finding; narrowing to an account;
+showing and hiding calendars; joining a meeting (ADR-054). Read-only. The
+records ADR-054 leaves open (repeats, time zones) come first.
+**Exit:** every calendar output of the design is drawn cell for cell; a
+corpus of hostile calendars, one test each; the secret job finds no feed
+address in any file; a feed that fails says so and keeps what it had.
+
+### M14 — Answer
+The five answers (ADR-057), which takes the invitation half of M10: the
+`REPLY` and `COUNTER` parts, the write to the receiving account's
+calendar, ignore, undo, and updates and cancellations from the organizer
+alone.
+**Exit:** an invitation fixture answered five ways produces three valid
+`REPLY` parts, one valid `COUNTER`, and for ignore nothing sent; under
+`make real-server` the reply arrives from the account the invitation came
+to; a cancellation from anyone but the organizer changes nothing.
+
+### M15 — Remind
+Reminders while open, and the switch (ADR-058).
+**Exit:** on a clock the test sets, a reminder is raised once, to a
+notifier that records and never to the real desktop; a hostile title
+reaches it as one argument with nothing to render; off stays off across a
+restart.
+
+### M16 — Edit
+The form; creating, changing and deleting an event, one occurrence or all;
+a `REQUEST` to the guests after the send summary (ADR-057); `:export`.
+**Exit:** an event made, changed and deleted round-trips through its file;
+the invitation it sends is read back by M13's parser as the same event.
 
 ---
 

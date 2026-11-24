@@ -79,6 +79,8 @@ pullpen has five of.
 
 *2026-11-24: and the binary figure is ADR-049's.*
 
+*2026-11-24: the code figure is ADR-059's.*
+
 ## ADR-005 — The dependency ceiling is a list
 
 The crates tuimex may depend on are the list in PLAN §1. Adding one takes a
@@ -392,6 +394,10 @@ The parser is a small one in `tuimex-content` covering the properties the
 card shows. Recurrence is displayed as its rule in words where simple and as
 "repeats" otherwise.
 
+*2026-11-24: ADR-054 replaces "Nothing is stored and no calendar is written
+to", and ADR-057 adds two answers to the three. The card and the rule for a
+URL stand.*
+
 ## ADR-022 — What v1 leaves out
 
 Each of these is absent on purpose, and adding one takes a record:
@@ -407,6 +413,8 @@ Each of these is absent on purpose, and adding one takes a record:
 - S/MIME (ADR-020), and a calendar store (ADR-021).
 - A settings screen. `tuimex setup` asks plain questions; everything else is
   the config file.
+
+*2026-11-24: a calendar store is no longer left out (ADR-054).*
 
 ## ADR-023 — The IMAP client is the `imap` crate, pinned, behind a trait
 
@@ -1446,3 +1454,249 @@ now the switch's words.
 tuimex that keeps no password, and is told why each time. A keyring that
 works is still proven only on one in memory and by hand
 (`docs/testing.md`).
+
+## ADR-054 — The calendar is kept, in a place of its own
+
+tuimex shows one calendar across every account, and keeps what it shows.
+This replaces the sentence in ADR-021 that nothing is stored, and takes "a
+calendar store" off ADR-022's list. Bryan asked for it on 2026-11-24: every
+calendar and invitation in one view, by month, week, day and event; an
+answer that lands in the calendar of the account the invitation came to;
+meeting links that open; reminders.
+
+The strongest argument against is the north star. tuimex is a triage
+inbox, and a calendar with repeating events, time zones, a second kind of
+sync and an editor is a second program about as hard as the first. For
+Proton, and perhaps for Google, half of it can only be a copy tuimex
+keeps (ADR-056). What survives that:
+
+- It is built in stages that are each useful alone and each a pull request:
+  see, answer, remind, edit (PLAN §10). A stage that proves too costly
+  stops the ones after it, not the ones before.
+- The north star is changed by this record and says so. The question a
+  screen answers grows from "does this need me?" to "does this need me, and
+  where do I need to be?". An invitation is mail that needs an answer, and
+  the answer depends on the day it would land in.
+- An event that exists only in tuimex is marked `local` wherever it is
+  drawn (ADR-055). The view never implies a provider holds what it does not.
+
+The calendar is not a section. `gc` opens it and `gm` returns to mail, and
+each side keeps where it was. A section is a saved query over mail, moved
+between with `h` and `l`; a grid of days needs those keys for days. Inside,
+one rule carries the navigation: `Enter` goes deeper (month, day, event),
+`Esc` comes back, and `h` `j` `k` `l` always move the cursor. `m`, `w` and
+`d` change the view at the same date. The keys and every screen are
+`design/tui.js`'s to state (ADR-002), and nothing is built until Bryan has
+merged that design (ADR-024).
+
+A meeting link is a link (ADR-018): `o` on an event opens it after the same
+assessment, with its real host on the status line, and it is the user
+asking for that one thing (ADR-008). Where an event carries several, the
+one offered first is its conference property, then its URL, then a URL in
+its location, then the links in its notes.
+
+Not decided here, and each needs its own record before the stage that
+meets it: how a repeating event is expanded, how a time zone is resolved
+without a zone database (PLAN §1 has `chrono` for the clock only), and
+whether any crate is added (ADR-005).
+
+**What it costs.** The invariant no longer fits in one sentence about an
+inbox. The code grows by about a third (ADR-059). And the second source of
+truth the north star already counts as a cost gains a third: a provider's
+calendar, which tuimex can read and mostly cannot write.
+
+Nothing here is built. The wiki says so until a stage lands with its proof.
+
+## ADR-055 — An event made here is a file; a provider's copy is a cache
+
+This is ADR-013 again, for events. An event tuimex itself holds (one
+accepted or created for an account whose calendar it cannot write) is one
+iCalendar file under the data directory, in a directory per account, named
+by a key tuimex makes and never by the event's UID, which is hostile text.
+Those files are the truth. Everything fetched from a provider, and the
+index over all of it, lives under the cache directory and can be deleted
+and rebuilt: the feeds are fetched again and the files are read again.
+Every file is made by the one module that makes files (ADR-011).
+
+The strongest argument for SQLite alone is that there would be one thing
+to keep right instead of two. But a local event has no server to restore
+it, so it gets the treatment the mail gets: a file a person can read, back
+up, and import elsewhere, which survives the index being wrong.
+
+An event that is only a file here is drawn with the word `local`, in every
+view and at every size. `:export` writes such events as `.ics`, which is
+how one reaches a provider's own calendar: by the user importing it there.
+
+When a provider's copy and a local file carry the same UID, they are one
+event on screen. The provider's copy supplies what the organizer may have
+changed; the local file supplies the answer given here, until the
+provider's copy shows an answer of its own.
+
+Deleting an event is undone with `u` (ADR-015). Nothing is removed from a
+provider by a delete here unless tuimex can write that calendar.
+
+**What it costs.** An event in two places can disagree, and the rule above
+is the first of several that real feeds will ask for. A `local` event is
+not on the user's phone, and the mark is the only thing that says so.
+
+## ADR-056 — A calendar is read from an address the user gave, and the address is a secret
+
+What tuimex can do with a provider's calendar depends on what the provider
+offers a program with no project registered anywhere:
+
+- **Proton** has no calendar protocol. Bridge carries mail only. Proton
+  Calendar can share a calendar by a private link that serves iCalendar,
+  read-only.
+- **Google** offers its API and its current CalDAV address to OAuth2 only,
+  and OAuth2 needs a client registered in Google Cloud (ADR-019). Bryan,
+  2026-11-24: "Does OAuth require me to setup something in gcp? if so I am
+  not doing that". Google Calendar also has a secret address in iCalendar
+  format, read-only. Whether its older CalDAV address still accepts an app
+  password is **unverified**: nobody here has tried. It is tried once,
+  by hand, against a real account, and the result is written under this
+  record. If it works, CalDAV for Google gets its own record and stage. If
+  not, Google is a feed, as Proton is.
+
+So the mechanism every account can use is a feed: `tuimex setup` asks for
+the address, and the engine fetches it on a thread of its own (ADR-006),
+on the sync schedule and on `:sync`.
+
+The address is a secret. Anyone holding it reads the calendar. It goes
+where a password goes (ADR-010): the keyring, or a `password_cmd`, and into
+no file tuimex writes. The log and the status line name the account and
+the host, never the path.
+
+ADR-008 says tuimex fetches nothing a message names. This is not that:
+the address is typed by the user at setup, and no message can add or
+change one. To keep it so, a fetch is `https` only, follows no redirect to
+another host, is capped in size, and is the only thing fetched: nothing
+the calendar itself names (an attachment, a picture, a link in an event's
+notes) is requested. `ureq` does it, which PLAN §1 had for token requests
+alone; that line is widened and no crate is added.
+
+The bytes are hostile input. A shared or subscribed calendar is written by
+other people, and an event from an invitation by whoever sent it. Only
+`tuimex-content` parses them (ADR-007), from bytes the engine hands it.
+
+A feed that cannot be fetched says so on the status line, with when it was
+last read, as an account that cannot sync does. The events already held
+stay on screen and are not presented as fresh.
+
+**What it costs.** A feed is read-only and as late as the provider makes
+it; how late each one is, nobody here has measured. An answer or an event made in
+tuimex for these accounts is `local` (ADR-055) and the provider's own apps
+do not know it. A leaked feed address cannot be revoked from tuimex, only
+at the provider.
+
+## ADR-057 — An answer goes to the organizer by mail, and into the calendar of the account it came to
+
+ADR-021 had three answers. There are five, on one question, from the
+reader's card or from the event in the calendar:
+
+- **Accept, tentative, decline** send a `REPLY` to the organizer and write
+  the event, with the answer, to the calendar of the account that received
+  the invitation: that provider's calendar where tuimex can write it,
+  otherwise that account's local calendar (ADR-055). Never another
+  account's.
+- **Propose a time** sends a `COUNTER` with the new start, and the same
+  proposal as a sentence in the body, because a provider may drop a
+  `COUNTER` it does not handle (which ones do is unverified) and a person
+  can still read a sentence. The event is shown as proposed until the
+  organizer sends a new version.
+- **Ignore** sends nothing. The invitation stops counting as waiting for an
+  answer and is not drawn in the calendar. The mail is untouched and can be
+  answered later.
+
+The reply leaves from the account the invitation came to. The engine
+already refuses a From that is not an identity of the account whose Outbox
+holds the message, and "you" among the guests is that account's identity,
+not any identity of any account. It waits in the Outbox for the send delay
+like any mail, so `u` takes back both the reply and the calendar entry
+(ADR-015).
+
+An event made here that names guests is mailed to them as a `REQUEST`,
+after the send summary lists who receives it.
+
+A later message for the same UID with a higher `SEQUENCE` updates the
+event, and a `CANCEL` strikes it. Either is believed only from the
+organizer the event already names: a cancellation is mail, and mail is
+hostile.
+
+The strongest argument against writing to a calendar on accept is that
+Gmail already adds an invitation to Google Calendar when it arrives, so
+tuimex would hold a second copy. The two are one event on screen
+(ADR-055), and for Proton there is no first copy: an invitation answered
+outside Proton's apps reaches Proton Calendar by no route at all.
+
+**What it costs.** For an account read by feed, the answer the provider's
+own apps show stays "not answered" although the organizer has it. That is
+said where the answer is given, in the result line: `in proton (local)`.
+
+## ADR-058 — A reminder notifies while tuimex is open
+
+PLAN §6.6 said nothing but new Inbox mail notifies. An event's reminder
+now does too: its own alarm where it has one, otherwise a default lead
+time. It rings the bell, puts the event and the key that joins it on the
+status line, and raises a desktop notification.
+
+Only while tuimex is running. Bryan chose this on 2026-11-24 over a
+background helper. Nothing is installed, no timer is registered, and
+nothing of tuimex runs after it is closed. The cost is plain: a closed
+terminal reminds nobody.
+
+The desktop notification is the system's own program for it (`notify-send`
+on Linux, `osascript` on macOS), started with a fixed argument list and no
+shell, as `password_cmd` is. An event's title is hostile text: it is
+passed as one argument, stripped of control characters and of the markup a
+notification service would render. A terminal's OSC 9 is the other route,
+chosen in the config. No crate is added. A machine with neither still gets
+the bell and the status line.
+
+Reminders are turned off and on with a key and a command. The choice is
+remembered in a file under the state directory, since setup only appends
+to the config and nothing else writes it (ADR-043), and `[notify]` gives
+the value a first run starts with. This is one switch, not the settings
+screen ADR-022 leaves out. Off is shown on the status line; on is not,
+since what is normal is silent.
+
+**What it costs.** A reminder depends on a program tuimex does not ship,
+and a notification service can show an event's title on a locked screen.
+The title is all that is sent: no guest, place or link.
+
+## ADR-059 — The code budget is 26,000 lines
+
+`MAX_CODE_LINES` goes from 18,000 to 26,000. The other three budgets stand.
+
+The count is 17,509, and the calendar (ADR-054) cannot fit in 491 lines.
+Bryan's ruling of 2026-11-23 stands: "raise the cap if we need to, don't
+cut features".
+
+ADR-042 warned against exactly what this record does, a figure summed from
+guesses before the design exists. The guesses are written down so that the
+next record of this kind can say how wrong each was:
+
+| What | Lines |
+|---|---|
+| Reading every event of a calendar and writing replies, proposals and invitations (`tuimex-content`) | 700 |
+| Events, repeats, the words for a date (`tuimex-core`) | 700 |
+| Event files and their index (`tuimex-store`) | 600 |
+| Fetching feeds, the calendar's thread, writing an answer (`tuimex-engine`) | 600 |
+| Month, week, day, event, the form, the panels, the keys (`tuimex-ui`) | 2,800 |
+| Wiring, the setup step, reminders (`tuimex`) | 700 |
+| Calendar fixtures (`tuimex-fixtures`) | 500 |
+| OpenPGP, and what is left of M11 | 1,400 |
+
+That is 8,000, and 17,509 with it is 25,509. The interface figure is the
+least sure: the whole of mail's interface is about 4,300 lines, and the
+calendar has more screens than the reader and compose together. CalDAV for
+Google, if it comes (ADR-056), is not in the table and brings its own
+record.
+
+The binary budget is not raised. Nothing new is linked by ADR-054 to
+ADR-058, and 8,000 lines at ADR-049's 290 bytes each is more than the
+0.9 MiB that is left, so the stage that crosses it writes that record
+against a measurement.
+
+**What it costs.** The third budget record, and the first written ahead of
+the code it pays for. The table is what makes it more than a number going
+up: each stage's pull request states its own count beside its line here.
