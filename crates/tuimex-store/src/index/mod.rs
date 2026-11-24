@@ -172,6 +172,49 @@ pub struct Synced {
     pub flags: Flags,
 }
 
+/// Opens the database at `path`, making an empty one if there is none. A
+/// file there that is not a database is replaced: every database tuimex
+/// keeps is a cache.
+pub(crate) fn open_cache(path: &Path) -> Result<Connection> {
+    match connect(path) {
+        Err(Error::Index(rusqlite::Error::SqliteFailure(e, _))) if e.code == ErrorCode::NotADatabase => {
+            for suffix in ["", "-wal", "-shm"] {
+                let mut file = path.as_os_str().to_owned();
+                file.push(suffix);
+                let file = PathBuf::from(file);
+                match fs::remove_file(&file) {
+                    Err(e) if e.kind() != ErrorKind::NotFound => return Err(e).at(&file),
+                    _ => {}
+                }
+            }
+            connect(path)
+        }
+        other => other,
+    }
+}
+
+fn connect(path: &Path) -> Result<Connection> {
+    match files::create(path) {
+        Err(e) if e.kind() == ErrorKind::AlreadyExists => {
+            // A link here would have SQLite write wherever it points.
+            if !fs::symlink_metadata(path).at(path)?.is_file() {
+                return Err(std::io::Error::from(ErrorKind::InvalidInput)).at(path);
+            }
+        }
+        made => drop(made.at(path)?),
+    }
+    // Without the create flag SQLite opens the owner-only file made
+    // above and never makes one of its own; its WAL and shared-memory
+    // files take their mode from the database's.
+    let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_NO_MUTEX)?;
+    // The agent command line reads while a running tuimex writes: WAL
+    // lets it, and the timeout covers the moments it cannot.
+    conn.busy_timeout(Duration::from_secs(5))?;
+    conn.pragma_update(None, "journal_mode", "WAL")?;
+    conn.pragma_update(None, "synchronous", "NORMAL")?;
+    Ok(conn)
+}
+
 pub struct Index {
     conn: Connection,
 }
@@ -180,44 +223,7 @@ impl Index {
     /// Opens the index at `path`, making an empty one if there is none. A
     /// file there that is not a database is replaced: it is a cache.
     pub fn open(path: &Path) -> Result<Index> {
-        match Self::connect(path) {
-            Err(Error::Index(rusqlite::Error::SqliteFailure(e, _))) if e.code == ErrorCode::NotADatabase => {
-                for suffix in ["", "-wal", "-shm"] {
-                    let mut file = path.as_os_str().to_owned();
-                    file.push(suffix);
-                    let file = PathBuf::from(file);
-                    match fs::remove_file(&file) {
-                        Err(e) if e.kind() != ErrorKind::NotFound => return Err(e).at(&file),
-                        _ => {}
-                    }
-                }
-                Self::connect(path)
-            }
-            other => other,
-        }
-    }
-
-    fn connect(path: &Path) -> Result<Index> {
-        match files::create(path) {
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => {
-                // A link here would have SQLite write wherever it points.
-                if !fs::symlink_metadata(path).at(path)?.is_file() {
-                    return Err(std::io::Error::from(ErrorKind::InvalidInput)).at(path);
-                }
-            }
-            made => drop(made.at(path)?),
-        }
-        // Without the create flag SQLite opens the owner-only file made
-        // above and never makes one of its own; its WAL and shared-memory
-        // files take their mode from the database's.
-        let conn =
-            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_NO_MUTEX)?;
-        // The agent command line reads while a running tuimex writes: WAL
-        // lets it, and the timeout covers the moments it cannot.
-        conn.busy_timeout(Duration::from_secs(5))?;
-        conn.pragma_update(None, "journal_mode", "WAL")?;
-        conn.pragma_update(None, "synchronous", "NORMAL")?;
-        Ok(Index { conn })
+        Ok(Index { conn: open_cache(path)? })
     }
 
     /// False for an index that has to be rebuilt before it is read.
