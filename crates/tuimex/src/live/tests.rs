@@ -919,3 +919,51 @@ fn an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_t
     assert!(!shows("Accepted: Planning")(&back), "it is in no folder, Drafts included: {back:#?}");
     s.stop();
 }
+
+/// The reader's card answers once the message has been read: the worker
+/// hands the interface the event the message carries, and `i a` on the
+/// card is the same ask as in the calendar, threaded under that message.
+#[test]
+fn an_invitation_s_card_in_the_reader_answers_once_its_message_has_been_read() {
+    let part = rig::invitation("planning@example.com", 0, Some("REQUEST"), "");
+    let invitation = rig::mail(1, "Lars Holm <lars@example.com>", "REQUEST", &part);
+    let deliver = |work: &FakeServer, _: &FakeServer| {
+        work.deliver("INBOX", &invitation, Flags::default(), Timestamp(1_795_435_200));
+    };
+    let mut s = Session::calendared("calendar-card", deliver, rig::Kind::None);
+    s.until("the invitation's mail", shows("Invitation 1"));
+    // The filter puts the cursor on its one match, and Esc leaves it there.
+    s.press("/Invitation 1");
+    s.press("\x1b\r");
+    s.until("the card", shows("Planning"));
+    let deadline = Instant::now() + PATIENCE;
+    loop {
+        s.press("ia");
+        let said = s.screen().pop().unwrap();
+        if said.contains("Accepted Planning") {
+            assert!(said.contains("in work, local"), "{said}");
+            break;
+        }
+        // Until the event is handed over the card says it cannot answer.
+        assert!(said.contains("could not be read"), "{said}");
+        assert!(Instant::now() < deadline, "the card never learned its event: {said}");
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    let deadline = Instant::now() + PATIENCE;
+    while kept(&s.root).is_empty() {
+        assert!(Instant::now() < deadline, "the answer was never kept");
+        s.pass();
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert!(kept(&s.root)[0].contains("PARTSTAT=ACCEPTED"));
+    // `u` in mail takes back what was answered from mail.
+    s.press("u");
+    assert!(s.screen().pop().unwrap().contains("Undone"), "{:?}", s.screen().pop());
+    let deadline = Instant::now() + PATIENCE;
+    while !kept(&s.root).is_empty() {
+        assert!(Instant::now() < deadline, "the answer was never taken back");
+        s.pass();
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    s.stop();
+}
