@@ -1,0 +1,40 @@
+{fg}  {fg b}Help{fg}                                                                                                                  
+{fg}                                                                                                                        
+{fg}    {fg b}Everywhere{fg}                          {fg b}Calendar (after gc){fg}                  {fg b}Event{fg}                                      
+{fg}    :          {dim}command line{fg}             h l        {dim}previous, next day{fg}        j k ^d ^u gg G  {dim}scroll{fg}                     
+{fg}    ?          {dim}help; type to filter{fg}     j k        {dim}month: week; else: event{fg}  zo zc           {dim}unfold, fold More{fg}          
+{fg}    Esc        {dim}back; clear find, marks{fg}  [ ]        {dim}previous, next page{fg}       v               {dim}the mail it came in{fg}        
+{fg}    h S-Tab    {dim}previous section{fg}         J K        {dim}next, previous event{fg}      o i E d J K I   {dim}as in the calendar{fg}         
+{fg}    l Tab      {dim}next section{fg}             n N        {dim}next, previous match{fg}                                                 
+{fg}    1-9        {dim}section by position{fg}      I          {dim}next invite to answer{fg}     {fg b}Invitation (after i){fg}                       
+{fg}    u          {dim}undo the last action{fg}     t          {dim}today{fg}                     a               {dim}accept{fg}                     
+{fg}    A          {dim}what the agent can do{fg}    gd         {dim}go to a date{fg}              t               {dim}tentative{fg}                  
+{fg}    ^l         {dim}redraw{fg}                   Tab S-Tab  {dim}next, previous view{fg}       d               {dim}decline{fg}                    
+{fg}    gc         {dim}the calendar{fg}             1 2 3      {dim}month, week, day{fg}          p               {dim}propose another time{fg}       
+{fg}                                        Enter      {dim}the day; then the event{fg}   x               {dim}ignore; nothing is sent{fg}    
+{fg}    {fg b}Command line{fg}                        /          {dim}find; Enter: every day{fg}                                               
+{fg}    Tab S-Tab  {dim}complete, cycle{fg}          gt gT      {dim}next, previous account{fg}    {fg b}Calendars (after C){fg}                        
+{fg}    Up Down    {dim}history, by prefix{fg}       C          {dim}show, hide calendars{fg}      j k             {dim}choose{fg}                     
+{fg}    ^w ^u      {dim}delete word, line{fg}        o          {dim}links; the meeting first{fg}  Space           {dim}show or hide{fg}               
+{fg}    Enter      {dim}run{fg}                      i          {dim}answer an invitation{fg}      Esc             {dim}close{fg}                      
+{fg}    Esc        {dim}cancel{fg}                   c          {dim}new event here{fg}                                                       
+{fg}                                        E          {dim}edit the event{fg}            {fg b}Event form{fg}                                 
+{fg}    {fg b}Confirm{fg}                             d          {dim}delete the event{fg}          Tab S-Tab       {dim}next, previous field{fg}       
+{fg}    y Enter    {dim}yes{fg}                      gn         {dim}reminders on, off{fg}         Left Right      {dim}choose, where offered{fg}      
+{fg}    n Esc      {dim}no{fg}                       gm         {dim}back to mail{fg}              Enter           {dim}edit notes in $EDITOR{fg}      
+{fg}    any other  {dim}cancels; key dropped{fg}                                          ^s              {dim}save; guests get mail{fg}      
+{fg}                                                                             Esc             {dim}close; keep or discard{fg}     
+{fg}    {fg b}Help (after ?){fg}                                                                                                      
+{fg}    ^d ^u      {dim}scroll{fg}                                                        {fg b}Links (after o){fg}                            
+{fg}                                                                             1-9             {dim}open that link{fg}             
+{fg}                                                                             j k Enter       {dim}choose, then open{fg}          
+{fg}                                                                             Esc             {dim}close{fg}                      
+{fg}                                                                                                                        
+{fg}    {fg b}Commands{fg}                                                                                                            
+{fg}    :archive                                          {dim}archive what is selected{fg}                                          
+{fg}    :trash                                            {dim}move what is selected to Trash{fg}                                    
+{fg}    :flag                                             {dim}flag or unflag what is selected{fg}                                   
+{fg}    :read                                             {dim}mark what is selected read{fg}                                        
+{fg}                                                                                                                        
+{fg}  {dim}140 keys and commands · lines 1-35 of 63{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

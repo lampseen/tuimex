@@ -1,0 +1,24 @@
+{default}  {brightblack}Month{default}   {brightblack}Week{default}   {magenta b}Day{default}                                      {default b}Thu 26 November 2026{default}  
+{default}                                                                                
+{default}  {brightblack b}Thu 26 November{default}                                                               
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                             
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}10:00-11:30{default}  {default b}Q4 roadmap review{default}                     {yellow}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}11:00-12:00{default}  Vendor call                              {cyan}tentative{default}  
+{default}    {brightyellow}work{default}       {brightblack}20:00-23:00{default}  Staging migration window                     {cyan}local{default}  
+{default}                                                                                
+{default}  {brightblack b}Fri 27 November{default}                                                               
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Library books due                            {cyan}local{default}  
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                     
+{default}    {brightblue}personal{default}   {brightblack}09:00-09:30{default}  {default b}Account review{default}                        {yellow}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                             
+{default}                                                                                
+{default}  {brightblack b}Sat 28 November{default}                                                               
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                     
+{default}                                                                                
+{default}  {brightblack b}Sun 29 November{default}                                                               
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                     
+{default}                                                                                
+{default}                                                                                
+{default}                                                                                
+{default}  {brightblack}Thu 26 Nov - 2 of 4 - {yellow}1 to answer{default}                 sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}i {brightblack}answer - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back - {default}? {brightblack}help{default}       

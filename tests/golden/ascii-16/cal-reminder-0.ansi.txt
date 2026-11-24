@@ -1,0 +1,6 @@
+{default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}15:00-16:00{default}  Halden contract call                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}Mon 23 Nov - 2 of 2{default}                   {yellow}^ Halden contract call in 10 min{brightblack} - o for its link - {default}sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back - {default}? {brightblack}help{default}                                                          

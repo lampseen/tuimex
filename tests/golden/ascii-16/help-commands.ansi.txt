@@ -1,40 +1,40 @@
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
-{default}    ^a          {brightblack}attach a file{default}                                                 t                {brightblack}tidy, in compose{default}         
-{default}    ^s          {brightblack}send summary{default}                                                  l                {brightblack}review a link, in links{default}  
-{default}    ^d          {brightblack}save the draft{default}                                                                                          
-{default}    Esc         {brightblack}close; keep or discard{default}                                        {default b}Invitation (after i){default}                      
-{default}                                                                              a                {brightblack}accept{default}                   
-{default}    {default b}Help (after ?){default}                                                            t                {brightblack}tentative{default}                
-{default}    ^d ^u       {brightblack}scroll{default}                                                        d                {brightblack}decline{default}                  
+{default}                                                                              x                {brightblack}ignore; nothing is sent{default}  
 {default}                                                                                                                        
 {default}    {default b}Commands{default}                                                                                                            
-{default}    :archive                           {brightblack}archive what is selected{default}                                                         
-{default}    :trash                             {brightblack}move what is selected to Trash{default}                                                   
-{default}    :flag                              {brightblack}flag or unflag what is selected{default}                                                  
-{default}    :read                              {brightblack}mark what is selected read{default}                                                       
-{default}    :unread                            {brightblack}mark what is selected unread{default}                                                     
-{default}    :move <folder>                     {brightblack}move what is selected to a folder{default}                                                
-{default}    :section <name>                    {brightblack}switch to a section by name{default}                                                      
-{default}    :account [name]                    {brightblack}show one account only; alone, every account{default}                                      
-{default}    :agent reply|tidy|link             {brightblack}reply, tidy or link: hand text to the agent{default}                                      
-{default}    :compose [address]                 {brightblack}write a new message{default}                                                              
-{default}    :reply                             {brightblack}reply to the sender{default}                                                              
-{default}    :replyall                          {brightblack}reply to everyone{default}                                                                
-{default}    :forward                           {brightblack}forward the message{default}                                                              
-{default}    :send                              {brightblack}the send summary, then confirm{default}                                                   
-{default}    :browser                           {brightblack}open the sealed browser copy; asks before images{default}                                 
-{default}    :save <n> [path]                   {brightblack}save an attachment to downloads{default}                                                  
-{default}    :open <n>                          {brightblack}open an attachment, after asking{default}                                                 
-{default}    :link <n>                          {brightblack}open a link, after assessment{default}                                                    
-{default}    :invite accept|tentative|decline   {brightblack}answer an invitation{default}                                                             
-{default}    :unsubscribe                       {brightblack}prepare an unsubscribe for review{default}                                                
-{default}    :preview auto|right|below|off      {brightblack}where the preview sits{default}                                                           
-{default}    :sync [all]                        {brightblack}sync this section, or all{default}                                                        
-{default}    :empty-trash [account]             {brightblack}delete an account's Trash for good{default}                                               
-{default}    :messages                          {brightblack}the last results and errors{default}                                                      
-{default}    :q                                 {brightblack}quit from the list; back elsewhere{default}                                               
-{default}    :qa                                {brightblack}quit{default}                                                                             
+{default}    :archive                                          {brightblack}archive what is selected{default}                                          
+{default}    :trash                                            {brightblack}move what is selected to Trash{default}                                    
+{default}    :flag                                             {brightblack}flag or unflag what is selected{default}                                   
+{default}    :read                                             {brightblack}mark what is selected read{default}                                        
+{default}    :unread                                           {brightblack}mark what is selected unread{default}                                      
+{default}    :move <folder>                                    {brightblack}move what is selected to a folder{default}                                 
+{default}    :section <name>                                   {brightblack}switch to a section by name{default}                                       
+{default}    :account [name]                                   {brightblack}show one account only; alone, every account{default}                       
+{default}    :agent reply|tidy|link                            {brightblack}reply, tidy or link: hand text to the agent{default}                       
+{default}    :compose [address]                                {brightblack}write a new message{default}                                               
+{default}    :reply                                            {brightblack}reply to the sender{default}                                               
+{default}    :replyall                                         {brightblack}reply to everyone{default}                                                 
+{default}    :forward                                          {brightblack}forward the message{default}                                               
+{default}    :send                                             {brightblack}the send summary, then confirm{default}                                    
+{default}    :browser                                          {brightblack}open the sealed browser copy; asks before images{default}                  
+{default}    :save <n> [path]                                  {brightblack}save an attachment to downloads{default}                                   
+{default}    :open <n>                                         {brightblack}open an attachment, after asking{default}                                  
+{default}    :link <n>                                         {brightblack}open a link, after assessment{default}                                     
+{default}    :invite accept|tentative|decline|propose|ignore   {brightblack}answer an invitation{default}                                              
+{default}    :calendar [month|week|day]                        {brightblack}the calendar; alone, where it was{default}                                 
+{default}    :mail                                             {brightblack}back to mail, where it was{default}                                        
+{default}    :goto <date>                                      {brightblack}go to a date: 5 dec, fri, +2w{default}                                     
+{default}    :event [title]                                    {brightblack}a new event on the selected day{default}                                   
+{default}    :export [path]                                    {brightblack}write local events as .ics{default}                                        
+{default}    :notify on|off                                    {brightblack}reminders on or off{default}                                               
+{default}    :unsubscribe                                      {brightblack}prepare an unsubscribe for review{default}                                 
+{default}    :preview auto|right|below|off                     {brightblack}where the preview sits{default}                                            
+{default}    :sync [all]                                       {brightblack}sync this section, or all{default}                                         
+{default}    :empty-trash [account]                            {brightblack}delete an account's Trash for good{default}                                
+{default}    :messages                                         {brightblack}the last results and errors{default}                                       
+{default}    :q                                                {brightblack}quit from the list; back elsewhere{default}                                
+{default}    :qa                                               {brightblack}quit{default}                                                              
 {default}                                                                                                                        
-{default}  {brightblack}98 keys and commands - lines 28-62 of 62{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}140 keys and commands - lines 36-70 of 70{default}                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

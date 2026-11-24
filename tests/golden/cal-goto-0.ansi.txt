@@ -1,0 +1,8 @@
+{fg}  {dim b}Thu 26 November{fg}                                                                                                       
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{fg}    {head}work{fg}       {dim}10:00-11:30{fg}  {fg b}Q4 roadmap review{fg}                                                             {warn}needs answer{fg}  
+{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor call                                                                      {agent}tentative{fg}  
+{fg}    {head}work{fg}       {dim}20:00-23:00{fg}  Staging migration window                                                             {agent}local{fg}  
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Go to: {bg bg=acc} {fg}                                                                                                              

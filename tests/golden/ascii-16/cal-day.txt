@@ -1,0 +1,40 @@
+  Month   Week   Day                                                                              Thu 26 November 2026  
+                                                                                                                        
+  Thu 26 November                                                                                                       
+    work       09:30-09:45  Standup                                                                                     
+>   work       10:00-11:30  Q4 roadmap review                                                             needs answer  
+    work       11:00-12:00  Vendor call                                                                      tentative  
+    work       20:00-23:00  Staging migration window                                                             local  
+                                                                                                                        
+  Fri 27 November                                                                                                       
+    personal   all day      Library books due                                                                    local  
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+    personal   09:00-09:30  Account review                                                                needs answer  
+    work       09:30-09:45  Standup                                                                                     
+                                                                                                                        
+  Sat 28 November                                                                                                       
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+                                                                                                                        
+  Sun 29 November                                                                                                       
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+------------------------------------------------------------------------------------------------------------------------
+  Q4 roadmap review                                                                                                     
+                                                                                                                        
+    When     Thu 26 Nov 2026, 10:00 to 11:30 - in 3 days                                                                
+    Where    Room Fjord                                                                                                 
+    Join     meet.example.org https://meet.example.org/r/q4-roadmap                                                     
+    Calendar work - its own calendar, read 20s ago                                                                      
+    Who      Imani Castell organizer, you no answer, Lars Lindqvist yes, Mei Tanaka no, Dmitri Volkov no answer         
+                                                                                                                        
+    The pre-read is the roadmap document from last week. Please answer by                                               
+    Wednesday so I can book the right room.                                                                             
+                                                                                                                        
+    - What shipped in Q3 and what slipped                                                                               
+    - The three bets for Q4                                                                                             
+    - Headcount, once the budget is in                                                                                  
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  Thu 26 Nov - 2 of 4 - 1 to answer                                                         sending in 6s - 1 not sent  
+  Enter open - i answer - o links - E edit - d delete - Esc back - ? help                                               

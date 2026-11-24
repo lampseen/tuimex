@@ -1,0 +1,40 @@
+  Month   Week   Day   Search call                                                                                      
+                                                                                                                        
+  Today · Mon 23 November                                                                                               
+▌   work       15:00-16:00  Halden contract call                                                                        
+                                                                                                                        
+  Thu 26 November                                                                                                       
+    work       11:00-12:00  Vendor call                                                                      tentative  
+                                                                                                                        
+  Mon 7 December                                                                                                        
+    work       all day      On call                                                                                     
+                                                                                                                        
+  Tue 8 December                                                                                                        
+    work       all day      On call                                                                                     
+                                                                                                                        
+  Wed 9 December                                                                                                        
+    work       all day      On call                                                                                     
+                                                                                                                        
+  Thu 10 December                                                                                                       
+    work       all day      On call                                                                                     
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Halden contract call                                                                                                  
+                                                                                                                        
+    When     Mon 23 Nov 2026, 15:00 to 16:00 · today                                                                    
+    Join     meet.example.org https://meet.example.org/r/halden                                                         
+    Calendar work · its own calendar, read 20s ago                                                                      
+    Who      Priya Raman organizer, you yes, Dmitri Volkov yes                                                          
+                                                                                                                        
+    Payment terms and the support clause. Draft v3 is attached to Priya's mail                                          
+    of this morning.                                                                                                    
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  3 events match "call"                                                                     sending in 6s · 1 not sent  
+  Enter open · n N next match · Esc back · ? help                                                                       

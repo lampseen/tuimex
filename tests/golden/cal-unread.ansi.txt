@@ -1,0 +1,40 @@
+{fg}  {acc b}Month{fg}   {dim}Week{fg}   {dim}Day{fg}                                                                                     {fg b}November 2026{fg}  
+{fg}                                                                                                                        
+{fg}     {fg b}November 2026{fg}                {faint}│{fg}  {dim b}Thu 26 November{fg}                                                                    
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}                             {dim} 1{fg}   {faint}│{fg}    {head}work{fg}       {dim}10:00-11:30{fg}  {fg b}Q4 roadmap review{fg}                          {warn}needs answer{fg}  
+{fg}      2{dim}∙{fg}  3{dim}∙{fg}  4{dim}∙{fg}  5{dim}∙{fg}  6{dim}∙{fg} {dim} 7{fg}  {dim} 8{fg}   {faint}│{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor call                                   {agent}tentative{fg}  
+{fg}      9{dim}∙{fg} 10{dim}∙{fg} 11{dim}∙{fg} 12{dim}∙{fg} 13{dim}∙{fg} {dim}14{fg}  {dim}15{fg}   {faint}│{fg}    {head}work{fg}       {dim}20:00-23:00{fg}  Staging migration window                          {agent}local{fg}  
+{fg}     16{dim}∙{fg} 17{dim}:{fg} 18{dim}∙{fg} 19{dim}∙{fg} 20{dim}:{fg} {dim}21{fg}  {dim}22{fg}   {faint}│{fg}                                                                                     
+{fg}     {acc b}23{dim}:{fg} 24{dim}:{fg} 25{dim}:{acc bg=sel}▌{fg bg=sel}26{warn bg=sel}⋮{fg} 27{warn}⋮{fg} 28{dim}∙{fg} 29{dim}∙{fg}  {faint}│{fg}  {dim b}Fri 27 November{fg}                                                                    
+{fg}     30{dim}∙{fg}                          {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                 {agent}local{fg}  
+{fg}                                  {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                          
+{fg}     {dim}December 2026{fg}                {faint}│{fg}    {link}personal{fg}   {dim}09:00-09:30{fg}  {fg b}Account review{fg}                             {warn}needs answer{fg}  
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}          1{dim}∙{fg}  2{dim}∙{fg}  3{dim}:{fg}  4{dim}∙{fg}  5{dim}∙{fg} {dim} 6{fg}   {faint}│{fg}                                                                                     
+{fg}      7{dim}:{fg}  8{dim}:{fg}  9{dim}:{fg} 10{dim}:{fg} 11{dim}:{fg} 12{dim}∙{fg} 13{dim}∙{fg}  {faint}│{fg}  {dim b}Sat 28 November{fg}                                                                    
+{fg}     14{dim}∙{fg} 15{dim}∙{fg} 16{dim}∙{fg} 17{dim}∙{fg} 18{dim}∙{fg} {dim}19{fg}  {dim}20{fg}   {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                          
+{fg}     21{dim}∙{fg} 22{dim}∙{fg} 23{dim}∙{fg} 24{dim}∙{fg} 25{dim}∙{fg} {dim}26{fg}  {dim}27{fg}   {faint}│{fg}                                                                                     
+{fg}     28{dim}∙{fg} 29{dim}∙{fg} 30{dim}∙{fg} 31{dim}∙{fg}              {faint}│{fg}  {dim b}Sun 29 November{fg}                                                                    
+{fg}                                  {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                          
+{fg}     {dim}January 2027{fg}                 {faint}│{fg}                                                                                     
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}  {dim b}Mon 30 November{fg}                                                                    
+{fg}                     {dim} 1{fg}  {dim} 2{fg}  {dim} 3{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}     {dim} 4{fg}  {dim} 5{fg}  {dim} 6{fg}  {dim} 7{fg}  {dim} 8{fg}  {dim} 9{fg}  {dim}10{fg}   {faint}│{fg}                                                                                     
+{fg}     {dim}11{fg}  {dim}12{fg}  {dim}13{fg}  {dim}14{fg}  {dim}15{fg}  {dim}16{fg}  {dim}17{fg}   {faint}│{fg}  {dim b}Tue 1 December{fg}                                                                     
+{fg}     {dim}18{fg}  {dim}19{fg}  {dim}20{fg}  {dim}21{fg}  {dim}22{fg}  {dim}23{fg}  {dim}24{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}     {dim}25{fg}  {dim}26{fg}  {dim}27{fg}  {dim}28{fg}  {dim}29{fg}  {dim}30{fg}  {dim}31{fg}   {faint}│{fg}                                                                                     
+{fg}                                  {faint}│{fg}  {dim b}Wed 2 December{fg}                                                                     
+{fg}     {dim}February 2027{fg}                {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}                                                                                     
+{fg}     {dim} 1{fg}  {dim} 2{fg}  {dim} 3{fg}  {dim} 4{fg}  {dim} 5{fg}  {dim} 6{fg}  {dim} 7{fg}   {faint}│{fg}  {dim b}Thu 3 December{fg}                                                                     
+{fg}     {dim} 8{fg}  {dim} 9{fg}  {dim}10{fg}  {dim}11{fg}  {dim}12{fg}  {dim}13{fg}  {dim}14{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}     {dim}15{fg}  {dim}16{fg}  {dim}17{fg}  {dim}18{fg}  {dim}19{fg}  {dim}20{fg}  {dim}21{fg}   {faint}│{fg}    {link}personal{fg}   {dim}19:00-21:00{fg}  Book club  {dim}at Greta's{fg}                                    
+{fg}     {dim}22{fg}  {dim}23{fg}  {dim}24{fg}  {dim}25{fg}  {dim}26{fg}  {dim}27{fg}  {dim}28{fg}   {faint}│{fg}                                                                                     
+{fg}                                  {faint}│{fg}  {dim b}Fri 4 December{fg}                                                                     
+{fg}                                  {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}                                  {faint}│{fg}                                                                                     
+{fg}                                  {faint}│{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim}Thu 26 Nov · 4 events · {warn}1 to answer{fg}     sending in 6s{dim} · {err}1 not sent{dim} · {err}personal's calendar not read{dim} · last read 2h ago{fg}  
+{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm {dim}mail · {fg}? {dim}help{fg}                                                

@@ -1,0 +1,7 @@
+{default}  {brightblack b}Fri 27 November{default}                                                                                                       
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Library books due                                                                    {cyan}local{default}  
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                                                             
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack}Fri 27 Nov - 3 events{default}                                                                     sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {green}+{default} Ignored Account review{brightblack} - nothing sent - u to undo{default}                                                                   
