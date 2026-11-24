@@ -331,6 +331,7 @@ impl App {
             }
             Event::NewMail { .. } => {}
             Event::Found { serial, hits, searched } => self.found_event(serial, hits, searched),
+            Event::Edited { text } if self.form_is_open() => self.form_edited(text),
             event @ (Event::Edited { .. } | Event::Paths { .. } | Event::Attached { .. } | Event::AgentText { .. }) => {
                 self.compose_event(event);
             }

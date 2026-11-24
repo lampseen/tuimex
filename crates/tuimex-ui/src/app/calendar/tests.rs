@@ -346,16 +346,7 @@ fn what_the_calendar_cannot_do_yet_says_so() {
     assert_eq!(said("gcE"), "E E: no event is selected");
     assert_eq!(said("gcu"), "E undo: nothing to undo");
     assert_eq!(said("gc:export\r"), "E :export: not built yet · arrives with writing local events as .ics");
-    for keys in ["gcc", ":event Offsite planning\r", "gc\rE"] {
-        let mut app = after(keys);
-        let rows = screen(&mut app, 120, 40);
-        assert_eq!(rows[0], "  New event", "{keys}");
-        assert_eq!(rows[2], "  E form: not built yet · arrives with the calendar's event form");
-        press(&mut app, "\t");
-        assert_eq!(foot(&mut app).1, "E Tab: not built yet · arrives with the calendar's event form");
-        press(&mut app, "\x1b");
-        assert!(screen(&mut app, 120, 40)[0].starts_with("  Month"), "Esc closes the form");
-    }
+    assert_eq!(said("gcc^s"), "E ^s: not built yet · arrives with storing events and mailing invitations");
     assert_eq!(said("gc\r\rv"), "E v: not built yet · arrives with events that keep the mail they came in");
     assert_eq!(said("gcA"), "E A: nothing here for the agent");
 }
