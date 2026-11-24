@@ -26,8 +26,12 @@
 # an Archive and a Trash made at the top are refused (ADR-048). A fourth,
 # tuimex-radicale, is a CalDAV server, where an event is written, changed,
 # answered and deleted (ADR-062); it serves plain HTTP, which the engine
-# allows on 127.0.0.1 alone, and it is bound there. The accounts and their
-# passwords are made up here.
+# allows on 127.0.0.1 alone, and it is bound there. The last leg joins the
+# two: an invitation delivered to GreenMail for an account whose calendar
+# is the Radicale one, answered in the binary on a terminal, with the
+# reply read back from GreenMail and the event from Radicale (ADR-057).
+# Radicale knows that account by its mail password, as a provider would.
+# The accounts and their passwords are made up here.
 #
 # Two checkouts on one machine would take each other's containers and
 # ports. REAL_SERVER_TAG is added to every name, and REAL_SERVER_PORTS is
@@ -207,7 +211,9 @@ type = owner_only
 [storage]
 filesystem_folder = /data/collections
 CONF
-printf 'caldav:throwaway-calendar\n' >"$dir/radicale-users"
+# `spike` is GreenMail's first user, with the password it has there: tuimex
+# signs in to a calendar as the mail account.
+printf 'caldav:throwaway-calendar\nspike:throwaway\n' >"$dir/radicale-users"
 chmod 644 "$dir/radicale.conf" "$dir/radicale-users"
 $runtime run -d --name "tuimex-radicale$tag" -p "127.0.0.1:${caldav}232:5232" \
     -v "$dir/radicale.conf:/config/config:ro,Z" -v "$dir/radicale-users:/config/users:ro,Z" \
@@ -238,3 +244,26 @@ for ran in 'real-server: ran caldav-write (' 'real-server: ran caldav-redirect (
     }
 done
 echo "real-server: the radicale leg passed"
+
+# The calendar leg: GreenMail and Radicale together under the binary. It
+# is the mail servers' variables again, as GreenMail has them, beside
+# Radicale's.
+log=$dir/calendar.log
+export TUIMEX_SERVER_HOST=localhost TUIMEX_SERVER_PORT="${green}993" TUIMEX_SERVER_USER=spike
+export TUIMEX_SERVER_USER2=second TUIMEX_SERVER_USER3=third TUIMEX_SERVER_PASSWORD=throwaway
+export TUIMEX_SERVER_PASSWORD3=its0wn TUIMEX_SERVER_CA="$dir/cert.pem"
+export TUIMEX_SERVER_SMTPS_PORT="${green}465" TUIMEX_SERVER_SMTP_PORT="${green}025"
+unset TUIMEX_SERVER_PREFIX TUIMEX_SERVER_STARTTLS_PORT
+(cd "$root" &&
+    cargo test --locked -p tuimex --test real_server an_invitation_is_answered_on_a_terminal -- --nocapture) \
+    >"$log" 2>&1 || {
+    cat "$log"
+    echo "real-server: the calendar leg failed" >&2
+    exit 1
+}
+grep -E 'real-server[a-z -]*: |^test result' "$log"
+grep -qF 'real-server: ran calendar-answer (' "$log" || {
+    echo "real-server: the calendar leg did not print \"real-server: ran calendar-answer (\"; the test was skipped or renamed" >&2
+    exit 1
+}
+echo "real-server: the calendar leg passed"
