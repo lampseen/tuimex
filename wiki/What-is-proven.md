@@ -38,9 +38,12 @@ that every name on this page is a test that exists.
 ## Calendars
 
 The calendar's screens are not built: what is below is setup, the config,
-`tuimex sync` and `tuimex doctor`. Every calendar server here is a
-stand-in that answers from a script. Writing to a calendar has not been
-run against any real CalDAV server yet.
+`tuimex sync` and `tuimex doctor`. The calendar servers in the unit tests
+are stand-ins that answer from a script. Reading and writing over CalDAV
+are also run against a real server, Radicale in a container, by
+`an_event_is_written_changed_answered_and_deleted_on_a_caldav_server` and
+`an_address_that_redirects_is_not_followed` under `make real-server`.
+Nothing has been written to Google's calendar.
 
 | what is true | what proves it |
 |---|---|

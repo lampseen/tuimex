@@ -52,13 +52,9 @@ dir=$root/target/real-server
 # Dovecot publishes this version for amd64 alone.
 greenmail=docker.io/greenmail/standalone:2.1.15@sha256:309ba544ea482e5d4265d09921cdab07c8dad2cc4481d715c9b8ff5d3f0a149f
 dovecot=docker.io/dovecot/dovecot:2.3.21.1@sha256:547d28f9a893c93a1d2f6dc164880cd7bfa74009106dfa46b36a6a2ee636d921
-# PLACEHOLDER: Radicale's digest has not been taken from a pulled image.
-# Pull the tag below, put the digest the runtime reports in its place
-# (`podman image inspect --format '{{.Digest}}' <image>`, or RepoDigests
-# under docker), and check the tag is the one wanted. Until then the
-# CalDAV leg is refused, after the mail legs have run.
+# Radicale 3.5.4, the CalDAV server the calendar's writes are proven on.
 radicale_tag=docker.io/tomsquest/docker-radicale:3.5.4.0
-radicale_digest=sha256:FILL-FROM-THE-PULLED-IMAGE
+radicale_digest=sha256:ead0f90cb6a691a45cd8ff4971dc0689cd4d5fab85934388f77f2a1a6af5f7b1
 radicale=$radicale_tag@$radicale_digest
 
 remove() {
@@ -199,12 +195,6 @@ echo "real-server: the dovecot-ns leg passed"
 # deleted over CalDAV, each write conditional on the tag last read, and
 # whether a refused sign-in and a redirect are said as such. A leg that
 # cannot start fails: a skip must never read as a pass.
-case $radicale_digest in
-*FILL*)
-    echo "real-server: the radicale leg was not started: its image has no digest yet (radicale_digest, at the top)" >&2
-    exit 1
-    ;;
-esac
 cat >"$dir/radicale.conf" <<'CONF'
 [server]
 hosts = 0.0.0.0:5232

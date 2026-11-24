@@ -1854,6 +1854,11 @@ is sent. What the scripted tests in `calendar::tests` prove is that
 tuimex sends those requests and reads those answers as stated: they
 answer from a script and say nothing about any server. The leg of
 `make real-server` that writes to a Radicale in a container through the
-real wire (`tests/caldav_server.rs`) is written and has **not been run**:
-its image's digest is still to be taken. Writing to Google's calendar is
-**untried**: nothing has been written there, by hand or by a test.
+real wire (`tests/caldav_server.rs`) passed on 2026-11-24 against
+Radicale 3.5.4: a calendar made, an event written, read back the same,
+refused a second time under the same name, changed, refused when it had
+changed behind tuimex's back, answered with every other line the server
+held kept, and deleted; a wrong password said as a refused sign-in; a
+redirect not followed. That is the first time the real wire sent
+anything. Writing to Google's calendar is **untried**: nothing has been
+written there, by hand or by a test.
