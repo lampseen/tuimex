@@ -5,8 +5,6 @@
 //! The bell and the status line are the interface's. What is here raises
 //! the notification and hands the interface what fell due.
 
-#![expect(dead_code, reason = "joined to the interface and the event loop by its own step")]
-
 use std::collections::BTreeMap;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};

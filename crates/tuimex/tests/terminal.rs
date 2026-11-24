@@ -205,6 +205,58 @@ fn a_session_in_the_calendar_moves_by_days_and_returns_to_mail() {
     }
 }
 
+/// ADR-054, ADR-056: over a real store the calendar kept on disk is on
+/// screen behind `gc` whatever its provider says, and a provider that
+/// cannot be reached is said on the status line with how old that is. The
+/// feed's address is one nothing listens at, so the one fetch is refused
+/// by this machine and nothing leaves it; every step waits for what it
+/// names and for no length of time.
+#[test]
+fn a_calendar_kept_on_disk_is_shown_and_one_that_cannot_be_fetched_says_so() {
+    let home = scratch_home("calendar-kept");
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    store.ensure_folder("work", "INBOX", tuimex_core::Role::Inbox).unwrap();
+    drop(store);
+    // Every day at noon, so that it is on today whenever this runs.
+    let feed = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:kept@example.org\r\n\
+                DTSTART:20200101T120000Z\r\nDTEND:20200101T123000Z\r\nRRULE:FREQ=DAILY\r\nSUMMARY:Kept on disk\r\n\
+                END:VEVENT\r\nEND:VCALENDAR\r\n";
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+    let calendars = tuimex_store::calendar::Calendars::open(&data, &cache).unwrap();
+    calendars.put("work", tuimex_engine::calendar::FEED, "", None, feed).unwrap();
+    calendars.read("work", tuimex_engine::calendar::FEED, None, None, i64::try_from(now).unwrap() - 2 * 3_600).unwrap();
+    drop(calendars);
+    // No notifier: a reminder for the event must reach no desktop.
+    let config = "[notify]\nvia = \"none\"\n\n[[account]]\nname = \"work\"\naddress = \"ada@example.org\"\n\
+                  auth = \"command\"\npassword_cmd = [\"true\"]\nimap = { host = \"127.0.0.1\", port = 1 }\n\
+                  smtp = { host = \"127.0.0.1\", port = 1 }\n\n[[calendar]]\naccount = \"work\"\nkind = \"feed\"\n\
+                  address_cmd = [\"echo\", \"https://127.0.0.1:1/private/feed.ics\"]\n";
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), config).unwrap();
+    let steps = [
+        "wait Inbox",
+        "keys gc",
+        "wait Kept on disk",
+        "wait work's calendar not read - last read 2h ago",
+        // The events held stay beside the failure.
+        "wait Kept on disk",
+        // `:q` is back to mail from the calendar, and out from the list.
+        "keys :q\\r",
+        "wait Nothing here.",
+        "keys :q\\r",
+    ];
+    let script = home.join("steps");
+    fs::write(&script, steps.join("\n") + "\n").unwrap();
+    // Wide enough that the mail account, which has no server either, does
+    // not push the calendar's state off the status line.
+    let env = [("ON_PTY_SCRIPT", script.to_str().unwrap()), ("ON_PTY_SIZE", "40x220"), ("ON_PTY_STEP_TIMEOUT", "20")];
+    let out = on_a_pty(&home, "", &[], &env);
+    let screen = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "every step was so, and :q left: {screen}");
+    assert!(!screen.contains("private"), "ADR-056: nothing of the feed's address is on the screen");
+}
+
 /// PLAN §10 M8: the reader is usable by hand. One session: open a thread's
 /// newest message, back to its first, scroll, list its files, return to
 /// the list with the cursor kept; then open the bank's message, list its
