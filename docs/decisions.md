@@ -1377,9 +1377,15 @@ other. The observations that are no use to an attacker are kept on the
 same terms, so that nothing can be worked out by elimination. Neither
 project is named anywhere in this repository, for any reason.
 
-The weaknesses are reported to each author privately, by Bryan, with a
-proposed ninety days before anything more is said in public. The reports
-are not in this repository.
+The weaknesses were to be reported to each author privately, with a
+proposed ninety days before anything more was said in public.
+
+*2026-11-24, the same day: no report was sent.* Bryan decided not to
+contact the other projects. What stands is the removal: nothing published
+here points at a weakness in either of them, and that does not depend on a
+report having been made. The paragraph at the end of this record, about
+saying more once reports are answered, has nothing to wait for; the details
+stay out.
 
 History files are append-only. This is the one exception: the prior-art
 record and the account of how the plan came about were rewritten on

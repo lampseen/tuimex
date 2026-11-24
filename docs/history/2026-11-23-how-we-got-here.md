@@ -3,8 +3,7 @@
 > *Edited 2026-11-24, before this repository was published.* History files
 > here are otherwise never changed. This one named the two mail clients that
 > were reviewed and pointed at a weakness in one of them; those details are
-> removed, and the weaknesses are being reported to the projects' authors
-> privately. A path on the owner's machine and a detail about his mail
+> removed. A path on the owner's machine and a detail about his mail
 > accounts went with them. The owner keeps the original. ADR-052 is the
 > record of this exception.
 
@@ -104,8 +103,8 @@ Nothing in this repository has been compiled or run. In particular:
 ## What is not written anywhere else
 
 - Nothing the review found had been reported to either project's author
-  when this was written. (2026-11-24: the reports are being sent privately;
-  ADR-052.)
+  when this was written. (2026-11-24: none was sent; ADR-052 says what was
+  done instead.)
 - The clones the review read were temporary. The commits reviewed are named
   in the owner's original of the prior-art record and nowhere public.
 
