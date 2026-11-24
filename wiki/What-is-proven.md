@@ -39,7 +39,8 @@ that every name on this page is a test that exists.
 
 The calendar's screens are not built: what is below is setup, the config,
 `tuimex sync` and `tuimex doctor`. Every calendar server here is a
-stand-in that answers from a script.
+stand-in that answers from a script. Writing to a calendar has not been
+run against any real CalDAV server yet.
 
 | what is true | what proves it |
 |---|---|
@@ -50,6 +51,9 @@ stand-in that answers from a script.
 | `tuimex sync` reads each calendar after the mail, a line each with its kind and host; CalDAV signs in as the account's mail does; one that fails says why and the others are still read; `--account` limits it | `sync_says_a_line_for_each_calendar_and_a_feed_s_host_alone`, `each_calendar_is_signed_in_to_as_its_account_s_mail_or_read_from_its_feed`, `a_pass_over_two_accounts_reads_the_one_that_answers_when_the_other_fails` |
 | CalDAV is asked for 90 days back to two years on, only what changed is fetched, nothing on another host is followed, and a calendar that fails keeps what it held | `caldav_is_asked_for_ninety_days_back_and_two_years_on`, `a_calendar_is_fetched_once_and_then_only_what_changed`, `a_server_cannot_add_what_was_not_listed_or_send_the_fetch_elsewhere`, `a_refusal_says_what_kind_and_changes_nothing`, `a_feed_is_kept_whole_and_its_address_is_in_no_error` |
 | Only an `https://` address with no user name in it is fetched | `only_an_address_over_tls_with_no_sign_in_name_is_asked` |
+| A new event is written to a CalDAV calendar only where nothing is yet, under a name tuimex made and never the event's own UID; a name that would leave the calendar is refused before anything is sent | `a_new_event_is_put_only_where_nothing_is_and_kept_with_the_tag_the_server_gave`, `a_new_event_s_name_is_tuimex_s_own_and_never_leaves_the_calendar` |
+| A change or a delete is sent only over the version last read: if the event changed at the provider meanwhile, it is refused, said so, and nothing held here is touched; with no version held, nothing is sent until the calendar is read again | `a_change_is_put_only_over_the_tag_last_read_and_a_412_leaves_the_store_as_it_was`, `a_delete_is_conditional_and_one_already_gone_is_done`, `a_write_with_no_tag_held_is_refused_before_anything_is_sent_until_a_fetch_reads_it_again` |
+| A write goes only to an event under the calendar's own address on its own server; a refused sign-in, a redirect and any other refusal are said by kind and change nothing | `an_address_off_the_calendar_is_refused_before_anything_is_sent`, `a_write_the_server_refuses_says_what_kind_and_changes_nothing`, `a_read_carries_no_precondition_and_says_its_body_is_xml` |
 | `tuimex doctor` names each calendar's kind, its host, whether its password or address is found, and when it was last read, asking no calendar's server; `--redact` hides the host | `each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last_read` |
 | A feed's address is in no file under the config, data, cache and state directories and in nothing setup, sync, doctor or the calendar's thread says, read or failing | `a_secret_never_reaches_a_file_when_a_calendar_feed_is_set_up_and_read`, which the CI job `secret` runs by its name; `a_feed_s_address_is_printed_by_its_command_and_a_failing_command_says_so_without_it` |
 

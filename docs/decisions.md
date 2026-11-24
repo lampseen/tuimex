@@ -1842,3 +1842,18 @@ not the last one cannot be added there. It also lets an account have more
 than one. Linked but not yet called from the binary, `roxmltree` made the
 release binary 49,152 bytes larger; the figure with the reader in use
 goes here when the fetch is wired in.
+
+*2026-11-24, as built.* The engine writes: `put_new` puts a new event at
+`<calendar>/<name>.ics` with `If-None-Match: *`, where the name is a key
+tuimex made and never an event's UID; `put_changed` and `delete` send
+`If-Match` with the tag last read, and refuse before sending anything
+when no tag is held. A `412` is "it changed at the provider", and nothing
+held is touched; a delete answered `404` is done. An address that is not
+under the calendar's own, on its own server, is refused before a request
+is sent. What the scripted tests in `calendar::tests` prove is that
+tuimex sends those requests and reads those answers as stated: they
+answer from a script and say nothing about any server. The leg of
+`make real-server` that writes to a Radicale in a container through the
+real wire (`tests/caldav_server.rs`) is written and has **not been run**:
+its image's digest is still to be taken. Writing to Google's calendar is
+**untried**: nothing has been written there, by hand or by a test.

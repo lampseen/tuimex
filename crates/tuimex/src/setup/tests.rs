@@ -274,13 +274,13 @@ impl Wire for FakeWire {
     fn send(&self, sent: &Sent<'_>) -> Result<Got, CalendarError> {
         let user = sent.sign_in.map(|(user, _)| user.to_string());
         self.asked.borrow_mut().push((sent.method.to_string(), sent.url.to_string(), user));
-        let body = sent.body.unwrap_or_default();
+        let body = sent.body.map_or("", |body| body.text);
         let found = self
             .served
             .iter()
             .find(|(method, url, words, ..)| *method == sent.method && *url == sent.url && body.contains(words));
         let (.., status, body) = found.ok_or_else(|| CalendarError::Unreachable("its host was not found".into()))?;
-        Ok(Got { status: *status, body: body.clone() })
+        Ok(Got { status: *status, body: body.clone(), etag: None })
     }
 }
 
