@@ -8,6 +8,7 @@ mod doctor;
 mod live;
 mod message;
 mod net;
+mod notify;
 mod outside;
 mod palette;
 mod paths;

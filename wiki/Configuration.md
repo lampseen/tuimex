@@ -131,10 +131,27 @@ notes, is fetched.
 
 Absent, there is no `:agent`. See [The agent](The-agent).
 
+## `[notify]`
+
+An event's reminder, while tuimex is open. Reminders are not yet joined
+to the interface, so for now these keys are read and checked and nothing
+is raised.
+
+| key | default | holds |
+|---|---|---|
+| `events` | `true` | whether reminders start on. Once they are switched off or on, that choice is kept in the file `reminders` under the state directory (`~/.local/state/tuimex`), and it wins over this key |
+| `lead` | `"10m"` | how long before its start an event with no alarm of its own is reminded. `s`, `m` or `h` |
+| `via` | `"desktop"` | `desktop`: `notify-send`, or `osascript` on macOS. `osc9`: the terminal's own notification, for a terminal that shows one. `none`: neither |
+
+A word `via` does not take, or a `lead` in another unit, is an error
+naming the key. Only the event's title is sent, never its guests, place,
+link or notes, with its control characters gone and cut to 120
+characters. A title can still show on a locked screen.
+
 ## Accepted, and not read yet
 
-`[notify]` (`bell`, `osc9`), `[pgp]` (`sign`, `key`) and `[keys]` parse, so
-a file that has them is not refused, and nothing reads them: new-mail
+`[notify]`'s `bell` and `osc9`, `[pgp]` (`sign`, `key`) and `[keys]` parse,
+so a file that has them is not refused, and nothing reads them: new-mail
 notifications, OpenPGP and remapping keys are not built.
 
 ## Your own palette

@@ -40,8 +40,11 @@ url = "https://www.google.com/calendar/dav/you@example.com/events/"   # caldav o
                                # a feed has no url: its address is a secret, kept in the keyring as "<account>/calendar-feed", or printed by address_cmd = ["pass", "show", "calendar/personal"] (argv, no shell, the first line)
 
 [notify]
-bell = true
-osc9 = true
+bell = true                    # new mail: the bell, and
+osc9 = true                    # an OSC 9 notification, not built yet
+events = true                  # whether a first run starts with reminders on; the switch then remembers (ADR-058)
+lead = "10m"                   # how long before an event with no alarm of its own it is reminded: s, m or h
+via = "desktop"                # desktop (notify-send; osascript on macOS) | osc9 | none
 
 [pgp]
 sign = "never"                 # never | always | ask

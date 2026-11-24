@@ -53,6 +53,24 @@ stand-in that answers from a script.
 | `tuimex doctor` names each calendar's kind, its host, whether its password or address is found, and when it was last read, asking no calendar's server; `--redact` hides the host | `each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last_read` |
 | A feed's address is in no file under the config, data, cache and state directories and in nothing setup, sync, doctor or the calendar's thread says, read or failing | `a_secret_never_reaches_a_file_when_a_calendar_feed_is_set_up_and_read`, which the CI job `secret` runs by its name; `a_feed_s_address_is_printed_by_its_command_and_a_failing_command_says_so_without_it` |
 
+## Reminders
+
+Reminders are built and tested on their own, and not yet joined to the
+interface or its event loop: tuimex does not raise one yet. No test has
+run `notify-send` or `osascript`; every test hands the reminder to a
+notifier that records it.
+
+| what is true | what proves it |
+|---|---|
+| A reminder falls due at each of an event's own alarms, or `lead` before it; each occurrence of a repeat has its own; an all-day event has none without an alarm; a cancelled or declined event, and one in a zone nothing defines, has none; looks at the clock a step at a time see each once, also across the day the clocks go back | `each_rule_of_a_reminder_holds` |
+| One that fell due while nothing was looking is not raised late: after a gap of over five minutes, only what fell due in the last five, for an event not begun | `each_rule_of_a_reminder_holds`, `off_stays_off_across_a_restart_and_raises_nothing_and_no_backlog_when_turned_on` |
+| A reminder is raised once, with the event's title and nothing else of it | `a_reminder_is_raised_once_with_its_title_alone_and_handed_to_the_interface` |
+| The title loses its control and direction characters and is cut to 120 characters; an escape in it cannot end the terminal's OSC 9 early | `a_hostile_title_is_one_line_with_nothing_to_steer_text_or_a_terminal`, `osc9_writes_the_cleaned_title_and_an_escape_in_it_cannot_end_the_sequence_early` |
+| `notify-send` is given the title as one argument after `--`, as its summary, which is plain text; `osascript` is given it as an argument to a fixed script | `the_title_is_one_argument_after_the_options_end_and_never_markup_or_script` (the argument list only: neither program is run) |
+| A notification program that cannot start is said once, naming it, and reminders still reach the interface | `a_program_that_is_not_there_is_a_sentence_naming_it`, `a_notifier_that_fails_is_said_once_and_reminders_still_reach_the_interface` |
+| Off stays off across a restart, whatever `events` says; a missing or unreadable switch file is `events`; the file is not read or written through a link | `off_stays_off_across_a_restart_and_raises_nothing_and_no_backlog_when_turned_on`, `the_switch_is_remembered_and_a_missing_or_strange_file_is_the_config_s_default`, `a_switch_file_that_is_a_link_is_not_read_and_not_written_through` |
+| `[notify]`'s `events`, `lead` and `via` have the defaults [Configuration](Configuration) gives, and a wrong word is an error naming the key | `notify_s_keys_have_their_defaults_and_a_wrong_word_is_named` |
+
 ## Syncing with a server
 
 | what is true | what proves it |
@@ -185,6 +203,7 @@ itself.
 | **An archive started by hand, and the Homebrew formula** | no archive a dry run built is recorded as unpacked and run by a person, and none has been on a Mac. The formula is a template nothing has installed from. That a download made with `curl` is not stopped by Gatekeeper, as [Installing](Installing) says, is how macOS is documented to behave and has not been tried with this binary |
 | **A picture drawn in a terminal** | tests check what is handed to the terminal's image protocol. None has a terminal to see the result on |
 | **How a browser draws the sealed copy** | tests check what the page contains and what its policy allows. None opens a browser |
+| **`notify-send` and `osascript`** | no test runs either: tests check the argument list each would be given. That a notification service shows the summary as plain text is what the freedesktop specification says, not something a test has seen |
 | **The system's opener** | tests check what would be handed to it, and never start a browser or a viewer |
 | **A long mailbox** | drawing, filtering and start-up over 50,000 and 150,000 messages are measured by tests run by hand, not by `make check` |
 
@@ -196,7 +215,7 @@ above.
 ## Not built
 
 OpenPGP (signing, encrypting, verifying, decrypting), answering an
-invitation, the calendar's screens, the mouse, `NO_COLOR`, remapping keys under `[keys]`, new-mail
+invitation, the calendar's screens, reminders in the interface (`gn`, `:notify`, the bell and the status line), the mouse, `NO_COLOR`, remapping keys under `[keys]`, new-mail
 notifications, and `ui.glyphs` and `ui.colors` in the config. Each is
 planned; none is claimed anywhere on these pages.
 

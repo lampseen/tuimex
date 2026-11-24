@@ -564,6 +564,21 @@ a thread it claims to continue; the message is a draft an agent wrote.
 notification, both configurable under `[notify]`. The one other thing that
 notifies is an event's reminder, while tuimex is open (ADR-058, M15).
 
+A reminder falls due at each of the event's own alarms, or `notify.lead`
+before it when it has none; each occurrence of a repeat has its own. An
+all-day event has none without an alarm, and a cancelled or declined event
+has none. The event loop looks at the clock and is handed each reminder
+once; one that fell due while tuimex was closed is not raised late: after a
+gap of more than five minutes, only what fell due in the last five, for an
+event that has not begun. It rings the bell, goes on the status line and,
+by `notify.via`, raises `notify-send`'s summary (`osascript` on macOS, an
+argument to a fixed script) or an OSC 9. The title alone is sent, one
+argument, with its control and direction characters gone and cut to 120
+characters. A program that cannot start is said once, and reminders go on
+by the bell and the status line. `gn` and `:notify on|off` switch them; the
+choice is the file `reminders` under the state directory, `on` or `off`,
+and `notify.events` is the value before there is one.
+
 ### 6.7 Setup and doctor
 
 `tuimex setup` is plain prompts that work over SSH, as pullpen's is: the
@@ -964,8 +979,11 @@ colors = "auto"                # auto | 16 | 256 | true
 preview = "auto"               # auto | right | below | off: beside the list from 160 columns, else below
 
 [notify]
-bell = true
-osc9 = true
+bell = true                    # new mail: the bell, and
+osc9 = true                    # an OSC 9 notification (§6.6)
+events = true                  # whether a first run starts with reminders on; the switch then remembers (ADR-058)
+lead = "10m"                   # how long before an event with no alarm of its own it is reminded: s, m or h
+via = "desktop"                # desktop (notify-send; osascript on macOS) | osc9 | none
 
 [pgp]
 sign = "never"                 # never | always | ask

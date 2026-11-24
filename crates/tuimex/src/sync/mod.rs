@@ -23,7 +23,7 @@ pub const PATIENCE: Duration = Duration::from_secs(60);
 
 /// A number and its unit, such as `30d` or `10MB`, as a count of the
 /// unit `units` gives a size for. `key` is the config's whole name for it.
-fn amount(key: &str, text: &str, units: &[(&str, u64)]) -> Result<u64> {
+pub(crate) fn amount(key: &str, text: &str, units: &[(&str, u64)]) -> Result<u64> {
     let digits = text.trim_end_matches(|c: char| !c.is_ascii_digit());
     let unit = units.iter().find(|(name, _)| name.eq_ignore_ascii_case(text[digits.len()..].trim()));
     let known = units.iter().map(|(name, _)| *name).collect::<Vec<_>>().join(", ");

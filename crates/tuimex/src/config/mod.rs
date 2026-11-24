@@ -30,7 +30,7 @@ pub struct Config {
     pub sync: Option<Sync>,
     pub send: Option<Send>,
     pub ui: Option<Ui>,
-    notify: Option<unread::Notify>,
+    pub notify: Option<Notify>,
     pgp: Option<unread::Pgp>,
     pub paths: Option<Paths>,
     keys: Option<BTreeMap<String, String>>,
@@ -193,17 +193,29 @@ pub struct Section {
     pub threaded: Option<bool>,
 }
 
+/// `[notify]`. `bell` and `osc9` are for new mail (PLAN §6.6), which is
+/// not built; the other three are an event's reminder (ADR-058).
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Notify {
+    #[expect(dead_code, reason = "new mail does not notify yet")]
+    bell: Option<bool>,
+    #[expect(dead_code, reason = "new mail does not notify yet")]
+    osc9: Option<bool>,
+    /// Whether a first run starts with reminders on; the switch then
+    /// remembers.
+    pub events: Option<bool>,
+    /// Such as `10m`: how long before its start an event with no alarm of
+    /// its own is reminded.
+    pub lead: Option<String>,
+    /// `desktop`, `osc9` or `none`.
+    pub via: Option<String>,
+}
+
 mod unread {
     #![expect(dead_code, reason = "the shapes of tables no code reads yet")]
 
     use serde::Deserialize;
-
-    #[derive(Debug, Deserialize)]
-    #[serde(deny_unknown_fields)]
-    pub struct Notify {
-        bell: Option<bool>,
-        osc9: Option<bool>,
-    }
 
     #[derive(Debug, Deserialize)]
     #[serde(deny_unknown_fields)]
@@ -235,6 +247,7 @@ impl Config {
                 bail!("account {} has two [[calendar]] tables, and an account has one calendar", calendar.account);
             }
         }
+        crate::notify::settings(config.notify.as_ref())?;
         Ok(config)
     }
 
