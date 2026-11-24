@@ -1533,9 +1533,10 @@ Nothing here is built. The wiki says so until a stage lands with its proof.
 after two changes of his: `d` deletes and no view is on a letter, and
 every key mail uses means the same here, `h` and `l` excepted ("keep
 it"). He also ruled that nothing is merged or pushed until there is a
-working calendar: the milestones are built in order on local branches and
-reach `main` together, not one pull request at a time as PLAN §10 has
-it.*
+working calendar: the milestones are built in order on one local branch,
+`feat/calendar`, and reach `main` as one pull request, not one each as
+PLAN §10 has it. Until the Rust draws the design, the three tests that
+hold its tables to `design/tui.js` fail on that branch.*
 
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
