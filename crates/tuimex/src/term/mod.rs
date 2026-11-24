@@ -17,7 +17,7 @@ use crossterm::terminal::{
 use crossterm::{execute, queue};
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
-use tuimex_core::{Action, Ask, Body, Event as Told, Folder, Listed, MessageId, Timestamp};
+use tuimex_core::{Action, Ask, Body, Event as Told, Folder, Link, Listed, MessageId, Timestamp};
 use tuimex_ui::app::App;
 use tuimex_ui::keymap::{Key, TIMEOUT_MS};
 use tuimex_ui::paint::{Theme, paint};
@@ -63,6 +63,23 @@ pub trait Backend {
     fn shown(&mut self, _id: &MessageId) -> Option<(Vec<String>, Body)> {
         None
     }
+    /// The events whose link the agent was asked about since this was
+    /// last called, each as `shown` gives a message. It never waits.
+    fn asked(&mut self) -> Vec<Asked> {
+        Vec::new()
+    }
+}
+
+/// What the agent may be shown of an event, to say what it makes of one
+/// of its links (ADR-031): the ask's serial and the link's number, the
+/// names of the people in the event, its links, and its text.
+#[derive(Debug)]
+pub struct Asked {
+    pub serial: u64,
+    pub n: usize,
+    pub names: Vec<String>,
+    pub links: Vec<Link>,
+    pub text: String,
 }
 
 /// What the store now holds of some messages, for `App::refresh`: `rows`
@@ -185,6 +202,13 @@ pub(crate) fn event_loop<W: Write>(
         }
         if changed {
             frame(terminal, app, backend, &mut painter)?;
+            // After the frame, which was flushed whole: a bell inside one
+            // would be read as part of it (ADR-058).
+            if diary.rang() {
+                let out = terminal.backend_mut();
+                out.write_all(b"\x07")?;
+                out.flush()?;
+            }
         }
         // The first key of a sequence waits only so long for the next.
         if app.waiting() && !input.poll(Duration::from_millis(TIMEOUT_MS))? {
@@ -256,6 +280,7 @@ pub(crate) fn event_loop<W: Write>(
         if let Some(now) = backend.now() {
             changed |= app.tick(now);
             changed |= diary.tick(app, now);
+            changed |= diary.rings();
         }
     }
     Ok(())

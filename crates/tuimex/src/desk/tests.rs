@@ -3,17 +3,17 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use tuimex_core::{AccountId, Action, AgentAsk, Ask, Body, Event, Link, MessageId};
+use tuimex_core::{AccountId, Action, AgentAsk, Ask, Body, Event, EventId, Link, MessageId};
 use tuimex_engine::agent::Agent;
 
 use super::{Desk, agent};
 use crate::config::Config;
-use crate::term::Backend;
+use crate::term::{Asked, Backend};
 
 /// Stands for the mail backend: it keeps what is passed on to it, and has
 /// read one message, the bank's.
 #[derive(Default)]
-struct Inner(Vec<Ask>);
+struct Inner(Vec<Ask>, Vec<Asked>);
 
 fn bank() -> MessageId {
     MessageId { account: AccountId("personal".into()), key: "bank".into() }
@@ -25,6 +25,9 @@ impl Backend for Inner {
     }
     fn events(&mut self) -> Vec<Event> {
         Vec::new()
+    }
+    fn asked(&mut self) -> Vec<Asked> {
+        std::mem::take(&mut self.1)
     }
     fn shown(&mut self, id: &MessageId) -> Option<(Vec<String>, Body)> {
         let link = |n, url: &str, shown: &str| Link { n, url: url.into(), shown: shown.into() };
@@ -355,4 +358,46 @@ fn the_built_in_agent_is_named_and_never_mixed_with_a_command() {
         table("[agent]\nuse = \"another\"\n").unwrap_err(),
         "agent.use = \"another\": the built-in agent is \"claude\""
     );
+}
+
+/// ADR-031, ADR-054: an event's link is put to the agent as a message's
+/// is. The backend finds the event and hands back what may be shown of
+/// it; the names in it are redacted, and the answer carries the serial
+/// of the ask.
+#[test]
+fn an_event_s_link_is_put_to_the_agent_with_its_names_redacted_and_answered_under_the_ask_s_serial() {
+    let root = scratch("agent-event-link");
+    let saw = root.join("saw");
+    let script = format!("cat > {}; echo 'against opening: the host is not the bank it names'", saw.display());
+    let mut desk = desk(&root, Some(&script));
+    let event =
+        EventId { account: AccountId("work".into()), local: false, uid: "review@example.com".into(), occurrence: None };
+    desk.ask(ask(7, Action::AgentEventLink(Box::new(event), 1)));
+    assert_eq!(desk.inner.0.len(), 1, "finding the event is the backend's");
+    desk.inner.1.push(Asked {
+        serial: 7,
+        n: 1,
+        names: vec!["Robin Vale".into()],
+        links: vec![Link { n: 1, url: "https://198.51.100.7/join".into(), shown: "bank.example.com".into() }],
+        text: "Account review\nbank.example.com\nRobin Vale asked for this.".into(),
+    });
+    let first = desk.events();
+    assert!(matches!(first.as_slice(), [Event::AgentAsked { serial: 7, .. }]), "what left is said first: {first:?}");
+    let advice = told(&mut desk, Duration::from_secs(10));
+    let expected = Event::AgentAdvice {
+        serial: 7,
+        advice: "against opening".into(),
+        why: "the host is not the bank it names".into(),
+    };
+    assert_eq!(advice, [expected]);
+    let saw = fs::read_to_string(saw).unwrap();
+    assert!(saw.contains("https://198.51.100.7/join") && !saw.contains("Robin Vale"), "{saw}");
+
+    // A link the event does not have, and no agent to ask.
+    desk.inner.1.push(Asked { serial: 8, n: 4, names: Vec::new(), links: Vec::new(), text: String::new() });
+    let failed = |serial, reason: &str| Event::ActionFailed { serial, reason: reason.into(), hint: String::new() };
+    assert_eq!(desk.events(), [failed(8, "the event has no such link")]);
+    let mut none = super::Desk::new(Inner::default(), None, &root.join("cache"));
+    none.inner.1.push(Asked { serial: 9, n: 1, names: Vec::new(), links: Vec::new(), text: String::new() });
+    assert_eq!(none.events(), [failed(9, "no [agent] table in the config")]);
 }

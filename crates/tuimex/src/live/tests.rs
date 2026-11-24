@@ -13,12 +13,17 @@ use tuimex_ui::app::App;
 use tuimex_ui::keymap::Key;
 
 use super::{Live, sections};
+use crate::calendar::rig;
 use crate::config::Config;
+use crate::diary::Diary;
 use crate::outside::{Opener, Outside};
 use crate::term::Backend;
 use crate::term::tests::{Glass, Typist, no_calendar};
 
 const PASSWORD: &str = "synthetic-password";
+/// Who the two accounts are, as a config would say it.
+const CONFIG: &str = "[[account]]\nname = \"work\"\naddress = \"ada@example.org\"\n\n\
+                      [[account]]\nname = \"home\"\naddress = \"ada@example.org\"\n";
 const CAPABILITIES: Capabilities =
     Capabilities { uidplus: true, r#move: true, condstore: true, special_use: true, idle: true, gmail: false };
 /// Long enough that only a hang reaches it.
@@ -84,6 +89,8 @@ struct Session {
     /// folder, since this was last emptied.
     synced: Vec<(String, String)>,
     root: PathBuf,
+    /// What hands the interface its calendars, where the session has any.
+    diary: Option<Diary>,
 }
 
 impl Session {
@@ -99,6 +106,21 @@ impl Session {
     /// As `over`, where `last` is the last folder of the home account's
     /// pass.
     fn ending(name: &str, prepare: impl FnOnce(&FakeServer, &FakeServer), last: &str) -> Session {
+        Session::built(name, prepare, last, None)
+    }
+
+    /// As `over`, with the calendars of the account `work` kept and
+    /// carried out as `kind` says its config would have them.
+    fn calendared(name: &str, prepare: impl FnOnce(&FakeServer, &FakeServer), kind: rig::Kind) -> Session {
+        Session::built(name, prepare, "Trash", Some(kind))
+    }
+
+    fn built(
+        name: &str,
+        prepare: impl FnOnce(&FakeServer, &FakeServer),
+        last: &str,
+        calendar: Option<rig::Kind>,
+    ) -> Session {
         let root = scratch(name);
         let (work, home) = (server(&[(1, "Quarterly numbers"), (2, "Standup notes")]), server(&[(3, "Cabin weekend")]));
         prepare(&work, &home);
@@ -115,10 +137,19 @@ impl Session {
         let cache = root.join("cache");
         let outside = move || Outside::new(Box::new(Never), cache.join("downloads"), &cache);
         let sections = sections(&Config::default());
-        let (mailbox, live) = Live::over(store, accounts, sections, vec!["ada@example.org".into()], outside).unwrap();
+        let (shown, arriving) = std::sync::mpsc::channel();
+        let reader = calendar.map(|kind| rig::reader(&root, kind, shown).0);
+        let diary = reader.is_some().then(|| Diary::new(arriving, None));
+        let me = vec!["ada@example.org".into()];
+        let (mailbox, live) = Live::with(store, accounts, sections, me, outside, reader).unwrap();
         assert!(mailbox.mail.is_empty(), "nothing is here before a server has answered");
-        let app = App::new(crate::theme::choose(None, None, |_| None), mailbox);
-        let mut session = Session { app, live: Some(live), work, home, synced: Vec::new(), root };
+        let mut app = App::new(crate::theme::choose(None, None, |_| None), mailbox);
+        // An answer is given as somebody: the calendar needs who the
+        // accounts are, which the mail's own tests leave unsaid.
+        if diary.is_some() {
+            app.set_up(crate::live::identities(&Config::parse(CONFIG).unwrap()), false);
+        }
+        let mut session = Session { app, live: Some(live), work, home, synced: Vec::new(), root, diary };
         // The Trash is the last folder of an account's pass.
         session.until_synced(&[("work", "Trash"), ("home", last)], "the first sync of both accounts");
         session.pass();
@@ -164,6 +195,9 @@ impl Session {
             for refresh in rows {
                 self.app.refresh(refresh.now, refresh.after, refresh.asked.as_deref(), refresh.rows, refresh.folders);
             }
+        }
+        if let Some(diary) = self.diary.as_mut() {
+            diary.hand(&mut self.app);
         }
     }
 
@@ -279,8 +313,16 @@ fn two_accounts_are_one_list_that_follows_their_servers_and_changes_them() {
 #[test]
 fn a_refusal_found_waiting_behind_rows_read_before_it_is_taken_after_them() {
     let ((jobs, _queue), (worker, news)) = (std::sync::mpsc::channel(), std::sync::mpsc::channel());
-    let mut live =
-        Live { jobs, news, worker: None, read: Vec::new(), rows: Vec::new(), next: None, failed: Vec::new() };
+    let mut live = Live {
+        jobs,
+        news,
+        worker: None,
+        read: Vec::new(),
+        rows: Vec::new(),
+        next: None,
+        failed: Vec::new(),
+        asked: Vec::new(),
+    };
     let rows = |after| {
         let (now, folders) = (Timestamp(0), Vec::new());
         super::News::Rows(crate::term::Refresh { now, after, asked: None, rows: Vec::new(), folders })
@@ -823,4 +865,57 @@ fn a_key_held_down_over_fifty_thousand_messages_stops_when_it_is_let_go() {
 #[ignore = "a measurement, which a loaded machine would fail"]
 fn a_key_held_down_over_a_hundred_and_fifty_thousand_messages_stops_when_it_is_let_go() {
     held_keys(150_000);
+}
+
+/// The calendar's files of the account `work`, as text.
+fn kept(root: &Path) -> Vec<String> {
+    let store = tuimex_store::calendar::Calendars::open(&root.join("data"), &root.join("cache")).unwrap();
+    store.held().unwrap().into_iter().filter(|held| held.calendar.is_none()).map(|held| held.text).collect()
+}
+
+/// The whole path of an answer: an invitation that is in mail alone is on
+/// the calendar, `i a` answers it there, the reply waits in the Outbox,
+/// the event is in the account's local calendar, and `u` takes both back.
+#[test]
+fn an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_the_entry_back() {
+    // Two days from now, so that it is in reach of `I` whenever this runs.
+    let day = (chrono::Utc::now() + chrono::Duration::days(2)).format("%Y%m%d").to_string();
+    let part = rig::invitation("planning@example.com", 0, Some("REQUEST"), "").replace("20261126", &day);
+    let invitation = rig::mail(1, "Lars Holm <lars@example.com>", "REQUEST", &part);
+    let deliver = |work: &FakeServer, _: &FakeServer| {
+        work.deliver("INBOX", &invitation, Flags::default(), Timestamp(1_795_435_200));
+    };
+    let mut s = Session::calendared("calendar-answer", deliver, rig::Kind::None);
+    s.until("the invitation's mail", shows("Invitation 1"));
+    // `I` goes to the day of the next invitation waiting, and Enter into
+    // that day, where its first event is selected.
+    s.press("gcI\r");
+    let waiting = s.until("the invitation on the calendar", shows("needs answer"));
+    assert!(shows("Planning")(&waiting), "{waiting:#?}");
+    assert!(kept(&s.root).is_empty(), "it is shown from the mail, and kept nowhere yet");
+
+    s.press("ia");
+    let said = s.screen().pop().unwrap();
+    assert!(said.contains("Accepted Planning") && said.contains("in work, local"), "{said}");
+    let accepted = s.until("the calendar read after the answer", |screen| !shows("needs answer")(screen));
+    assert!(shows("you yes")(&accepted) && shows("local, only in tuimex")(&accepted), "{accepted:#?}");
+    let files = kept(&s.root);
+    assert!(files.len() == 1 && files[0].contains("PARTSTAT=ACCEPTED"), "{files:?}");
+    // The reply is mail like any other while it waits: a row of the
+    // Outbox, in the list `gm` returns to.
+    s.press("gm");
+    s.until("the Outbox among the sections", |screen| screen[0].ends_with("Archive   Outbox"));
+    s.press("llllll");
+    let held = s.until("the reply in the Outbox", shows("Accepted: Planning"));
+    assert!(s.cursor().contains("Accepted: Planning"), "it is the Outbox's one row: {held:#?}");
+    s.press("hhhhhh");
+
+    s.press("gcu");
+    assert!(s.screen().pop().unwrap().contains("Undone"), "{:?}", s.screen().pop());
+    s.until("the invitation waiting again", shows("needs answer"));
+    assert!(kept(&s.root).is_empty(), "the event is in no calendar");
+    s.press("gm");
+    let back = s.until("the Outbox without the reply", |screen| !shows("Outbox")(screen));
+    assert!(!shows("Accepted: Planning")(&back), "it is in no folder, Drafts included: {back:#?}");
+    s.stop();
 }

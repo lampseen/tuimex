@@ -204,9 +204,42 @@ impl Keyring for Holds {
     }
 }
 
+/// The calendars a reader hands over, without what it hands over beside
+/// them.
+struct Arriving(Receiver<Handed>);
+
+fn calendar_of(handed: Handed) -> Option<Calendar> {
+    match handed {
+        Handed::Calendar { calendar, .. } => Some(*calendar),
+        Handed::Invited(..) => None,
+    }
+}
+
+impl Arriving {
+    fn recv_timeout(&self, wait: Duration) -> Result<Calendar, mpsc::RecvTimeoutError> {
+        loop {
+            if let Some(calendar) = calendar_of(self.0.recv_timeout(wait)?) {
+                return Ok(calendar);
+            }
+        }
+    }
+
+    fn try_iter(&self) -> impl Iterator<Item = Calendar> + '_ {
+        self.0.try_iter().filter_map(calendar_of)
+    }
+
+    fn try_recv(&self) -> Result<Calendar, mpsc::TryRecvError> {
+        loop {
+            if let Some(calendar) = calendar_of(self.0.try_recv()?) {
+                return Ok(calendar);
+            }
+        }
+    }
+}
+
 /// A reader over a scratch store that holds one fetched event and one
 /// local one, what it sends, and how often its provider was asked.
-fn reader(name: &str) -> (Reader, Receiver<Calendar>, Receiver<()>) {
+fn reader(name: &str) -> (Reader, Arriving, Receiver<()>) {
     let root = scratch(name);
     let (data, cache) = (root.join("data"), root.join("cache"));
     let store = Calendars::open(&data, &cache).unwrap();
@@ -222,7 +255,7 @@ fn reader(name: &str) -> (Reader, Receiver<Calendar>, Receiver<()>) {
         cache,
         every: Duration::from_secs(3_600),
     };
-    (Reader::new(runner, about(Vec::new()), shown), arriving, asks)
+    (Reader::new(runner, about(Vec::new()), shown), Arriving(arriving), asks)
 }
 
 fn summaries(calendar: &Calendar) -> Vec<(bool, &str)> {

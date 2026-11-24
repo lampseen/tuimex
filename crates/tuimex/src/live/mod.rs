@@ -18,10 +18,11 @@ use tuimex_engine::{Account, Connect, Engine, Engines, StoreHandle};
 use tuimex_store::Store;
 use tuimex_ui::mailbox::Mailbox;
 
+use crate::calendar::{Post, Refusal};
 use crate::config::Config;
 use crate::outside::{self, Outside};
 use crate::paths::Dirs;
-use crate::term::{Backend, Refresh};
+use crate::term::{Asked, Backend, Refresh};
 use crate::{calendar, message, sync};
 
 /// How many asks are remembered for a refusal to name, as the engine
@@ -70,6 +71,8 @@ enum News {
     Told(Event),
     Rows(Refresh),
     Read(Box<Read>),
+    /// An event whose link the agent is asked about.
+    Asked(Box<Asked>),
     /// The accounts a message is leaving from as everything stops.
     Stopping(Vec<String>),
 }
@@ -94,6 +97,9 @@ pub struct Live {
     next: Option<News>,
     /// What could not be handed over, to be said with the next events.
     failed: Vec<Event>,
+    /// The events the agent was asked about, until whoever runs the
+    /// agent takes them.
+    asked: Vec<Asked>,
 }
 
 /// The sections of the config, or the defaults.
@@ -251,6 +257,7 @@ impl Live {
             rows: Vec::new(),
             next: None,
             failed: Vec::new(),
+            asked: Vec::new(),
         };
         Ok((mailbox, live))
     }
@@ -313,10 +320,15 @@ impl Backend for Live {
                     let over = self.read.len().saturating_sub(READ);
                     self.read.drain(..over);
                 }
+                News::Asked(asked) => self.asked.push(*asked),
                 News::Stopping(_) => {}
             }
         }
         events
+    }
+
+    fn asked(&mut self) -> Vec<Asked> {
+        std::mem::take(&mut self.asked)
     }
 
     fn refreshes(&mut self) -> Vec<Refresh> {
@@ -386,6 +398,71 @@ impl Worker {
         self.tell(News::Told(Event::ActionFailed { serial, reason: reason.into(), hint: String::new() }));
     }
 
+    /// The calendars, and the mail side of what is asked of them.
+    fn calendars(&mut self) -> Option<(&mut calendar::Reader, Post<'_>)> {
+        let post = Post { engines: &self.engines, store: &self.store };
+        self.calendar.as_mut().map(|reader| (reader, post))
+    }
+
+    /// Says what mail did to the calendar, each thing as a plain line.
+    fn notices(&self, said: Vec<String>) {
+        for text in said {
+            let account = AccountId(String::new());
+            self.tell(News::Told(Event::Notice { account, error: false, text, hint: String::new() }));
+        }
+    }
+
+    /// Carries out a calendar ask, or after `changed`, which did it
+    /// already, only what follows: the invitations in mail are worked out
+    /// against what is now held, and the calendar is handed over. A
+    /// refusal is said under `serial`.
+    fn carry(&mut self, serial: u64, ask: Option<&Ask>, changed: Result<bool, Refusal>) {
+        let Some((reader, post)) = self.calendars() else {
+            return self.refuse(serial, "no calendar is kept in this run");
+        };
+        let carried = match ask {
+            Some(ask) => reader.carry(ask, &post).map(|mail| (true, mail)),
+            None => changed.map(|changed| (changed, None)),
+        };
+        let handed = match &carried {
+            Ok((false, _)) => (Vec::new(), Ok(())),
+            _ => reader.refresh(&post),
+        };
+        match carried {
+            // Taken back with no ask of its own, an ask's mail went with
+            // it: which message that was, the store says.
+            Ok((true, None)) if ask.is_none() => self.rows(None),
+            Ok((_, mail)) => mail.into_iter().for_each(|id| self.rows(Some(vec![id]))),
+            Err(Refusal { reason, hint }) => self.tell(News::Told(Event::ActionFailed { serial, reason, hint })),
+        }
+        self.notices(handed.0);
+        self.said(handed.1);
+    }
+
+    /// Looks at the invitations in mail again: after mail arrived, and
+    /// after an invitation's body was read.
+    fn look(&mut self) {
+        let Some((reader, post)) = self.calendars() else { return };
+        let said = reader.look(&post);
+        self.notices(said);
+    }
+
+    /// An event's link, opened or put to the agent (ADR-018, ADR-031).
+    fn event_link(&mut self, serial: u64, id: &tuimex_core::EventId, n: usize, agent: bool, outside: &mut Outside) {
+        let event = self.calendar.as_ref().and_then(|reader| reader.event(id));
+        if !agent {
+            let told = outside.event_link(serial, event, n);
+            return told.into_iter().for_each(|event| self.tell(News::Told(event)));
+        }
+        let Some(event) = event else { return self.refuse(serial, "the event is no longer in the calendar") };
+        let people = event.organizer.iter().chain(event.guests.iter().map(|guest| &guest.who));
+        let names = people.filter_map(|person| person.name.clone()).collect();
+        let parts = [Some(&event.summary), event.location.as_ref(), event.description.as_ref()];
+        let text = parts.into_iter().flatten().map(String::as_str).collect::<Vec<_>>().join("\n");
+        let links = tuimex_core::calendar::links_of(event);
+        self.tell(News::Asked(Box::new(Asked { serial, n, names, links, text })));
+    }
+
     /// Owes the loop what the store holds of `ids`, or with none of
     /// everything.
     fn rows(&mut self, ids: Option<Vec<MessageId>>) {
@@ -441,7 +518,22 @@ impl Worker {
     fn ask(&mut self, ask: Ask, outside: &mut Outside) {
         let serial = ask.serial;
         self.after = serial;
+        if let Some(reader) = self.calendar.as_mut() {
+            reader.carried = serial;
+        }
         match &ask.action {
+            Action::AnswerEvent(_) | Action::DeleteEvent(_) | Action::SaveEvent(_) | Action::UndoEvent(_) => {
+                return self.carry(serial, Some(&ask), Ok(true));
+            }
+            Action::OpenEventLink(id, n) => return self.event_link(serial, id, *n, false, outside),
+            Action::AgentEventLink(id, n) => return self.event_link(serial, id, *n, true, outside),
+            Action::Export(to) => {
+                let text = match &self.calendar {
+                    Some(reader) => reader.exported().map_err(|refusal| refusal.reason),
+                    None => Err("no calendar is kept in this run".to_string()),
+                };
+                return self.tell(News::Told(outside.export(serial, to, text)));
+            }
             Action::Written(draft) => {
                 self.written.retain(|d| d.id != draft.id);
                 self.written.push((**draft).clone());
@@ -479,11 +571,17 @@ impl Worker {
             calendar.nudge();
         }
         let whole = matches!(ask.action, Action::EmptyTrash(_) | Action::CreateArchive(_) | Action::CreateTrash(_));
-        let on = ask.on.clone();
+        let (on, undo) = (ask.on.clone(), ask.action == Action::Undo);
         self.asked.push((serial, on.clone()));
         let over = self.asked.len().saturating_sub(ASKS);
         self.asked.drain(..over);
         self.engines.act(ask);
+        // `u` on a reply still in the Outbox takes its calendar entry
+        // back with it (ADR-057).
+        if let (true, Some((reader, post))) = (undo, self.calendars()) {
+            let unsent = reader.unsent(&on, &post);
+            self.carry(serial, None, unsent);
+        }
         if whole || !on.is_empty() {
             self.rows((!whole).then_some(on));
         }
@@ -533,6 +631,7 @@ impl Worker {
                 self.tell(News::Told(event));
                 if !changed.is_empty() {
                     self.rows(Some(changed));
+                    self.look();
                 }
             }
             Event::ActionFailed { serial, .. } => {
@@ -541,8 +640,17 @@ impl Worker {
                 // Whatever the interface puts back, the store has the
                 // last word on those messages.
                 on.into_iter().for_each(|on| self.rows(Some(on)));
+                // Mail the engine would not take leaves no calendar
+                // entry behind it.
+                if let Some((reader, post)) = self.calendars() {
+                    let refused = reader.refused(serial, &post);
+                    self.carry(serial, None, refused);
+                }
             }
             Event::Sent { ref id, ref answered } => {
+                if let Some(reader) = self.calendar.as_mut() {
+                    reader.sent(id);
+                }
                 let rows = std::iter::once(id).chain(answered).cloned().collect();
                 self.tell(News::Told(event));
                 self.rows(Some(rows));
@@ -576,6 +684,11 @@ impl Worker {
         let people = envelope.iter().flat_map(|e| e.from.iter().chain(&e.to).chain(&e.cc).chain(&e.reply_to));
         let names = people.filter_map(|a| a.name.clone()).collect();
         let raw = Arc::new(raw);
+        // An invitation's card answers once it knows its event, and a
+        // body that has just been filled may be an invitation's.
+        if self.calendar.as_ref().is_some_and(|reader| reader.invited(&id, &raw)) {
+            self.look();
+        }
         self.read.retain(|(read, ..)| *read != id);
         self.read.push((id.clone(), (*body).clone(), raw.clone()));
         let over = self.read.len().saturating_sub(READ);
@@ -595,6 +708,7 @@ impl Worker {
             let read = reader.start(events);
             self.said(read);
             self.calendar = Some(reader);
+            self.look();
         }
         loop {
             // A key held on an action is an ask for each repeat, and a

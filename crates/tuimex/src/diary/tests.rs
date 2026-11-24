@@ -108,17 +108,28 @@ fn keys(app: &mut App, diary: &mut Diary, keys: &str) {
     }
 }
 
+/// Where a test sends its calendars: each is handed over as one read
+/// after no ask.
+struct Shown(Sender<Handed>);
+
+impl Shown {
+    fn send(&self, calendar: Calendar) -> Result<(), mpsc::SendError<Handed>> {
+        self.0.send(Handed::Calendar { calendar: Box::new(calendar), carried: 0 })
+    }
+}
+
 /// A diary that reminds through `recorder` and keeps its switch under
 /// `state`, and where its calendars are sent.
-fn diary(state: PathBuf, recorder: &Recorder) -> (Diary, Sender<Calendar>) {
+fn diary(state: PathBuf, recorder: &Recorder) -> (Diary, Shown) {
     let (shown, arriving) = mpsc::channel();
     let reminders = Reminders::new(ON, Some(Box::new(recorder.clone())), state);
-    (Diary::new(arriving, Some(reminders)), shown)
+    (Diary::new(arriving, Some(reminders)), Shown(shown))
 }
 
 #[test]
 fn a_calendar_that_arrives_is_handed_to_the_interface_once() {
     let (shown, arriving) = mpsc::channel();
+    let shown = Shown(shown);
     let (mut app, mut diary) = (app(), Diary::new(arriving, None));
     shown.send(crate::fixture_calendar()).unwrap();
     diary.begin(&mut app);
@@ -253,4 +264,93 @@ fn an_event_is_declined_by_the_account_that_holds_it_and_by_no_other() {
         diary.tick(&mut app, Timestamp(NOON + 5 * MINUTE));
         assert_eq!(recorder.titles.borrow().len(), raised, "held by {accounts:?}");
     }
+}
+
+/// Everything on screen, as one text.
+fn screen(app: &mut App) -> String {
+    let lines = app.lines(160, 40);
+    lines.iter().map(|line| line.iter().map(|span| span.text.as_str()).collect::<String>() + "\n").collect()
+}
+
+/// ADR-058: what falls due is put on the status line, in mail as in the
+/// calendar, and the bell rings for it once, after the frame that shows
+/// it.
+#[test]
+fn what_falls_due_is_on_the_status_line_and_rings_the_bell_once() {
+    let recorder = Recorder::default();
+    let (mut diary, shown) = diary(scratch("status"), &recorder);
+    let mut app = app();
+    shown.send(calendar(vec![("work", vec![event("Stand-up", NOON + 15 * MINUTE, &[])])])).unwrap();
+    diary.begin(&mut app);
+    diary.tick(&mut app, Timestamp(NOON));
+    assert!(!diary.rings() && !screen(&mut app).contains("Stand-up"), "nothing is due at noon");
+
+    diary.tick(&mut app, Timestamp(NOON + 5 * MINUTE));
+    assert!(diary.rings(), "a frame is owed: the status line has changed");
+    let shown_in_mail = screen(&mut app);
+    assert!(shown_in_mail.contains("Stand-up"), "{shown_in_mail}");
+    assert!(diary.rang() && !diary.rang() && !diary.rings(), "the bell rings once");
+    keys(&mut app, &mut diary, "gc");
+    assert!(screen(&mut app).contains("Stand-up in "), "and in the calendar: {}", screen(&mut app));
+    diary.tick(&mut app, Timestamp(NOON + 6 * MINUTE));
+    assert!(!diary.rings(), "a later look that finds nothing new rings nothing");
+}
+
+/// What the reader chose not to see does not interrupt them: a calendar
+/// they hid, and an invitation they ignored. Both are the interface's to
+/// know, and are asked of it at each look.
+#[test]
+fn a_hidden_calendar_and_an_ignored_invitation_remind_nobody() {
+    let recorder = Recorder::default();
+    let (mut diary, shown) = diary(scratch("silent"), &recorder);
+    let mut app = app();
+    let mut both = calendar(vec![
+        ("work", vec![event("Hidden", NOON + 15 * MINUTE, &[])]),
+        ("home", vec![event("Ignored", NOON + 15 * MINUTE, &[(HOME, Said::Nothing)])]),
+    ]);
+    both.ignored.push((AccountId("home".into()), "Ignored".into()));
+    shown.send(both).unwrap();
+    diary.begin(&mut app);
+    // `C` lists the calendars, work's first, and Space hides the one chosen.
+    keys(&mut app, &mut diary, "gcC \u{1b}");
+    assert!(app.calendar().is_hidden(&AccountId("work".into()), false), "{}", screen(&mut app));
+    diary.tick(&mut app, Timestamp(NOON + 5 * MINUTE));
+    assert_eq!(recorder.titles.borrow().len(), 0);
+    assert!(!diary.rings() && !screen(&mut app).contains(" in 10"), "{}", screen(&mut app));
+
+    // Shown again, the calendar's next event reminds as any does.
+    keys(&mut app, &mut diary, "C \u{1b}");
+    assert!(!app.calendar().is_hidden(&AccountId("work".into()), false));
+    shown.send(calendar(vec![("work", vec![event("Shown", NOON + 25 * MINUTE, &[])])])).unwrap();
+    diary.hand(&mut app);
+    diary.tick(&mut app, Timestamp(NOON + 15 * MINUTE));
+    assert_eq!(*recorder.titles.borrow(), ["Shown"]);
+}
+
+/// Why a calendar could not be read is on the status line for as long as
+/// it is so; `:messages` keeps the reason, once for each failure and not
+/// once for each reading.
+#[test]
+fn why_a_calendar_could_not_be_read_is_kept_for_messages_once() {
+    let (shown, arriving) = mpsc::channel();
+    let shown = Shown(shown);
+    let (mut app, mut diary) = (app(), Diary::new(arriving, None));
+    let failing = |reason: &str| {
+        let mut calendar = calendar(vec![("work", Vec::new()), ("home", Vec::new())]);
+        calendar.shelves[0].failed = Some(reason.to_string());
+        calendar
+    };
+    shown.send(failing("the connection failed")).unwrap();
+    diary.begin(&mut app);
+    shown.send(failing("the connection failed")).unwrap();
+    assert!(diary.hand(&mut app));
+    shown.send(failing("its certificate was not accepted")).unwrap();
+    assert!(diary.hand(&mut app));
+    for key in ":messages".chars().map(Key::Char).chain([Key::Enter]) {
+        app.key(key);
+    }
+    let log = screen(&mut app);
+    assert_eq!(log.matches("calendar: work: the connection failed").count(), 1, "{log}");
+    assert_eq!(log.matches("calendar: work: its certificate was not accepted").count(), 1, "{log}");
+    assert!(!log.contains("calendar: home"), "a calendar that was read has nothing to say: {log}");
 }

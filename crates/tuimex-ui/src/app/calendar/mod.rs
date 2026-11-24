@@ -148,6 +148,12 @@ impl App {
         self.changes_again();
     }
 
+    /// The calendar as it is shown: what was handed over, with what the
+    /// reader has hidden and what they changed since.
+    pub fn calendar(&self) -> &Calendar {
+        &self.cal.model
+    }
+
     /// What is about to begin, for the right of the status line in mail
     /// and in the calendar alike; `None` takes it away. It goes by itself
     /// when the event begins or its links are opened.

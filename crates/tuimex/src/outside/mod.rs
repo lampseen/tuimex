@@ -12,8 +12,10 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
 use tuimex_content as content;
+use tuimex_core::calendar::{Event as Held, links_of};
 use tuimex_core::{Action, Ask, Body, Event, Picture, Unsubscribe, assess};
 use tuimex_store::files;
+use tuimex_ui::keymap;
 
 use crate::pictures;
 
@@ -152,8 +154,41 @@ impl Outside {
     /// against the download directory, and is never written over. Returns
     /// where the file is.
     fn save(&mut self, raw: Option<&[u8]>, index: usize, to: &Path) -> Result<String, String> {
-        let what = ":save";
-        let file = Self::attachment(what, raw, index)?;
+        let file = Self::attachment(":save", raw, index)?;
+        self.put(":save", &file.name, to, &file.data)
+    }
+
+    /// Link `n` of an event, counted from 1 (ADR-054). Whatever the
+    /// interface found of it, it is assessed again here, as a message's
+    /// link is. Says only why it did not open.
+    pub fn event_link(&mut self, serial: u64, event: Option<&Held>, n: usize) -> Option<Event> {
+        let what = format!("{} {n}", keymap::hint("calendar.links").0.split(' ').next().unwrap_or_default());
+        let links = event.map(links_of).ok_or_else(|| failed(&what, "the event is no longer in the calendar"));
+        let opened = links.and_then(|links| {
+            let link = links.iter().find(|link| link.n == n).ok_or_else(|| failed(&what, "no such link"))?;
+            self.web(&what, &link.url, &link.shown)
+        });
+        opened.err().map(|reason| Event::ActionFailed { serial, reason, hint: String::new() })
+    }
+
+    /// `:export [path]`: the local events as one `.ics`, placed as a
+    /// saved file is. `text` is that calendar, or none when no event is
+    /// local, or why it could not be made.
+    pub fn export(&mut self, serial: u64, to: &Path, text: Result<Option<String>, String>) -> Event {
+        let what = ":export";
+        let written = text.map_err(|why| failed(what, why)).and_then(|text| {
+            let text = text.ok_or_else(|| failed(what, "tuimex holds no local event to write"))?;
+            self.put(what, "tuimex-calendar.ics", to, text.as_bytes())
+        });
+        match written {
+            Ok(path) => Event::Saved { path },
+            Err(reason) => Event::ActionFailed { serial, reason, hint: String::new() },
+        }
+    }
+
+    /// Writes `bytes` as a new file for `what`: at `to`, or with none
+    /// under `name` in the download directory. Returns where it is.
+    fn put(&self, what: &str, name: &str, to: &Path, bytes: &[u8]) -> Result<String, String> {
         let home = directories::BaseDirs::new().map(|dirs| dirs.home_dir().to_path_buf());
         let typed = match (to.strip_prefix("~"), &home) {
             (Ok(rest), Some(home)) => home.join(rest),
@@ -161,7 +196,7 @@ impl Outside {
         };
         let named = to.as_os_str().is_empty() || typed.is_dir();
         let (dir, name) = if named {
-            (typed, file.name.clone())
+            (typed, name.to_string())
         } else {
             let name =
                 typed.file_name().and_then(|n| n.to_str()).ok_or_else(|| failed(what, "that is not a file's path"))?;
@@ -178,7 +213,7 @@ impl Outside {
             let path = dir.join(if n == 1 { name.clone() } else { numbered(n) });
             match files::create(&path) {
                 Ok(mut made) => {
-                    made.write_all(&file.data).map_err(|e| failed(what, e))?;
+                    made.write_all(bytes).map_err(|e| failed(what, e))?;
                     return Ok(homely(&path, home.as_deref()));
                 }
                 Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}

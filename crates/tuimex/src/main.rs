@@ -119,7 +119,7 @@ fn main() -> Result<ExitCode> {
         app.set_up(design::identities(), agent.is_some());
         // Taken by the loop before its first frame. `arriving` is held
         // until then, so there is always someone to send to.
-        let _ = shown.send(fixture_calendar());
+        let _ = shown.send(calendar::Handed::Calendar { calendar: Box::new(fixture_calendar()), carried: 0 });
         app.set_preview(preview);
         open(&mut app)?;
         let mut desk = desk::Desk::new(Offline::new(outside), agent, &dirs.cache);
@@ -136,9 +136,11 @@ fn main() -> Result<ExitCode> {
     // The screen is taken once the config has been found good and before
     // the store is opened, so that a wait for the index is said on it.
     let mut opening = term::Opening::new(theme);
+    let calendar = Some(calendar);
     let (mailbox, live, delay) = live::start(&config, &dirs, downloads, calendar, &mut |rebuilt| opening.say(rebuilt))?;
     let mut app = App::new(theme, mailbox);
     app.set_up(live::identities(&config), agent.is_some());
+    app.set_writable_calendars(calendar::writable(&config).into_iter().map(AccountId).collect());
     app.set_delay(delay);
     app.set_colours(colours);
     app.set_preview(preview);
