@@ -235,11 +235,9 @@ impl App {
                 let start = proposed.unwrap_or(asked.start);
                 items.extend((!asked.held).then(|| held(asked.event.clone())));
                 items.push(Item::Proposed { account, uid, start: Some(start) });
-                let who = asked
-                    .event
-                    .organizer
-                    .as_ref()
-                    .map_or_else(String::new, |o| o.name.clone().unwrap_or(o.email.clone()));
+                let who = asked.event.organizer.as_ref().map_or_else(String::new, |o| {
+                    o.name.clone().filter(|name| !name.is_empty()).unwrap_or(o.email.clone())
+                });
                 let time = if asked.event.start.is_day() { String::new() } else { format!(" {}", clock(start)) };
                 say::ok(format!("Proposed {}{time} to {who}", day_short(start.div_euclid(DAY)))).key("u to undo")
             }

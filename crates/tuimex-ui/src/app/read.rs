@@ -227,9 +227,13 @@ impl App {
     /// when it has none or it could not be read. Without it the reader's
     /// card shows the invitation and cannot answer it.
     pub fn set_invited(&mut self, id: MessageId, invited: Option<Invited>) {
-        // Kept for the messages whose bodies are, and no longer.
+        // Bounded as the bodies are: past that many, only those whose
+        // bodies are kept stay. It may come before its body or after.
         let reading = &mut self.reading;
-        reading.invited.retain(|read, _| *read != id && reading.bodies.contains_key(read));
+        reading.invited.remove(&id);
+        if reading.invited.len() >= KEPT {
+            reading.invited.retain(|read, _| reading.bodies.contains_key(read));
+        }
         reading.invited.extend(invited.map(|invited| (id, invited)));
     }
 
