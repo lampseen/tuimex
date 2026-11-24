@@ -81,6 +81,8 @@ pullpen has five of.
 
 *2026-11-24: the code figure is ADR-059's.*
 
+*2026-11-24: and then ADR-063's.*
+
 ## ADR-005 — The dependency ceiling is a list
 
 The crates tuimex may depend on are the list in PLAN §1. Adding one takes a
@@ -1552,6 +1554,16 @@ alone, and the reverse; `u` in the calendar undoes what was done in the
 calendar and never reaches into mail; a mail command typed in the
 calendar is refused and says `gm` returns to mail.
 
+*2026-11-24, joined.* What the interface asks is carried out (PLAN §4.6),
+and the wiki says what the calendar does instead of that it is not
+built. Two more things decided where the design was silent, with no
+output changed. An invitation that is in mail and in no calendar is drawn
+as an event of the calendar an answer would put it in: the account's own
+where that is written, otherwise its local one, so that such an event
+carries the word `local` before it is stored anywhere. And the design
+draws no cancelled event, so an event its organizer cancels is removed,
+and a line on the command line and in `:messages` says so.
+
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
 This is ADR-013 again, for events. An event tuimex itself holds (one
@@ -1583,6 +1595,17 @@ provider by a delete here unless tuimex can write that calendar.
 **What it costs.** An event in two places can disagree, and the rule above
 is the first of several that real feeds will ask for. A `local` event is
 not on the user's phone, and the mark is the only thing that says so.
+
+*2026-11-24, as built.* An event and the events standing in for single
+days of it are one file, as a provider keeps them under one address, so
+that a change to either is one write. Beside the accounts' directories is
+`answers.json`: the invitations the reader ignored and the times they
+proposed, which no event's file says and which are theirs, not a cache.
+It is JSON, `{"ignored": [[account, uid]], "proposed": [[account, uid,
+start]]}`. `:export` writes every local event into one calendar, to a
+new file through the file module, and never over one. `u` reaches the
+asks of this run: what each file held before an ask is kept in memory,
+and after a restart nothing can be undone, as for mail (ADR-040).
 
 ## ADR-056 — A calendar is read from an address the user gave, and the address is a secret
 
@@ -1690,6 +1713,35 @@ outside Proton's apps reaches Proton Calendar by no route at all.
 own apps show stays "not answered" although the organizer has it. That is
 said where the answer is given, in the result line: `in proton (local)`.
 
+*2026-11-24, as built.* The result line reads `in proton, local`.
+
+The calendar is written before the mail is handed to the Outbox, so an
+answer the calendar refuses mails nobody; and when the engine then
+refuses the mail, what was written is put back and the draft discarded.
+`u` puts the calendar back first and then takes the mail out of the
+Outbox; if the engine will not stop the mail, the calendar is made to
+hold the answer again. Once the mail has been sent the answer stands and
+`u` says so: taking back the entry alone would leave the organizer told
+one thing and the calendar saying another.
+
+An invitation is on the calendar from the moment its mail is read, not
+from the moment it is answered. One that is in an Inbox and in no
+calendar of its account is shown, unstored, until it is answered or
+ignored. This is the ordinary case for Proton, whose feed holds only
+what was answered in Proton's own apps, and it is what makes an
+invitation "mail that needs an answer" in the view where the day is
+(ADR-054). A request whose mail is marked answered and whose event has
+gone was deleted by the reader, and does not come back. The work is
+bounded: what each message carried, its method and UID, is kept in the
+cache, so a start reads the messages that are new and the few still
+waiting.
+
+A later message is applied only to an event a local calendar holds: an
+event at a provider is the provider's to update. The rule that says
+whether it is believed is `invitation::later`, unchanged. Whether Gmail
+has already put an invitation into the calendar by the time its mail is
+read here is **unobserved**; either way the event is drawn once.
+
 ## ADR-058 — A reminder notifies while tuimex is open
 
 PLAN §6.6 said nothing but new Inbox mail notifies. An event's reminder
@@ -1720,6 +1772,13 @@ since what is normal is silent.
 **What it costs.** A reminder depends on a program tuimex does not ship,
 and a notification service can show an event's title on a locked screen.
 The title is all that is sent: no guest, place or link.
+
+*2026-11-24, as built.* The bell is one byte on the stream the frames are
+written to, so it is written after the frame that shows the reminder has
+been flushed, never inside one. A calendar the reader has hidden and an
+invitation they ignored remind nobody: both are the interface's to know,
+and are asked of it at each look. Neither `notify-send` nor `osascript`
+has been run by a test or seen to raise a notification by anyone here.
 
 ## ADR-059 — The code budget is 26,000 lines
 
@@ -1876,3 +1935,75 @@ held kept, and deleted; a wrong password said as a refused sign-in; a
 redirect not followed. That is the first time the real wire sent
 anything. Writing to Google's calendar is **untried**: nothing has been
 written there, by hand or by a test.
+
+*2026-11-24, the write key.* "Once writing is proven" is now a key and a
+check, decided by the agent leading the build, under Bryan's authority.
+A `[[calendar]]` of kind `caldav` is written at
+its provider only when its table says `write = true`. Left out it is
+false, and every write for that account goes to its local calendar,
+exactly as for a feed: a calendar is not written on a path nobody has
+tried, and that is the default because the untried path is the one most
+users have.
+
+`tuimex setup` offers to find out, for a calendar it has just checked
+and, from its menu, for one already in the config. It says that it will
+add one event named "tuimex write test" a year from today and remove it
+again, asks, does it with the same `put_new` and `delete` every other
+write uses, and writes the key when both worked. A server that names no
+tag for what it took is read once, so that the conditional delete has
+one. Any failure is said as it happened and leaves the calendar
+read-only; an event that could not be removed is named, so that its
+owner can remove it.
+
+Setup only appends (ADR-043), and a key cannot be appended to a table
+that is not the last in the file. So for a calendar already there the
+key is a `[[calendar]]` table of its own, holding `account` and `write`
+and no `kind`, which adds to the account's table above it. The parser
+takes that shape and no other second table. The cost is two ways to
+write one fact; the alternative was a hand-made editor of TOML text,
+which ADR-043 already declined.
+
+The config also takes a `url` of `http://127.0.0.1:<port>/`, which the
+engine already took: the binary is run against a CalDAV server in a
+container by `make real-server`, and plain HTTP reaches no other host.
+
+## ADR-063 — The code budget is 28,000 lines
+
+`MAX_CODE_LINES` goes from 26,000 to 28,000. The other three budgets
+stand.
+
+The count is 26,121 with the calendar joined, and OpenPGP is still to
+build. ADR-059 asked that the next record of this kind say how wrong each
+guess was. Counted as the Makefile counts, against the 17,509 the
+calendar began from:
+
+| What | Guessed | Built |
+|---|---|---|
+| Reading every event of a calendar and writing replies, proposals and invitations (`tuimex-content`) | 700 | 773 |
+| Events, repeats, the words for a date (`tuimex-core`) | 700 | 953 |
+| Event files and their index (`tuimex-store`) | 600 | 236 |
+| Fetching feeds, the calendar's thread, writing an answer (`tuimex-engine`) | 600 | 991 |
+| Month, week, day, event, the form, the panels, the keys (`tuimex-ui`) | 2,800 | 3,325 |
+| Wiring, the setup step, reminders (`tuimex`) | 700 | 2,158 |
+| Calendar fixtures (`tuimex-fixtures`) | 500 | 176 |
+| OpenPGP, and what is left of M11 | 1,400 | not built |
+
+The calendar came to 8,612 lines against 6,600 guessed. The engine's
+figure holds CalDAV (ADR-062), which that table said it left out. The
+binary's is three times its guess, and that is the one to learn from:
+"wiring" was guessed as glue, and it is where an ask is carried out, kept
+for `u`, mailed, refused and put back, where the invitations in mail are
+found, and where setup tries a write. None of that was in any other
+row.
+
+28,000 is the count, the 1,400 still guessed for OpenPGP and the rest of
+M11, and about 500 spare. Bryan's ruling of 2026-11-23 stands: "raise
+the cap if we need to, don't cut features".
+
+The binary budget is not raised here. The release binary has not been
+measured since the calendar was joined, so whether it is still under
+ADR-049's 17 MiB is **unverified**; if it is not, that is its own record
+against a measurement, as ADR-059 said.
+
+**What it costs.** The fourth budget record. The guess it makes, 1,400
+for OpenPGP, is three records old and has been wrong in kind before.
