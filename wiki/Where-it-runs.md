@@ -11,7 +11,8 @@ the job `release-build` builds the release binary on the oldest runner
 image and starts it.
 
 **macOS** is a claim the CI job `macos` makes, and nothing else does: it
-runs the whole suite on a Mac and builds the release binary there. A green
+runs the whole suite on a Mac and builds the release binary there. The
+suite has passed on `macos-latest` in CI as of 2026-11-24, and a green
 `macos` on a commit is the evidence for that commit. Nobody has used
 tuimex interactively on a Mac; a report is welcome. The paths are the same
 as on Linux (`~/.config/tuimex` and the rest), not `~/Library`.
@@ -19,8 +20,9 @@ as on Linux (`~/.config/tuimex` and the rest), not `~/Library`.
 **Windows** is not supported and nothing is built for it. Mail directory
 names, the keyring and the paths would each need a second branch.
 
-Release archives are built for x86_64 and arm64 on both systems; see
-[Installing](Installing).
+Release archives are built for x86_64 and arm64 on both systems: the
+release workflow has built and packaged all four in a dry run, and no
+archive has been started by hand on a Mac. See [Installing](Installing).
 
 ## Terminals
 
