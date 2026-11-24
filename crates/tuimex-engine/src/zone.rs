@@ -199,7 +199,10 @@ fn parse(bytes: &[u8]) -> Option<Zone> {
         if text.contains(&b'\n') {
             return None;
         }
-        posix(text).unwrap_or(Footer::Unread)
+        // A rule this cannot read is a zone this cannot place a future
+        // date in, and a zone half known would be a guess (ADR-061): the
+        // time is then shown as written.
+        posix(text)?
     };
 
     if head.type_count == 0

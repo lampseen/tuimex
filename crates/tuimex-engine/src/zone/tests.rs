@@ -166,14 +166,17 @@ fn a_fixed_footer_adds_nothing() {
 }
 
 #[test]
-fn a_footer_in_another_form_leaves_the_explicit_transitions() {
-    for footer in
-        ["EST5EDT,J60/2,J300/2", "EST5EDT,60,300", "<-02>2<-01>,M3.5.0/-1,M10.5.0/0", "EST5EDT", ":Europe/X", ""]
+fn a_zone_whose_rule_for_the_future_cannot_be_read_is_not_half_known() {
+    let file = |footer: &str| tzif(b'2', &[(at(2000, 1, 1, 0), 1)], &[-4 * HOUR, -5 * HOUR], footer);
+    for footer in ["EST5EDT,J60/2,J300/2", "EST5EDT,60,300", "<-02>2<-01>,M3.5.0/-1,M10.5.0/0", "EST5EDT", ":Europe/X"]
     {
-        let zone = parse(&tzif(b'2', &[(at(2000, 1, 1, 0), 1)], &[-4 * HOUR, -5 * HOUR], footer)).unwrap();
-        assert!(zone.periods.iter().all(|p| p.yearly.is_none()), "{footer:?}");
-        assert_eq!(zone.offset_at(at(2035, 7, 1, 0)), Some(-5 * HOUR), "{footer:?}");
+        assert_eq!(parse(&file(footer)), None, "{footer:?}");
     }
+    // No rule at all is the older form of the file: the transitions it
+    // lists are all it says, and they are used.
+    let zone = parse(&file("")).unwrap();
+    assert!(zone.periods.iter().all(|p| p.yearly.is_none()));
+    assert_eq!(zone.offset_at(at(2035, 7, 1, 0)), Some(-5 * HOUR));
 }
 
 #[test]
