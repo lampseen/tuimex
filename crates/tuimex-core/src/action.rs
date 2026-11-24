@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
+use crate::calendar::Moment;
 use crate::{AccountId, AgentAsk, Attached, Body, Draft, FolderId, MessageId, Timestamp};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -90,11 +91,19 @@ pub enum Start {
     MailTo(String),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The five answers to an invitation (ADR-057).
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Answer {
     Accept,
     Tentative,
     Decline,
+    /// Another time, sent to the organizer as a `COUNTER`.
+    Propose {
+        start: Moment,
+        end: Option<Moment>,
+    },
+    /// Nothing is sent; the invitation stops waiting for an answer.
+    Ignore,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

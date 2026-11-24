@@ -5,6 +5,7 @@
 mod action;
 pub mod calendar;
 mod compose;
+pub mod invitation;
 mod link;
 mod listed;
 mod message;
