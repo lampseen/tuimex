@@ -35,7 +35,7 @@ jobs:
     outputs:
       code: ${{ steps.probe.outputs.code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: probe
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -81,8 +81,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - run: make golden
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: |
@@ -118,7 +118,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: python3 --version
@@ -131,7 +131,9 @@ jobs:
           cargo test --locked -p tuimex --test terminal doctor_with_the_keyring_turned_off | tee keyring.log
           grep -q "doctor_with_the_keyring_turned_off_asks_no_keyring_service_and_says_what_turned_it_off ... ok" keyring.log || {
             echo "::error::the keyring test did not run; the filter has drifted"; exit 1; }
-      - run: cargo test --workspace --locked
+      # Every failing test is wanted from one run: a Mac is not at hand to
+      # run the next one on.
+      - run: cargo test --workspace --locked --no-fail-fast
       - run: cargo build --release --locked && ./target/release/tuimex --version
 
   # ADR-010 as a named gate: a password the engine was given reaches no file
@@ -145,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: |
@@ -172,7 +174,7 @@ jobs:
     env:
       CONTAINER: docker
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: docker --version && openssl version && python3 --version
@@ -187,7 +189,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-gnu
