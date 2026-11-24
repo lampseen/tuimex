@@ -1,0 +1,40 @@
+{default}  {brightblack}Month{default}   {magenta b}Week{default}   {brightblack}Day{default}                                                                            {default b}23 to 29 November 2026{default}  
+{default}                                                                                                                        
+{default}          {magenta b}Mon 23{default}         {brightblack}Tue 24{default}         {brightblack}Wed 25{default}         {default b}Thu 26{default}         {brightblack}Fri 27{default}         {brightblack}Sat 28{default}         {brightblack}Sun 29{default}              
+{default}  {brightblack}all day{default}                                                            {brightblue}|{default}Library book~ {brightblue}|{default}Cabin weekend {brightblue}|{default}Cabin weekend       
+{default}                                                                     {brightblue}|{default}Cabin weekend                                     
+{default}                                                                                                                        
+{default}  {brightblack}08:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}09:00{default}                                                              {brightblue}|{default b}Account revi~{default}                                     
+{default}         {brightyellow}|{brightblack}Standup{default}       {brightyellow}|{default}Standup       {brightyellow}|{default}Standup       {brightyellow}|{default}Standup       {brightyellow}|{default}Standup                                           
+{default}  {brightblack}10:00{default}                                               {magenta}>{default b}Q4 roadmap r~{default}                                                    
+{default}                                                      {magenta}>{brightblack}10:00-11:30{default}                                                      
+{default}  {brightblack}11:00{default}                 {brightblue}|{default}Dentist                      {magenta}>{default} {brightyellow}|{default}Vendor call                                                    
+{default}                        {brightblue}|{brightblack}11:00-11:45{default}                    {brightyellow}|{brightblack}11:00-12:00{default}                                                    
+{default}  {brightblack}12:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}13:00{default}                                {brightyellow}|{default}1:1 with Ima~                                                                   
+{default}                                                                                                                        
+{default}  {magenta b}14:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}15:00{default}  {brightyellow}|{default}Halden contr~                                                                                                 
+{default}         {brightyellow}|{brightblack}15:00-16:00{default}                                                                                                   
+{default}  {brightblack}16:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}17:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}18:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}19:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}20:00{default}                                               {brightyellow}|{default}Staging migr~                                                    
+{default}                                                      {brightyellow}|{brightblack}20:00-23:00{default}                                                      
+{default}  {brightblack}21:00{default}                                               {brightyellow}|{brightblack}local{default}                                                            
+{default}                                                      {brightyellow}|{default}                                                                 
+{default}  {brightblack}22:00{default}                                               {brightyellow}|{default}                                                                 
+{default}                                                      {brightyellow}|{default}                                                                 
+{default}  {brightblack}23:00{default}                                                                                                                 
+{default}                                                                                                                        
+{default}  {brightblack}Thu 26 Nov - 2 of 4 - {yellow}1 to answer{default}                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}i {brightblack}answer - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back - {default}? {brightblack}help{default}                                               

@@ -10,31 +10,31 @@
     u           undo the last action     V            mark a range            B                sealed browser copy      
     A           what the agent can do    Enter        open; a draft, to edit  e d s m M r R f  as in the list           
     ^l          redraw                   p            show or hide preview                                              
-                                         P            preview beside, below   Preview, focused                          
-    Command line                         B            sealed browser copy     j k ^d ^u gg G   scroll                   
-    Tab S-Tab   complete, cycle          Alt-j Alt-l  focus the preview       Alt-k Alt-h      back to the list         
-    Up Down     history, by prefix       gt gT        next, previous account                                            
-    ^w ^u       delete word, line        e            archive                 Links (after o)                           
-    Enter       run                      d            move to Trash           1-9              open that link           
-    Esc         cancel                   s            flag or unflag          j k Enter        choose, then open        
-                                         m            mark read or unread     Esc              close                    
-    Confirm                              M            move to a folder                                                  
-    y Enter     yes                      c            write a new message     Attachments (after a)                     
-    n Esc       no                       r            reply                   j k              choose                   
-    any other   cancels; key dropped     R            reply to everyone       Enter            save to downloads        
-                                         f            forward                 O                open, after asking       
-    Compose                              zo           unfold a thread         Esc              close                    
-    Tab S-Tab   next, previous field     zc           fold a thread                                                     
-    Left Right  identity, on From                                             Agent (after A)                           
-    Enter       edit body in $EDITOR                                          r                write a reply            
-    ^a          attach a file                                                 t                tidy, in compose         
-    ^s          send summary                                                  l                review a link, in links  
-    ^d          save the draft                                                                                          
-    Esc         close; keep or discard                                        Invitation (after i)                      
-                                                                              a                accept                   
-    Help (after ?)                                                            t                tentative                
-    ^d ^u       scroll                                                        d                decline                  
+    gc          the calendar             P            preview beside, below   Preview, focused                          
+                                         B            sealed browser copy     j k ^d ^u gg G   scroll                   
+    Command line                         Alt-j Alt-l  focus the preview       Alt-k Alt-h      back to the list         
+    Tab S-Tab   complete, cycle          gt gT        next, previous account                                            
+    Up Down     history, by prefix       e            archive                 Links (after o)                           
+    ^w ^u       delete word, line        d            move to Trash           1-9              open that link           
+    Enter       run                      s            flag or unflag          j k Enter        choose, then open        
+    Esc         cancel                   m            mark read or unread     Esc              close                    
+                                         M            move to a folder                                                  
+    Confirm                              c            write a new message     Attachments (after a)                     
+    y Enter     yes                      r            reply                   j k              choose                   
+    n Esc       no                       R            reply to everyone       Enter            save to downloads        
+    any other   cancels; key dropped     f            forward                 O                open, after asking       
+                                         zo           unfold a thread         Esc              close                    
+    Compose                              zc           fold a thread                                                     
+    Tab S-Tab   next, previous field                                          Agent (after A)                           
+    Left Right  identity, on From                                             r                write a reply            
+    Enter       edit body in $EDITOR                                          t                tidy, in compose         
+    ^a          attach a file                                                 l                review a link, in links  
+    ^s          send summary                                                                                            
+    ^d          save the draft                                                Invitation (after i)                      
+    Esc         close; keep or discard                                        a                accept                   
+                                                                              t                tentative                
+    Help (after ?)                                                            d                decline                  
+    ^d ^u       scroll                                                        p                propose another time     
                                                                                                                         
-                                                                                                                        
-  98 keys and commands · lines 1-35 of 62                                                   sending in 6s · 1 not sent  
+  140 keys and commands · lines 1-35 of 70                                                  sending in 6s · 1 not sent  
   type to filter · ^d ^u scroll · Esc back                                                                              

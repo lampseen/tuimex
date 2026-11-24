@@ -10,31 +10,31 @@
 {fg}    u           {dim}undo the last action{fg}     V            {dim}mark a range{fg}            B                {dim}sealed browser copy{fg}      
 {fg}    A           {dim}what the agent can do{fg}    Enter        {dim}open; a draft, to edit{fg}  e d s m M r R f  {dim}as in the list{fg}           
 {fg}    ^l          {dim}redraw{fg}                   p            {dim}show or hide preview{fg}                                              
-{fg}                                         P            {dim}preview beside, below{fg}   {fg b}Preview, focused{fg}                          
-{fg}    {fg b}Command line{fg}                         B            {dim}sealed browser copy{fg}     j k ^d ^u gg G   {dim}scroll{fg}                   
-{fg}    Tab S-Tab   {dim}complete, cycle{fg}          Alt-j Alt-l  {dim}focus the preview{fg}       Alt-k Alt-h      {dim}back to the list{fg}         
-{fg}    Up Down     {dim}history, by prefix{fg}       gt gT        {dim}next, previous account{fg}                                            
-{fg}    ^w ^u       {dim}delete word, line{fg}        e            {dim}archive{fg}                 {fg b}Links (after o){fg}                           
-{fg}    Enter       {dim}run{fg}                      d            {dim}move to Trash{fg}           1-9              {dim}open that link{fg}           
-{fg}    Esc         {dim}cancel{fg}                   s            {dim}flag or unflag{fg}          j k Enter        {dim}choose, then open{fg}        
-{fg}                                         m            {dim}mark read or unread{fg}     Esc              {dim}close{fg}                    
-{fg}    {fg b}Confirm{fg}                              M            {dim}move to a folder{fg}                                                  
-{fg}    y Enter     {dim}yes{fg}                      c            {dim}write a new message{fg}     {fg b}Attachments (after a){fg}                     
-{fg}    n Esc       {dim}no{fg}                       r            {dim}reply{fg}                   j k              {dim}choose{fg}                   
-{fg}    any other   {dim}cancels; key dropped{fg}     R            {dim}reply to everyone{fg}       Enter            {dim}save to downloads{fg}        
-{fg}                                         f            {dim}forward{fg}                 O                {dim}open, after asking{fg}       
-{fg}    {fg b}Compose{fg}                              zo           {dim}unfold a thread{fg}         Esc              {dim}close{fg}                    
-{fg}    Tab S-Tab   {dim}next, previous field{fg}     zc           {dim}fold a thread{fg}                                                     
-{fg}    Left Right  {dim}identity, on From{fg}                                             {fg b}Agent (after A){fg}                           
-{fg}    Enter       {dim}edit body in $EDITOR{fg}                                          r                {dim}write a reply{fg}            
-{fg}    ^a          {dim}attach a file{fg}                                                 t                {dim}tidy, in compose{fg}         
-{fg}    ^s          {dim}send summary{fg}                                                  l                {dim}review a link, in links{fg}  
-{fg}    ^d          {dim}save the draft{fg}                                                                                          
-{fg}    Esc         {dim}close; keep or discard{fg}                                        {fg b}Invitation (after i){fg}                      
-{fg}                                                                              a                {dim}accept{fg}                   
-{fg}    {fg b}Help (after ?){fg}                                                            t                {dim}tentative{fg}                
-{fg}    ^d ^u       {dim}scroll{fg}                                                        d                {dim}decline{fg}                  
+{fg}    gc          {dim}the calendar{fg}             P            {dim}preview beside, below{fg}   {fg b}Preview, focused{fg}                          
+{fg}                                         B            {dim}sealed browser copy{fg}     j k ^d ^u gg G   {dim}scroll{fg}                   
+{fg}    {fg b}Command line{fg}                         Alt-j Alt-l  {dim}focus the preview{fg}       Alt-k Alt-h      {dim}back to the list{fg}         
+{fg}    Tab S-Tab   {dim}complete, cycle{fg}          gt gT        {dim}next, previous account{fg}                                            
+{fg}    Up Down     {dim}history, by prefix{fg}       e            {dim}archive{fg}                 {fg b}Links (after o){fg}                           
+{fg}    ^w ^u       {dim}delete word, line{fg}        d            {dim}move to Trash{fg}           1-9              {dim}open that link{fg}           
+{fg}    Enter       {dim}run{fg}                      s            {dim}flag or unflag{fg}          j k Enter        {dim}choose, then open{fg}        
+{fg}    Esc         {dim}cancel{fg}                   m            {dim}mark read or unread{fg}     Esc              {dim}close{fg}                    
+{fg}                                         M            {dim}move to a folder{fg}                                                  
+{fg}    {fg b}Confirm{fg}                              c            {dim}write a new message{fg}     {fg b}Attachments (after a){fg}                     
+{fg}    y Enter     {dim}yes{fg}                      r            {dim}reply{fg}                   j k              {dim}choose{fg}                   
+{fg}    n Esc       {dim}no{fg}                       R            {dim}reply to everyone{fg}       Enter            {dim}save to downloads{fg}        
+{fg}    any other   {dim}cancels; key dropped{fg}     f            {dim}forward{fg}                 O                {dim}open, after asking{fg}       
+{fg}                                         zo           {dim}unfold a thread{fg}         Esc              {dim}close{fg}                    
+{fg}    {fg b}Compose{fg}                              zc           {dim}fold a thread{fg}                                                     
+{fg}    Tab S-Tab   {dim}next, previous field{fg}                                          {fg b}Agent (after A){fg}                           
+{fg}    Left Right  {dim}identity, on From{fg}                                             r                {dim}write a reply{fg}            
+{fg}    Enter       {dim}edit body in $EDITOR{fg}                                          t                {dim}tidy, in compose{fg}         
+{fg}    ^a          {dim}attach a file{fg}                                                 l                {dim}review a link, in links{fg}  
+{fg}    ^s          {dim}send summary{fg}                                                                                            
+{fg}    ^d          {dim}save the draft{fg}                                                {fg b}Invitation (after i){fg}                      
+{fg}    Esc         {dim}close; keep or discard{fg}                                        a                {dim}accept{fg}                   
+{fg}                                                                              t                {dim}tentative{fg}                
+{fg}    {fg b}Help (after ?){fg}                                                            d                {dim}decline{fg}                  
+{fg}    ^d ^u       {dim}scroll{fg}                                                        p                {dim}propose another time{fg}     
 {fg}                                                                                                                        
-{fg}                                                                                                                        
-{fg}  {dim}98 keys and commands · lines 1-35 of 62{fg}                                                   sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}140 keys and commands · lines 1-35 of 70{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

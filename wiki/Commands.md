@@ -70,14 +70,21 @@ what you have typed; `^w` and `^u` delete a word and the line.
 | `:preview auto\|right\|below\|off` | where the preview sits |
 | `:sync [all]` | sync now |
 | `:empty-trash [account]` | delete an account's Trash for good, after a question with the count. `u` does not reach it |
-| `:invite accept\|tentative\|decline` | answer an invitation. Not built: it says so and changes nothing |
+| `:invite accept\|tentative\|decline\|propose\|ignore` | answer an invitation. Not built: it says so and changes nothing |
+| `:calendar [month\|week\|day]` | open the calendar; alone, where it was. Only the month is drawn: the week and the day say they are not built |
+| `:mail` | back to mail, where it was |
+| `:goto <date>` | go to a date in the calendar: `2026-12-05`, `5 dec`, `fri`, `+2w` |
+| `:notify on\|off` | reminders on or off, for this run. Not built beyond that: no reminder is given |
+| `:event [title]` | a new event on the selected day. Not built: the form says so |
+| `:export [path]` | write local events as .ics. Not built: it says so and writes nothing |
 | `:messages` | the last results and errors |
 | `:q` | quit from the list; back elsewhere |
 | `:qa` | quit from anywhere |
 
 **What a command acts on.** The selected row, or every marked row when
 there are marks. A folded thread is taken whole. A command does not take a
-row's number: move the cursor or mark.
+row's number: move the cursor or mark. In the calendar the rows of mail are
+out of sight, so a command that takes them is refused there and says so.
 
 **What it says back.** A result is in the past tense with the next key
 after a dot, `✓ Trashed 3 messages · u to undo`. An error starts with `E` and names

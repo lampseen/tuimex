@@ -1,0 +1,40 @@
+{fg}  {dim}Month{fg}   {dim}Week{fg}   {acc b}Day{fg}                                                                              {fg b}Mon 23 November 2026{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Today · Mon 23 November{fg}                                                                                               
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}    {head}work{fg}       {dim}15:00-16:00{fg}  Halden contract {fg b u}call{fg}                                                                        
+{fg}                                                                                                                        
+{fg}  {dim b}Tomorrow · Tue 24 November{fg}                                                                                            
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}    {faint}personal{fg}   {faint}11:00-11:45{fg}  {faint}Dentist{fg}  {faint}Kirkegata 12{fg}                                                                       
+{fg}                                                                                                                        
+{fg}  {dim b}Wed 25 November{fg}                                                                                                       
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}    {faint}work{fg}       {faint}13:00-13:30{fg}  {faint}1:1 with Imani{fg}                                                                              
+{fg}                                                                                                                        
+{fg}  {dim b}Thu 26 November{fg}                                                                                                       
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}    {faint}work{fg}       {faint}10:00-11:30{fg}  {faint}Q4 roadmap review{fg}                                                             {faint}needs answer{fg}  
+{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor {fg b u}call{fg}                                                                      {agent}tentative{fg}  
+{fg}    {faint}work{fg}       {faint}20:00-23:00{fg}  {faint}Staging migration window{fg}                                                             {faint}local{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {faint}personal{fg}   {faint}all day{fg}      {faint}Library books due{fg}                                                                    {faint}local{fg}  
+{fg}    {faint}personal{fg}   {faint}all day{fg}      {faint}Cabin weekend{fg}  {faint}Ridge saddle hut{fg}                                                             
+{fg}    {faint}personal{fg}   {faint}09:00-09:30{fg}  {faint}Account review{fg}                                                                {faint}needs answer{fg}  
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Sat 28 November{fg}                                                                                                       
+{fg}    {faint}personal{fg}   {faint}all day{fg}      {faint}Cabin weekend{fg}  {faint}Ridge saddle hut{fg}                                                             
+{fg}                                                                                                                        
+{fg}  {dim b}Sun 29 November{fg}                                                                                                       
+{fg}    {faint}personal{fg}   {faint}all day{fg}      {faint}Cabin weekend{fg}  {faint}Ridge saddle hut{fg}                                                             
+{fg}                                                                                                                        
+{fg}  {dim b}Mon 30 November{fg}                                                                                                       
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Tue 1 December{fg}                                                                                                        
+{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  /call{bg bg=acc} {fg}                                                                                                                

@@ -1,0 +1,14 @@
+{default}  {default b}Q4 roadmap review{default}                                                                               {brightblack}2 of 4 on Thu 26 Nov{default}  
+{default}                                                                                                                        
+{default}    {brightblack}When     {default}Thu 26 Nov 2026, 10:00 to 11:30{brightblack} - in 3 days{default}                                                                
+{default}    {brightblack}Where    {default}Room Fjord                                                                                                 
+{default}    {brightblack}Join     {default}meet.example.org {brightblack}https://meet.example.org/r/q4-roadmap{default}                                                     
+{default}    {brightblack}Calendar {brightyellow}work{brightblack} - its own calendar, read 20s ago{default}                                                                      
+{default}    {brightblack}Who      {default}Imani Castell {brightblack}organizer, {default}you {yellow}no answer{brightblack}, {default}Lars Lindqvist {brightblack}yes, {default}Mei Tanaka {brightblack}no, {default}Dmitri Volkov {brightblack}no answer{default}         
+{default}    {brightblack}Answer   {yellow}not answered{default}                                                                                               
+{default}    {brightblack}Reminder {default}10 minutes before                                                                                          
+{default}                                                                                                                        
+{default}    {yellow}^ Needs your answer{brightblack} - asked by Imani Castell{default}                                                                        
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  i {brightblack}answer - {default}o {brightblack}links - {default}v {brightblack}its mail - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back{default}                                                        

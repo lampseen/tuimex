@@ -1,0 +1,8 @@
+{default}  {brightblack b}Fri 27 November{default}                                                                                                       
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Library books due                                                                    {cyan}local{default}  
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                                                             
+{magenta}>{default}   {brightblue}personal{default}   {brightblack}09:00-09:30{default}  {default b}Account review{default}                                                                {yellow}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://bank.example.com.device-check.example.net/meet                              sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {yellow}^{default} Text says bank.example.com; opens bank.example.com.device-check.example.net. Open?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no - {default}A {brightblack}ask the agent{default}  

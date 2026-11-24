@@ -2,6 +2,7 @@ use tuimex_core::{Address, Attachment, Body, EventTime, Invite, Link, Picture, T
 
 use super::text::{invite, rows};
 use super::{files, links, look};
+use crate::palette::Tok;
 use crate::span::Line;
 
 fn text(line: &Line) -> String {
@@ -129,9 +130,9 @@ fn a_link_s_row_shows_its_real_host_and_what_is_wrong_with_it() {
             " 7  www.example.com     {err|braces}",
         ]
     );
-    let fifth = look(&b.links[4], &b);
+    let fifth = look(&b.links[4], &b.trackers);
     assert_eq!(fifth.url, "https://www.example.com/offer?id=7");
-    assert!(look(&b.links[3], &b).blocked && !fifth.blocked);
+    assert!(look(&b.links[3], &b.trackers).blocked && !fifth.blocked);
 }
 
 #[test]
@@ -158,7 +159,8 @@ fn an_invitation_s_card_says_when_and_who_in_words() {
         recurrence: Some("every week".into()),
     };
     let me = ["ME@example.com".to_string()];
-    let got: Vec<String> = invite(&card, &me).iter().map(text).collect();
+    let work = ("work", Tok::Head);
+    let got: Vec<String> = invite(&card, &me, work).iter().map(text).collect();
     assert_eq!(
         got,
         [
@@ -166,15 +168,16 @@ fn an_invitation_s_card_says_when_and_who_in_words() {
             "When     Thu 26 Nov 2026, 10:00 to Fri 27 Nov 2026, 01:00",
             "Who      Ada and 1 other",
             "Repeats  every week",
+            "Calendar work · the account it came to",
             "",
         ]
     );
     card.attendees.push(person("Me", "me@example.com"));
     (card.start, card.end, card.organizer) = (EventTime::Day(Timestamp(day)), None, None);
-    let got: Vec<String> = invite(&card, &me).iter().map(text).collect();
+    let got: Vec<String> = invite(&card, &me, work).iter().map(text).collect();
     assert_eq!(got[1..3], ["When     Thu 26 Nov 2026", "Who      you and 2 others"]);
     card.start = EventTime::Local { wall: Timestamp(day + 36_000), zone: Some("Mars/Olympus".into()) };
-    assert_eq!(text(&invite(&card, &me)[1]), "When     Thu 26 Nov 2026, 10:00 Mars/Olympus");
+    assert_eq!(text(&invite(&card, &me, work)[1]), "When     Thu 26 Nov 2026, 10:00 Mars/Olympus");
 }
 
 /// The design's rule for the narrow preview: no word of a message is cut.

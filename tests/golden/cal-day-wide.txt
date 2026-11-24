@@ -1,0 +1,45 @@
+  Month   Week   Day                                                                                                                                          Thu 26 November 2026  
+                                                                                                                                                                                    
+  Thu 26 November                                                                                              │  Q4 roadmap review                                                 
+    work       09:30-09:45  Standup                                                                            │                                                                    
+▌   work       10:00-11:30  Q4 roadmap review                                                    needs answer  │    When     Thu 26 Nov 2026, 10:00 to 11:30 · in 3 days            
+    work       11:00-12:00  Vendor call                                                             tentative  │    Where    Room Fjord                                             
+    work       20:00-23:00  Staging migration window                                                    local  │    Join     meet.example.org https://meet.example.org/r/q4-roadm…  
+                                                                                                               │    Calendar work · its own calendar, read 20s ago                  
+  Fri 27 November                                                                                              │    Who      Imani Castell organizer, you no answer,                
+    personal   all day      Library books due                                                           local  │             Lars Lindqvist yes, Mei Tanaka no, and 1 more          
+    personal   all day      Cabin weekend  Ridge saddle hut                                                    │                                                                    
+    personal   09:00-09:30  Account review                                                       needs answer  │    The pre-read is the roadmap document from last week. Please     
+    work       09:30-09:45  Standup                                                                            │    answer by Wednesday so I can book the right room.               
+                                                                                                               │                                                                    
+  Sat 28 November                                                                                              │    · What shipped in Q3 and what slipped                           
+    personal   all day      Cabin weekend  Ridge saddle hut                                                    │    · The three bets for Q4                                         
+                                                                                                               │    · Headcount, once the budget is in                              
+  Sun 29 November                                                                                              │                                                                    
+    personal   all day      Cabin weekend  Ridge saddle hut                                                    │                                                                    
+                                                                                                               │                                                                    
+  Mon 30 November                                                                                              │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+                                                                                                               │                                                                    
+  Tue 1 December                                                                                               │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+                                                                                                               │                                                                    
+  Wed 2 December                                                                                               │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+                                                                                                               │                                                                    
+  Thu 3 December                                                                                               │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+    personal   19:00-21:00  Book club  at Greta's                                                              │                                                                    
+                                                                                                               │                                                                    
+  Fri 4 December                                                                                               │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+                                                                                                               │                                                                    
+  Sat 5 December                                                                                               │                                                                    
+    personal   10:00-13:00  Gear swap  Fernway hall                                                     local  │                                                                    
+                                                                                                               │                                                                    
+  Mon 7 December                                                                                               │                                                                    
+    work       all day      On call                                                                            │                                                                    
+    work       09:30-09:45  Standup                                                                            │                                                                    
+                                                                                                                                                                                    
+  Thu 26 Nov · 2 of 4 · 1 to answer                                                                                                                     sending in 6s · 1 not sent  
+  Enter open · i answer · o links · E edit · d delete · Esc back · ? help                                                                                                           

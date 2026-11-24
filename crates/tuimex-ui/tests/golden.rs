@@ -9,6 +9,8 @@
 // unwrap does; clippy's test allowance does not reach helper functions.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
+mod calendar;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -34,8 +36,9 @@ use tuimex_ui::span::{Line, cells, markup};
 const DEFAULT: &str = ".";
 const ASCII_16: &str = "ascii-16";
 
-/// Every output this test can draw. `no_output_goes_undrawn` fails when the
-/// design has one that is neither here nor a later milestone's.
+/// Every output of mail this test can draw; the calendar's are listed in
+/// `calendar`. `no_output_goes_undrawn` fails when the design has one that
+/// is in neither.
 const DRAWN: [&str; 100] = [
     "list-three-accounts",
     "list-three-accounts-80-ascii",
@@ -619,7 +622,7 @@ fn reading(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             assert_eq!(app.pictures().map(|(id, _)| id.key.as_str()), Some("draft-agent"));
             notice(app)
         }
-        _ => return None,
+        _ => return calendar::draw(name, width, height),
     })
 }
 
@@ -649,7 +652,7 @@ fn session(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             let mut app = app(usual_mail());
             press(&mut app, "?");
             app.lines(width, height);
-            press(&mut app, "^d^d");
+            press(&mut app, "^d^d^d");
             app.lines(width, height)
         }
         "help-filtered" => {
@@ -1211,18 +1214,19 @@ fn agent_completion() {
 #[test]
 fn no_output_goes_undrawn() {
     let (mut found, mut wrong) = (Vec::new(), Vec::new());
+    let drawn: Vec<&str> = DRAWN.iter().copied().chain(calendar::drawn()).collect();
     for build in [DEFAULT, ASCII_16] {
         for output in index(build).iter() {
             let name = output.name.as_str();
             match compare(build, name) {
                 Err(why) => wrong.push(why.lines().next().unwrap_or_default().to_string()),
-                Ok(()) => assert!(DRAWN.contains(&name), "{build}/{name}: drawn, and not listed in DRAWN"),
+                Ok(()) => assert!(drawn.contains(&name), "{build}/{name}: drawn, and not listed in DRAWN"),
             }
             found.push(name.to_string());
         }
     }
     assert!(wrong.is_empty(), "{} outputs are not the design's:\n{}", wrong.len(), wrong.join("\n"));
-    for name in DRAWN {
+    for name in drawn {
         assert!(found.iter().any(|f| f == name), "{name} is drawn here and the design no longer has it");
     }
 }

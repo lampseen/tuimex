@@ -1,0 +1,40 @@
+{default}  {brightblack}Month{default}   {brightblack}Week{default}   {magenta b}Day{default}                                                                              {default b}Mon 23 November 2026{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}    {brightyellow}work{default}       {brightblack}15:00-16:00{default}  Halden contract {default b u}call{default}                                                                        
+{default}                                                                                                                        
+{default}  {brightblack b}Tomorrow - Tue 24 November{default}                                                                                            
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}    {brightblack}personal{default}   {brightblack}11:00-11:45{default}  {brightblack}Dentist{default}  {brightblack}Kirkegata 12{default}                                                                       
+{default}                                                                                                                        
+{default}  {brightblack b}Wed 25 November{default}                                                                                                       
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}    {brightblack}work{default}       {brightblack}13:00-13:30{default}  {brightblack}1:1 with Imani{default}                                                                              
+{default}                                                                                                                        
+{default}  {brightblack b}Thu 26 November{default}                                                                                                       
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}    {brightblack}work{default}       {brightblack}10:00-11:30{default}  {brightblack}Q4 roadmap review{default}                                                             {brightblack}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}11:00-12:00{default}  Vendor {default b u}call{default}                                                                      {cyan}tentative{default}  
+{default}    {brightblack}work{default}       {brightblack}20:00-23:00{default}  {brightblack}Staging migration window{default}                                                             {brightblack}local{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Fri 27 November{default}                                                                                                       
+{default}    {brightblack}personal{default}   {brightblack}all day{default}      {brightblack}Library books due{default}                                                                    {brightblack}local{default}  
+{default}    {brightblack}personal{default}   {brightblack}all day{default}      {brightblack}Cabin weekend{default}  {brightblack}Ridge saddle hut{default}                                                             
+{default}    {brightblack}personal{default}   {brightblack}09:00-09:30{default}  {brightblack}Account review{default}                                                                {brightblack}needs answer{default}  
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Sat 28 November{default}                                                                                                       
+{default}    {brightblack}personal{default}   {brightblack}all day{default}      {brightblack}Cabin weekend{default}  {brightblack}Ridge saddle hut{default}                                                             
+{default}                                                                                                                        
+{default}  {brightblack b}Sun 29 November{default}                                                                                                       
+{default}    {brightblack}personal{default}   {brightblack}all day{default}      {brightblack}Cabin weekend{default}  {brightblack}Ridge saddle hut{default}                                                             
+{default}                                                                                                                        
+{default}  {brightblack b}Mon 30 November{default}                                                                                                       
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Tue 1 December{default}                                                                                                        
+{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  /call{black bg=magenta} {default}                                                                                                                

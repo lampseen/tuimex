@@ -9,6 +9,7 @@
 {fg}    {dim}When     {fg}Thu 26 Nov 2026, 10:00 to 11:30                                                                            
 {fg}    {dim}Where    {fg}Room Fjord, or the call link {link}[1]{fg}                                                                           
 {fg}    {dim}Who      {fg}Imani Castell, you and 3 others                                                                            
+{fg}    {dim}Calendar {head}work{dim} · the account it came to{fg}                                                                              
 {fg}                                                                                                                        
 {fg}    The pre-read is the roadmap document from last week. Please answer by                                               
 {fg}    Wednesday so I can book the right room.                                                                             
@@ -35,6 +36,5 @@
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
-{fg}                                                                                                                        
 {fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Answer?{dim}  {fg}a {dim}accept · {fg}t {dim}tentative · {fg}d {dim}decline · {fg}Esc {dim}cancel{fg}                                                              
+{fg}  Answer?{dim}  {fg}a {dim}accept · {fg}t {dim}tentative · {fg}d {dim}decline · {fg}p {dim}propose a time · {fg}x {dim}ignore · {fg}Esc {dim}cancel{fg}                                

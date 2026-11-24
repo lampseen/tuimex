@@ -1,0 +1,11 @@
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                                                    {agent}local{fg}  
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {dim bg=sel}09:00-09:30{fg bg=sel}  {fg bg=sel b}Account review{fg bg=sel}                                                                {warn bg=sel}needs answer{fg bg=sel}  
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{fg}                                                                                                                        
+{fg}  {fg b}Links{fg}                                                                                                                 
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel} 1  {fg bg=sel}bank.example.com.device-check.example.net   {dim bg=sel}bank.example.com{fg bg=sel}   {warn bg=sel}▲{fg bg=sel} text says bank.example.com                     
+{fg}                                                                                                                        
+{fg}  {dim}opens{fg} https://bank.example.com.device-check.example.net/meet                              sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  1-9 {dim}open · {fg}j k Enter {dim}choose · {fg}A {dim}agent · {fg}Esc {dim}close{fg}                                                                     

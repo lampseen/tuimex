@@ -11,8 +11,12 @@ use std::collections::BTreeMap;
 
 use crate::Address;
 
+pub mod date;
+mod rules;
 #[cfg(test)]
 mod tests;
+
+pub use self::rules::{Standing, links_of, standing};
 
 pub const DAY: i64 = 86_400;
 

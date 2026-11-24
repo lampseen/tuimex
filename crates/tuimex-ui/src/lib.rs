@@ -3,6 +3,7 @@
 //! binary owns the terminal and feeds it.
 
 pub mod app;
+pub mod calendar;
 pub mod command;
 pub mod compose;
 pub mod editor;

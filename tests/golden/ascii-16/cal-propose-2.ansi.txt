@@ -1,0 +1,8 @@
+{default}  {brightblack b}Thu 26 November{default}                                                                                                       
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                                                     
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}10:00-11:30{default}  Q4 roadmap review                                                       {cyan}proposed Thu 14:00{default}  
+{default}    {brightyellow}work{default}       {brightblack}11:00-12:00{default}  Vendor call                                                                      {cyan}tentative{default}  
+{default}    {brightyellow}work{default}       {brightblack}20:00-23:00{default}  Staging migration window                                                             {cyan}local{default}  
+{default}                                                                                                                        
+{default}  {brightblack}Thu 26 Nov - 2 of 4{default}                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {green}+{default} Proposed Thu 26 Nov 14:00 to Imani Castell{brightblack} - u to undo{default}                                                              

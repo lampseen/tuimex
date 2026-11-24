@@ -1,0 +1,40 @@
+{fg}  {dim}Month{fg}   {dim}Week{fg}   {acc b}Day{fg}                                                                              {fg b}Thu 26 November 2026{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Thu 26 November{fg}                                                                                                       
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {dim bg=sel}10:00-11:30{fg bg=sel}  {fg bg=sel b}Q4 roadmap review{fg bg=sel}                                                             {warn bg=sel}needs answer{fg bg=sel}  
+{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor call                                                                      {agent}tentative{fg}  
+{fg}    {head}work{fg}       {dim}20:00-23:00{fg}  Staging migration window                                                             {agent}local{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                                                    {agent}local{fg}  
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{fg}    {link}personal{fg}   {dim}09:00-09:30{fg}  {fg b}Account review{fg}                                                                {warn}needs answer{fg}  
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Sat 28 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{fg}                                                                                                                        
+{fg}  {dim b}Sun 29 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{fg}  {fg b}Q4 roadmap review{fg}                                                                                                     
+{fg}                                                                                                                        
+{fg}    {dim}When     {fg}Thu 26 Nov 2026, 10:00 to 11:30{dim} · in 3 days{fg}                                                                
+{fg}    {dim}Where    {fg}Room Fjord                                                                                                 
+{fg}    {dim}Join     {fg}meet.example.org {dim}https://meet.example.org/r/q4-roadmap{fg}                                                     
+{fg}    {dim}Calendar {head}work{dim} · its own calendar, read 20s ago{fg}                                                                      
+{fg}    {dim}Who      {fg}Imani Castell {dim}organizer, {fg}you {warn}no answer{dim}, {fg}Lars Lindqvist {dim}yes, {fg}Mei Tanaka {dim}no, {fg}Dmitri Volkov {dim}no answer{fg}         
+{fg}                                                                                                                        
+{fg}    The pre-read is the roadmap document from last week. Please answer by                                               
+{fg}    Wednesday so I can book the right room.                                                                             
+{fg}                                                                                                                        
+{fg}    {dim}· {fg}What shipped in Q3 and what slipped                                                                               
+{fg}    {dim}· {fg}The three bets for Q4                                                                                             
+{fg}    {dim}· {fg}Headcount, once the budget is in                                                                                  
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                               

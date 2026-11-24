@@ -707,7 +707,7 @@ const EVENTS = [
   // Accepted from tuimex on an account whose own calendar it cannot write.
   { id: 'migration', account: 'work', day: '2026-11-26', start: '20:00', end: '23:00', title: 'Staging migration window', organizer: 'lars', answer: 'accepted', local: true },
   // The link's text names one host and it opens another (ADR-018).
-  { id: 'review', account: 'personal', day: '2026-11-27', start: '09:00', end: '09:30', title: 'Account review', where: 'https://bank.example.com/meet',
+  { id: 'review', account: 'personal', day: '2026-11-27', start: '09:00', end: '09:30', title: 'Account review', where: 'bank.example.com',
     link: { host: 'bank.example.com.device-check.example.net', url: 'https://bank.example.com.device-check.example.net/meet', shown: 'bank.example.com' },
     organizer: 'bank', answer: 'needs' },
   { id: 'library', account: 'personal', day: '2026-11-27', allDay: true, title: 'Library books due', local: true },
