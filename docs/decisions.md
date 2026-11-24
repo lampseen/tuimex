@@ -1349,6 +1349,14 @@ from yet. The code scanning rule holds every pull request until CodeQL
 has run, so it must be turned on in the repository before the ruleset is
 applied.
 
+*2026-11-24, after the first runs on GitHub: three runners, not four.* The
+ruleset, the Linux and ARM builds and both Mac builds have now run. One Mac
+job builds both Mac targets, each still on `macos-latest`: with a job for
+each, GitHub twice gave a runner to one and cancelled the other after
+fifteen minutes in its queue, and a release that needs two scarce runners
+at once waits twice as often as one that needs one. The Intel binary was
+already a cross build, so nothing about what is built changed.
+
 ## ADR-052 — What is published about other projects' weaknesses
 
 The review that most of the security records answer (ADR-007 to ADR-018)

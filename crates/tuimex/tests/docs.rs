@@ -368,22 +368,27 @@ fn the_jobs_that_read_prose_are_not_skipped_for_prose_and_every_job_has_a_time_l
     }
 }
 
-/// The value of `key` on each line of the release workflow's build matrix.
-fn matrix(key: &str) -> Vec<String> {
+/// What the release workflow builds: each target, the runner it is built
+/// on and the name its archive carries, read from the build matrix.
+fn builds() -> Vec<(String, String, String)> {
     let release = read(".github/workflows/release.yml");
-    let rows: Vec<&str> = release.lines().filter(|l| l.trim_start().starts_with("- { target: ")).collect();
-    let value = |row: &str| {
-        let (_, rest) = row.split_once(&format!("{key}: ")).unwrap_or_else(|| panic!("no {key} in {row}"));
-        rest.split([',', ' ']).next().unwrap().to_string()
-    };
-    rows.into_iter().map(value).collect()
+    let mut all = Vec::new();
+    for row in release.lines().filter(|l| l.trim_start().starts_with("- { os: ")) {
+        let os = row.split_once("os: ").unwrap().1.split(',').next().unwrap().trim();
+        let list = row.split_once("builds: '").unwrap_or_else(|| panic!("no builds in {row}")).1;
+        for build in list.split('\'').next().unwrap().split(' ') {
+            let (target, name) = build.split_once('=').unwrap_or_else(|| panic!("{build}"));
+            all.push((target.to_string(), os.to_string(), name.to_string()));
+        }
+    }
+    all
 }
 
 /// ADR-051 and ADR-022: four targets, each on the runner the record gives
 /// it, and nothing for Windows.
 #[test]
 fn the_release_builds_exactly_the_four_targets_and_none_for_windows() {
-    let built: Vec<(String, String)> = matrix("target").into_iter().zip(matrix("os")).collect();
+    let built: Vec<(String, String)> = builds().into_iter().map(|(target, os, _)| (target, os)).collect();
     let pair = |target: &str, os: &str| (target.to_string(), os.to_string());
     let wanted = [
         pair("x86_64-unknown-linux-gnu", "ubuntu-22.04"),
@@ -392,6 +397,10 @@ fn the_release_builds_exactly_the_four_targets_and_none_for_windows() {
         pair("aarch64-apple-darwin", "macos-latest"),
     ];
     assert_eq!(built, wanted);
+    // Mac runners are the scarce ones: two jobs wanting one each have twice
+    // left a release waiting on a runner that never came.
+    let macs = read(".github/workflows/release.yml").lines().filter(|l| l.contains("os: macos-")).count();
+    assert_eq!(macs, 1, "the Mac targets are built by one job on one runner");
     let release = read(".github/workflows/release.yml").to_lowercase();
     assert!(!release.contains("windows") && !release.contains(".exe") && !release.contains(".zip"));
     // A record's lines are wrapped where they fall.
@@ -405,10 +414,10 @@ fn the_release_builds_exactly_the_four_targets_and_none_for_windows() {
 /// names that no release holds is a formula that cannot be installed.
 #[test]
 fn every_archive_the_formula_names_is_one_the_release_makes() {
-    let made: BTreeSet<String> = matrix("name").into_iter().map(|name| format!("tuimex_{name}.tar.gz")).collect();
+    let made: BTreeSet<String> = builds().into_iter().map(|(_, _, name)| format!("tuimex_{name}.tar.gz")).collect();
     assert_eq!(made.len(), 4, "{made:?}");
     let release = read(".github/workflows/release.yml");
-    assert!(release.contains("tar -czf dist/tuimex_${{ matrix.name }}.tar.gz "), "the archive is named by the matrix");
+    assert!(release.contains("tar -czf \"dist/tuimex_$name.tar.gz\" "), "the archive is named by the matrix");
     let formula = read("packaging/homebrew/tuimex.rb");
     let prefix = "https://github.com/lampseen/tuimex/releases/download/vVERSION/";
     let named: BTreeSet<String> = formula
@@ -424,7 +433,7 @@ fn every_archive_the_formula_names_is_one_the_release_makes() {
 /// that no release holds is an instruction that ends in a 404.
 #[test]
 fn every_archive_the_readme_and_the_wiki_name_is_one_the_release_makes() {
-    let made: BTreeSet<String> = matrix("name").into_iter().map(|name| format!("tuimex_{name}.tar.gz")).collect();
+    let made: BTreeSet<String> = builds().into_iter().map(|(_, _, name)| format!("tuimex_{name}.tar.gz")).collect();
     let mut named = BTreeSet::new();
     for page in ["README.md", "wiki/Installing.md"] {
         let text = read(page);
