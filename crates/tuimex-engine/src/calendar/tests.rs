@@ -23,16 +23,25 @@ fn store(name: &str) -> Calendars {
 /// whether it was signed in.
 type Asked = (String, String, Option<u8>, String, bool);
 
+/// What a request said beside its address and body: its precondition, as
+/// `If-Match: <tag>` or `If-None-Match: <tag>`, and its body's type.
+type Said = (Option<String>, Option<&'static str>);
+
 /// Answers in the order given and keeps what it was asked.
 struct Script {
     answers: RefCell<Vec<Got>>,
     asked: RefCell<Vec<Asked>>,
+    said: RefCell<Vec<Said>>,
 }
 
 impl Script {
     fn new(answers: Vec<(u16, String)>) -> Script {
-        let answers = answers.into_iter().rev().map(|(status, body)| Got { status, body }).collect();
-        Script { answers: RefCell::new(answers), asked: RefCell::new(Vec::new()) }
+        Script::answering(answers.into_iter().map(|(status, body)| Got { status, body, etag: None }).collect())
+    }
+
+    fn answering(answers: Vec<Got>) -> Script {
+        let answers = answers.into_iter().rev().collect();
+        Script { answers: RefCell::new(answers), asked: RefCell::new(Vec::new()), said: RefCell::new(Vec::new()) }
     }
 
     fn methods(&self) -> Vec<String> {
@@ -46,9 +55,14 @@ impl Wire for Script {
             sent.method.to_string(),
             sent.url.to_string(),
             sent.depth,
-            sent.body.unwrap_or_default().to_string(),
+            sent.body.map_or("", |body| body.text).to_string(),
             sent.sign_in.is_some(),
         ));
+        let only_if = sent.only_if.map(|only| match only {
+            Only::IfMatch(tag) => format!("If-Match: {tag}"),
+            Only::IfNoneMatch(tag) => format!("If-None-Match: {tag}"),
+        });
+        self.said.borrow_mut().push((only_if, sent.body.map(|body| body.content_type)));
         Ok(self.answers.borrow_mut().pop().expect("the script has an answer for every request"))
     }
 }
@@ -294,7 +308,7 @@ struct Served(Vec<(&'static str, u16, String)>);
 impl Wire for Served {
     fn send(&self, sent: &Sent<'_>) -> Result<Got, CalendarError> {
         let (_, status, body) = self.0.iter().find(|(url, ..)| *url == sent.url).expect("an address it serves");
-        Ok(Got { status: *status, body: body.clone() })
+        Ok(Got { status: *status, body: body.clone(), etag: None })
     }
 }
 
@@ -494,4 +508,240 @@ fn what_is_kept_says_whose_it_is_whether_it_is_local_and_when_it_was_read() {
         .map(|k| (k.account.as_str(), k.local, k.name.as_deref(), k.read_at, k.calendar.events[0].summary.as_str()))
         .collect();
     assert_eq!(said, [("work", false, Some("Work"), Some(5_000), "Standup"), ("home", true, None, None, "Dentist")]);
+}
+
+const ROBIN: &str = "robin@example.org";
+const LUNCH: &str = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:lunch@example.org\r\nDTSTART:20261126T120000Z\r\n\
+                     SUMMARY:Lunch\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+const LUNCH_MOVED: &str = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:lunch@example.org\r\nDTSTART:20261126T130000Z\r\n\
+                           SUMMARY:Lunch moved\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+const CALENDAR_TYPE: Option<&str> = Some("text/calendar; charset=utf-8");
+
+fn got(status: u16, etag: Option<&str>) -> Got {
+    Got { status, body: String::new(), etag: etag.map(str::to_string) }
+}
+
+/// What the store holds of the calendar at `URL`: address, tag and text.
+fn holds(store: &Calendars) -> Vec<(String, Option<String>, String)> {
+    let held = store.held().unwrap().into_iter().filter(|h| h.calendar.as_deref() == Some(URL));
+    held.map(|h| (h.href, h.etag, h.text)).collect()
+}
+
+/// A store that holds A and B at tag "1", as a fetch left them.
+fn store_holding_a_and_b(name: &str) -> Calendars {
+    let store = store(name);
+    let read = Script::new(vec![
+        about("t1"),
+        listing(&[(A, "\"1\""), (B, "\"1\"")]),
+        events(&[(A, "\"1\"", "Standup"), (B, "\"1\"", "Review")]),
+    ]);
+    fetch(&read, &store).unwrap();
+    store
+}
+
+fn put_new_as_robin(script: &Script, store: &Calendars, text: &str, name: &str) -> Result<String, CalendarError> {
+    let password = Secret::new("app password".to_string());
+    put_new(script, store, "work", URL, (ROBIN, &password), text, name)
+}
+
+fn put_changed_as_robin(script: &Script, store: &Calendars, href: &str, text: &str) -> Result<(), CalendarError> {
+    let password = Secret::new("app password".to_string());
+    put_changed(script, store, "work", URL, (ROBIN, &password), href, text)
+}
+
+fn delete_as_robin(script: &Script, store: &Calendars, href: &str) -> Result<(), CalendarError> {
+    let password = Secret::new("app password".to_string());
+    delete(script, store, "work", URL, (ROBIN, &password), href)
+}
+
+/// Method, address and body of the one request `script` was sent.
+fn only_request(script: &Script) -> (String, String, String) {
+    let asked = script.asked.borrow();
+    assert_eq!(asked.len(), 1, "{asked:?}");
+    assert!(asked[0].4, "a write is signed in");
+    assert_eq!(asked[0].2, None, "a write has no depth");
+    (asked[0].0.clone(), asked[0].1.clone(), asked[0].3.clone())
+}
+
+#[test]
+fn a_read_carries_no_precondition_and_says_its_body_is_xml() {
+    let store = store("read-headers");
+    let script = Script::new(vec![about("t1"), listing(&[(A, "\"1\"")]), events(&[(A, "\"1\"", "Standup")])]);
+    fetch(&script, &store).unwrap();
+    let xml = Some("application/xml; charset=utf-8");
+    assert_eq!(*script.said.borrow(), [(None, xml), (None, xml), (None, xml)]);
+}
+
+#[test]
+fn a_new_event_is_put_only_where_nothing_is_and_kept_with_the_tag_the_server_gave() {
+    let store = store("put-new");
+    let script = Script::answering(vec![got(201, Some("\"e1\""))]);
+    let href = put_new_as_robin(&script, &store, LUNCH, "k1.lunch").unwrap();
+    assert_eq!(href, "/calendar/dav/robin%40example.org/events/k1.lunch.ics");
+    assert_eq!(only_request(&script), ("PUT".into(), format!("{URL}k1.lunch.ics"), LUNCH.into()));
+    assert_eq!(
+        script.said.borrow()[0],
+        (Some("If-None-Match: *".to_string()), CALENDAR_TYPE),
+        "a new event never lands on one that is there"
+    );
+    assert_eq!(holds(&store), [(href.clone(), Some("\"e1\"".to_string()), LUNCH.to_string())]);
+
+    // The same name again: the server says something is there.
+    let again = Script::answering(vec![got(412, None)]);
+    assert_eq!(put_new_as_robin(&again, &store, LUNCH_MOVED, "k1.lunch"), Err(CalendarError::Exists));
+    assert_eq!(holds(&store), [(href, Some("\"e1\"".to_string()), LUNCH.to_string())], "and nothing is kept");
+}
+
+#[test]
+fn a_new_event_s_name_is_tuimex_s_own_and_never_leaves_the_calendar() {
+    let store = store("put-new-names");
+    let long = "k".repeat(201);
+    for name in [
+        "",
+        ".",
+        "..",
+        ".hidden",
+        "../other/x",
+        "a/b",
+        "lunch@example.org",
+        "a b",
+        "%2e%2e",
+        "a?b",
+        "a#b",
+        "é",
+        long.as_str(),
+    ] {
+        let script = Script::new(Vec::new());
+        assert_eq!(put_new_as_robin(&script, &store, LUNCH, name), Err(CalendarError::Name), "{name:?}");
+        assert!(script.asked.borrow().is_empty(), "{name:?}: nothing was sent");
+    }
+    assert!(holds(&store).is_empty());
+    for name in ["k1", "0123.abc", "a-b_c.d"] {
+        assert!(valid_name(name), "{name}");
+    }
+}
+
+#[test]
+fn a_change_is_put_only_over_the_tag_last_read_and_a_412_leaves_the_store_as_it_was() {
+    let store = store_holding_a_and_b("put-changed");
+    let script = Script::answering(vec![got(204, Some("\"2\""))]);
+    put_changed_as_robin(&script, &store, A, LUNCH_MOVED).unwrap();
+    assert_eq!(only_request(&script), ("PUT".into(), format!("https://dav.example.org{A}"), LUNCH_MOVED.into()));
+    assert_eq!(
+        script.said.borrow()[0],
+        (Some("If-Match: \"1\"".to_string()), CALENDAR_TYPE),
+        "the change is made only over what was last read"
+    );
+    let after = holds(&store);
+    assert_eq!(after[0], (A.to_string(), Some("\"2\"".to_string()), LUNCH_MOVED.to_string()));
+
+    let changed = Script::answering(vec![got(412, None)]);
+    let error = put_changed_as_robin(&changed, &store, A, LUNCH).unwrap_err();
+    assert_eq!(error, CalendarError::Changed);
+    assert_eq!(error.to_string(), "it changed at the provider; read the calendar again and repeat the change");
+    assert_eq!(changed.said.borrow()[0].0.as_deref(), Some("If-Match: \"2\""), "the tag the last write returned");
+    assert_eq!(holds(&store), after, "a refused change touches nothing held");
+}
+
+#[test]
+fn a_write_with_no_tag_held_is_refused_before_anything_is_sent_until_a_fetch_reads_it_again() {
+    let store = store("no-tag");
+    let href = put_new_as_robin(&Script::answering(vec![got(201, None)]), &store, LUNCH, "k2").unwrap();
+    assert_eq!(holds(&store), [(href.clone(), None, LUNCH.to_string())], "what was written is kept, with no tag");
+
+    let script = Script::new(Vec::new());
+    assert_eq!(put_changed_as_robin(&script, &store, &href, LUNCH_MOVED), Err(CalendarError::Unread));
+    assert_eq!(delete_as_robin(&script, &store, &href), Err(CalendarError::Unread));
+    assert_eq!(put_changed_as_robin(&script, &store, A, LUNCH_MOVED), Err(CalendarError::Unread), "nor one not held");
+    assert!(script.asked.borrow().is_empty(), "nothing was sent");
+
+    let read = Script::new(vec![
+        about("t2"),
+        listing(&[(href.as_str(), "\"3\"")]),
+        events(&[(href.as_str(), "\"3\"", "Lunch")]),
+    ]);
+    fetch(&read, &store).unwrap();
+    assert!(read.asked.borrow()[2].3.contains(&format!("<D:href>{href}</D:href>")), "the next fetch asks for it");
+    let script = Script::answering(vec![got(204, Some("\"4\""))]);
+    put_changed_as_robin(&script, &store, &href, LUNCH_MOVED).unwrap();
+    assert_eq!(script.said.borrow()[0].0.as_deref(), Some("If-Match: \"3\""));
+}
+
+#[test]
+fn an_address_off_the_calendar_is_refused_before_anything_is_sent() {
+    let store = store_holding_a_and_b("elsewhere");
+    for href in [
+        "https://evil.example.net/calendar/dav/robin%40example.org/events/a.ics",
+        "https://dav.example.org.evil.example.net/calendar/dav/robin%40example.org/events/a.ics",
+        "//evil.example.net/calendar/dav/robin%40example.org/events/a.ics",
+        "/calendar/dav/robin%40example.org/other/a.ics",
+        "/calendar/dav/robin%40example.org/events/../other/a.ics",
+        "/calendar/dav/robin%40example.org/events/%2e%2e/other/a.ics",
+        "/calendar/dav/robin%40example.org/events/./a.ics",
+        "/calendar/dav/robin%40example.org/events/",
+        "/calendar/dav/robin%40example.org/events",
+        "/calendar/dav/robin%40example.org/events/a.ics?x=1",
+        "/calendar/dav/robin%40example.org/events//a.ics",
+        "a.ics",
+    ] {
+        let script = Script::new(Vec::new());
+        assert_eq!(put_changed_as_robin(&script, &store, href, LUNCH), Err(CalendarError::Elsewhere), "{href}");
+        assert_eq!(delete_as_robin(&script, &store, href), Err(CalendarError::Elsewhere), "{href}");
+        assert!(script.asked.borrow().is_empty(), "{href}: nothing was sent");
+    }
+    assert_eq!(
+        under(URL, "/calendar/dav/robin@example.org/events/a.ics").as_deref(),
+        Some("https://dav.example.org/calendar/dav/robin@example.org/events/a.ics"),
+        "one address spelled two ways is still under the calendar"
+    );
+    assert_eq!(under(URL, A), Some(format!("https://dav.example.org{A}")));
+    assert_eq!(holds(&store).len(), 2);
+}
+
+#[test]
+fn a_delete_is_conditional_and_one_already_gone_is_done() {
+    let store = store_holding_a_and_b("delete");
+    let script = Script::answering(vec![got(204, None)]);
+    delete_as_robin(&script, &store, A).unwrap();
+    assert_eq!(only_request(&script), ("DELETE".into(), format!("https://dav.example.org{A}"), String::new()));
+    assert_eq!(script.said.borrow()[0], (Some("If-Match: \"1\"".to_string()), None));
+    assert_eq!(holds(&store).iter().map(|h| h.0.as_str()).collect::<Vec<_>>(), [B]);
+
+    let changed = Script::answering(vec![got(412, None)]);
+    assert_eq!(delete_as_robin(&changed, &store, B), Err(CalendarError::Changed));
+    assert_eq!(holds(&store).len(), 1, "a refused delete keeps what was held");
+
+    delete_as_robin(&Script::answering(vec![got(404, None)]), &store, B).unwrap();
+    assert!(holds(&store).is_empty(), "one already gone at the provider is forgotten here");
+}
+
+#[test]
+fn a_write_the_server_refuses_says_what_kind_and_changes_nothing() {
+    let store = store_holding_a_and_b("write-refused");
+    let before = holds(&store);
+    for (status, want) in [
+        (401, CalendarError::SignIn),
+        (403, CalendarError::SignIn),
+        (302, CalendarError::Redirected),
+        (500, CalendarError::Status(500)),
+    ] {
+        let one = || Script::answering(vec![got(status, Some("\"9\""))]);
+        assert_eq!(put_new_as_robin(&one(), &store, LUNCH, "k3"), Err(want.clone()), "{status}");
+        assert_eq!(put_changed_as_robin(&one(), &store, A, LUNCH), Err(want.clone()), "{status}");
+        assert_eq!(delete_as_robin(&one(), &store, A), Err(want), "{status}");
+    }
+    assert_eq!(holds(&store), before);
+
+    let password = Secret::new("p".to_string());
+    for (url, want) in [
+        ("http://dav.example.org/events/", CalendarError::NotTls),
+        ("https://robin:secret@dav.example.org/events/", CalendarError::Credentials),
+    ] {
+        let script = Script::new(Vec::new());
+        let sign_in = (ROBIN, &password);
+        assert_eq!(put_new(&script, &store, "work", url, sign_in, LUNCH, "k4"), Err(want.clone()), "{url}");
+        assert_eq!(put_changed(&script, &store, "work", url, sign_in, A, LUNCH), Err(want.clone()), "{url}");
+        assert_eq!(delete(&script, &store, "work", url, sign_in, A), Err(want), "{url}");
+        assert!(script.asked.borrow().is_empty(), "{url}: nothing was sent");
+    }
 }

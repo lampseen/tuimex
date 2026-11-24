@@ -1,7 +1,9 @@
 //! Fetching calendars (ADR-056, ADR-062): Google's over CalDAV with the
 //! account's own password, any other from a private address that serves
 //! iCalendar. What comes back is kept as text in the store's cache; only
-//! `tuimex-content` reads it.
+//! `tuimex-content` reads it. A CalDAV calendar is also written, each
+//! write conditional on the tag last read, so that a change made
+//! elsewhere is never written over unseen.
 //!
 //! Every request goes to an address the user configured, over TLS, with no
 //! redirect followed. Nothing a calendar names is fetched.
@@ -49,6 +51,16 @@ pub enum CalendarError {
     Redirected,
     #[error("{0}")]
     Answer(String),
+    #[error("it changed at the provider; read the calendar again and repeat the change")]
+    Changed,
+    #[error("an event of that name is already in the calendar")]
+    Exists,
+    #[error("an event's name holds letters, digits, `.`, `-` and `_` alone, and begins with no `.`")]
+    Name,
+    #[error("the event is not in this calendar, so it is not written")]
+    Elsewhere,
+    #[error("the event has not been read as the provider holds it; read the calendar again first")]
+    Unread,
     #[error("the calendar could not be kept: {0}")]
     Store(String),
     /// Why the password or the feed's address could not be had, in words
@@ -68,14 +80,45 @@ pub struct Sent<'a> {
     pub method: &'static str,
     pub url: &'a str,
     pub depth: Option<u8>,
-    pub body: Option<&'a str>,
+    pub body: Option<Body<'a>>,
+    /// What the server must find at `url` for the request to be carried
+    /// out: what keeps a write from landing on a change it has not seen.
+    pub only_if: Option<Only<'a>>,
     pub sign_in: Option<(&'a str, &'a Secret)>,
+}
+
+/// What a request carries, and what kind of text it is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Body<'a> {
+    pub content_type: &'static str,
+    pub text: &'a str,
+}
+
+impl<'a> Body<'a> {
+    pub fn xml(text: &'a str) -> Body<'a> {
+        Body { content_type: "application/xml; charset=utf-8", text }
+    }
+
+    pub fn calendar(text: &'a str) -> Body<'a> {
+        Body { content_type: "text/calendar; charset=utf-8", text }
+    }
+}
+
+/// A precondition of a write (RFC 7232).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Only<'a> {
+    /// `If-Match`: only if what is there has this tag.
+    IfMatch(&'a str),
+    /// `If-None-Match`, which with `*` is: only if nothing is there.
+    IfNoneMatch(&'a str),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Got {
     pub status: u16,
     pub body: String,
+    /// The `ETag` the server answered with, where it gave one.
+    pub etag: Option<String>,
 }
 
 /// What carries a request. A trait so that a test answers from a script
@@ -184,7 +227,15 @@ pub fn fetch_caldav(
     origin(url)?;
     let read = |body: &str| multistatus(body).map_err(|e| CalendarError::Answer(e.to_string()));
     let ask = |method, depth, body: &str| {
-        wire.send(&Sent { method, url, depth: Some(depth), body: Some(body), sign_in: Some(sign_in) }).and_then(ok)
+        let sent = Sent {
+            method,
+            url,
+            depth: Some(depth),
+            body: Some(Body::xml(body)),
+            only_if: None,
+            sign_in: Some(sign_in),
+        };
+        wire.send(&sent).and_then(ok)
     };
 
     let about = read(&ask("PROPFIND", 0, PROPFIND)?.body)?;
@@ -249,7 +300,7 @@ pub fn fetch_feed(
 fn get_feed(wire: &dyn Wire, address: &Secret) -> Result<String, CalendarError> {
     let url = address.expose();
     origin(url)?;
-    let got = ok(wire.send(&Sent { method: "GET", url, depth: None, body: None, sign_in: None })?)?;
+    let got = ok(wire.send(&Sent { method: "GET", url, depth: None, body: None, only_if: None, sign_in: None })?)?;
     // Some servers begin a file with a byte-order mark, which is no part
     // of the calendar.
     let text = got.body.trim_start_matches('\u{feff}');
@@ -269,10 +320,163 @@ pub fn check_feed(wire: &dyn Wire, address: &Secret) -> Result<(), CalendarError
 /// of the calendar alone, and nothing kept. The name it gives, if any.
 pub fn check_caldav(wire: &dyn Wire, url: &str, sign_in: (&str, &Secret)) -> Result<Option<String>, CalendarError> {
     origin(url)?;
-    let sent = Sent { method: "PROPFIND", url, depth: Some(0), body: Some(PROPFIND), sign_in: Some(sign_in) };
+    let sent = Sent {
+        method: "PROPFIND",
+        url,
+        depth: Some(0),
+        body: Some(Body::xml(PROPFIND)),
+        only_if: None,
+        sign_in: Some(sign_in),
+    };
     let got = ok(wire.send(&sent)?)?;
     let about = multistatus(&got.body).map_err(|e| CalendarError::Answer(e.to_string()))?;
     Ok(about.into_iter().next().and_then(|item| item.name))
+}
+
+/// `url` as the address of a collection, ending in `/`.
+fn collection(url: &str) -> String {
+    if url.ends_with('/') { url.to_string() } else { format!("{url}/") }
+}
+
+/// `text` with each `%XX` read as the byte it stands for, so that two
+/// spellings of one address compare equal. Used to compare, never sent.
+fn decoded(text: &str) -> String {
+    let bytes = text.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        let hex = bytes.get(i + 1..i + 3).and_then(|h| std::str::from_utf8(h).ok());
+        match (bytes[i], hex.and_then(|h| u8::from_str_radix(h, 16).ok())) {
+            (b'%', Some(byte)) => {
+                out.push(byte);
+                i += 3;
+            }
+            (byte, _) => {
+                out.push(byte);
+                i += 1;
+            }
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+/// The URL of `href` when it names one thing inside the calendar at
+/// `url`, on the calendar's own server: no other host, no parent, no
+/// query, and not the calendar itself.
+fn under(url: &str, href: &str) -> Option<String> {
+    let full = within(url, href)?;
+    let base = decoded(&collection(url));
+    let rest = decoded(&full).strip_prefix(base.as_str())?.to_string();
+    let safe = !rest.is_empty()
+        && !rest.contains(['?', '#', '\\'])
+        && rest.split('/').all(|segment| !segment.is_empty() && segment != "." && segment != "..");
+    safe.then_some(full)
+}
+
+/// A name tuimex made for an event, which is all that is ever put in an
+/// address: an event's UID is text from outside.
+fn valid_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 200
+        && !name.starts_with('.')
+        && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
+}
+
+/// The tag the store holds for `href` of the calendar at `url`. A write is
+/// conditional on it, so with none there is no write.
+fn held_tag(store: &Calendars, account: &str, url: &str, href: &str) -> Result<String, CalendarError> {
+    let held = store.tags(account, url)?;
+    held.into_iter().find(|(h, _)| h == href).and_then(|(_, etag)| etag).ok_or(CalendarError::Unread)
+}
+
+fn write(
+    wire: &dyn Wire,
+    method: &'static str,
+    url: &str,
+    body: Option<Body<'_>>,
+    only_if: Only<'_>,
+    sign_in: (&str, &Secret),
+) -> Result<Got, CalendarError> {
+    wire.send(&Sent { method, url, depth: None, body, only_if: Some(only_if), sign_in: Some(sign_in) })
+}
+
+/// Writes a new event, `text`, into the CalDAV calendar at `url` as
+/// `<url><name>.ics`, only if nothing is there yet, and keeps it in the
+/// store under the address it returns. `name` is a key tuimex made.
+pub fn put_new(
+    wire: &dyn Wire,
+    store: &Calendars,
+    account: &str,
+    url: &str,
+    sign_in: (&str, &Secret),
+    text: &str,
+    name: &str,
+) -> Result<String, CalendarError> {
+    let origin = origin(url)?;
+    if !valid_name(name) {
+        return Err(CalendarError::Name);
+    }
+    let target = format!("{}{name}.ics", collection(url));
+    let href = target[origin.len()..].to_string();
+    if under(url, &href).is_none() {
+        return Err(CalendarError::Elsewhere);
+    }
+    let got = write(wire, "PUT", &target, Some(Body::calendar(text)), Only::IfNoneMatch("*"), sign_in)?;
+    if got.status == 412 {
+        return Err(CalendarError::Exists);
+    }
+    let got = ok(got)?;
+    store.put(account, url, &href, got.etag.as_deref(), text)?;
+    Ok(href)
+}
+
+/// Writes `text` over the event at `href` of the calendar at `url`, only
+/// if the provider still holds what tuimex last read of it.
+pub fn put_changed(
+    wire: &dyn Wire,
+    store: &Calendars,
+    account: &str,
+    url: &str,
+    sign_in: (&str, &Secret),
+    href: &str,
+    text: &str,
+) -> Result<(), CalendarError> {
+    origin(url)?;
+    let target = under(url, href).ok_or(CalendarError::Elsewhere)?;
+    let etag = held_tag(store, account, url, href)?;
+    let got = write(wire, "PUT", &target, Some(Body::calendar(text)), Only::IfMatch(&etag), sign_in)?;
+    if got.status == 412 {
+        return Err(CalendarError::Changed);
+    }
+    let got = ok(got)?;
+    store.put(account, url, href, got.etag.as_deref(), text)?;
+    Ok(())
+}
+
+/// Removes the event at `href` from the calendar at `url`, only if the
+/// provider still holds what tuimex last read of it. One already gone is
+/// as good as removed.
+pub fn delete(
+    wire: &dyn Wire,
+    store: &Calendars,
+    account: &str,
+    url: &str,
+    sign_in: (&str, &Secret),
+    href: &str,
+) -> Result<(), CalendarError> {
+    origin(url)?;
+    let target = under(url, href).ok_or(CalendarError::Elsewhere)?;
+    let etag = held_tag(store, account, url, href)?;
+    let got = write(wire, "DELETE", &target, None, Only::IfMatch(&etag), sign_in)?;
+    match got.status {
+        412 => return Err(CalendarError::Changed),
+        404 => {}
+        _ => {
+            ok(got)?;
+        }
+    }
+    store.drop_one(account, url, href)?;
+    Ok(())
 }
 
 /// The host of an address tuimex may fetch, which is all of a feed's
@@ -568,8 +772,13 @@ impl Wire for Https {
         if let Some(depth) = sent.depth {
             request = request.header("Depth", depth.to_string());
         }
-        if sent.body.is_some() {
-            request = request.header("Content-Type", "application/xml; charset=utf-8");
+        if let Some(body) = sent.body {
+            request = request.header("Content-Type", body.content_type);
+        }
+        match sent.only_if {
+            Some(Only::IfMatch(tag)) => request = request.header("If-Match", tag),
+            Some(Only::IfNoneMatch(tag)) => request = request.header("If-None-Match", tag),
+            None => {}
         }
         if let Some((user, password)) = sent.sign_in {
             let pair = zeroize::Zeroizing::new(format!("{user}:{}", password.expose()));
@@ -577,11 +786,14 @@ impl Wire for Https {
             request = request.header("Authorization", format!("Basic {}", encoded.as_str()));
         }
         let request = request
-            .body(sent.body.unwrap_or_default())
+            .body(sent.body.map_or("", |body| body.text))
             .map_err(|_| CalendarError::Unreachable("the address is not one".to_string()))?;
         let mut response = self.agent.run(request).map_err(unreachable)?;
         let status = response.status().as_u16();
+        // A tag that is not text cannot be sent back, so it is taken as
+        // none given: the next fetch asks for the event again.
+        let etag = response.headers().get("ETag").and_then(|v| v.to_str().ok()).map(str::to_string);
         let body = response.body_mut().with_config().limit(LARGEST).read_to_string().map_err(unreachable)?;
-        Ok(Got { status, body })
+        Ok(Got { status, body, etag })
     }
 }
