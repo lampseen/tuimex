@@ -140,6 +140,14 @@ that every name on this page is a test that exists.
 | Every call is a line in `~/.local/state/tuimex/audit.jsonl`, with no message text; a call that cannot be recorded answers nothing | `every_call_is_one_line_in_the_audit_log_with_no_message_text`, `a_call_that_cannot_be_recorded_answers_nothing` |
 | No call prints or writes a secret put in the config by mistake | `no_agent_call_prints_or_writes_a_secret` |
 | No subcommand can open a connection | `the_agent_module_cannot_reach_the_network` |
+
+## Releases and dependencies
+
+| what is true | what proves it |
+|---|---|
+| A release builds four archives, for Linux and macOS on x86_64 and arm64, under the names [Installing](Installing) gives | [`release.yml`](https://github.com/lampseen/tuimex/blob/main/.github/workflows/release.yml), whose dry run built and packaged all four and wrote their checksums on runners, as of 2026-11-24; `the_release_builds_exactly_the_four_targets_and_none_for_windows`, `every_archive_the_readme_and_the_wiki_name_is_one_the_release_makes` |
+| A dependency that has a newer release, or that an advisory names, is reported in an issue each week, and never changed by itself | [`outdated.yml`](https://github.com/lampseen/tuimex/blob/main/.github/workflows/outdated.yml), which has run on GitHub once, started by hand on 2026-11-24, and opened the issue for updates; `the_weekly_check_runs_when_the_plan_says`. Its schedule has not fired yet, and no advisory has yet been there for it to report |
+
 ## What no test reaches
 
 Each of these is built, and none is proven by anything that runs by
@@ -153,7 +161,9 @@ itself.
 | **The system keyring** | every test uses a keyring in memory. The Secret Service and the macOS keychain have been used only in the two by-hand runs above |
 | **The real Claude CLI behind `use = "claude"`** | no test runs it, because running it sends text to a provider. A test holds the arguments tuimex gives it; that the program then behaves as its help says is not tested |
 | **Sending from the interface through a real provider** | sending is run against servers in containers by `make real-server`, and against no provider's own |
-| **macOS** | the CI job `macos` runs the whole suite on a Mac. Nobody has used tuimex on one by hand |
+| **macOS** | the CI job `macos` runs the whole suite on a Mac, and it has passed on `macos-latest` as of 2026-11-24. Nobody has used tuimex on one by hand |
+| **Attesting and publishing a release** | the two steps of [`release.yml`](https://github.com/lampseen/tuimex/blob/main/.github/workflows/release.yml) that a dry run skips. They have never run, so no archive has an attestation to check yet |
+| **An archive started by hand, and the Homebrew formula** | no archive a dry run built is recorded as unpacked and run by a person, and none has been on a Mac. The formula is a template nothing has installed from |
 | **A picture drawn in a terminal** | tests check what is handed to the terminal's image protocol. None has a terminal to see the result on |
 | **How a browser draws the sealed copy** | tests check what the page contains and what its policy allows. None opens a browser |
 | **The system's opener** | tests check what would be handed to it, and never start a browser or a viewer |
