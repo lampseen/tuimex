@@ -1529,6 +1529,14 @@ calendar, which tuimex can read and mostly cannot write.
 
 Nothing here is built. The wiki says so until a stage lands with its proof.
 
+*2026-11-24: Bryan accepted the draft as drawn ("screens look good"),
+after two changes of his: `d` deletes and no view is on a letter, and
+every key mail uses means the same here, `h` and `l` excepted ("keep
+it"). He also ruled that nothing is merged or pushed until there is a
+working calendar: the milestones are built in order on local branches and
+reach `main` together, not one pull request at a time as PLAN §10 has
+it.*
+
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
 This is ADR-013 again, for events. An event tuimex itself holds (one
