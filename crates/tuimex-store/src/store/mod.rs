@@ -4,6 +4,8 @@
 
 use std::fs::{File, TryLockError};
 use std::path::{Path, PathBuf};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use tuimex_core::{
     AccountId, Address, Attachment, Envelope, Flags, Folder, Listed, MessageId, Query, Role, Security, Sort, Timestamp,
@@ -73,12 +75,23 @@ pub struct Sole(#[expect(dead_code, reason = "held for the lock it carries, whic
 /// something has it open: an interface, a `tuimex sync`, an agent's call.
 pub fn sole(data: &Path) -> Result<Sole> {
     let file = lock_file(data)?;
-    match file.try_lock() {
-        Ok(()) => Ok(Sole(file)),
-        Err(TryLockError::WouldBlock) => Err(Error::InUse(data.to_path_buf())),
-        Err(TryLockError::Error(e)) => Err(e).at(data),
+    let patience = Instant::now() + PASSING;
+    loop {
+        match file.try_lock() {
+            Ok(()) => return Ok(Sole(file)),
+            Err(TryLockError::WouldBlock) if Instant::now() < patience => thread::sleep(PASSING / 25),
+            Err(TryLockError::WouldBlock) => return Err(Error::InUse(data.to_path_buf())),
+            Err(TryLockError::Error(e)) => return Err(e).at(data),
+        }
     }
 }
+
+/// How long `sole` waits before it says the mail is in use. A store just
+/// closed can still be held for a moment by a child process that was
+/// forked while it was open and has not yet replaced itself: the lock is
+/// on the open file, which the child shares until then. Something that
+/// really has the mail open holds it far longer than this.
+const PASSING: Duration = Duration::from_millis(500);
 
 pub struct Store {
     maildir: Maildir,
