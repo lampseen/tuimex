@@ -257,6 +257,138 @@ fn a_calendar_kept_on_disk_is_shown_and_one_that_cannot_be_fetched_says_so() {
     assert!(!screen.contains("private"), "ADR-056: nothing of the feed's address is on the screen");
 }
 
+/// A home with one account, `work`, whose servers nothing listens at, so
+/// that nothing leaves this machine and a message sent waits in the
+/// Outbox for as long as the test runs. No notifier: a reminder must
+/// reach no desktop. Returns the home, and where its local events are.
+fn calendar_home(test: &str) -> (PathBuf, PathBuf) {
+    let home = scratch_home(test);
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    store.ensure_folder("work", "INBOX", tuimex_core::Role::Inbox).unwrap();
+    drop(store);
+    let config = "[notify]\nvia = \"none\"\n\n[send]\ndelay = \"10m\"\n\n[[account]]\nname = \"work\"\n\
+                  address = \"ada@example.org\"\nauth = \"command\"\npassword_cmd = [\"true\"]\n\
+                  imap = { host = \"127.0.0.1\", port = 1 }\nsmtp = { host = \"127.0.0.1\", port = 1 }\n";
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), config).unwrap();
+    (home, data.join(".calendars/work"))
+}
+
+/// Runs tuimex in `home` through `steps`, each of which waits for what it
+/// names and for no length of time, and returns what the terminal showed.
+fn calendar_session(home: &Path, steps: &[String]) -> String {
+    let script = home.join("steps");
+    fs::write(&script, steps.join("\n") + "\n").unwrap();
+    let env = [("ON_PTY_SCRIPT", script.to_str().unwrap()), ("ON_PTY_SIZE", "40x220"), ("ON_PTY_STEP_TIMEOUT", "20")];
+    let out = on_a_pty(home, "", &[], &env);
+    let screen = String::from_utf8_lossy(&out.stdout).to_string();
+    assert_eq!(out.status.code(), Some(0), "every step was so, and :q left: {screen}");
+    screen
+}
+
+/// ADR-057, by hand: an invitation that is in mail alone is on the
+/// calendar; `i a` answers it; the row no longer waits, the event is a
+/// file of the account's local calendar, and the reply is in the Outbox;
+/// `u` takes the entry and the reply back.
+#[test]
+fn an_invitation_is_answered_in_the_calendar_its_reply_waits_in_the_outbox_and_u_takes_both_back() {
+    let (home, events) = calendar_home("calendar-answer");
+    // Two days from now, so that `I` reaches it whenever this runs.
+    let day = (chrono::Utc::now() + chrono::Duration::days(2)).format("%Y%m%d").to_string();
+    let invitation = format!(
+        "From: Lars Holm <lars@example.com>\r\nTo: ada@example.org\r\nSubject: Invitation: Planning\r\n\
+         Message-ID: <planning-1@example.com>\r\nDate: Mon, 23 Nov 2026 10:00:00 +0000\r\nMIME-Version: 1.0\r\n\
+         Content-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n\
+         BEGIN:VCALENDAR\r\nVERSION:2.0\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:planning@example.com\r\n\
+         SEQUENCE:0\r\nDTSTART:{day}T100000Z\r\nDTEND:{day}T110000Z\r\nSUMMARY:Planning\r\n\
+         ORGANIZER;CN=Lars Holm:mailto:lars@example.com\r\n\
+         ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:ada@example.org\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    );
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    let delivery = tuimex_store::maildir::Delivery {
+        key: tuimex_store::maildir::new_key(),
+        uid: Some(1),
+        origin: tuimex_core::Origin::Server,
+        flags: tuimex_core::Flags::default(),
+    };
+    store.deliver("work", "INBOX", &delivery, invitation.as_bytes()).unwrap();
+    drop(store);
+    let (kept, none) = (format!("{}/*.ics", events.display()), format!("test -z \"$(ls {})\"", events.display()));
+    let steps = [
+        "wait Invitation: Planning".to_string(),
+        // The day view lists the days ahead, so the invitation is on it
+        // once the calendar has been read; `I` then selects it.
+        "keys gc3".to_string(),
+        "wait needs answer".to_string(),
+        format!("run test ! -e {}", events.display()),
+        "keys Iia".to_string(),
+        "wait Accepted Planning".to_string(),
+        "wait in work, local".to_string(),
+        "gone needs answer".to_string(),
+        format!("until grep -qs PARTSTAT=ACCEPTED {kept}"),
+        // The reply is mail: the Outbox is the seventh section.
+        "keys gm".to_string(),
+        "wait Archive   Outbox".to_string(),
+        "keys llllll".to_string(),
+        "wait Accepted: Planning".to_string(),
+        "keys hhhhhh".to_string(),
+        "keys gcu".to_string(),
+        "wait Undone".to_string(),
+        "wait needs answer".to_string(),
+        format!("until {none}"),
+        "keys gm".to_string(),
+        "gone Outbox".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &steps);
+}
+
+/// ADR-055, by hand: an event made with the form is a file here, is on
+/// the calendar of a later run, and is deleted and brought back with `u`.
+#[test]
+fn an_event_made_with_the_form_is_there_after_a_restart_and_is_deleted_and_brought_back() {
+    let (home, events) = calendar_home("calendar-form");
+    let (kept, none) = (format!("{}/*.ics", events.display()), format!("test -z \"$(ls {})\"", events.display()));
+    let made = [
+        "wait Nothing here.".to_string(),
+        "keys gcc".to_string(),
+        "wait Title".to_string(),
+        // The title, then `^s` to save.
+        "keys Dentist".to_string(),
+        "keys \\x13".to_string(),
+        "wait Added Dentist to work, local".to_string(),
+        format!("until grep -qs SUMMARY:Dentist {kept}"),
+        "keys gm".to_string(),
+        "wait Nothing here.".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &made);
+    let file = fs::read_dir(&events).unwrap().map(|entry| entry.unwrap().path()).next().expect("an event's file");
+    assert_eq!(fs::metadata(&file).unwrap().permissions().mode() & 0o777, 0o600, "ADR-011: the owner's alone");
+    let text = fs::read_to_string(&file).unwrap();
+    assert!(text.contains("@tuimex\r\n") && text.contains("SUMMARY:Dentist\r\n"), "{text}");
+
+    let again = [
+        "wait Nothing here.".to_string(),
+        // Found on whichever day it was made for; `n` selects the match.
+        "keys gc/Dentist\\r".to_string(),
+        "wait 1 event matches".to_string(),
+        "wait local".to_string(),
+        "keys nd".to_string(),
+        "wait Deleted Dentist".to_string(),
+        format!("until {none}"),
+        "keys u".to_string(),
+        "wait Undone".to_string(),
+        format!("until grep -qs SUMMARY:Dentist {kept}"),
+        "keys gm".to_string(),
+        "wait Nothing here.".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &again);
+}
+
 /// PLAN §10 M8: the reader is usable by hand. One session: open a thread's
 /// newest message, back to its first, scroll, list its files, return to
 /// the list with the cursor kept; then open the bank's message, list its
