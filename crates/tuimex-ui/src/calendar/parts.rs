@@ -1,11 +1,11 @@
 //! What every view of the calendar is drawn from: the design's
 //! `calendarTabs`, `calendarAlerts`, `dayStatus`, `calendarHint`,
-//! `eventWords`, `eventRow`, `agendaRows`, `calendarEntries` and
-//! `eventLinks`, its words for a day, and the frame they all sit in. A view
-//! is finished without changing this file.
+//! `eventWords`, `eventRow`, `agendaRows`, `eventFields`, `calendarEntries`
+//! and `eventLinks`, its words for a day, and the frame they all sit in. A
+//! view is finished without changing this file.
 
 use tuimex_core::AccountId;
-use tuimex_core::calendar::{DAY, Standing, civil_from_days, links_of, weekday_of};
+use tuimex_core::calendar::{DAY, Said, Standing, civil_from_days, links_of, weekday_of};
 
 use super::{Calendar, Days, Entry, Picked};
 use crate::glyphs::{CURSOR, DOT, NOTICE};
@@ -367,6 +367,92 @@ pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<
     let mut out: Vec<Line> = lines.into_iter().map(|(line, _)| fit(&line, width)).collect();
     out.resize(room, fit(&[], width));
     out
+}
+
+/// When an event is, in words, and after a dot how far off its day is:
+/// `Thu 26 Nov 2026, 10:00 to 11:30 · in 3 days`.
+fn when(o: &Scene, entry: &Entry) -> Line {
+    let (first, year) = (entry.start.div_euclid(DAY), civil_from_days(entry.day).0);
+    let last = (entry.end - 1).max(entry.start).div_euclid(DAY);
+    let said = match (entry.all_day, last > first) {
+        (false, _) => format!("{} {year}, {} to {}", day_short(first), clock(entry.start), clock(entry.end)),
+        (true, true) => format!("{} to {} {year}, all day", day_short(first), day_short(last)),
+        (true, false) => format!("{} {year}, all day", day_short(first)),
+    };
+    let off = match entry.day - o.calendar.today() {
+        0 => "today".to_string(),
+        1 => "tomorrow".to_string(),
+        -1 => "yesterday".to_string(),
+        days if days > 0 => format!("in {days} days"),
+        days => format!("{} days ago", -days),
+    };
+    vec![run(said, Tok::Fg), run(format!(" {DOT} {off}"), Tok::Dim)]
+}
+
+/// Everyone asked, each a whole item: the organizer, you with what you
+/// have said, then the others with what each has said.
+fn guests(o: &Scene, entry: &Entry) -> Vec<Line> {
+    let name = |who: &tuimex_core::Address| who.name.clone().filter(|n| !n.is_empty()).unwrap_or(who.email.clone());
+    let mine = |email: &str| {
+        let own = o.calendar.identities.iter().filter(|identity| identity.account == *entry.account);
+        own.into_iter().any(|identity| identity.address.email.eq_ignore_ascii_case(email))
+    };
+    let mut all: Vec<Line> = Vec::new();
+    let organizer = entry.event.organizer.as_ref();
+    all.extend(organizer.map(|who| vec![run(format!("{} ", name(who)), Tok::Fg), run("organizer", Tok::Dim)]));
+    all.extend(match (entry.proposed, entry.standing) {
+        (Some(_), _) => Some(vec![run("you ", Tok::Fg), run("proposed another time", Tok::Dim)]),
+        (None, Some(Standing::Needs)) => Some(vec![run("you ", Tok::Fg), run("no answer", Tok::Warn)]),
+        (None, Some(Standing::Accepted)) => Some(vec![run("you ", Tok::Fg), run("yes", Tok::Dim)]),
+        (None, Some(Standing::Tentative)) => Some(vec![run("you ", Tok::Fg), run("maybe", Tok::Dim)]),
+        (None, Some(Standing::Declined)) => Some(vec![run("you ", Tok::Fg), run("no", Tok::Dim)]),
+        (None, None) => None,
+    });
+    let asked = |who: &&tuimex_core::calendar::Guest| {
+        !mine(&who.who.email) && organizer.is_none_or(|by| !by.email.eq_ignore_ascii_case(&who.who.email))
+    };
+    all.extend(entry.event.guests.iter().filter(asked).map(|guest| {
+        let said = match guest.said {
+            Said::Nothing => "no answer",
+            Said::Accepted => "yes",
+            Said::Tentative => "maybe",
+            Said::Declined => "no",
+        };
+        vec![run(format!("{} ", name(&guest.who)), Tok::Fg), run(said, Tok::Dim)]
+    }));
+    all
+}
+
+/// The fields every event has, as a header block of `width` cells: when,
+/// where, the host its link really opens with the address after it, the
+/// calendar that holds it, and everyone asked. `brief` is the form beside
+/// a list, which keeps the list of people short; the event's own screen
+/// puts its further fields after these.
+pub fn event_fields(o: &Scene, entry: &Entry, brief: bool, width: usize) -> Vec<Line> {
+    let mut rows = reader::field("When", vec![when(o, entry)]);
+    if let Some(place) = &entry.event.location {
+        rows.extend(reader::field("Where", vec![vec![run(place.as_str(), Tok::Fg)]]));
+    }
+    if let Some(link) = links_of(entry.event).first() {
+        let look = reader::look(link, &[]);
+        rows.extend(reader::field(
+            "Join",
+            vec![vec![run(format!("{} ", look.host), Tok::Fg), run(look.url, Tok::Dim)]],
+        ));
+    }
+    let own = o.calendar.sources().into_iter().find(|source| source.account == entry.account && !source.local);
+    let kept = match (entry.local, own.and_then(|source| source.read)) {
+        (true, _) => "local, only in tuimex".to_string(),
+        (false, Some(read)) => format!("its own calendar, read {} ago", age(o.calendar, read)),
+        (false, None) => "its own calendar".to_string(),
+    };
+    let account = run(entry.account.0.as_str(), o.colour_of(entry.account));
+    rows.extend(reader::field("Calendar", vec![vec![account, run(format!(" {DOT} {kept}"), Tok::Dim)]]));
+    if entry.event.organizer.is_some() {
+        let most = if brief { reader::ROWS.0 } else { reader::ROWS.1 };
+        rows.extend(reader::field("Who", reader::packed(guests(o, entry), width.saturating_sub(reader::LABEL), most)));
+    }
+    rows.iter().map(|row| fit(row, width)).collect()
 }
 
 /// The whole screen round a view's `content`, which is `o.room(height)`

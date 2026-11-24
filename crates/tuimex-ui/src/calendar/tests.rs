@@ -276,3 +276,55 @@ fn the_month_marks_each_day_with_how_much_is_on_it_and_holds_the_months_that_fit
     assert_eq!(named(&none), 0, "a month that does not fit whole is not begun");
     assert!(none[2].contains("Thu 26 November"), "the list of days still is");
 }
+
+/// The design's `cal-event`, `cal-event-local` and `cal-day-wide`, where
+/// these rows are the event's header block.
+#[test]
+fn an_event_s_fields_say_when_where_what_it_opens_which_calendar_and_who() {
+    let (calendar, accounts) = (design(), both());
+    let o = scene(&calendar, &accounts, fx::THU);
+    let days = o.days(fx::THU, fx::FRI + 3);
+    let fields = |entry: &super::Entry, brief: bool, width: usize| -> Vec<String> {
+        parts::event_fields(&o, entry, brief, width).iter().map(text).collect()
+    };
+    let roadmap = [
+        "When     Thu 26 Nov 2026, 10:00 to 11:30 · in 3 days",
+        "Where    Room Fjord",
+        "Join     meet.example.org https://meet.example.org/r/q4-roadmap",
+        "Calendar work · its own calendar, read 20s ago",
+        "Who      Imani Castell organizer, you no answer, Lars Lindqvist yes, Mei Tanaka no, Dmitri Volkov no answer",
+    ];
+    assert_eq!(fields(&days.on(fx::THU)[1], false, 114), roadmap);
+    let beside = [
+        "When     Thu 26 Nov 2026, 10:00 to 11:30 · in 3 days",
+        "Where    Room Fjord",
+        "Join     meet.example.org https://meet.example.org/r/q4-roadm…",
+        "Calendar work · its own calendar, read 20s ago",
+        "Who      Imani Castell organizer, you no answer,",
+        "         Lars Lindqvist yes, Mei Tanaka no, and 1 more",
+    ];
+    assert_eq!(fields(&days.on(fx::THU)[1], true, 62), beside);
+    let migration = [
+        "When     Thu 26 Nov 2026, 20:00 to 23:00 · in 3 days",
+        "Calendar work · local, only in tuimex",
+        "Who      Lars Lindqvist organizer, you yes",
+    ];
+    assert_eq!(fields(&days.on(fx::THU)[3], false, 114), migration);
+    let cabin = ["When     Fri 27 Nov to Sun 29 Nov 2026, all day · in 5 days", "Where    Ridge saddle hut"];
+    assert_eq!(fields(&days.on(fx::FRI + 1)[0], true, 114)[..2], cabin, "its second day, counted from that day");
+    let library = &days.on(fx::FRI)[0];
+    assert_eq!(
+        fields(library, true, 114),
+        ["When     Fri 27 Nov 2026, all day · in 4 days", "Calendar personal · local, only in tuimex"]
+    );
+    let lying = fields(&days.on(fx::FRI)[2], true, 114);
+    assert_eq!(lying[1], "Where    bank.example.com");
+    assert_eq!(
+        lying[2],
+        "Join     bank.example.com.device-check.example.net https://bank.example.com.device-check.example.net/meet"
+    );
+    let rows = parts::event_fields(&o, &days.on(fx::THU)[1], false, 114);
+    assert!(rows.iter().all(|row| crate::span::cells(row) == 114));
+    let warned: String = rows[4].iter().filter(|span| span.fg == Tok::Warn).map(|span| span.text.as_str()).collect();
+    assert_eq!(warned, "no answer", "your own missing answer is the one in the warning colour");
+}

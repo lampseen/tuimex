@@ -41,8 +41,8 @@ pub(crate) fn size_text(bytes: u32) -> String {
 /// The design's `LAYOUT.header`: the label column, and how many rows a
 /// list of recipients or files may take in the preview and in the reader
 /// before it says how many more there are.
-const LABEL: usize = 9;
-const ROWS: (usize, usize) = (2, 6);
+pub(crate) const LABEL: usize = 9;
+pub(crate) const ROWS: (usize, usize) = (2, 6);
 
 /// A value under its label: the label on the first row, and every row
 /// after it under the value.
