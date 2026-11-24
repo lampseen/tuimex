@@ -55,11 +55,12 @@ fn the_calendar_s_keys_are_read_before_the_ones_of_everywhere() {
         let row = screen(&mut app, 120, 40)[2].clone();
         match view {
             "" => assert!(row.contains("November 2026"), "{keys:?} is the month: {row}"),
-            view => assert_eq!(row, format!("  E {view}: not built yet · arrives with the calendar's {view} view")),
+            "week" => assert!(row.trim_start().starts_with("Mon 23"), "{keys:?} is the week, a column to a day: {row}"),
+            _ => assert_eq!(row, "  Tomorrow · Tue 24 November", "{keys:?} is the day, from the cursor's on"),
         }
     }
     app.key(crate::keymap::Key::BackTab);
-    assert!(screen(&mut app, 120, 40)[2].starts_with("  E day"), "S-Tab steps back, round the end");
+    assert_eq!(screen(&mut app, 120, 40)[2], "  Tomorrow · Tue 24 November", "S-Tab steps back, round the end");
     press(&mut app, "gm");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"), "and no section was changed");
 }
@@ -90,8 +91,7 @@ fn in_the_month_the_next_event_is_the_next_day_that_has_one() {
 #[test]
 fn enter_goes_deeper_and_esc_comes_back() {
     let mut app = after("gclll\r");
-    let day = "  E day: not built yet · arrives with the calendar's day view";
-    assert_eq!(screen(&mut app, 120, 40)[2], day);
+    assert_eq!(screen(&mut app, 120, 40)[2], "  Thu 26 November");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 1 of 4 · 1 to answer", "the first event of the day is selected");
     press(&mut app, "j");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer");
@@ -108,7 +108,7 @@ fn enter_goes_deeper_and_esc_comes_back() {
         "a key the event's table does not name is not the calendar's"
     );
     press(&mut app, "\x1b");
-    assert_eq!(screen(&mut app, 120, 40)[2], day);
+    assert_eq!(screen(&mut app, 120, 40)[2], "  Thu 26 November");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 3 of 4 · 1 to answer");
     press(&mut app, "\x1b");
     assert!(screen(&mut app, 120, 40)[2].contains("November 2026"), "Esc undoes one Enter");
@@ -162,16 +162,20 @@ fn a_find_is_typed_and_enter_searches_every_day() {
     press(&mut app, "\r");
     let rows = screen(&mut app, 120, 40);
     assert!(rows[0].starts_with("  Month   Week   Day   Search Call"), "{}", rows[0]);
-    assert_eq!(rows[2], "  E search: not built yet · arrives with the calendar's day view");
-    assert_eq!(foot(&mut app).0, "Mon 23 Nov · 1 of 1", "the first match from today on, among the matches");
+    assert_eq!(foot(&mut app).0, "3 events match \"Call\"");
+    // The list begins at the selected match's day, so the selection is
+    // the row under the first label.
+    let picked = |app: &mut App| screen(app, 120, 40)[2..4].join("|");
+    let shows = |day: &str, title: &str, rows: String| assert!(rows.contains(day) && rows.contains(title), "{rows}");
+    shows("Mon 23 November", "Halden contract call", picked(&mut app));
     press(&mut app, "n");
-    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 1 of 1");
+    shows("Thu 26 November", "Vendor call", picked(&mut app));
     press(&mut app, "n");
-    assert_eq!(foot(&mut app).0, "Mon 7 Dec · 1 of 1", "a week on call is a match on each of its days");
+    shows("Mon 7 December", "On call", picked(&mut app));
     press(&mut app, "NN");
-    assert_eq!(foot(&mut app).0, "Mon 23 Nov · 1 of 1");
+    shows("Mon 23 November", "Halden contract call", picked(&mut app));
     press(&mut app, "N");
-    assert_eq!(foot(&mut app).0, "Mon 23 Nov · 1 of 1", "nothing matched before it");
+    shows("Mon 23 November", "Halden contract call", picked(&mut app));
     press(&mut app, "\x1b");
     assert_eq!(foot(&mut app).0, "Mon 23 Nov · 2 events", "Esc is back to the view, where it was");
     assert!(screen(&mut app, 120, 40)[0].ends_with("November 2026"));
@@ -362,19 +366,19 @@ fn what_the_calendar_cannot_do_yet_says_so() {
 #[test]
 fn the_calendar_has_its_commands_and_refuses_the_ones_that_take_rows_of_mail() {
     let mut app = after(":calendar week\r");
-    assert!(screen(&mut app, 120, 40)[2].starts_with("  E week: not built yet"));
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "the week, a column to a day");
     press(&mut app, ":archive\r");
     assert_eq!(foot(&mut app).1, "E :archive: the calendar is open · gm returns to mail");
     assert!(app.asks().is_empty());
     press(&mut app, ":mail\r");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
     press(&mut app, ":calendar\r");
-    assert!(screen(&mut app, 120, 40)[2].starts_with("  E week"), "alone, where it was");
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "alone, where it was");
     assert_eq!(said(":calendar year\r"), "E :calendar: it takes month, week or day · Tab completes");
     press(&mut app, ":calendar month\r\r\r");
     assert_eq!(screen(&mut app, 120, 40)[0], "  Standup");
     press(&mut app, ":q\r");
-    assert!(screen(&mut app, 120, 40)[2].starts_with("  E day"), ":q is back, out of the event");
+    assert_eq!(screen(&mut app, 120, 40)[2], "  Today · Mon 23 November", ":q is back, out of the event");
     press(&mut app, ":q\r");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9") && !app.quit, "and then out of the calendar");
     assert!(after("gc:qa\r").quit);
