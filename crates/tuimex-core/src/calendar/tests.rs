@@ -288,3 +288,29 @@ fn days_are_touched_by_what_runs_over_them() {
     assert_eq!(on(30), Vec::<&str>::new());
     assert_eq!(on(28), vec!["cabin"], "a rule tuimex does not work out is shown on its first day only");
 }
+
+/// What names one occurrence to whoever keeps the event is its start as
+/// the event's own calendar writes it, whatever clock the reader is on.
+#[test]
+fn an_occurrence_is_named_by_its_start_as_its_own_calendar_writes_it() {
+    let zones = BTreeMap::from([("Europe/Berlin".to_string(), berlin())]);
+    let nine = |day: i64| Moment::Wall { wall: at(2026, 10, day, 9), zone: Some("Europe/Berlin".into()) };
+    let mut standup = event("standup", nine(19), None);
+    standup.repeat = Some(Repeat::Rule(rule(Freq::Weekly)));
+    let utc = Zone::fixed(0);
+    // A reader on UTC sees the second at 08:00, after the clocks changed.
+    assert_eq!(occurrence_at(&standup, &zones, &utc, at(2026, 10, 26, 8)), Some(nine(26)));
+    assert_eq!(occurrence_at(&standup, &zones, &utc, at(2026, 10, 19, 7)), Some(nine(19)));
+    assert_eq!(occurrence_at(&standup, &zones, &utc, at(2026, 10, 26, 9)), None, "nothing begins then");
+    assert_eq!(occurrence_at(&standup, &BTreeMap::new(), &utc, at(2026, 10, 26, 8)), None, "its zone is unknown");
+    let once = event("once", Moment::Day(days_from_civil(2026, 11, 3)), None);
+    assert_eq!(occurrence_at(&once, &zones, &utc, at(2026, 11, 3, 0)), Some(once.start.clone()));
+    let mut moved = event("standup", nine(27), None);
+    moved.instead_of = Some(nine(26));
+    moved.repeat = standup.repeat.clone();
+    assert_eq!(
+        occurrence_at(&moved, &zones, &utc, at(2026, 10, 27, 8)),
+        Some(nine(27)),
+        "one that stands in is itself"
+    );
+}

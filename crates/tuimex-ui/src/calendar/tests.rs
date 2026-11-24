@@ -163,8 +163,12 @@ fn an_account_with_several_calendars_is_one_row_as_old_as_its_oldest_reading() {
     let unread: Vec<(&str, Option<Timestamp>)> =
         calendar.unread().iter().map(|(a, read)| (a.0.as_str(), *read)).collect();
     assert_eq!(unread, [("work", Some(Timestamp(fx::NOW.0 - 3 * 3600)))]);
-    let right =
-        parts::alerts(&calendar, vec![run("1 not sent", Tok::Err)], Some(("Halden contract call", "10 min")), true);
+    let right = parts::alerts(
+        &calendar,
+        vec![run("1 not sent", Tok::Err)],
+        Some(("Halden contract call", "10 min".to_string())),
+        true,
+    );
     let want = "▲ Halden contract call in 10 min · o for its link · 1 not sent · work's calendar not read · last read 3h \
                 ago · reminders off";
     assert_eq!(text(&right), want);

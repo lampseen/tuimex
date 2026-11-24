@@ -64,6 +64,77 @@ pub enum Action {
     /// every account wherever it is filed, its whole body included.
     /// Answered by `Event::Found`.
     Search(String),
+    /// An answer to an invitation (ADR-057): the mail to its organizer,
+    /// when the answer sends one, from the account the invitation came
+    /// to, and the event with the answer in that account's calendar.
+    AnswerEvent(Box<EventAnswer>),
+    /// The event is deleted, or with an occurrence named that one alone
+    /// (ADR-055).
+    DeleteEvent(Box<EventId>),
+    /// An event out of the form, to be stored (ADR-055) and, when it says
+    /// so, mailed to its guests (ADR-057).
+    SaveEvent(Box<Stored>),
+    /// The event's link of that number, counted from 1 in the order
+    /// `calendar::links_of` gives them. It is the user asking for that one
+    /// thing (ADR-008), assessed and confirmed where that is called for
+    /// (ADR-018).
+    OpenEventLink(Box<EventId>, usize),
+    /// What the agent makes of that link of the event (ADR-031); answered
+    /// as `AgentLink` is.
+    AgentEventLink(Box<EventId>, usize),
+    /// Takes back what the calendar ask of this serial did: the calendar
+    /// as it was before, and a mail of it still waiting in the Outbox back
+    /// to Drafts (ADR-040, ADR-057).
+    UndoEvent(u64),
+    /// Every event tuimex alone holds, written as `.ics` to this path, or
+    /// with an empty one to wherever downloads go (ADR-055). Answered by
+    /// `Event::Saved`.
+    Export(PathBuf),
+}
+
+/// An event as an ask names it: the calendar that holds it, or is to, and
+/// its UID there.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EventId {
+    pub account: AccountId,
+    /// The calendar tuimex alone holds for the account; otherwise the
+    /// account's own, at its provider.
+    pub local: bool,
+    pub uid: String,
+    /// The start of the one occurrence meant, as the event's own calendar
+    /// writes it: what an `EXDATE` or a `RECURRENCE-ID` carries. `None`
+    /// for the event whole.
+    pub occurrence: Option<Moment>,
+}
+
+/// An answer, and the invitation it is given to.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EventAnswer {
+    /// The event, in the calendar that holds it; one no calendar holds yet
+    /// is named in the calendar of the receiving account the answer puts
+    /// it in.
+    pub event: EventId,
+    pub answer: Answer,
+    /// The mail the invitation came in, when that is known: the answer
+    /// threads under it, and an event no calendar holds is read from it.
+    pub message: Option<MessageId>,
+}
+
+/// What the event form hands over to be kept.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Stored {
+    pub account: AccountId,
+    /// As `EventId::local`: which of the account's calendars it goes to.
+    pub local: bool,
+    /// A new event has no UID, and whoever stores it makes one. One whose
+    /// `instead_of` is set stands in for that occurrence of the event
+    /// `replaces` names, which stays.
+    pub event: crate::calendar::Event,
+    /// The event this takes the place of, which may be in another
+    /// calendar; `None` for a new one.
+    pub replaces: Option<EventId>,
+    /// The guests are mailed the invitation, which the user has agreed to.
+    pub invite: bool,
 }
 
 /// An action and the messages it takes, as the UI hands it to whoever

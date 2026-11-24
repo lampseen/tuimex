@@ -1,3 +1,5 @@
+use tuimex_fixtures::design as fx;
+
 use crate::app::App;
 use crate::app::tests::{after, foot, press, screen};
 use crate::calendar::parts::View;
@@ -95,7 +97,24 @@ fn esc_returns_to_the_day_it_was_opened_from() {
 }
 
 #[test]
-fn v_says_the_mail_an_event_came_in_is_not_kept_yet() {
-    let said = foot(&mut opened("v")).1;
-    assert!(said.starts_with("E v: not built yet"), "{said}");
+fn v_opens_the_mail_the_event_came_in_and_gc_returns_to_the_event() {
+    assert_eq!(foot(&mut opened("v")).1, "E v: this event did not come by mail");
+    let mut calendar = crate::calendar::tests::design();
+    let uid = "roadmap@design.example.net".to_string();
+    calendar
+        .came_in
+        .extend([(uid.clone(), fx::id("work", "invite")), (uid.replace("roadmap", "vendor"), fx::id("work", "gone"))]);
+    let mut app = crate::app::tests::app();
+    app.set_calendar(calendar);
+    press(&mut app, &format!("{ROADMAP}v"));
+    assert!(screen(&mut app, 120, 40)[0].starts_with("  Invitation: Q4 roadmap review"), "the reader, in mail");
+    assert_eq!(
+        app.asks().iter().filter(|ask| ask.action == tuimex_core::Action::Read).count(),
+        1,
+        "its body is asked for"
+    );
+    press(&mut app, "gc");
+    assert!(screen(&mut app, 120, 40)[0].starts_with("  Q4 roadmap review"), "the event, where it was left");
+    press(&mut app, "Jv");
+    assert_eq!(foot(&mut app).1, "E v: the mail it came in is no longer here");
 }

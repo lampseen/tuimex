@@ -88,7 +88,7 @@ impl App {
                 }
                 self.cal.event.more = i == 0;
             }
-            "event.mail" => self.say(say::not_built(key_name(id, i), "events that keep the mail they came in")),
+            "event.mail" => self.event_mail(key_name(id, i)),
             _ => {
                 let Some((action, which)) = ACTIONS.get(i).filter(|_| id == "event.actions") else { return };
                 let before = self.cal.picked.clone();
@@ -97,6 +97,25 @@ impl App {
                 if self.cal.picked != before {
                     self.cal.event.rewind();
                 }
+            }
+        }
+    }
+
+    /// `v`: the mail the event came in, in the reader. The calendar is
+    /// left as it is, so `gc` returns to the event.
+    fn event_mail(&mut self, key: &str) {
+        let came_in = |entry: Entry| {
+            let known = self.cal.model.came_in.iter().find(|(uid, _)| *uid == entry.event.uid);
+            known.map(|(_, id)| id.clone())
+        };
+        match self.picked_entry().and_then(came_in) {
+            None => self.say(say::err(format!("{key}: this event did not come by mail"))),
+            Some(id) if !self.mailbox.mail.iter().any(|m| m.envelope.id == id) => {
+                self.say(say::err(format!("{key}: the mail it came in is no longer here")));
+            }
+            Some(id) => {
+                self.calendar_close();
+                self.read(id, None);
             }
         }
     }

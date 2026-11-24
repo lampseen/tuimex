@@ -16,7 +16,7 @@ pub mod reminder;
 mod remote;
 mod thread;
 
-pub use action::{Action, Answer, Ask, Check, Event, Hit, Start};
+pub use action::{Action, Answer, Ask, Check, Event, EventAnswer, EventId, Hit, Start, Stored};
 pub use compose::{AgentAsk, Attached, CalendarPart, Draft, Identity, addresses, is_address, pieces, registrable};
 pub use link::{Assessment, Url, Warning, assess};
 pub use listed::{Listed, Sending};

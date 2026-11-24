@@ -4,10 +4,13 @@
 //! typed. A saved event leaves through `form_saved` and nowhere else.
 
 use tuimex_core::calendar::DAY;
-use tuimex_core::{AccountId, Action};
+use tuimex_core::{AccountId, Action, EventId, Stored};
 
-use super::{View, key_name};
+use super::change::title;
+use super::{DATES, View, key_name};
 use crate::app::App;
+use crate::calendar::Entry;
+use crate::calendar::change::{Item, Patch};
 use crate::calendar::form::{self, Form, Saved, Target};
 use crate::calendar::parts::Scene;
 use crate::editor::Editor;
@@ -37,8 +40,11 @@ pub(in crate::app) struct State {
     writable: Vec<AccountId>,
 }
 
-/// The words a date can be typed in, as `gd` offers them.
-const DATES: &str = "2026-12-05, 5 dec, fri, +2w";
+impl State {
+    pub(super) fn writable(&self) -> &[AccountId] {
+        &self.writable
+    }
+}
 
 impl App {
     /// The accounts whose own calendar tuimex can write, which the form
@@ -102,6 +108,18 @@ impl App {
         (self.cal.form.form, self.cal.form.asking) = (Some(opened), None);
     }
 
+    /// `E` on the selected event: with `one`, the form holds the selected
+    /// day of an event that repeats and no other, and what it saves stands
+    /// in for that day.
+    pub(super) fn form_open_which(&mut self, one: bool) {
+        let Some(entry) = self.picked_entry() else { return self.form_open(true, "") };
+        let Some(day) = self.one_day(&entry).filter(|_| one) else { return self.form_open(true, "") };
+        let at = Target { account: entry.account.clone(), local: entry.local };
+        let times = (entry.start, entry.end, entry.all_day);
+        let opened = Form::edit(self.targets(), at, &day, times, self.cal.model.today());
+        (self.cal.form.form, self.cal.form.asking) = (Some(opened), None);
+    }
+
     /// A key of the `event-form` table; `i` is which of the binding's keys.
     /// At a question, a key of the form's own is no answer and only leaves
     /// the question.
@@ -157,12 +175,54 @@ impl App {
         }
     }
 
-    /// Where a saved event is handed over, to be stored in `saved.to` and,
-    /// when `saved.invite` says so, mailed to its guests. Nothing stores an
-    /// event or mails an invitation yet, so the form says so as it closes.
-    pub(in crate::app) fn form_saved(&mut self, _saved: Saved) {
-        let key = key_name("event-form.save", 0);
-        self.say(say::not_built(key, "storing events and mailing invitations"));
+    /// A saved event leaves the form: the calendar holds it at once, it
+    /// is selected, and the ask that stores it in `saved.to`, and mails
+    /// its guests when `saved.invite` says so, goes out.
+    pub(in crate::app) fn form_saved(&mut self, saved: Saved) {
+        let Saved { to, mut event, replaces, invite } = saved;
+        let what = title(&event);
+        let of = |at: Target, uid: String| EventId {
+            account: at.account,
+            local: at.local,
+            uid,
+            occurrence: event.instead_of.clone(),
+        };
+        let stored = Stored {
+            account: to.account.clone(),
+            local: to.local,
+            event: event.clone(),
+            replaces: replaces.clone().map(|(at, uid)| of(at, uid)),
+            invite,
+        };
+        // Whoever stores a new event gives it its UID; until it is read
+        // back it is known here by one no calendar could hold.
+        if replaces.is_none() {
+            event.uid = format!("unsaved {}", self.serial + 1);
+        }
+        let mut items = Vec::new();
+        if let Some((was, _)) = replaces.as_ref().filter(|(was, _)| *was != to) {
+            items.push(Item::Event { at: was.clone(), event: Box::new(event.clone()), held: false, unsaved: false });
+        }
+        let unsaved = replaces.is_none();
+        items.push(Item::Event { at: to.clone(), event: Box::new(event.clone()), held: true, unsaved });
+        let (said, restored) = match &replaces {
+            None => (format!("Added {what} to {}", self.kept_in(&to)), format!("{what} is gone")),
+            Some(_) => (format!("Changed {what}"), format!("{what} is as it was")),
+        };
+        self.change(key_name("event-form.save", 0), Action::SaveEvent(Box::new(stored)), Patch(items), restored, false);
+        // The cursor goes to the event saved: on the day it was on when
+        // that day still has it, and else on the day it starts.
+        let model = &self.cal.model;
+        let starts = event.start.local_wall(&model.zones, &model.zone).map_or(self.day(), |wall| wall.div_euclid(DAY));
+        let saved = |day: i64| {
+            let days = model.days(day, day + 1, None);
+            let is = |e: &&Entry| *e.account == to.account && e.local == to.local && *e.event == event;
+            days.on(day).iter().find(is).map(Entry::pick)
+        };
+        if let Some(picked) = saved(self.day()).or_else(|| saved(starts)) {
+            (self.cal.cursor, self.cal.picked) = (Some(picked.day), Some(picked));
+        }
+        self.say(say::ok(said).key("u to undo"));
     }
 
     /// A key the form's table does not name: an answer to the question

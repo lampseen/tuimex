@@ -154,7 +154,7 @@ impl Moment {
     }
 
     /// The same moment at another wall time: an occurrence of a repeat.
-    fn at_wall(&self, wall: i64) -> Moment {
+    pub fn at_wall(&self, wall: i64) -> Moment {
         match self {
             Moment::Day(_) => Moment::Day(wall.div_euclid(DAY)),
             Moment::Utc(_) => Moment::Utc(wall),
@@ -422,4 +422,19 @@ pub fn occurrences_between<'a>(
     }
     out.sort_by_key(|o| (o.start, !o.all_day));
     out
+}
+
+/// The start of the occurrence of `event` that begins at the wall time
+/// `start` on the reader's clock, as the event's own calendar writes it:
+/// what names that occurrence to whoever keeps the event.
+pub fn occurrence_at(event: &Event, zones: &BTreeMap<String, Zone>, local: &Zone, start: i64) -> Option<Moment> {
+    let here = |moment: &Moment| moment.local_wall(zones, local) == Some(start);
+    match &event.repeat {
+        Some(Repeat::Rule(rule)) if event.instead_of.is_none() => {
+            // Two days either side covers any zone's distance from the reader's.
+            let walls = occurrences(event.start.wall(), rule, start - 2 * DAY, start + 2 * DAY);
+            walls.into_iter().map(|wall| event.start.at_wall(wall)).find(here)
+        }
+        _ => Some(event.start.clone()).filter(here),
+    }
 }
