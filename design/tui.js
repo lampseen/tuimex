@@ -219,7 +219,8 @@ const KEYMAP = {
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
     'the calendar is a place and not a section: `gc` opens it and `gm` returns, each side keeping where it was (ADR-054).',
-    'calendar: `x` deletes, not `d`, because `m`, `w` and `d` are the three views. `e` edits; nothing there is archived.',
+    'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
+    'calendar: `e` edits; nothing there is archived.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -308,9 +309,8 @@ const KEYMAP = {
       { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
       { id: 'calendar.today', keys: 't', does: 'today', hint: 'today' },
       { id: 'calendar.goto', keys: 'gd', does: 'go to a date', hint: 'go to' },
-      { id: 'calendar.view', keys: 'm w d', does: 'month, week, day' },
       { id: 'calendar.view-cycle', keys: 'Tab S-Tab', does: 'next, previous view' },
-      { id: 'calendar.view-number', keys: '1-3', does: 'view by position' },
+      { id: 'calendar.view-number', keys: '1 2 3', does: 'month, week, day' },
       { id: 'calendar.open', keys: 'Enter', does: 'the day; then the event', hint: 'open' },
       { id: 'calendar.find', keys: '/', does: 'find events', hint: 'find' },
       { id: 'calendar.account', keys: 'gt gT', does: 'next, previous account' },
@@ -319,7 +319,7 @@ const KEYMAP = {
       { id: 'calendar.answer', keys: 'i', does: 'answer an invitation', hint: 'answer' },
       { id: 'calendar.new', keys: 'c', does: 'new event here', hint: 'new event' },
       { id: 'calendar.edit', keys: 'e', does: 'edit the event', hint: 'edit' },
-      { id: 'calendar.delete', keys: 'x', does: 'delete the event', hint: 'delete' },
+      { id: 'calendar.delete', keys: 'd', does: 'delete the event', hint: 'delete' },
       { id: 'calendar.reminders', keys: 'gn', does: 'reminders on, off' },
       { id: 'calendar.mail', keys: 'gm', does: 'back to mail', hint: 'mail' },
     ] },
@@ -328,7 +328,7 @@ const KEYMAP = {
       { id: 'event.step', keys: '[ ]', does: 'previous, next event' },
       { id: 'event.fold', keys: 'zo zc', does: 'unfold, fold More', hint: 'more' },
       { id: 'event.mail', keys: 'v', does: 'the mail it came in', hint: 'its mail' },
-      { id: 'event.actions', keys: 'o i e x n N I', does: 'as in the calendar' },
+      { id: 'event.actions', keys: 'o i e d n N I', does: 'as in the calendar' },
     ] },
     { mode: 'calendars', title: 'Calendars (after C)', keys: [
       { id: 'calendars.choose', keys: 'j k', does: 'choose', hint: 'choose' },
@@ -2716,11 +2716,11 @@ function build(mode = {}) {
   }));
 
   const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
-  screen('cal-week', 'Calendar, week', 'after w: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
+  screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
   alsoSmall('cal-week', 'Calendar, week', week(small));
 
   const day = (size, more) => dayScreen({ ...size, cursor: thu, selected: roadmap, ...more });
-  screen('cal-day', 'Calendar, day', 'after Enter on a day, or d: the list of mail again, with events from that day on and the selected one below the divider', day(LAYOUT.default));
+  screen('cal-day', 'Calendar, day', 'after Enter on a day, or 3: the list of mail again, with events from that day on and the selected one below the divider', day(LAYOUT.default));
   alsoSmall('cal-day', 'Calendar, day', day(small));
   screen('cal-day-wide', 'Calendar, day, the event beside it', 'from 160 columns the selected event sits to the right of the list', day(wide), wide);
   screen('cal-find', 'Calendar, finding', 'after /: what is typed is underlined where it matches and every other event goes faint', dayScreen({
@@ -2792,7 +2792,7 @@ function build(mode = {}) {
       rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
   ]);
   flow('cal-delete', 'Deleting, and undoing it', [
-    { key: 'x', caption: 'Deleted', note: 'No question first: u reverses it (ADR-015).',
+    { key: 'd', caption: 'Deleted', note: 'No question first: u reverses it (ADR-015).',
       rows: calendarStrip(thu, { changed: { vendor: { gone: true } }, command: said(SAY.deleted('Vendor call')) }) },
     { key: 'u', caption: 'Undone', note: '',
       rows: calendarStrip(thu, { selected: 'vendor', command: said(SAY.restored('Vendor call')) }) },
