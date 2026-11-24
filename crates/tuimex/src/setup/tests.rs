@@ -935,6 +935,10 @@ fn a_rename_takes_the_account_s_calendar_and_its_feed_s_address_along() {
     keyring.set("work/calendar-feed", &Secret::new(FEED.into())).unwrap();
     let net = FakeNet::trusted();
     let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let store = tuimex_store::calendar::Calendars::open(&root.join("data"), &root.join("cache")).unwrap();
+    store.keep("work", DENTIST).unwrap();
+    store.put("work", "feed", "", None, DENTIST).unwrap();
+    drop(store);
     let (result, script) = run.go(&["4", "office", "y"]);
     result.unwrap();
     assert!(
@@ -945,4 +949,9 @@ fn a_rename_takes_the_account_s_calendar_and_its_feed_s_address_along() {
     assert_eq!(renamed, text.replace("\"work\"", "\"office\""));
     assert_eq!(keyring.names(), ["office", "office/calendar-feed"]);
     assert_eq!(keyring.get("office/calendar-feed").as_deref(), Some(FEED));
+    // Its own events go with it; what was fetched is dropped, to be
+    // fetched again under the new name.
+    assert!(!root.join("data/.calendars/work").exists());
+    assert_eq!(fs::read_dir(root.join("data/.calendars/office")).unwrap().count(), 1);
+    assert!(!root.join("cache/calendar.sqlite").exists());
 }
