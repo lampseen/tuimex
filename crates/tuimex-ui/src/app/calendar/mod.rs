@@ -14,12 +14,15 @@ mod join;
 #[cfg(test)]
 mod tests;
 
-use tuimex_core::calendar::date;
-use tuimex_core::{AccountId, Timestamp};
+use std::path::PathBuf;
 
+use tuimex_core::calendar::{DAY, date};
+use tuimex_core::{AccountId, Action, Event, Timestamp};
+
+use super::read::Advised;
 use super::{App, Mode};
 use crate::calendar::parts::{self, AHEAD, Scene, View};
-use crate::calendar::{self, Calendar, Entry, Picked};
+use crate::calendar::{self, Calendar, Due, Entry, Picked};
 use crate::command::COMMANDS;
 use crate::editor::Editor;
 use crate::keymap::{self, Found, Key};
@@ -31,6 +34,10 @@ use crate::span::{Line, run};
 /// What is typed after `gd` and after `/`: each is its prompt's label.
 const GOTO: &str = "Go to: ";
 const FIND: &str = "/";
+const PROPOSE: &str = "Propose: ";
+
+/// The words a date can be typed in, as every error over one offers them.
+const DATES: &str = "2026-12-05, 5 dec, fri, +2w";
 
 /// How many days either side of today a search and `I` look through. A
 /// repeating event has no last day, so "every day" has to end somewhere.
@@ -47,6 +54,16 @@ pub(super) enum Panel {
     Links(usize),
     /// `i` was pressed, and the next key answers the invitation.
     Answer,
+    /// `d` or `E` on an event that repeats: the next key says whether it
+    /// means this day's or every day's.
+    Which(Which),
+}
+
+/// What is being done to an event that repeats, as the question says it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Which {
+    Delete,
+    Edit,
 }
 
 #[derive(Debug)]
@@ -73,6 +90,17 @@ pub(super) struct Place {
     /// Where the cursor was when the search began.
     sought_from: (Option<i64>, Option<Picked>),
     reminders_off: bool,
+    /// What is about to begin, which the status line says wherever the
+    /// reader is until it has begun (ADR-058).
+    reminder: Option<Due>,
+    /// The address of the link just opened, which the status line keeps
+    /// until the next key (ADR-018).
+    joining: Option<String>,
+    /// What the agent was asked of a link of the selected event.
+    advised: Advised,
+    pub changes: change::Changes,
+    /// The invitation a time is being proposed for.
+    answering: Option<answer::Asked>,
     pub event: event::State,
     pub form: form::State,
 }
@@ -92,6 +120,11 @@ impl Place {
             searching: false,
             sought_from: (None, None),
             reminders_off: false,
+            reminder: None,
+            joining: None,
+            advised: Advised::default(),
+            changes: change::Changes::default(),
+            answering: None,
             event: event::State::default(),
             form: form::State::default(),
         }
@@ -106,10 +139,65 @@ fn key_name(id: &str, i: usize) -> &'static str {
 impl App {
     /// Takes every calendar as it now stands, from whoever reads them.
     /// Which calendars are hidden is the reader's choice, made here, and
-    /// stays as it is.
+    /// stays as it is. What was changed here and has not been carried out
+    /// is newer than what was read, and is made of it again
+    /// (`calendar_carried`).
     pub fn set_calendar(&mut self, calendar: Calendar) {
         let hidden = std::mem::take(&mut self.cal.model.hidden);
         self.cal.model = Calendar { hidden, ..calendar };
+        self.changes_again();
+    }
+
+    /// What is about to begin, for the right of the status line in mail
+    /// and in the calendar alike; `None` takes it away. It goes by itself
+    /// when the event begins or its links are opened.
+    pub fn set_reminder(&mut self, due: Option<Due>) {
+        self.cal.reminder = due;
+    }
+
+    /// The reminder as the status line says it: what, and how soon.
+    pub(super) fn reminding(&self) -> Option<(&str, String)> {
+        let due = self.cal.reminder.as_ref()?;
+        let left = due.start.0 - self.cal.model.now.0;
+        (left > 0).then(|| (due.summary.as_str(), parts::lead(left)))
+    }
+
+    /// The event the reminder is of, where the calendars shown hold it.
+    fn reminded(&self) -> Option<Picked> {
+        let due = self.cal.reminder.as_ref().filter(|_| self.reminding().is_some())?;
+        let wall = due.start.0 + self.cal.model.zone.offset_at(due.start.0).unwrap_or(0);
+        let day = wall.div_euclid(DAY);
+        let days = self.cal.model.days(day, day + 1, None);
+        let of = |e: &&Entry| *e.account == due.account && e.event.uid == due.uid && e.start == wall;
+        days.on(day).iter().find(of).map(Entry::pick)
+    }
+
+    /// `o` where no event is selected and a reminder is showing: that
+    /// event in its day, with its links listed. Says whether there was one.
+    pub(super) fn reminder_links(&mut self) -> bool {
+        let Some(picked) = self.reminded() else { return false };
+        self.calendar_open(Some(View::Day));
+        self.cal.account = self.cal.account.take().filter(|account| *account == picked.account);
+        (self.cal.cursor, self.cal.picked) = (Some(picked.day), Some(picked));
+        self.links_open();
+        true
+    }
+
+    /// `o`: the selected event's links, when it has any.
+    fn links_open(&mut self) {
+        let key = key_name("calendar.links", 0);
+        match self.picked_entry().map(|entry| parts::links(&entry).0.len()) {
+            None if self.reminder_links() => {}
+            None => self.say(say::err(format!("{key}: no event is selected"))),
+            Some(0) => self.say(say::err(format!("{key}: this event has no link"))),
+            Some(_) => {
+                self.cal.panel = Panel::Links(0);
+                // Its links are what the reminder offered.
+                if self.reminded() == self.cal.picked {
+                    self.cal.reminder = None;
+                }
+            }
+        }
     }
 
     /// Whether reminders are on, for whoever keeps that between runs.
@@ -139,7 +227,7 @@ impl App {
     }
 
     /// `gm` and `:mail`.
-    fn calendar_close(&mut self) {
+    pub(super) fn calendar_close(&mut self) {
         (self.cal.open, self.cal.panel) = (false, Panel::None);
     }
 
@@ -260,7 +348,7 @@ impl App {
             }
             None => {
                 let said = say::err(format!("{name}: not a date: \"{}\"", words.trim()));
-                self.say(said.key("2026-12-05, 5 dec, fri, +2w"));
+                self.say(said.key(DATES));
             }
         }
     }
@@ -314,6 +402,7 @@ impl App {
             Panel::Calendars(_) => &["calendars", "global"],
             Panel::Links(_) => &["links", "global"],
             Panel::Answer => &["invite"],
+            Panel::Which(_) => &[],
             Panel::None if self.event_is_open() => &["event", "calendar", "global"],
             Panel::None => &["calendar", "global"],
         }
@@ -321,6 +410,7 @@ impl App {
 
     /// A key while the calendar is open.
     pub(super) fn calendar_key(&mut self, key: Key) {
+        self.cal.joining = None;
         self.pending.push(key);
         match keymap::find(self.calendar_modes(), &self.pending) {
             Found::Prefix => return,
@@ -331,7 +421,12 @@ impl App {
             Found::Nothing if self.form_is_open() => self.form_typed(key),
             // Any key that is not an answer leaves the question.
             Found::Nothing if self.cal.panel == Panel::Answer => self.cal.panel = Panel::None,
-            Found::Nothing => {}
+            Found::Nothing => {
+                if let Panel::Which(which) = self.cal.panel {
+                    self.cal.panel = Panel::None;
+                    self.which_answered(which, key);
+                }
+            }
         }
         self.pending.clear();
     }
@@ -343,7 +438,7 @@ impl App {
             "event" => self.event_run(id, i),
             "invite" => {
                 self.cal.panel = Panel::None;
-                self.answer_run(id);
+                self.answer_run(key_name("calendar.answer", 0), id, false);
             }
             "calendars" => self.sources_run(id, i),
             "links" => self.event_links_run(id, i),
@@ -362,7 +457,7 @@ impl App {
             "global.command" => self.mode = Mode::Command(Editor::default()),
             "global.help" => self.mode = Mode::Help(String::new(), 0),
             "global.back" => self.calendar_back(),
-            "global.undo" => self.calendar_undo(),
+            "global.undo" => self.calendar_undo(false),
             "global.agent" if matches!(self.cal.panel, Panel::Links(_)) => self.event_link_agent(),
             "global.agent" if self.agent => self.say(say::err("A: nothing here for the agent")),
             "global.agent" => self.agent_menu(),
@@ -431,14 +526,10 @@ impl App {
                 self.calendar_narrow(next);
             }
             ("calendar.calendars", _) => self.cal.panel = Panel::Calendars(0),
-            ("calendar.links", _) => match self.picked_entry().map(|entry| parts::links(&entry).0.len()) {
-                None => self.say(say::err(format!("{}: no event is selected", key_name(id, i)))),
-                Some(0) => self.say(say::err(format!("{}: this event has no link", key_name(id, i)))),
-                Some(_) => self.cal.panel = Panel::Links(0),
-            },
+            ("calendar.links", _) => self.links_open(),
             ("calendar.answer", _) => self.answer_ask(),
             ("calendar.new", _) => self.form_open(false, ""),
-            ("calendar.edit", _) => self.form_open(true, ""),
+            ("calendar.edit", _) => self.event_edit(),
             ("calendar.delete", _) => self.event_delete(),
             ("calendar.reminders", _) => self.remind(self.cal.reminders_off),
             ("calendar.mail", _) => self.calendar_close(),
@@ -515,14 +606,19 @@ impl App {
             (GOTO, Some(words)) => self.goto(keymap::hint("calendar.goto").0, words),
             (FIND, Some(query)) => self.search(query),
             (FIND, None) => self.end_search(),
+            (PROPOSE, Some(words)) => self.propose(words),
+            (PROPOSE, None) => self.cal.answering = None,
             _ => {}
         }
     }
 
     /// The left of the status line while something is typed: for a date,
     /// the day the words mean so far.
-    fn prompt_left(&self) -> Option<Line> {
+    pub(super) fn prompt_left(&self) -> Option<Line> {
         let Mode::Prompt(label, editor) = &self.mode else { return None };
+        if *label == PROPOSE {
+            return Some(self.proposes(&editor.text));
+        }
         let named = date::parse(&editor.text, self.cal.model.today(), self.day()).filter(|_| *label == GOTO);
         Some(named.map_or_else(Line::new, |named| {
             let year = tuimex_core::calendar::civil_from_days(named.day).0;
@@ -553,11 +649,14 @@ impl App {
                 self.calendar_open(None);
                 self.form_open(false, rest);
             }
-            "export" => self.say(say::not_built(":export", "writing local events as .ics")),
+            "export" => {
+                self.outside(Action::Export(PathBuf::from(rest)));
+                self.say(say::plain("Writing local events as .ics"));
+            }
             _ if !self.cal.open => return false,
             "account" if rest.is_empty() => self.calendar_narrow(None),
             "account" if self.accounts().contains(&rest) => self.calendar_narrow(Some(rest.to_string())),
-            "invite" => self.answer_command(rest),
+            "invite" => self.answer_command(rest, false),
             // Back, as everywhere but the list: out of the event, then out
             // of the calendar.
             "q" => {
@@ -605,7 +704,7 @@ impl App {
             preview: self.preview,
             panel: Vec::new(),
             left: None,
-            right: parts::alerts(&place.model, mail, None, place.reminders_off),
+            right: parts::alerts(&place.model, mail, self.reminding(), place.reminders_off),
             command: None,
         };
         let entry = base.entry();
@@ -615,6 +714,7 @@ impl App {
             (entries.into_iter().skip(from).take(fits).collect::<Vec<_>>(), Some(at - from))
         };
         let keys = |ids: &[&str]| list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>());
+        let opens = |url: &str| vec![run("opens", Tok::Dim), run(format!(" {url}"), Tok::Fg)];
         let (panel, left, hint) = match (place.panel, &entry) {
             (Panel::Calendars(at), _) => {
                 let (entries, at) = window(parts::sources(&base), at);
@@ -623,18 +723,30 @@ impl App {
             }
             (Panel::Links(at), Some(entry)) => {
                 let (rows, urls) = parts::links(entry);
-                let url = urls.get(at).cloned().unwrap_or_default();
-                let (entries, at) = window(rows, at);
-                let opens = vec![run("opens", Tok::Dim), run(format!(" {url}"), Tok::Fg)];
+                let (entries, shown) = window(rows, at);
                 let hint = keys(&["links.number", "links.choose", "global.agent", "links.close"]);
-                (list::panel("Links", entries, at, width), Some(opens), Some(hint))
+                let mut panel = list::panel("Links", entries, shown, width);
+                panel.extend(place.advised.lines());
+                (panel, Some(opens(urls.get(at).map_or("", String::as_str))), Some(hint))
             }
             (Panel::Answer, _) => (Vec::new(), None, Some(say::answer().line(width))),
+            (Panel::Which(which), _) => (Vec::new(), None, Some(say::which_ones(which.verb()).line(width))),
             _ => (Vec::new(), None, None),
         };
+        // The address a link opens stays in sight while it is asked about
+        // and as it opens.
+        let asked = match (&self.mode, &entry) {
+            (Mode::Confirm(_, Action::OpenEventLink(_, n)), Some(entry)) => {
+                parts::links(entry).1.into_iter().nth(n.saturating_sub(1))
+            }
+            _ => None,
+        };
+        let joining = asked.as_ref().or(place.joining.as_ref()).map(|url| opens(url));
+        let advised = place.advised.right().filter(|_| matches!(place.panel, Panel::Links(_)));
         let o = Scene {
             panel: if menu.is_empty() { panel } else { menu },
-            left: self.prompt_left().or(left),
+            left: self.prompt_left().or(left).or(joining),
+            right: advised.unwrap_or_else(|| base.right.clone()),
             command: command.or(hint),
             ..base
         };
@@ -645,6 +757,47 @@ impl App {
             (_, View::Month) => calendar::month::screen(&o, width, height),
             (_, View::Week) => calendar::week::screen(&o, width, height),
             (_, View::Day) => calendar::day::screen(&o, width, height),
+        }
+    }
+}
+
+impl Which {
+    fn verb(self) -> &'static str {
+        match self {
+            Which::Delete => "Delete",
+            Which::Edit => "Edit",
+        }
+    }
+}
+
+impl App {
+    /// A key at the question a repeating event asks: the first of its
+    /// keys means the one day and the second every day, and any other
+    /// leaves the event as it is.
+    fn which_answered(&mut self, which: Which, key: Key) {
+        let asked = say::which_ones(which.verb());
+        let Some(at) = asked.keys.iter().take(2).position(|(name, _)| keymap::presses(name) == [key]) else { return };
+        match which {
+            Which::Delete => self.event_delete_which(at == 0),
+            Which::Edit => self.form_open_which(at == 0),
+        }
+    }
+
+    /// What came back that is the calendar's to hear: a refusal of
+    /// something changed here, and the agent's reading of an event's link.
+    /// Anything else is handed back.
+    pub(super) fn calendar_told(&mut self, event: Event) -> Option<Event> {
+        match self.cal.advised.told(event)? {
+            Event::ActionFailed { serial, reason, hint } if self.change_refused(serial, &reason, &hint) => None,
+            other => Some(other),
+        }
+    }
+
+    /// A confirm over the calendar was answered, either way: the list it
+    /// was asked over closes, and the agent's advice with it.
+    pub(super) fn calendar_answered(&mut self) {
+        if matches!(self.cal.panel, Panel::Links(_)) {
+            (self.cal.panel, self.cal.advised) = (Panel::None, Advised::default());
         }
     }
 }

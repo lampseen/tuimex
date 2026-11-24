@@ -526,7 +526,16 @@ impl App {
         tabs
     }
 
+    /// The right of the status line: a reminder that is due, wherever
+    /// the reader is (ADR-058), then what is not normal about the mail.
     fn alerts(&self) -> Line {
+        let reminder = self.reminding().map(|(what, lead)| crate::calendar::parts::reminder(what, &lead));
+        let parts: Vec<Line> =
+            reminder.into_iter().chain([self.mail_alerts()]).filter(|part| !part.is_empty()).collect();
+        parts.join(&run(format!(" {} ", crate::glyphs::DOT), Tok::Dim))
+    }
+
+    fn mail_alerts(&self) -> Line {
         let held = self.held().find_map(|m| match m.sending {
             Some(Sending::Held { seconds }) => Some(seconds),
             _ => None,
@@ -630,7 +639,8 @@ impl App {
             return drawn.lines;
         }
         if self.cal.open {
-            return self.calendar_lines(width, height, right);
+            let mail = self.mail_alerts();
+            return self.calendar_lines(width, height, mail);
         }
         if let Some(lines) = self.compose_lines(width, height) {
             return lines;
@@ -761,6 +771,7 @@ impl App {
         // A question that is still there has not been answered.
         if confirming && !matches!(self.mode, Mode::Confirm(..)) {
             self.reader_answered();
+            self.calendar_answered();
         }
     }
 
@@ -837,7 +848,14 @@ impl App {
         let modes: &[&str] = if self.focus { &["preview", "list", "global"] } else { &["list", "global"] };
         match keymap::find(modes, &self.pending) {
             Found::Prefix => {}
-            Found::Nothing => self.pending.clear(),
+            Found::Nothing => {
+                self.pending.clear();
+                // A reminder offers its event's links by the key that
+                // lists links in the calendar, which the list does not bind.
+                if matches!(keymap::find(&["calendar"], &[key]), Found::Bound(b, _) if b.id == "calendar.links") {
+                    self.reminder_links();
+                }
+            }
             Found::Bound(binding, i) => {
                 self.pending.clear();
                 self.run(binding.id, i);
@@ -1129,6 +1147,9 @@ impl App {
             Some("preview") => ("Preview".to_string(), plain(vec!["auto", "right", "below", "off"])),
             Some("calendar") => ("Views".to_string(), plain(vec!["month", "week", "day"])),
             Some("notify") => ("Reminders".to_string(), plain(vec!["on", "off"])),
+            Some("invite") => {
+                ("Answers".to_string(), plain(vec!["accept", "tentative", "decline", "propose", "ignore"]))
+            }
             Some("agent") if self.agent => match editor.text["agent ".len()..].split_once(' ') {
                 None => {
                     let agent = COMMANDS.iter().filter(|c| c.name == "agent");

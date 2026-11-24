@@ -130,10 +130,10 @@ fn each_refusal_on_save_says_why() {
 }
 
 #[test]
-fn with_no_guests_s_saves_at_once_and_what_saves_it_is_not_built() {
+fn with_no_guests_s_saves_at_once() {
     let mut app = after("gclllcDentist^s");
     assert!(closed(&mut app));
-    assert_eq!(foot(&mut app).1, "E ^s: not built yet · arrives with storing events and mailing invitations");
+    assert_eq!(foot(&mut app).1, "✓ Added Dentist to personal, local · u to undo");
 }
 
 #[test]
@@ -167,7 +167,7 @@ fn esc_closes_at_once_with_nothing_typed_and_otherwise_asks_to_keep_the_changes(
     assert_eq!(foot(&mut app).1, "✓ Changes discarded");
     let mut app = after("gclllcDentist\x1by");
     assert!(closed(&mut app));
-    assert!(foot(&mut app).1.starts_with("E ^s: not built yet"), "y saves");
+    assert!(foot(&mut app).1.starts_with("✓ Added Dentist"), "y saves");
     // A change of choice is a change too.
     let mut app = after("gclllc\t");
     app.key(Key::Right);

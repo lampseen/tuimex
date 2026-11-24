@@ -97,12 +97,6 @@ pub fn count(n: usize, what: &str) -> String {
     if n == 1 { format!("1 {what}") } else { format!("{n} {what}s") }
 }
 
-/// What a key or command whose screen is not built answers with, naming
-/// the milestone that builds it.
-pub fn not_built(name: &str, with: &str) -> Said {
-    err(format!("{name}: not built yet")).then(format!("arrives with {with}"))
-}
-
 /// A question and the keys that answer it, with what each does.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Question {
@@ -157,4 +151,11 @@ pub fn answer() -> Question {
     let mut keys: Vec<(&str, &str)> = ids.iter().map(|id| crate::keymap::hint(id)).collect();
     keys.push(("Esc", "cancel"));
     asked(vec![run("Answer?", Tok::Fg)], &keys)
+}
+
+/// What an event that repeats asks before it is deleted or changed: this
+/// day's, or every day's. The first two keys are those answers, in that
+/// order.
+pub fn which_ones(verb: &str) -> Question {
+    asked(vec![run(format!("{verb} which?"), Tok::Fg)], &[("t", "this one"), ("a", "all of them"), ("Esc", "cancel")])
 }

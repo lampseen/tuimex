@@ -56,7 +56,7 @@ fn told(app: &mut App, fake: &mut fx::Fake) {
 /// The app with the message `key` open in the reader and its body there,
 /// after `keys`. What opening asked for has been taken; what `keys` asked
 /// for has not.
-fn reading(key: &str, keys: &str) -> App {
+pub(super) fn reading(key: &str, keys: &str) -> App {
     let (mut app, mut fake) = (app(), fx::Fake::default());
     let mail = fx::inbox();
     let row = crate::list::rows(&mail, &[]).iter().position(|row| row.msg.envelope.id.key == key).unwrap();
@@ -537,18 +537,6 @@ fn a_confirm_takes_y_or_enter_and_any_other_key_cancels_and_is_dropped() {
         assert_eq!(foot(&mut app).1, "E undo: nothing to undo", "what was deleted for good cannot be brought back");
     }
     assert_eq!(said(":empty-trash nobody\r"), "E :empty-trash: no account \"nobody\" · Tab completes");
-}
-
-/// The answers to an invitation are not built. Each says so, in the
-/// grammar of an error, and changes nothing.
-#[test]
-fn what_is_not_built_yet_says_so() {
-    let invited = "E :invite: not built yet · arrives with invitations (M10)";
-    for keys in ["ia", "it", "id", "ip", "ix", ":invite accept\r", ":invite propose\r"] {
-        let mut app = reading("invite", keys);
-        assert_eq!(foot(&mut app).1, invited, "{keys}");
-        assert!(app.asks().is_empty());
-    }
 }
 
 #[test]

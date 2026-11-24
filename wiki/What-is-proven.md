@@ -142,7 +142,7 @@ notifier that records it.
 | Where the terminal has an image protocol (kitty, sixel, iTerm2) the picture's own bytes are handed to it over the placeholder; nothing is fetched. No test has a terminal to see the result on, and `--fixtures` has no picture bytes, so it has not been seen drawn | `an_attached_picture_is_sized_placed_and_drawn_from_the_message_s_own_bytes`, `a_terminal_with_a_protocol_gets_the_picture_over_its_placeholder`, `the_placeholder_stays_where_no_picture_can_be_drawn` |
 | Only png, jpeg, gif and webp are decoded, never one over 8192 pixels on a side, and damaged bytes fail without a panic | `another_format_is_not_a_picture`, `a_picture_claiming_more_than_the_cap_is_never_decoded`, `damaged_bytes_decode_or_fail_and_never_panic` |
 | A signed or encrypted message nobody verified says so and is never drawn as good; verifying is not built | `a_signed_message_without_a_verdict_claims_none` |
-| The answers to an invitation are not built, say so and change nothing | `what_is_not_built_yet_says_so` |
+| The answers to an invitation are not built: nothing hands the reader the event beside its card, so each says the invitation could not be read and changes nothing | `a_card_whose_event_was_not_handed_over_says_it_could_not_be_read` |
 
 ## Writing and sending
 

@@ -1,6 +1,6 @@
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
-use tuimex_core::Timestamp;
+use tuimex_core::{Action, Event, Timestamp};
 use tuimex_fixtures::design as fx;
 
 use crate::app::App;
@@ -304,10 +304,8 @@ fn o_lists_the_selected_event_s_links_with_the_host_each_opens() {
     assert_eq!(foot(&mut app), ("opens https://meet.example.org/r/q4-roadmap".to_string(), hint.to_string()));
     press(&mut app, "5");
     assert_eq!(foot(&mut app).1, "E o: this event has no link 5 · o lists them");
-    press(&mut app, "\r");
-    assert_eq!(foot(&mut app).1, "E o: not built yet · arrives with joining a meeting from the calendar");
     assert!(app.asks().is_empty(), "nothing is opened");
-    press(&mut app, "\x1b");
+    press(&mut app, "o\x1b");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer", "Esc closes the list and no more");
 
     let mut lying = after("gcI\rI");
@@ -327,28 +325,36 @@ fn i_asks_the_five_answers_of_an_event_somebody_asked_the_reader_to() {
     let question = "Answer?  a accept · t tentative · d decline · p propose a time · x ignore · Esc cancel";
     let mut app = after("gcI\ri");
     assert_eq!(foot(&mut app).1, question);
-    for answer in ["a", "t", "d", "p", "x"] {
-        let mut app = after("gcI\ri");
-        press(&mut app, answer);
-        assert_eq!(foot(&mut app).1, "E :invite: not built yet · arrives with invitations (M10)", "{answer}");
-        assert!(app.asks().is_empty());
-    }
     press(&mut app, "q");
+    assert!(app.asks().is_empty());
     assert_eq!(foot(&mut app).1.split(" · ").next(), Some("Enter open"), "any other key leaves the question");
     assert_eq!(said("gci"), "E i: no event is selected");
     assert_eq!(said("gcl\rji"), "E i: nobody asked for an answer to this event", "the dentist");
 }
 
 #[test]
-fn what_the_calendar_cannot_do_yet_says_so() {
-    assert_eq!(said("gc\rd"), "E d: not built yet · arrives with deleting an event");
+fn a_key_with_nothing_to_act_on_says_so() {
     assert_eq!(said("gcd"), "E d: no event is selected");
     assert_eq!(said("gcE"), "E E: no event is selected");
     assert_eq!(said("gcu"), "E undo: nothing to undo");
-    assert_eq!(said("gc:export\r"), "E :export: not built yet · arrives with writing local events as .ics");
-    assert_eq!(said("gcc^s"), "E ^s: not built yet · arrives with storing events and mailing invitations");
-    assert_eq!(said("gc\r\rv"), "E v: not built yet · arrives with events that keep the mail they came in");
     assert_eq!(said("gcA"), "E A: nothing here for the agent");
+}
+
+/// ADR-055: `:export` is an ask carrying the path, answered as a saved
+/// attachment is.
+#[test]
+fn export_asks_for_the_local_events_to_be_written_and_says_where_they_went() {
+    let mut app = after("gc:export ~/cal.ics\r");
+    assert_eq!(foot(&mut app).1, "Writing local events as .ics");
+    let asks = app.asks();
+    assert_eq!(asks[0].action, Action::Export("~/cal.ics".into()));
+    app.event(Event::Saved { path: "~/cal.ics".to_string() });
+    assert_eq!(foot(&mut app).1, "✓ Saved ~/cal.ics");
+    let reason = ":export: tuimex holds no event of its own".to_string();
+    app.event(Event::ActionFailed { serial: asks[0].serial, reason, hint: String::new() });
+    assert_eq!(foot(&mut app).1, "E :export: tuimex holds no event of its own");
+    let mut app = after(":export\r");
+    assert_eq!(app.asks()[0].action, Action::Export("".into()), "from mail too, to wherever downloads go");
 }
 
 #[test]
@@ -403,7 +409,8 @@ fn today_is_the_clock_s() {
 #[test]
 fn every_cell_is_written_at_any_size_wherever_the_calendar_is() {
     let states = ["gc", "gclll\rj", "gc2", "gcC", "gclll\rjo", "gcI\ri", "gc/call", "gc/call\r", "gcgd5 dec", "gcc"];
-    for keys in states.into_iter().chain(["gc\r\r", "gc?", "gc:\t", "gcgt"]) {
+    let changing = ["gclll\rd", "gclll\rjipfri", "gcI\rIo\r", "gcI\rIoA", "gclll\rjo\r", "gclll\rjjd"];
+    for keys in states.into_iter().chain(["gc\r\r", "gc?", "gc:\t", "gcgt"]).chain(changing) {
         let mut app = after(keys);
         for (width, height) in (0..=130).step_by(13).flat_map(|w| (0..=45).step_by(3).map(move |h| (w, h))) {
             let area = Rect::new(0, 0, width, height);

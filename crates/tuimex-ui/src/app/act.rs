@@ -218,6 +218,10 @@ impl App {
             self.undo.retain(|c| c.action != Action::Send || c.cursor != id);
             return self.unsend(id);
         }
+        // An answer given from the reader is taken back here, in its turn.
+        if self.answered_in_mail() > self.undo.last().map_or(0, |change| change.serial) {
+            return self.calendar_undo(true);
+        }
         match self.undo.pop() {
             None => self.say(say::err("undo: nothing to undo")),
             Some(change) if change.action == Action::Send => self.unsend(change.cursor),
@@ -259,6 +263,7 @@ impl App {
 
     /// What whoever carries the asks out has to tell.
     pub fn event(&mut self, event: Event) {
+        let Some(event) = self.calendar_told(event) else { return };
         match event {
             Event::ActionFailed { serial, reason, hint } => {
                 let Some(at) = self.undo.iter().position(|c| c.serial == serial) else {
@@ -457,10 +462,12 @@ impl App {
         if now == was {
             return false;
         }
+        let reminded = self.reminding().map(|(_, lead)| lead);
         (self.mailbox.now, self.cal.model.now) = (now, now);
         let left = |until: Timestamp| u32::try_from((until.0 - now.0).max(0)).unwrap_or(u32::MAX);
         // A date moves to another group, and a clock to another minute.
         let mut changed = now.0.div_euclid(60) != was.0.div_euclid(60);
+        changed |= self.reminding().map(|(_, lead)| lead) != reminded;
         if let Some(last) = self.synced_at.iter().map(|(_, at)| *at).min() {
             let age = u32::try_from((now.0 - last.0).max(0)).unwrap_or(u32::MAX);
             changed |= self.mailbox.synced.map(span_of) != Some(span_of(age));
@@ -511,6 +518,9 @@ impl App {
 
     /// `y` at a confirm.
     pub(super) fn confirmed(&mut self, action: Action) {
+        if matches!(action, Action::OpenEventLink(..)) {
+            return self.event_link_confirmed(action);
+        }
         if let Action::CreateArchive(account) | Action::CreateTrash(account) = &action {
             // Shown at once, as everything is (ADR-015); the store's own
             // folder takes its place when it is next read. Then what was

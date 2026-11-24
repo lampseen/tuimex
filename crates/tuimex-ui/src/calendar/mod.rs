@@ -6,6 +6,7 @@
 //! `parts` is what every view is drawn from; `month`, `week`, `day`,
 //! `event` and `form` are the views, and none of them names another.
 
+pub mod change;
 pub mod day;
 pub mod event;
 pub mod form;
@@ -70,6 +71,25 @@ pub struct Calendar {
     /// handed the calendar over knows it: what `v` on the event opens. The
     /// message's account is the event's.
     pub came_in: Vec<(String, MessageId)>,
+}
+
+/// A reminder that fell due (ADR-058): the event about to begin, in the
+/// account whose calendar holds it, and the instant it begins.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Due {
+    pub account: AccountId,
+    pub uid: String,
+    /// The event's title, as the calendar wrote it.
+    pub summary: String,
+    pub start: Timestamp,
+}
+
+/// The event an invitation's mail carries: its calendar part's event, and
+/// the zones that part defines for its times.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Invited {
+    pub event: Event,
+    pub zones: BTreeMap<String, Zone>,
 }
 
 /// One event on one day, as a view draws it. An event that runs over

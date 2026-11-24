@@ -177,12 +177,8 @@ pub fn tabs(o: &Scene, width: usize, title: &str) -> Line {
 /// what mail says there, each account whose calendar could not be read,
 /// and reminders being off. `reminder` is what is about to begin and how
 /// soon.
-pub fn alerts(calendar: &Calendar, mail: Line, reminder: Option<(&str, &str)>, reminders_off: bool) -> Line {
-    let mut parts: Vec<Line> = Vec::new();
-    if let Some((what, lead)) = reminder {
-        let link = format!(" {DOT} {} for its link", keymap::hint("calendar.links").0);
-        parts.push(vec![run(format!("{NOTICE} {what} in {lead}"), Tok::Warn), run(link, Tok::Dim)]);
-    }
+pub fn alerts(calendar: &Calendar, mail: Line, reminder: Option<(&str, String)>, reminders_off: bool) -> Line {
+    let mut parts: Vec<Line> = reminder.map(|(what, lead)| self::reminder(what, &lead)).into_iter().collect();
     parts.push(mail);
     for (account, read) in calendar.unread() {
         let mut part = vec![run(format!("{}'s calendar not read", account.0), Tok::Err)];
@@ -194,6 +190,24 @@ pub fn alerts(calendar: &Calendar, mail: Line, reminder: Option<(&str, &str)>, r
     }
     parts.retain(|part| !part.is_empty());
     parts.join(&run(format!(" {DOT} "), Tok::Dim))
+}
+
+/// What is about to begin and how soon, with the key that lists its links.
+pub fn reminder(what: &str, lead: &str) -> Line {
+    let link = format!(" {DOT} {} for its link", keymap::hint("calendar.links").0);
+    vec![run(format!("{NOTICE} {what} in {lead}"), Tok::Warn), run(link, Tok::Dim)]
+}
+
+/// How long until something `seconds` away begins, as a reminder says it:
+/// `10 min`, `2 h`, `1 h 30 min`. A minute begun counts whole, so it never
+/// says less time than there is.
+pub fn lead(seconds: i64) -> String {
+    let minutes = (seconds.max(0) + 59) / 60;
+    match (minutes / 60, minutes % 60) {
+        (0, minutes) => format!("{minutes} min"),
+        (hours, 0) => format!("{hours} h"),
+        (hours, minutes) => format!("{hours} h {minutes} min"),
+    }
 }
 
 /// How long ago `at` was, in its largest whole unit: `2m`, `20s`.
