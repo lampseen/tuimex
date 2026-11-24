@@ -164,3 +164,33 @@ fn a_submission_without_a_bcc_is_the_bytes_as_written() {
     assert_eq!(submission(raw).unwrap().message, raw);
     assert_eq!(submission(b""), Err(Error::NotAMessage));
 }
+
+/// A file is taken for a calendar by its name only under a type that says
+/// nothing else: a name ending in something after `.ics`, or a type that
+/// says what the file is, keeps it an ordinary file.
+#[test]
+fn only_an_ics_name_under_a_generic_type_is_a_calendar() {
+    let with = |kind: &str, name: &str| {
+        format!(
+            "From: a@example.com\r\nContent-Type: multipart/mixed; boundary=\"b\"\r\n\r\n--b\r\n\
+             Content-Type: text/plain\r\n\r\nSee attached.\r\n--b\r\nContent-Type: {kind}\r\n\
+             Content-Disposition: attachment; filename=\"{name}\"\r\n\r\n\
+             BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:u@example.com\r\n\
+             DTSTART:20261201T090000Z\r\nSUMMARY:S\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--b--\r\n"
+        )
+        .into_bytes()
+    };
+    for (kind, name, calendar) in [
+        ("application/octet-stream", "invite.ics", true),
+        ("application/octet-stream", "INVITE.ICS", true),
+        ("application/ics", "invite.ics", true),
+        ("application/octet-stream", "invite.ics.exe", false),
+        ("application/octet-stream", ".ics", false),
+        ("application/pdf", "invite.ics", false),
+        ("text/plain", "invite.ics", false),
+    ] {
+        let raw = with(kind, name);
+        assert_eq!(calendar_part(&raw).unwrap().is_some(), calendar, "{kind} {name}");
+        assert_eq!(body(&raw, 80).unwrap().invite.is_some(), calendar, "{kind} {name}");
+    }
+}

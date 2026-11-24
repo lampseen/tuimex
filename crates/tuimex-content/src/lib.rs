@@ -16,7 +16,8 @@ use tuimex_core::Link;
 pub use calendar::{calendar, cancel, counter, event_text, invite, new_uid, reply, request, with_answer};
 pub use dav::{DavItem, multistatus};
 pub use message::{
-    Payload, Structure, Submission, attachment, body, browser_copy, envelope, structure, submission, unsubscribe,
+    Payload, Structure, Submission, attachment, body, browser_copy, calendar_part, envelope, structure, submission,
+    unsubscribe,
 };
 pub use sanitise::{InlineImage, sanitise};
 

@@ -4,7 +4,10 @@
 
 use mail_builder::MessageBuilder;
 use mail_builder::headers::address::Address as Header;
-use tuimex_core::{Address, Draft, is_address};
+use mail_builder::headers::raw::Raw;
+use mail_builder::mime::{BodyPart, MimePart};
+use tuimex_core::calendar::Method;
+use tuimex_core::{Address, CalendarPart, Draft, is_address};
 
 #[cfg(test)]
 mod tests;
@@ -91,8 +94,44 @@ pub fn build(draft: &Draft, files: Vec<File>, date: i64, unique: &str, bcc: Bcc)
     if let Some(parent) = draft.in_reply_to.as_deref().and_then(header_id).or_else(|| ids.last().cloned()) {
         message = message.in_reply_to(parent).references(ids);
     }
-    for file in files {
-        message = message.attachment(mime(&file.name), file.name, file.bytes);
+    match &draft.calendar {
+        None => {
+            for file in files {
+                message = message.attachment(mime(&file.name), file.name, file.bytes);
+            }
+        }
+        Some(calendar) => message = message.body(with_calendar(&draft.body, calendar, files)),
     }
     message.write_to_vec().map_err(|e| format!("building the message: {e}"))
+}
+
+/// The text and the calendar as two forms of one message (RFC 6047), the
+/// text first so that a reader with no calendar shows it; beside any
+/// files, inside `multipart/mixed`.
+fn with_calendar<'x>(body: &'x str, calendar: &'x CalendarPart, files: Vec<File>) -> MimePart<'x> {
+    let method = match calendar.method {
+        Method::Request => "REQUEST",
+        Method::Reply => "REPLY",
+        Method::Counter => "COUNTER",
+        Method::Cancel => "CANCEL",
+        Method::Other => "PUBLISH",
+    };
+    // The type goes in as raw text so that the builder sends the part as
+    // base64, which carries its CRLFs and lines of any length byte for
+    // byte. Given as a content type it would be judged as text and might
+    // go as quoted-printable, whose line breaks each reader decodes in its
+    // own way. Nothing in it came from a message: the method is one of
+    // the five above.
+    let kind = Raw::new(format!("text/calendar; method={method}; charset=utf-8"));
+    let part = MimePart {
+        headers: vec![("Content-Type".into(), kind.into())],
+        contents: BodyPart::Binary(calendar.text.as_bytes().into()),
+    };
+    let alternative = MimePart::new("multipart/alternative", vec![MimePart::new("text/plain", body), part]);
+    if files.is_empty() {
+        return alternative;
+    }
+    let mut parts = vec![alternative];
+    parts.extend(files.into_iter().map(|file| MimePart::new(mime(&file.name), file.bytes).attachment(file.name)));
+    MimePart::new("multipart/mixed", parts)
 }
