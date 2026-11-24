@@ -1538,6 +1538,20 @@ working calendar: the milestones are built in order on one local branch,
 PLAN §10 has it. Until the Rust draws the design, the three tests that
 hold its tables to `design/tui.js` fail on that branch.*
 
+*2026-11-24, while it was built.* Bryan left the build to run to one
+pull request and gave the agent leading it the authority to change the
+design where the build showed it had to ("you have authority to approve
+changes to the design if needed"). One change so far: the fixture event
+with a deceptive link gives its place as `bank.example.com`, not as an
+address, because a place that is itself an address is a second link
+(above) and the design's own drawing of that event's links shows one.
+No output changed. Decided where the design was silent: an event's row
+names its account only when more than one is configured, as a message's
+does; narrowing to an account in the calendar leaves mail's narrowing
+alone, and the reverse; `u` in the calendar undoes what was done in the
+calendar and never reaches into mail; a mail command typed in the
+calendar is refused and says `gm` returns to mail.
+
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
 This is ADR-013 again, for events. An event tuimex itself holds (one
