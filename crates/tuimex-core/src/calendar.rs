@@ -15,8 +15,10 @@ pub mod date;
 mod rules;
 #[cfg(test)]
 mod tests;
+mod words;
 
 pub use self::rules::{Standing, links_of, standing};
+pub use self::words::{alarm_words, repeat_words, rule_words};
 
 pub const DAY: i64 = 86_400;
 
