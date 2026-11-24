@@ -17,6 +17,7 @@ mod secret;
 mod smtp;
 mod store;
 pub mod sync;
+pub mod zone;
 
 use tuimex_core::{Event, Head, RemoteError, Security, Timestamp};
 use tuimex_store::Parsed;
