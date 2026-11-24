@@ -480,3 +480,16 @@ fn the_mail_is_taken_alone_only_while_no_store_is_open_and_a_store_does_not_open
     drop(alone);
     open(&f.root);
 }
+
+#[test]
+fn the_mail_is_taken_alone_once_something_that_held_it_for_a_moment_lets_go() {
+    let f = fixture("lock-passing");
+    let data = f.root.join("data");
+    let held = f.store;
+    let letting_go = std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        drop(held);
+    });
+    sole(&data).expect("a hold of a tenth of a second is waited out");
+    letting_go.join().unwrap();
+}
