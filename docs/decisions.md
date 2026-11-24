@@ -1834,3 +1834,11 @@ on an address Google documents as the old one: it is tried by hand before
 each release (`docs/testing.md`), because no test server behaves as
 Google does. And until the write is proven against a real calendar, the
 Google accounts are read-only like the rest.
+
+*2026-11-24, as built.* A calendar is a `[[calendar]]` table of its own
+naming its account, not a table inside the account. Setup only ever adds
+to the end of the config (ADR-043), and a table inside an account that is
+not the last one cannot be added there. It also lets an account have more
+than one. Linked but not yet called from the binary, `roxmltree` made the
+release binary 49,152 bytes larger; the figure with the reader in use
+goes here when the fetch is wired in.
