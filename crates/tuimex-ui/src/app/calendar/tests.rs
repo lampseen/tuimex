@@ -97,16 +97,13 @@ fn enter_goes_deeper_and_esc_comes_back() {
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer");
     press(&mut app, "\r");
     let rows = screen(&mut app, 120, 40);
-    assert_eq!(rows[0], "  Q4 roadmap review");
-    assert_eq!(rows[2], "  E event: not built yet · arrives with the calendar's event view");
+    assert_eq!(rows[0], format!("  Q4 roadmap review{}2 of 4 on Thu 26 Nov", " ".repeat(79)));
+    assert_eq!(rows[2], "    When     Thu 26 Nov 2026, 10:00 to 11:30 · in 3 days");
     press(&mut app, "J");
-    assert_eq!(screen(&mut app, 120, 40)[0], "  Vendor call", "J steps to the next event without going back");
+    let vendor = format!("  Vendor call{}3 of 4 on Thu 26 Nov", " ".repeat(85));
+    assert_eq!(screen(&mut app, 120, 40)[0], vendor, "J steps to the next event without going back");
     press(&mut app, "l");
-    assert_eq!(
-        screen(&mut app, 120, 40)[0],
-        "  Vendor call",
-        "a key the event's table does not name is not the calendar's"
-    );
+    assert_eq!(screen(&mut app, 120, 40)[0], vendor, "a key the event's table does not name is not the calendar's");
     press(&mut app, "\x1b");
     assert_eq!(screen(&mut app, 120, 40)[2], "  Thu 26 November");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 3 of 4 · 1 to answer");
@@ -359,7 +356,7 @@ fn what_the_calendar_cannot_do_yet_says_so() {
         press(&mut app, "\x1b");
         assert!(screen(&mut app, 120, 40)[0].starts_with("  Month"), "Esc closes the form");
     }
-    assert_eq!(said("gc\r\rzo"), "E zo: not built yet · arrives with the calendar's event view");
+    assert_eq!(said("gc\r\rv"), "E v: not built yet · arrives with events that keep the mail they came in");
     assert_eq!(said("gcA"), "E A: nothing here for the agent");
 }
 
@@ -376,7 +373,7 @@ fn the_calendar_has_its_commands_and_refuses_the_ones_that_take_rows_of_mail() {
     assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "alone, where it was");
     assert_eq!(said(":calendar year\r"), "E :calendar: it takes month, week or day · Tab completes");
     press(&mut app, ":calendar month\r\r\r");
-    assert_eq!(screen(&mut app, 120, 40)[0], "  Standup");
+    assert_eq!(screen(&mut app, 120, 40)[0], format!("  Standup{}1 of 2 on Mon 23 Nov", " ".repeat(89)));
     press(&mut app, ":q\r");
     assert_eq!(screen(&mut app, 120, 40)[2], "  Today · Mon 23 November", ":q is back, out of the event");
     press(&mut app, ":q\r");

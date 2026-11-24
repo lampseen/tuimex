@@ -199,6 +199,10 @@ fn every_key_of_the_table_does_something() {
         ("calendar.links" | "calendar.edit" | "calendar.delete", _) => "gc\r",
         (id, _) if id.starts_with("calendar.") => "gc",
         (id, _) if id.starts_with("event-form.") => "gcc",
+        // The roadmap review has fields under More; every event fits whole
+        // at this size, so a key that scrolls says so.
+        ("event.fold", "zo") => "gclll\rj\r",
+        ("event.fold", _) => "gclll\rj\rzo",
         (id, _) if id.starts_with("event.") => "gc\r\r",
         ("calendars.choose", "k") => "gcCj",
         (id, _) if id.starts_with("calendars.") => "gcC",
