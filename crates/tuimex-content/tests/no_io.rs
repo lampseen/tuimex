@@ -111,8 +111,9 @@ fn the_content_crate_does_no_io() {
 
 /// The crates that parse, and the two that carry data and errors. A new
 /// name here is a new way out of the crate, and needs the argument that it
-/// is not one.
-const ALLOWED: [&str; 6] = ["ammonia", "base64", "html2text", "mail-parser", "thiserror", "tuimex-core"];
+/// is not one. `roxmltree` builds a read-only tree from a string it is
+/// given and its one dependency searches bytes (ADR-062).
+const ALLOWED: [&str; 7] = ["ammonia", "base64", "html2text", "mail-parser", "roxmltree", "thiserror", "tuimex-core"];
 
 #[test]
 fn the_content_crate_depends_on_parsers_alone() {

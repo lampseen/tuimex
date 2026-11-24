@@ -4,6 +4,7 @@
 
 mod calendar;
 mod css;
+mod dav;
 mod html;
 mod message;
 mod sanitise;
@@ -13,6 +14,7 @@ mod trackers;
 use tuimex_core::Link;
 
 pub use calendar::{calendar, invite};
+pub use dav::{DavItem, multistatus};
 pub use message::{
     Payload, Structure, Submission, attachment, body, browser_copy, envelope, structure, submission, unsubscribe,
 };
@@ -26,6 +28,8 @@ pub enum Error {
     NoSuchAttachment(usize),
     #[error("the HTML could not be read: {0}")]
     Html(String),
+    #[error("the calendar server's answer could not be read: {0}")]
+    Dav(String),
 }
 
 /// HTML as the reader shows it, and the links its `[n]` marks stand for.
