@@ -590,9 +590,12 @@ fn mail_is_read_with_nothing_fetched_and_its_links_and_files_go_to_the_systems_o
     steps.extend(find(&late));
     // The cursor rests on its row and nothing is typed: the preview asks
     // for the body, shows the whole message, and scrolls to its end.
+    // The file is looked for until it is found whole: a message renamed
+    // between the shell listing the directory and grep opening it is a
+    // file grep cannot find, not a body that is missing.
     steps.extend([
         "wait The first line of a long body.".to_string(),
-        format!("run grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
+        format!("until grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
         "keys \\x1bj".to_string(),
         "wait lines 1-".to_string(),
         "keys G".to_string(),
@@ -606,7 +609,7 @@ fn mail_is_read_with_nothing_fetched_and_its_links_and_files_go_to_the_systems_o
         "wait The first line of a long body.".to_string(),
         // 03:04 UTC, on a wall clock nine hours east of it.
         "wait Mon 23 Nov 2026 12:04".to_string(),
-        format!("run grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
+        format!("until grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
         "keys :q\\r".to_string(),
         "wait Enter open".to_string(),
     ]);
