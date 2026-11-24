@@ -35,6 +35,24 @@ that every name on this page is a test that exists.
 | `tuimex doctor --redact` prints the same report line for line with every account name, address, user name, server host, certificate fingerprint and the home directory replaced by a placeholder that is the same wherever the value recurs, inside a server's own words too, and no name inside a longer word | `redact_replaces_each_kind_of_value_where_it_stands_whole_and_nothing_else`; over a working setup and each broken one in `a_working_setup_is_reported_line_by_line_and_nothing_is_wrong` and `each_thing_that_is_broken_is_named_with_what_mends_it_and_the_run_fails`; through the binary in `doctor_redacted_prints_the_same_report_with_no_name_address_host_or_home_in_it`. What the config does not name, such as a folder in a path: not replaced |
 | No password, client secret or token that setup, the sign-in or doctor handled is in a file or in anything printed, with `--redact` or without | `a_secret_never_reaches_a_file_or_anything_setup_or_doctor_says`, a named CI job |
 
+## Calendars
+
+The calendar's screens are not built: what is below is setup, the config,
+`tuimex sync` and `tuimex doctor`. Every calendar server here is a
+stand-in that answers from a script.
+
+| what is true | what proves it |
+|---|---|
+| A `[[calendar]]` is `caldav` with an `https://` address and no user name in it, or a `feed` with no address in the config; one of no account, a second for one account, and each other mistake is an error naming its key, and none repeats a feed's address | `a_calendar_is_caldav_with_an_address_or_a_feed_with_none`, `a_calendar_table_that_is_wrong_says_which_key_and_never_quotes_a_feed_s_address`, `the_reference_in_the_plan_parses_with_every_optional_key_set` |
+| Setup offers a Gmail account that signs in with an app password its calendar over CalDAV, tries that sign-in once before writing anything, and on a refusal says so and offers the secret address | `a_gmail_account_s_calendar_is_read_over_caldav_with_its_app_password`, `a_gmail_calendar_that_refuses_the_app_password_is_offered_by_its_secret_address` |
+| Setup asks for a feed's address unseen, says where Proton and Google keep it, reads it once, saves nothing when it serves a web page or when no keyring will keep it, keeps it in the keyring alone, and asks again on the next run after a no | `a_feed_is_asked_for_unseen_checked_once_and_kept_in_the_keyring_alone`, `an_account_already_here_is_offered_a_calendar_and_what_cannot_be_kept_is_not_written` |
+| A rename takes the account's `[[calendar]]` line, its feed's keyring entry and its own events with it | `a_rename_takes_the_account_s_calendar_and_its_feed_s_address_along` |
+| `tuimex sync` reads each calendar after the mail, a line each with its kind and host; CalDAV signs in as the account's mail does; one that fails says why and the others are still read; `--account` limits it | `sync_says_a_line_for_each_calendar_and_a_feed_s_host_alone`, `each_calendar_is_signed_in_to_as_its_account_s_mail_or_read_from_its_feed`, `a_pass_over_two_accounts_reads_the_one_that_answers_when_the_other_fails` |
+| CalDAV is asked for 90 days back to two years on, only what changed is fetched, nothing on another host is followed, and a calendar that fails keeps what it held | `caldav_is_asked_for_ninety_days_back_and_two_years_on`, `a_calendar_is_fetched_once_and_then_only_what_changed`, `a_server_cannot_add_what_was_not_listed_or_send_the_fetch_elsewhere`, `a_refusal_says_what_kind_and_changes_nothing`, `a_feed_is_kept_whole_and_its_address_is_in_no_error` |
+| Only an `https://` address with no user name in it is fetched | `only_an_address_over_tls_with_no_sign_in_name_is_asked` |
+| `tuimex doctor` names each calendar's kind, its host, whether its password or address is found, and when it was last read, asking no calendar's server; `--redact` hides the host | `each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last_read` |
+| A feed's address is in no file under the config, data, cache and state directories and in nothing setup, sync, doctor or the calendar's thread says, read or failing | `a_secret_never_reaches_a_file_when_a_calendar_feed_is_set_up_and_read`, which the CI job `secret` runs by its name; `a_feed_s_address_is_printed_by_its_command_and_a_failing_command_says_so_without_it` |
+
 ## Syncing with a server
 
 | what is true | what proves it |
@@ -158,6 +176,7 @@ itself.
 | **Gmail, as Google runs it** | two accounts were set up and synced by hand on 2026-11-23. Which way each signed in, sending, and every other step were not recorded. The browser sign-in itself is tested only against a stand-in for Google |
 | **Proton Bridge** | one account was set up and synced by hand on 2026-11-23, with nothing else recorded. Pinning is tested against a container's certificate, not Bridge's |
 | **Fastmail and iCloud** | setup knows their servers. Nobody has run either |
+| **Calendars at Google and Proton** | no test fetches from either. A `PROPFIND` on Google's older CalDAV address with an app password answered 207 by hand on 2026-11-24; a whole fetch, and any feed from Google or Proton, have not been run against the real thing |
 | **The system keyring** | every test uses a keyring in memory. The Secret Service and the macOS keychain have been used only in the two by-hand runs above |
 | **The real Claude CLI behind `use = "claude"`** | no test runs it, because running it sends text to a provider. A test holds the arguments tuimex gives it; that the program then behaves as its help says is not tested |
 | **Sending from the interface through a real provider** | sending is run against servers in containers by `make real-server`, and against no provider's own |
@@ -177,7 +196,7 @@ above.
 ## Not built
 
 OpenPGP (signing, encrypting, verifying, decrypting), answering an
-invitation, the mouse, `NO_COLOR`, remapping keys under `[keys]`, new-mail
+invitation, the calendar's screens, the mouse, `NO_COLOR`, remapping keys under `[keys]`, new-mail
 notifications, and `ui.glyphs` and `ui.colors` in the config. Each is
 planned; none is claimed anywhere on these pages.
 

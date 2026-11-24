@@ -943,6 +943,12 @@ read = true
 folders = ["INBOX"]
 draft = true
 
+[[calendar]]                   # absent means no calendar for the account; at most one for each
+account = "personal"           # an [[account]]'s name
+kind = "caldav"                # caldav | feed (ADR-056, ADR-062). caldav signs in as the account's IMAP user, with its password, so not for gmail-oauth
+url = "https://www.google.com/calendar/dav/you@example.com/events/"   # caldav only, required, https:// with no user@
+                               # a feed has no url: its address is a secret, kept in the keyring as "<account>/calendar-feed", or printed by address_cmd = ["pass", "show", "calendar/personal"] (argv, no shell, the first line)
+
 [sync]
 bodies = "30d"
 max_body = "10MB"

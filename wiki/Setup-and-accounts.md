@@ -21,7 +21,8 @@ worked. A first `tuimex` with no config runs it for you.
 
 Then two lines say it worked, `Signed in to <server> and found N folders.`
 and `Signed in to <server>; nothing was sent.`, and
-`Saved <name> in …/config.toml.`
+`Saved <name> in …/config.toml.` Setup then asks about the account's
+calendar: see [Calendars](#calendars).
 
 ## Ways to sign in
 
@@ -116,6 +117,46 @@ fingerprints: `the certificate <name>'s server presented is not the one
 that was pinned`. Run `tuimex setup` and choose `Accept a new certificate
 for <name>`. It is the same for any server you run yourself.
 
+## Calendars
+
+tuimex can read each account's calendar. **The calendar's screens are
+not built yet**: `tuimex sync` reads it and `tuimex doctor` names it, and
+nothing in the interface shows it. Setup asks about it after an account is
+added, and from its menu for an account that has none. No, which Enter
+gives, is a fine answer; it is not remembered, and the next run asks
+again.
+
+**Gmail, with an app password.** Setup offers to read the calendar with
+the password the account already signs in with, over CalDAV at
+`https://www.google.com/calendar/dav/<address>/events/`. It asks once
+whether the calendar takes that sign-in, and only then writes the
+`[[calendar]]` table. If Google refuses, setup says so and offers the
+secret address instead. A Gmail account that signs in through the browser
+is offered the secret address alone.
+
+**Any other account** is asked for the calendar's private address, which
+serves it in iCalendar format. Setup says where that is found for the
+providers where it is known:
+
+- Proton Calendar on the web: Settings, then the calendar, then
+  *Share via link*, with full view.
+- Google Calendar on the web: Settings, then the calendar, then
+  *Secret address in iCal format*.
+
+The address is not shown as you type it. Setup reads it once, and if
+what it serves is a web page rather than a calendar, says so and saves
+nothing. An address beginning `webcal://` is read over `https://`.
+
+The address is a secret: anyone holding it reads the calendar. It goes
+into the keyring as `<account>/calendar-feed` and into no file. On a
+machine with no keyring service setup saves nothing and prints the table
+to add by hand, with an `address_cmd`, a command that prints the address
+(see [Configuration](Configuration#calendar-at-most-once-for-each-account)).
+
+Nothing here has been run against Google or Proton by a test: CalDAV and
+feeds are tested against stand-ins. Google's older CalDAV address took an
+app password when it was tried by hand on 2026-11-24.
+
 ## Running setup again
 
 With accounts already there, `tuimex setup` shows a menu:
@@ -125,15 +166,20 @@ With accounts already there, `tuimex setup` shows a menu:
   2) Sign in again to work
   3) Accept a new certificate for work
   4) Rename an account
-  5) Quit
+  5) Add a calendar to an account that has none
+  6) Quit
 ```
+
+The calendar line is there while some account has no `[[calendar]]`.
 
 Setup only adds to the config file and keeps what was there to the byte;
 the one thing it changes in place is an account's name.
 
 **Renaming** moves four things together: the account's mail on this
 computer, its sign-in in the keyring, its pinned certificate, and its name
-in the config. No mail is downloaded again and nothing changes on the
+in the config. Its calendar goes with it: the `account` line of its
+`[[calendar]]` and the feed's address in the keyring; what was fetched of
+the calendar is fetched again. No mail is downloaded again and nothing changes on the
 server. It is refused while another tuimex has the mail open.
 
 **Removing an account** is not something setup does. Delete its
@@ -149,6 +195,10 @@ nothing, and exits non-zero when something is wrong:
 - for each account: where its password comes from, its certificate, a
   sign-in to IMAP with the folder count, a sign-in to SMTP that sends
   nothing, and any role no folder fills
+- for each calendar: CalDAV or a feed, its host (never the rest of a
+  feed's address), whether the password or the address is found, and when
+  it was last read. Doctor does not ask the calendar's server; `tuimex
+  sync` does
 - the keyring answers; whether `gpg` is on the path; which editor compose
   will open; whether the `[agent]` command exists (it is found, never run);
   whether this terminal draws pictures
@@ -171,6 +221,12 @@ post it.
 line for each folder such as `work/INBOX: 12 changed` or
 `work/INBOX: nothing new`. `--account <name>` does one account. It is for a
 script or a timer; an open tuimex syncs by itself.
+
+After the mail it reads each calendar, a line each:
+`work/calendar (caldav, www.google.com): 3 changed`, or
+`home/calendar (feed, calendar.example.net): nothing new`. A feed is named
+by its host alone. One that cannot be read says why on a line beginning
+`E sync:`, keeps what it held, and makes the exit status non-zero.
 
 ---
 

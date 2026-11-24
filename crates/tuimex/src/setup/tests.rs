@@ -10,9 +10,11 @@ use std::thread;
 
 use anyhow::Result;
 use tuimex_core::{RemoteError, RemoteFolder};
+use tuimex_engine::calendar::{CalendarError, Got, Sent, Wire};
 use tuimex_engine::oauth::{self, Endpoints};
 use tuimex_engine::{Credential, Keyring, Protocol, Secret, Seen, Server, pin};
 use tuimex_fixtures::FakeGoogle;
+use tuimex_store::files;
 
 use super::{Prompt, Setup, write};
 use crate::config::Config;
@@ -203,6 +205,85 @@ impl Net for FakeNet {
     }
 }
 
+/// A feed's private address, which no file and no line may hold.
+pub(crate) const FEED: &str = "https://calendar.example.net/api/calendar/v1/url/SYNTHETIC-FEED-TOKEN-4f1a/calendar.ics";
+/// Gmail's calendar for `ada@gmail.com`, as setup offers it.
+pub(crate) const GOOGLE_DAV: &str = "https://www.google.com/calendar/dav/ada@gmail.com/events/";
+
+pub(crate) const DENTIST: &str = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:d@example.net\r\n\
+                                  DTSTART:20261127T090000Z\r\nSUMMARY:Dentist\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+
+/// A CalDAV calendar's three answers: what it is, what it lists, and the
+/// events asked for, told apart by what each request's body asks.
+pub(crate) fn caldav(url: &'static str) -> Vec<(&'static str, &'static str, &'static str, u16, String)> {
+    let path = url.trim_start_matches("https://www.google.com");
+    vec![
+        (
+            "PROPFIND",
+            url,
+            "propfind",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/"><D:response><D:href>{path}</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:displayname>ada@gmail.com</D:displayname><CS:getctag>t1</CS:getctag></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+        (
+            "REPORT",
+            url,
+            "calendar-query",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:"><D:response><D:href>{path}standup.ics</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:getetag>"1"</D:getetag></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+        (
+            "REPORT",
+            url,
+            "calendar-multiget",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav"><D:response><D:href>{path}standup.ics</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:standup@example.org
+DTSTART:20261126T100000Z
+SUMMARY:Standup
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+    ]
+}
+
+/// Calendar servers: each request is answered by the first entry whose
+/// method and address it has and whose body holds the entry's words.
+/// What it was asked, it keeps: method, address, and the sign-in's user.
+#[derive(Default)]
+pub(crate) struct FakeWire {
+    pub served: Vec<(&'static str, &'static str, &'static str, u16, String)>,
+    pub asked: RefCell<Vec<(String, String, Option<String>)>>,
+}
+
+impl FakeWire {
+    pub fn new(served: Vec<(&'static str, &'static str, &'static str, u16, String)>) -> FakeWire {
+        FakeWire { served, asked: RefCell::default() }
+    }
+}
+
+impl Wire for FakeWire {
+    fn send(&self, sent: &Sent<'_>) -> Result<Got, CalendarError> {
+        let user = sent.sign_in.map(|(user, _)| user.to_string());
+        self.asked.borrow_mut().push((sent.method.to_string(), sent.url.to_string(), user));
+        let body = sent.body.unwrap_or_default();
+        let found = self
+            .served
+            .iter()
+            .find(|(method, url, words, ..)| *method == sent.method && *url == sent.url && body.contains(words));
+        let (.., status, body) = found.ok_or_else(|| CalendarError::Unreachable("its host was not found".into()))?;
+        Ok(Got { status: *status, body: body.clone() })
+    }
+}
+
 /// One run of setup in a scratch root, as the person in `script`.
 pub(crate) struct Run<'a> {
     pub root: &'a Path,
@@ -219,7 +300,12 @@ impl Run<'_> {
         self.root.join("config/config.toml")
     }
 
+    /// With calendar servers that answer nothing.
     pub fn go(&self, answers: &[&str]) -> (Result<()>, Script) {
+        self.go_with(&FakeWire::default(), answers)
+    }
+
+    pub fn go_with(&self, wire: &FakeWire, answers: &[&str]) -> (Result<()>, Script) {
         let mut script = Script::new(answers);
         let endpoints = self.google.map_or_else(
             // A port nothing listens on: a test that reaches it has gone wrong.
@@ -239,6 +325,7 @@ impl Run<'_> {
             endpoints,
             browser: if self.browser { Some(&mut browser) } else { None },
             claude: self.claude.then(|| PathBuf::from("/usr/bin/claude")),
+            wire,
         }
         .run();
         (result, script)
@@ -273,9 +360,22 @@ fn mode(path: &Path) -> u32 {
 }
 
 /// Address, provider, the four server answers, username, name, sign-in by
-/// password, the password, no agent access.
-const BY_HAND: [&str; 12] =
-    ["ada@example.org", "5", "imap.example.org", "", "smtp.example.org", "587", "", "work", "1", PASSWORD, "n", "n"];
+/// password, the password, no agent access, and no calendar.
+const BY_HAND: [&str; 13] = [
+    "ada@example.org",
+    "5",
+    "imap.example.org",
+    "",
+    "smtp.example.org",
+    "587",
+    "",
+    "work",
+    "1",
+    PASSWORD,
+    "n",
+    "n",
+    "",
+];
 
 const WORK: &str = "[[account]]\nname = \"work\"\naddress = \"ada@example.org\"\n\
                     imap = { host = \"imap.example.org\", port = 993 }\nsmtp = { host = \"smtp.example.org\", port = 587 }\n\
@@ -340,7 +440,7 @@ fn an_untrusted_certificate_is_shown_and_once_accepted_pinned_for_both_servers()
     let (keyring, net) = (MemoryKeyring::default(), FakeNet::self_signed(7));
     let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
     // Proton Bridge: its ports and username are asked, with its defaults.
-    let answers = ["ada@proton.me", "", "", "", "bridge-user", "", "1", PASSWORD, "y", "n", "n"];
+    let answers = ["ada@proton.me", "", "", "", "bridge-user", "", "1", PASSWORD, "y", "n", "n", ""];
     let (result, script) = run.go(&answers);
     result.unwrap();
     let shown = script.shown();
@@ -374,7 +474,7 @@ fn a_second_account_is_added_after_what_was_there_which_is_kept_to_the_byte() {
     fs::write(run.config(), mine).unwrap();
     // Enter adds another; iCloud is guessed from the address; the name
     // offered is taken; an agent may read; `:agent` may use Claude.
-    let (result, script) = run.go(&["", "ada@icloud.com", "", "", "1", PASSWORD, "y", "n", "y"]);
+    let (result, script) = run.go(&["", "ada@icloud.com", "", "", "1", PASSWORD, "y", "n", "y", ""]);
     result.unwrap();
     let text = fs::read_to_string(run.config()).unwrap();
     let added = "\n[[account]]\nname = \"icloud\"\naddress = \"ada@icloud.com\"\n\
@@ -389,7 +489,7 @@ fn a_second_account_is_added_after_what_was_there_which_is_kept_to_the_byte() {
 
     // A third: the name offered steps past one that is taken, and with an
     // [agent] table there the question is not asked again.
-    let (result, script) = run.go(&["", "bob@icloud.com", "", "", "2", "printf", "%s", PASSWORD, "", "n", "n"]);
+    let (result, script) = run.go(&["", "bob@icloud.com", "", "", "2", "printf", "%s", PASSWORD, "", "n", "n", ""]);
     result.unwrap();
     let third = fs::read_to_string(run.config()).unwrap();
     assert!(third.starts_with(&text) && !script.shown().contains("Claude"), "{third}");
@@ -455,7 +555,7 @@ fn the_roles_the_mapping_could_not_fill_are_asked_for_from_the_folders_left() {
     // Archive is the first of the two left, Trash then the only one left,
     // and nothing is left to ask about for Drafts or Junk.
     let mut answers = BY_HAND[..10].to_vec();
-    answers.extend(["1", "1", "n", "n"]);
+    answers.extend(["1", "1", "n", "n", ""]);
     let (result, script) = run.go(&answers);
     result.unwrap();
     let text = fs::read_to_string(run.config()).unwrap();
@@ -479,7 +579,7 @@ fn two_gmail_accounts_sign_in_through_a_browser_and_share_one_client() {
     let run = Run { root: &root, keyring: &keyring, net: &net, google: Some(&google), browser: true, claude: false };
     // Gmail is guessed and its name is the default; Google's sign-in is
     // the third way offered.
-    let (result, script) = run.go(&["ada@gmail.com", "", "", "3", CLIENT_ID, CLIENT_SECRET, "n", "n"]);
+    let (result, script) = run.go(&["ada@gmail.com", "", "", "3", CLIENT_ID, CLIENT_SECRET, "n", "n", ""]);
     result.unwrap();
     let shown = script.shown();
     assert!(
@@ -493,7 +593,7 @@ fn two_gmail_accounts_sign_in_through_a_browser_and_share_one_client() {
     assert_eq!(net.signed_in.borrow().len(), 2, "IMAP and SMTP both took the token");
 
     // The second is asked for no client: the first one's is in the keyring.
-    let (result, script) = run.go(&["", "bob@gmail.com", "", "", "3", "n", "n"]);
+    let (result, script) = run.go(&["", "bob@gmail.com", "", "", "3", "n", "n", ""]);
     result.unwrap();
     assert!(script.shown().contains("Using the Google client already in the keyring."));
     assert!(!script.shown().contains("Client ID:"));
@@ -544,7 +644,7 @@ fn with_no_browser_the_address_is_printed_and_the_pasted_redirect_or_code_is_tak
         }
     }
     for (whole, name) in [(true, "gmail"), (false, "gmail-2")] {
-        let mut person = Pasting(Script::new(&["", "ada@gmail.com", "", "", "3", "n", "n"]), &google, whole);
+        let mut person = Pasting(Script::new(&["", "ada@gmail.com", "", "", "3", "n", "n", ""]), &google, whole);
         if name == "gmail" {
             person.0.answers.pop_front();
         }
@@ -560,6 +660,7 @@ fn with_no_browser_the_address_is_printed_and_the_pasted_redirect_or_code_is_tak
             endpoints: Endpoints { authorize: google.authorize_url(), token: google.token_url() },
             browser: None,
             claude: None,
+            wire: &FakeWire::default(),
         }
         .run()
         .unwrap();
@@ -575,7 +676,7 @@ fn an_account_chosen_from_the_menu_accepts_its_server_s_new_certificate_without_
     let first = FakeNet::self_signed(7);
     let run = Run { root: &root, keyring: &keyring, net: &first, google: None, browser: false, claude: false };
     let mut answers = BY_HAND[..10].to_vec();
-    answers.extend(["y", "n", "n"]);
+    answers.extend(["y", "n", "n", ""]);
     run.go(&answers).0.unwrap();
     let written = fs::read_to_string(run.config()).unwrap() + "# a note of mine\n";
     fs::write(run.config(), &written).unwrap();
@@ -585,7 +686,8 @@ fn an_account_chosen_from_the_menu_accepts_its_server_s_new_certificate_without_
     result.unwrap();
     let shown = script.shown();
     let menu = "\nAccounts here: work.\n  1) Add another account\n  2) Sign in again to work\n  \
-                3) Accept a new certificate for work\n  4) Rename an account\n  5) Quit\n";
+                3) Accept a new certificate for work\n  4) Rename an account\n  \
+                5) Add a calendar to an account that has none\n  6) Quit\n";
     assert!(shown.contains(menu), "{shown}");
     assert!(shown.contains("The server still presents the certificate pinned for work."));
     assert!(shown.contains("The certificate of work's server has not changed; there was nothing to accept."));
@@ -610,10 +712,10 @@ fn an_account_chosen_from_the_menu_accepts_its_server_s_new_certificate_without_
     run.go(&["2", "synthetic-second-password"]).0.unwrap();
     assert_eq!(keyring.get("work").as_deref(), Some("synthetic-second-password"));
     // What is not on the menu is asked for again, and quitting changes nothing.
-    let (result, script) = run.go(&["work", "6", "5"]);
+    let (result, script) = run.go(&["work", "7", "6"]);
     result.unwrap();
     let shown = script.shown();
-    assert_eq!(shown.matches("Answer with a number from 1 to 5.").count(), 2, "{shown}");
+    assert_eq!(shown.matches("Answer with a number from 1 to 6.").count(), 2, "{shown}");
     assert!(shown.ends_with("Nothing was changed."), "{shown}");
     assert_eq!(keyring.get("work").as_deref(), Some("synthetic-second-password"));
     assert_eq!(fs::read_to_string(run.config()).unwrap(), written);
@@ -628,7 +730,7 @@ fn the_sign_in_question_says_what_each_way_needs_and_an_app_password_is_gmail_s_
     let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
     let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
     // Gmail is guessed; Enter takes its name, and Enter the first way.
-    let (result, script) = run.go(&["ada@gmail.com", "", "", "", PASSWORD, "n", "n"]);
+    let (result, script) = run.go(&["ada@gmail.com", "", "", "", PASSWORD, "n", "n", ""]);
     result.unwrap();
     let shown = script.shown();
     let question = &shown[shown.find("How should tuimex sign in to ada@gmail.com?").expect(&shown)..];
@@ -655,7 +757,7 @@ fn the_sign_in_question_says_what_each_way_needs_and_an_app_password_is_gmail_s_
 
     // A provider with one kind of password is offered two ways, and what
     // is not offered is not taken.
-    let (result, script) = run.go(&["1", "ada@fastmail.com", "", "", "3", "1", PASSWORD, "n", "n"]);
+    let (result, script) = run.go(&["1", "ada@fastmail.com", "", "", "3", "1", PASSWORD, "n", "n", ""]);
     result.unwrap();
     let shown = script.shown();
     assert!(shown.contains("  1) An app password, typed now: a separate password Fastmail makes"), "{shown}");
@@ -673,4 +775,183 @@ fn proton_bridge_is_named_before_the_questions_only_its_window_answers() {
     let shown = script.shown();
     let (bridge, port) = (shown.find("Proton Bridge must be running on this computer"), shown.find("IMAP port"));
     assert!(bridge.is_some() && bridge < port, "{shown}");
+}
+
+/// What setup leaves when a calendar has been offered: a config that
+/// parses, with no secret in it.
+fn calendar_saved(run: &Run) -> Config {
+    let text = fs::read_to_string(run.config()).unwrap();
+    for secret in [PASSWORD, FEED, "SYNTHETIC-FEED-TOKEN"] {
+        assert!(!text.contains(secret), "{secret} in:\n{text}");
+    }
+    Config::parse(&text).unwrap()
+}
+
+/// Gmail with an app password: its calendar is offered over CalDAV, which
+/// is tried with that password once before anything is written.
+#[test]
+fn a_gmail_account_s_calendar_is_read_over_caldav_with_its_app_password() {
+    let root = scratch("calendar-gmail");
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let wire = FakeWire::new(caldav(GOOGLE_DAV));
+    let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y"]);
+    result.unwrap();
+    let text = fs::read_to_string(run.config()).unwrap();
+    assert!(
+        text.ends_with(&format!("\n[[calendar]]\naccount = \"gmail\"\nkind = \"caldav\"\nurl = \"{GOOGLE_DAV}\"\n")),
+        "{text}"
+    );
+    let config = calendar_saved(&run);
+    assert_eq!(config.calendar("gmail").unwrap().url.as_deref(), Some(GOOGLE_DAV));
+    assert_eq!(
+        *wire.asked.borrow(),
+        [("PROPFIND".to_string(), GOOGLE_DAV.to_string(), Some("ada@gmail.com".to_string()))],
+        "one request, signed in as the mail is"
+    );
+    assert_eq!(keyring.names(), ["gmail"], "nothing more is kept: the app password is the calendar's too");
+    let shown = script.shown();
+    assert!(shown.contains("Google's calendar took the sign-in.") && shown.contains("Saved gmail's calendar in"));
+    assert!(shown.contains("The calendar's own screens are not built yet"), "{shown}");
+}
+
+/// A refusal is said in plain words, and the feed is offered instead.
+#[test]
+fn a_gmail_calendar_that_refuses_the_app_password_is_offered_by_its_secret_address() {
+    let root = scratch("calendar-gmail-refused");
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let wire = FakeWire::new(vec![
+        ("PROPFIND", GOOGLE_DAV, "", 401, String::new()),
+        ("GET", FEED, "", 200, DENTIST.to_string()),
+    ]);
+    let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y", "y", FEED]);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(
+        shown.contains("The calendar could not be read that way: Google refused the app password for the calendar."),
+        "{shown}"
+    );
+    assert!(shown.contains("Settings, then the calendar, then \"Secret address in iCal format\""), "{shown}");
+    assert!(shown.contains("calendar.example.net served a calendar."), "{shown}");
+    assert!(!shown.contains(FEED) && !shown.contains("SYNTHETIC-FEED-TOKEN"), "{shown}");
+    let config = calendar_saved(&run);
+    let calendar = config.calendar("gmail").unwrap();
+    assert_eq!((calendar.kind.as_str(), calendar.url.as_deref()), ("feed", None));
+    assert_eq!(keyring.get("gmail/calendar-feed").as_deref(), Some(FEED));
+}
+
+/// Any other account: where the address is found, when that is known,
+/// asked for with nothing shown, read once, and kept in the keyring.
+#[test]
+fn a_feed_is_asked_for_unseen_checked_once_and_kept_in_the_keyring_alone() {
+    let root = scratch("calendar-feed");
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet::self_signed(7));
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let wire = FakeWire::new(vec![("GET", FEED, "", 200, DENTIST.to_string())]);
+    // Proton Bridge, as in the test of pinning; then yes, and an address
+    // given as `webcal:`, which is the same one over HTTPS.
+    let webcal = FEED.replace("https://", "webcal://");
+    let answers = ["ada@proton.me", "", "", "", "bridge-user", "", "1", PASSWORD, "y", "n", "n", "y", &webcal];
+    let (result, script) = run.go_with(&wire, &answers);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(shown.contains("Settings, then the calendar, then \"Share via link\", with full view."), "{shown}");
+    assert!(shown.contains("Anyone with the address can read the calendar"), "{shown}");
+    assert!(script.said.iter().any(|line| line == "The calendar's address (it is not shown as you type):"));
+    assert_eq!(*wire.asked.borrow(), [("GET".to_string(), FEED.to_string(), None)]);
+    let text = fs::read_to_string(run.config()).unwrap();
+    assert!(text.ends_with("\n[[calendar]]\naccount = \"proton\"\nkind = \"feed\"\n"), "{text}");
+    calendar_saved(&run);
+    assert_eq!(keyring.get("proton/calendar-feed").as_deref(), Some(FEED));
+    assert!(shown.contains("Its address is in the keyring, and in no file."), "{shown}");
+}
+
+/// The menu offers a calendar to each account that has none, once each;
+/// a web page in place of a calendar, and a keyring that cannot keep the
+/// address, each save nothing; no is not remembered.
+#[test]
+fn an_account_already_here_is_offered_a_calendar_and_what_cannot_be_kept_is_not_written() {
+    let root = scratch("calendar-menu");
+    files::private_dir(&root.join("config")).unwrap();
+    let two = format!(
+        "{WORK}\n[[account]]\nname = \"home\"\naddress = \"ada@example.com\"\nimap = {{ host = \"imap.example.com\", port = 993 }}\n"
+    );
+    fs::write(root.join("config/config.toml"), &two).unwrap();
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet::trusted());
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let page = FakeWire::new(vec![("GET", FEED, "", 200, "<!doctype html><title>Sign in</title>".to_string())]);
+
+    // No to both: each asked once, nothing written; the next run asks again.
+    let (result, script) = run.go_with(&page, &["7", "", ""]);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(shown.contains("  7) Add a calendar to an account that has none\n  8) Quit"), "{shown}");
+    for name in ["work", "home"] {
+        let asked = format!("Add {name}'s calendar by its private address? [y/N]");
+        assert_eq!(shown.matches(&asked).count(), 1, "{shown}");
+    }
+    assert_eq!(fs::read_to_string(run.config()).unwrap(), two);
+
+    // A web page where the calendar should be.
+    let (result, script) = run.go_with(&page, &["7", "y", FEED, ""]);
+    result.unwrap();
+    assert!(script.shown().contains("What that address served is not a calendar"), "{}", script.shown());
+    assert_eq!(fs::read_to_string(run.config()).unwrap(), two);
+    assert!(keyring.names().is_empty());
+
+    // No keyring service: the address needs a command, and nothing is
+    // written anywhere.
+    let down = MemoryKeyring { down: Some("no such service"), ..MemoryKeyring::default() };
+    let served = FakeWire::new(vec![("GET", FEED, "", 200, DENTIST.to_string())]);
+    let (result, script) = Run { keyring: &down, ..run }.go_with(&served, &["7", "y", FEED, ""]);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(shown.contains("The keyring would not keep the address: no such service"), "{shown}");
+    assert!(shown.contains("address_cmd = [\"pass\", \"show\", \"calendar/work\"]"), "{shown}");
+    assert!(shown.contains("Nothing was saved.") && !shown.contains(FEED), "{shown}");
+    assert_eq!(fs::read_to_string(run.config()).unwrap(), two);
+
+    // Then one is added, and the menu offers the other alone.
+    run.go_with(&served, &["7", "y", FEED, ""]).0.unwrap();
+    calendar_saved(&run);
+    assert_eq!(keyring.get("work/calendar-feed").as_deref(), Some(FEED));
+    let (result, script) = run.go_with(&served, &["7", ""]);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(!shown.contains("Add work's calendar") && shown.contains("Add home's calendar"), "{shown}");
+}
+
+/// A rename carries the account's calendar with it: its table and the
+/// keyring entry that holds its feed's address.
+#[test]
+fn a_rename_takes_the_account_s_calendar_and_its_feed_s_address_along() {
+    let root = scratch("calendar-rename");
+    files::private_dir(&root.join("config")).unwrap();
+    let text = format!("{WORK}\n[[calendar]]\naccount = \"work\"\nkind = \"feed\"\n");
+    fs::write(root.join("config/config.toml"), &text).unwrap();
+    let keyring = MemoryKeyring::default();
+    keyring.set("work", &Secret::new(PASSWORD.into())).unwrap();
+    keyring.set("work/calendar-feed", &Secret::new(FEED.into())).unwrap();
+    let net = FakeNet::trusted();
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let store = tuimex_store::calendar::Calendars::open(&root.join("data"), &root.join("cache")).unwrap();
+    store.keep("work", DENTIST).unwrap();
+    store.put("work", "feed", "", None, DENTIST).unwrap();
+    drop(store);
+    let (result, script) = run.go(&["4", "office", "y"]);
+    result.unwrap();
+    assert!(
+        script.shown().contains("  4) Rename an account\n  5) Quit"),
+        "no calendar is offered to an account with one"
+    );
+    let renamed = fs::read_to_string(run.config()).unwrap();
+    assert_eq!(renamed, text.replace("\"work\"", "\"office\""));
+    assert_eq!(keyring.names(), ["office", "office/calendar-feed"]);
+    assert_eq!(keyring.get("office/calendar-feed").as_deref(), Some(FEED));
+    // Its own events go with it; what was fetched is dropped, to be
+    // fetched again under the new name.
+    assert!(!root.join("data/.calendars/work").exists());
+    assert_eq!(fs::read_dir(root.join("data/.calendars/office")).unwrap().count(), 1);
+    assert!(!root.join("cache/calendar.sqlite").exists());
 }

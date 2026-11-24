@@ -1,5 +1,9 @@
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use std::sync::mpsc;
+use std::time::Instant;
 
 use super::*;
 
@@ -257,4 +261,237 @@ fn a_feed_is_kept_whole_and_its_address_is_in_no_error() {
     }
     assert_eq!(summaries(&store), vec!["Dentist, moved"], "a failed fetch leaves what was held");
     assert_eq!(store.fetched().unwrap()[0].read_at, 700, "and it is not counted as read");
+}
+
+/// A keyring that exists only in the test: the user's is never opened.
+#[derive(Default)]
+struct MemoryKeyring(Mutex<HashMap<String, String>>);
+
+impl MemoryKeyring {
+    fn with(entries: &[(&str, &str)]) -> MemoryKeyring {
+        let keyring = MemoryKeyring::default();
+        for (entry, secret) in entries {
+            keyring.0.lock().unwrap().insert(entry.to_string(), secret.to_string());
+        }
+        keyring
+    }
+}
+
+impl crate::Keyring for MemoryKeyring {
+    fn password(&self, entry: &str) -> Result<Option<Secret>, String> {
+        Ok(self.0.lock().unwrap().get(entry).map(|kept| Secret::new(kept.clone())))
+    }
+
+    fn set(&self, entry: &str, secret: &Secret) -> Result<(), String> {
+        self.0.lock().unwrap().insert(entry.to_string(), secret.expose().to_string());
+        Ok(())
+    }
+}
+
+/// Answers each address the same way every time, from any thread.
+struct Served(Vec<(&'static str, u16, String)>);
+
+impl Wire for Served {
+    fn send(&self, sent: &Sent<'_>) -> Result<Got, CalendarError> {
+        let (_, status, body) = self.0.iter().find(|(url, ..)| *url == sent.url).expect("an address it serves");
+        Ok(Got { status: *status, body: body.clone() })
+    }
+}
+
+const FEED_ADDRESS: &str = "https://calendar.example.net/api/calendar/v1/url/SECRET-TOKEN/calendar.ics";
+const DENTIST: &str = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:d@example.net\r\nDTSTART:20261127T090000Z\r\n\
+                       SUMMARY:Dentist\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+
+fn root(name: &str) -> PathBuf {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/test-scratch")
+        .join(format!("engine-calendar-{}-{name}", std::process::id()));
+    if root.exists() {
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+    root
+}
+
+fn work_and_home() -> Vec<Configured> {
+    vec![
+        Configured {
+            account: "work".into(),
+            source: Source::CalDav { url: URL.into(), user: "robin@example.org".into(), password_cmd: None },
+        },
+        Configured { account: "home".into(), source: Source::Feed { address_cmd: None } },
+    ]
+}
+
+/// Work's server refuses the sign-in; home's feed is a calendar.
+fn served() -> Served {
+    Served(vec![(URL, 401, String::new()), (FEED_ADDRESS, 200, DENTIST.to_string())])
+}
+
+#[test]
+fn a_pass_over_two_accounts_reads_the_one_that_answers_when_the_other_fails() {
+    let store = store("pass");
+    let keyring = MemoryKeyring::with(&[("work", "app password"), ("home/calendar-feed", FEED_ADDRESS)]);
+    let outcomes = pass(&served(), &store, &keyring, &work_and_home(), 1_000);
+    let said: Vec<_> =
+        outcomes.iter().map(|o| (o.account.as_str(), o.kind, o.host.as_deref(), o.read.clone(), o.read_at)).collect();
+    assert_eq!(
+        said,
+        [
+            ("work", "caldav", Some("dav.example.org"), Err(CalendarError::SignIn), None),
+            (
+                "home",
+                "feed",
+                Some("calendar.example.net"),
+                Ok(Fetch { unchanged: false, changed: 1, removed: 0 }),
+                Some(1_000)
+            ),
+        ]
+    );
+    assert_eq!(summaries(&store), ["Dentist"]);
+
+    // With nothing to find a secret with, each says which and goes no
+    // further; the feed's last reading is still said.
+    let outcomes = pass(&served(), &store, &MemoryKeyring::default(), &work_and_home(), 2_000);
+    let reasons: Vec<String> = outcomes.iter().map(|o| o.read.clone().unwrap_err().to_string()).collect();
+    assert_eq!(
+        reasons,
+        [
+            "there is no password for work in the keyring, and no password_cmd",
+            "there is no address for home's calendar in the keyring, and no address_cmd; run `tuimex setup`",
+        ]
+    );
+    assert_eq!((outcomes[1].host.as_deref(), outcomes[1].read_at), (None, Some(1_000)));
+}
+
+#[test]
+fn a_feed_s_address_is_printed_by_its_command_and_a_failing_command_says_so_without_it() {
+    let store = store("address-cmd");
+    let by = |argv: &[&str]| Configured {
+        account: "home".into(),
+        source: Source::Feed { address_cmd: Some(argv.iter().map(ToString::to_string).collect()) },
+    };
+    let keyring = MemoryKeyring::default();
+    let outcomes = pass(&served(), &store, &keyring, &[by(&["printf", "%s\\n", FEED_ADDRESS])], 1_000);
+    assert_eq!(outcomes[0].read, Ok(Fetch { unchanged: false, changed: 1, removed: 0 }));
+    let printed_then_failed = format!("echo {FEED_ADDRESS}; exit 3");
+    for (argv, said) in [
+        (vec!["sh", "-c", printed_then_failed.as_str()], "address_cmd for home's calendar failed: sh ended"),
+        (vec!["printf", ""], "address_cmd for home's calendar printed no address"),
+        (vec!["/nonexistent/tuimex-no-such-program"], "address_cmd for home's calendar could not run"),
+    ] {
+        let error = pass(&served(), &store, &keyring, &[by(&argv)], 2_000).remove(0).read.unwrap_err();
+        assert!(error.to_string().starts_with(said), "{error}");
+        assert!(!error.to_string().contains("SECRET-TOKEN") && !format!("{error:?}").contains("SECRET-TOKEN"));
+    }
+}
+
+#[test]
+fn caldav_is_asked_for_ninety_days_back_and_two_years_on() {
+    let store = store("window");
+    let keyring = MemoryKeyring::with(&[("work", "app password")]);
+    let script = Script::new(vec![about("t1"), listing(&[(A, "\"1\"")]), events(&[(A, "\"1\"", "Standup")])]);
+    let today = 20_000;
+    pass(&script, &store, &keyring, &work_and_home()[..1], today * 86_400 + 3_600);
+    let asked = &script.asked.borrow()[1].3;
+    let range = format!(r#"<C:time-range start="{}" end="{}"/>"#, stamp(today - 90), stamp(today + 730));
+    assert!(asked.contains(&range), "{asked}");
+}
+
+#[test]
+fn a_check_asks_once_and_keeps_nothing() {
+    let password = Secret::new("app password".to_string());
+    let script = Script::new(vec![about("t1")]);
+    assert_eq!(check_caldav(&script, URL, ("robin@example.org", &password)), Ok(Some("Work".to_string())));
+    assert_eq!(script.methods(), ["PROPFIND"]);
+    assert_eq!(script.asked.borrow()[0].2, Some(0));
+    let refused = Script::new(vec![(403, String::new())]);
+    assert_eq!(check_caldav(&refused, URL, ("robin@example.org", &password)), Err(CalendarError::SignIn));
+
+    let address = Secret::new(FEED_ADDRESS.to_string());
+    assert_eq!(check_feed(&served(), &address), Ok(()));
+    let page = Script::new(vec![(200, "<!doctype html><title>Sign in</title>".to_string())]);
+    assert_eq!(check_feed(&page, &address), Err(CalendarError::NotACalendar));
+    assert_eq!(host(FEED_ADDRESS), Some("calendar.example.net"));
+    assert_eq!(host("http://calendar.example.net/x"), None);
+    assert_eq!(feed_entry("home"), "home/calendar-feed");
+}
+
+/// The events of one pass, in the order the calendars are configured.
+fn next_pass(events: &Receiver<Event>) -> Vec<Event> {
+    (0..2).map(|_| events.recv_timeout(Duration::from_secs(20)).expect("an event of the pass")).collect()
+}
+
+fn runner(root: &Path, every: Duration) -> Runner {
+    Runner {
+        calendars: work_and_home(),
+        wire: Box::new(served()),
+        keyring: Box::new(MemoryKeyring::with(&[("work", "app password"), ("home/calendar-feed", FEED_ADDRESS)])),
+        data: root.join("data"),
+        cache: root.join("cache"),
+        every,
+    }
+}
+
+fn ended(thread: &JoinHandle<()>) -> bool {
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while !thread.is_finished() && Instant::now() < deadline {
+        thread::sleep(Duration::from_millis(10));
+    }
+    thread.is_finished()
+}
+
+#[test]
+fn the_thread_reads_at_start_and_when_nudged_says_each_and_stops_when_its_channel_closes() {
+    let root = root("thread");
+    let (nudge, nudges) = mpsc::channel();
+    let (sender, events) = mpsc::channel();
+    let running = start(runner(&root, Duration::from_secs(3_600)), nudges, sender);
+    let refused = Event::CalendarFailed {
+        account: AccountId("work".into()),
+        reason: "the calendar's server refused the sign-in".into(),
+        read_at: None,
+    };
+    let read = |changed| Event::CalendarRead { account: AccountId("home".into()), changed };
+    assert_eq!(next_pass(&events), [refused.clone(), read(true)]);
+    nudge.send(()).unwrap();
+    assert_eq!(next_pass(&events), [refused, read(false)], "the same feed again is no change");
+    drop(nudge);
+    assert!(ended(&running), "the thread ends once nobody can nudge it");
+    assert!(events.recv_timeout(Duration::from_millis(50)).is_err(), "and says nothing more");
+
+    let kept = kept(&root.join("data"), &root.join("cache")).unwrap();
+    assert_eq!(kept.len(), 1);
+    assert_eq!((kept[0].account.as_str(), kept[0].local, kept[0].name.as_deref()), ("home", false, None));
+    assert!(kept[0].read_at.is_some());
+    assert_eq!(kept[0].calendar.events[0].summary, "Dentist");
+}
+
+#[test]
+fn the_thread_reads_again_unasked_and_stops_when_nobody_listens() {
+    let root = root("thread-tick");
+    let (nudge, nudges) = mpsc::channel();
+    let (sender, events) = mpsc::channel();
+    let running = start(runner(&root, Duration::from_millis(20)), nudges, sender);
+    next_pass(&events);
+    next_pass(&events);
+    drop(events);
+    assert!(ended(&running), "the thread ends once what it says reaches nobody");
+    drop(nudge);
+}
+
+#[test]
+fn what_is_kept_says_whose_it_is_whether_it_is_local_and_when_it_was_read() {
+    let root = root("kept");
+    let (data, cache) = (root.join("data"), root.join("cache"));
+    let store = Calendars::open(&data, &cache).unwrap();
+    let keyring = MemoryKeyring::with(&[("work", "app password")]);
+    let script = Script::new(vec![about("t1"), listing(&[(A, "\"1\"")]), events(&[(A, "\"1\"", "Standup")])]);
+    pass(&script, &store, &keyring, &work_and_home()[..1], 5_000);
+    store.keep("home", DENTIST).unwrap();
+    let kept = kept(&data, &cache).unwrap();
+    let said: Vec<_> = kept
+        .iter()
+        .map(|k| (k.account.as_str(), k.local, k.name.as_deref(), k.read_at, k.calendar.events[0].summary.as_str()))
+        .collect();
+    assert_eq!(said, [("work", false, Some("Work"), Some(5_000), "Standup"), ("home", true, None, None, "Dentist")]);
 }

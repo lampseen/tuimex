@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use crate::{AccountId, AgentAsk, Attached, Body, Draft, FolderId, MessageId};
+use crate::{AccountId, AgentAsk, Attached, Body, Draft, FolderId, MessageId, Timestamp};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
@@ -215,6 +215,20 @@ pub enum Event {
         serial: u64,
         hits: Vec<Hit>,
         searched: u32,
+    },
+    /// The account's calendar was read whole; `changed` is whether what
+    /// is held of it is now different.
+    CalendarRead {
+        account: AccountId,
+        changed: bool,
+    },
+    /// The account's calendar could not be read. `reason` never holds a
+    /// feed's address (ADR-056). What was held stays, read at `read_at`,
+    /// or never.
+    CalendarFailed {
+        account: AccountId,
+        reason: String,
+        read_at: Option<Timestamp>,
     },
 }
 

@@ -86,6 +86,18 @@ pub const PROVIDERS: [Provider; 4] = [
     },
 ];
 
+/// Where a calendar's private address is found (ADR-056), told only for
+/// the providers where that is known for certain, and what it is.
+pub const GOOGLE_FEED: &str = "Google Calendar's private address is in its settings on the web: Settings, then the \
+calendar, then \"Secret address in iCal format\".\nAnyone with the address can read the calendar, so tuimex keeps it \
+in the keyring and in no file.";
+pub const PROTON_FEED: &str = "Proton Calendar's private address is made in its settings on the web: Settings, then \
+the calendar, then \"Share via link\", with full view.\nAnyone with the address can read the calendar, so tuimex \
+keeps it in the keyring and in no file.";
+pub const ANY_FEED: &str = "Many providers give a calendar a private address in iCalendar format, often ending \
+.ics, in the calendar's settings.\nAnyone with the address can read the calendar, so tuimex keeps it in the keyring \
+and in no file.";
+
 /// The provider an address's domain is known to be, as a place in the table.
 pub fn guess(address: &str) -> Option<usize> {
     let domain = address.rsplit('@').next().unwrap_or_default().to_ascii_lowercase();

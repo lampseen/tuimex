@@ -13,8 +13,8 @@ Three rules hold for the whole file:
   ``line 2: unknown key `colour` ``. The error never repeats a value from the
   file. A file that does not parse stops tuimex; it never falls back to
   defaults.
-- **No key holds a password.** A password is in the system keyring, or
-  printed by a command you name.
+- **No key holds a password.** A password, or a calendar's private
+  address, is in the system keyring, or printed by a command you name.
 - **Setup only adds to the file.** It keeps what you wrote, comments
   included, to the byte.
 
@@ -22,7 +22,7 @@ Three rules hold for the whole file:
 
 | key | holds |
 |---|---|
-| `name` | the short name the list shows, and `account:` matches. Two accounts may not share one. Rename with `tuimex setup`, which moves the mail and the keyring entry with it |
+| `name` | the short name the list shows, and `account:` matches. Two accounts may not share one. Rename with `tuimex setup`, which moves the mail, the keyring entries and the account's `[[calendar]]` with it |
 | `address` | the mailbox's address |
 | `identities` | other addresses you send as from this account: `["You <you@example.com>", "alias@example.com"]`. Compose offers each on From |
 | `imap` | `{ host = "imap.example.com", port = 993 }`. Also `user`, where the sign-in name is not the address, and `starttls` |
@@ -47,6 +47,43 @@ checking off.
 | `draft` | `true` lets an agent file drafts |
 
 Absent, the account grants nothing. See [The agent](The-agent).
+
+## `[[calendar]]`, at most once for each account
+
+An account's calendar, which `tuimex sync` reads and `tuimex doctor`
+names. It is a table of its own, after the accounts, because setup only
+adds to the end of the file. The calendar's screens are not built yet:
+nothing in the interface shows it.
+
+| key | holds |
+|---|---|
+| `account` | the `name` of an `[[account]]`. One that is not there is an error naming it |
+| `kind` | `"caldav"` or `"feed"` |
+| `url` | `caldav` only, and required for it: the calendar's address, `https://` with no user name in it. For Gmail, `https://www.google.com/calendar/dav/<address>/events/` |
+| `address_cmd` | `feed` only: a program and its arguments that print the feed's address, `["pass", "show", "calendar/home"]`. No shell reads it, and the first line printed is the address |
+
+```toml
+[[calendar]]
+account = "work"
+kind = "caldav"
+url = "https://www.google.com/calendar/dav/you@example.com/events/"
+```
+
+**CalDAV** signs in as the account's mail does: with its IMAP user name
+and the same password, from the keyring or the account's `password_cmd`.
+There is no second password. An account with `auth = "gmail-oauth"`
+cannot use it; a feed is the way for that account.
+
+**A feed** is a calendar's private address, which serves it in iCalendar
+format. Anyone holding the address can read the calendar, so it is never
+in the config: a `url` under a feed is an error, and the error does not
+repeat it. The address is in the keyring under `<account>/calendar-feed`,
+where `tuimex setup` puts it, or printed by `address_cmd`. A feed is
+read-only.
+
+`tuimex sync` asks a CalDAV calendar for the events from 90 days ago to
+two years ahead. Nothing a calendar names, such as a link in an event's
+notes, is fetched.
 
 ## `[sync]`
 
