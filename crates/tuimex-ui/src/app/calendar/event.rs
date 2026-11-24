@@ -2,16 +2,34 @@
 //! table. The event shown is always the selected one, so `J`, `K` and `I`
 //! change it without leaving the screen.
 
+use std::cell::Cell;
+
 use super::key_name;
 use crate::app::App;
 use crate::calendar::Entry;
+use crate::calendar::event::{self, At};
 use crate::calendar::parts::Scene;
 use crate::say;
 use crate::span::Line;
 
+/// The scroll is kept to what the last drawing allowed, which only the
+/// drawing knows: the screen is drawn through `&self`, so what it learns
+/// goes in cells.
 #[derive(Debug, Default)]
 pub(in crate::app) struct State {
     open: bool,
+    more: bool,
+    top: Cell<usize>,
+    last_top: Cell<usize>,
+    room: Cell<usize>,
+}
+
+impl State {
+    /// The event as it first shows: from its top, with More folded.
+    fn rewind(&mut self) {
+        self.more = false;
+        self.top.set(0);
+    }
 }
 
 /// The keys `event.actions` names, as the calendar's own bindings: each
@@ -33,6 +51,7 @@ impl App {
 
     /// Enter on the selected event.
     pub(super) fn event_open(&mut self) {
+        self.cal.event.rewind();
         self.cal.event.open = true;
     }
 
@@ -43,13 +62,54 @@ impl App {
 
     /// A key of the `event` table; `i` is which of the binding's keys.
     pub(super) fn event_run(&mut self, id: &str, i: usize) {
-        match ACTIONS.get(i).filter(|_| id == "event.actions") {
-            Some((action, which)) => self.place_run(action, *which),
-            None => self.say(say::not_built(key_name(id, i), "the calendar's event view")),
+        let state = &mut self.cal.event;
+        match id {
+            "event.scroll" => {
+                let (top, last_top) = (state.top.get(), state.last_top.get());
+                if last_top == 0 {
+                    let said = format!("{}: all of the event is on the screen", key_name(id, i));
+                    return self.say(say::plain(said));
+                }
+                let half = (state.room.get() / 2).max(1);
+                state.top.set(match i {
+                    0 => (top + 1).min(last_top),
+                    1 => top.saturating_sub(1),
+                    2 => (top + half).min(last_top),
+                    3 => top.saturating_sub(half),
+                    4 => 0,
+                    _ => last_top,
+                });
+            }
+            "event.fold" => {
+                let has_more = self.picked_entry().is_some_and(|entry| !entry.event.more.is_empty());
+                if !has_more {
+                    let said = format!("{}: this event has nothing under More", key_name(id, i));
+                    return self.say(say::err(said));
+                }
+                self.cal.event.more = i == 0;
+            }
+            "event.mail" => self.say(say::not_built(key_name(id, i), "events that keep the mail they came in")),
+            _ => {
+                let Some((action, which)) = ACTIONS.get(i).filter(|_| id == "event.actions") else { return };
+                let before = self.cal.picked.clone();
+                self.place_run(action, *which);
+                // Another event is shown from its own top.
+                if self.cal.picked != before {
+                    self.cal.event.rewind();
+                }
+            }
         }
     }
 
     pub(super) fn event_lines(&self, o: &Scene, entry: &Entry, width: usize, height: usize) -> Vec<Line> {
-        crate::calendar::event::screen(o, entry, width, height)
+        let state = &self.cal.event;
+        let drawn = event::screen(o, entry, At { top: state.top.get(), more: state.more }, width, height);
+        state.top.set(drawn.top);
+        state.last_top.set(drawn.last_top);
+        state.room.set(drawn.room);
+        drawn.lines
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -16,7 +16,7 @@ pub mod week;
 use std::collections::BTreeMap;
 
 use tuimex_core::calendar::{DAY, Event, Standing, Zone, occurrences_between, standing};
-use tuimex_core::{AccountId, Identity, Timestamp};
+use tuimex_core::{AccountId, Identity, MessageId, Timestamp};
 
 #[cfg(test)]
 pub(crate) mod tests;
@@ -66,6 +66,10 @@ pub struct Calendar {
     /// Invitations the reader ignored, by account and UID: they are not
     /// drawn and wait for no answer (ADR-057).
     pub ignored: Vec<(AccountId, String)>,
+    /// The message an event came in, by the event's UID, where whoever
+    /// handed the calendar over knows it: what `v` on the event opens. The
+    /// message's account is the event's.
+    pub came_in: Vec<(String, MessageId)>,
 }
 
 /// One event on one day, as a view draws it. An event that runs over
@@ -169,6 +173,7 @@ impl Calendar {
             hidden: Vec::new(),
             proposed: Vec::new(),
             ignored: Vec::new(),
+            came_in: Vec::new(),
         }
     }
 
