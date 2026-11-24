@@ -101,6 +101,8 @@ const GLYPHS = {
   ellipsis:  { unicode: '…', ascii: '~', means: 'text cut to fit' },
   dot:       { unicode: '·', ascii: '-', means: 'separator' },
   shade:     { unicode: '░', ascii: ':', means: 'the cells an inline image occupies' },
+  few:       { unicode: '∙', ascii: '.', means: 'a day with one event; two is a colon in both tiers' },
+  many:      { unicode: '⋮', ascii: '#', means: 'a day with three events or more' },
 };
 
 const G = Object.fromEntries(Object.entries(GLYPHS).map(([name, g]) => [name, g.unicode]));
@@ -186,6 +188,17 @@ const LAYOUT = {
   header: { label: 9, rows: { preview: 2, reader: 6 } },
   // Body text wraps here however wide the terminal is.
   measure: 76,
+  // The calendar (ADR-054). A week begins on Monday and the clock has 24
+  // hours. In the month grid a day is `cell` cells: the cursor, two digits
+  // and a mark for how much is on it. The week shows seven days from
+  // `weekFrom` columns and three, around the cursor, below that; a row is
+  // `slot` minutes, and the hours start at `dayFrom` unless the selected
+  // event lies outside them. An event row is the account, its hours in
+  // `time` cells, the title, and up to `words` cells of what is not normal
+  // about it. Under `narrow` cells the account shortens, the hours become
+  // the hour it starts, and the words keep room for the longest one alone,
+  // so `needs answer` is never the thing that is cut.
+  calendar: { cell: 4, weekFrom: 120, slot: 30, step: 2, dayFrom: '08:00', axis: 7, time: 11, timeNarrow: 7, words: 20, wordsNarrow: 12, narrow: 70 },
 };
 
 // ------------------------------------------------------------------- keymap
@@ -205,6 +218,9 @@ const KEYMAP = {
     'compose: Left and Right choose the identity while From is focused. The proposal did not say.',
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
+    'the calendar is a place and not a section: `gc` opens it and `gm` returns, each side keeping where it was (ADR-054).',
+    'calendar: `x` deletes, not `d`, because `m`, `w` and `d` are the three views. `e` edits; nothing there is archived.',
+    'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
     { mode: 'global', title: 'Everywhere', keys: [
@@ -217,6 +233,7 @@ const KEYMAP = {
       { id: 'global.undo', keys: 'u', does: 'undo the last action', hint: 'undo' },
       { id: 'global.agent', keys: 'A', does: 'what the agent can do', hint: 'agent' },
       { id: 'global.redraw', keys: '^l', does: 'redraw' },
+      { id: 'global.calendar', keys: 'gc', does: 'the calendar', hint: 'calendar' },
     ] },
     { mode: 'list', title: 'List', keys: [
       { id: 'list.move', keys: 'j k', does: 'down, up' },
@@ -278,6 +295,52 @@ const KEYMAP = {
       { id: 'invite.accept', keys: 'a', does: 'accept', hint: 'accept' },
       { id: 'invite.tentative', keys: 't', does: 'tentative', hint: 'tentative' },
       { id: 'invite.decline', keys: 'd', does: 'decline', hint: 'decline' },
+      { id: 'invite.propose', keys: 'p', does: 'propose another time', hint: 'propose a time' },
+      { id: 'invite.ignore', keys: 'x', does: 'ignore; nothing is sent', hint: 'ignore' },
+    ] },
+    // In the calendar these are searched before `global`, so h, l, Tab and
+    // the digits move days and views here and sections only in mail.
+    { mode: 'calendar', title: 'Calendar (after gc)', keys: [
+      { id: 'calendar.day', keys: 'h l', does: 'previous, next day' },
+      { id: 'calendar.move', keys: 'j k', does: 'month: week; else: event' },
+      { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
+      { id: 'calendar.event', keys: 'n N', does: 'next, previous event', hint: 'next event' },
+      { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
+      { id: 'calendar.today', keys: 't', does: 'today', hint: 'today' },
+      { id: 'calendar.goto', keys: 'gd', does: 'go to a date', hint: 'go to' },
+      { id: 'calendar.view', keys: 'm w d', does: 'month, week, day' },
+      { id: 'calendar.view-cycle', keys: 'Tab S-Tab', does: 'next, previous view' },
+      { id: 'calendar.view-number', keys: '1-3', does: 'view by position' },
+      { id: 'calendar.open', keys: 'Enter', does: 'the day; then the event', hint: 'open' },
+      { id: 'calendar.find', keys: '/', does: 'find events', hint: 'find' },
+      { id: 'calendar.account', keys: 'gt gT', does: 'next, previous account' },
+      { id: 'calendar.calendars', keys: 'C', does: 'show, hide calendars', hint: 'calendars' },
+      { id: 'calendar.join', keys: 'o', does: 'open the meeting link', hint: 'join' },
+      { id: 'calendar.answer', keys: 'i', does: 'answer an invitation', hint: 'answer' },
+      { id: 'calendar.new', keys: 'c', does: 'new event here', hint: 'new event' },
+      { id: 'calendar.edit', keys: 'e', does: 'edit the event', hint: 'edit' },
+      { id: 'calendar.delete', keys: 'x', does: 'delete the event', hint: 'delete' },
+      { id: 'calendar.reminders', keys: 'gn', does: 'reminders on, off' },
+      { id: 'calendar.mail', keys: 'gm', does: 'back to mail', hint: 'mail' },
+    ] },
+    { mode: 'event', title: 'Event', keys: [
+      { id: 'event.scroll', keys: 'j k ^d ^u gg G', does: 'scroll' },
+      { id: 'event.step', keys: '[ ]', does: 'previous, next event' },
+      { id: 'event.fold', keys: 'zo zc', does: 'unfold, fold More', hint: 'more' },
+      { id: 'event.mail', keys: 'v', does: 'the mail it came in', hint: 'its mail' },
+      { id: 'event.actions', keys: 'o i e x n N I', does: 'as in the calendar' },
+    ] },
+    { mode: 'calendars', title: 'Calendars (after C)', keys: [
+      { id: 'calendars.choose', keys: 'j k', does: 'choose', hint: 'choose' },
+      { id: 'calendars.toggle', keys: 'Space', does: 'show or hide', hint: 'show or hide' },
+      { id: 'calendars.close', keys: 'Esc', does: 'close', hint: 'close' },
+    ] },
+    { mode: 'event-form', title: 'Event form', keys: [
+      { id: 'event-form.field', keys: 'Tab S-Tab', does: 'next, previous field' },
+      { id: 'event-form.choice', keys: 'Left Right', does: 'choose, where offered', hint: 'choose' },
+      { id: 'event-form.notes', keys: 'Enter', does: 'edit notes in $EDITOR', hint: 'notes' },
+      { id: 'event-form.save', keys: '^s', does: 'save; guests get mail', hint: 'save' },
+      { id: 'event-form.close', keys: 'Esc', does: 'close; keep or discard', hint: 'close' },
     ] },
     { mode: 'compose', title: 'Compose', keys: [
       { id: 'compose.field', keys: 'Tab S-Tab', does: 'next, previous field' },
@@ -338,7 +401,13 @@ const COMMANDS = [
   { name: 'save', args: '<n> [path]', does: 'save an attachment to downloads' },
   { name: 'open', args: '<n>', does: 'open an attachment, after asking' },
   { name: 'link', args: '<n>', does: 'open a link, after assessment' },
-  { name: 'invite', args: 'accept|tentative|decline', does: 'answer an invitation' },
+  { name: 'invite', args: 'accept|tentative|decline|propose|ignore', does: 'answer an invitation' },
+  { name: 'calendar', args: '[month|week|day]', does: 'the calendar; alone, where it was' },
+  { name: 'mail', args: '', does: 'back to mail, where it was' },
+  { name: 'goto', args: '<date>', does: 'go to a date: 5 dec, fri, +2w' },
+  { name: 'event', args: '[title]', does: 'a new event on the selected day' },
+  { name: 'export', args: '[path]', does: 'write local events as .ics' },
+  { name: 'notify', args: 'on|off', does: 'reminders on or off' },
   { name: 'unsubscribe', args: '', does: 'prepare an unsubscribe for review' },
   { name: 'preview', args: 'auto|right|below|off', does: 'where the preview sits' },
   { name: 'sync', args: '[all]', does: 'sync this section, or all' },
@@ -603,6 +672,50 @@ const OUTBOX = [
     reason: 'refused by smtp.example.org: 552 message too large' },
 ];
 
+// The calendar (ADR-054). Each account's own calendar is read from an
+// address it gave (ADR-056); what tuimex alone holds is `local` (ADR-055).
+const CALENDARS = [
+  { account: 'personal', source: 'own', read: '2m' },
+  { account: 'personal', source: 'local' },
+  { account: 'work', source: 'own', read: '20s' },
+  { account: 'work', source: 'local' },
+];
+
+const MEET = (room) => ({ host: 'meet.example.org', url: `https://meet.example.org/r/${room}` });
+
+// `answer` is the user's own: needs, accepted, tentative, declined or
+// proposed, and absent on an event nobody invited them to. `guests` are the
+// others and what each has said. An event either has a `day`, with `days`
+// when it runs over several, or repeats on weekdays between two dates.
+const EVENTS = [
+  { id: 'standup', account: 'work', title: 'Standup', start: '09:30', end: '09:45', weekdays: ['2026-11-02', '2026-12-31'], repeats: 'every weekday',
+    link: MEET('standup'), organizer: 'lars', answer: 'accepted' },
+  { id: 'climbing', account: 'personal', day: '2026-11-17', start: '18:00', end: '20:00', title: 'Climbing', where: 'the gym on Mill street' },
+  { id: 'flames', account: 'work', day: '2026-11-20', start: '12:00', end: '13:00', title: 'Lunch and learn: reading flame graphs', organizer: 'dmitri', answer: 'accepted' },
+  { id: 'halden-call', account: 'work', day: '2026-11-23', start: '15:00', end: '16:00', title: 'Halden contract call', link: MEET('halden'),
+    organizer: 'priya', guests: [['dmitri', 'yes']], answer: 'accepted', reminder: '10 minutes before',
+    notes: ['Payment terms and the support clause. Draft v3 is attached to Priya\'s mail of this morning.'] },
+  { id: 'dentist', account: 'personal', day: '2026-11-24', start: '11:00', end: '11:45', title: 'Dentist', where: 'Kirkegata 12' },
+  { id: 'one-to-one', account: 'work', day: '2026-11-25', start: '13:00', end: '13:30', title: '1:1 with Imani', organizer: 'imani', answer: 'accepted' },
+  { id: 'roadmap', account: 'work', day: '2026-11-26', start: '10:00', end: '11:30', title: 'Q4 roadmap review', where: 'Room Fjord', link: MEET('q4-roadmap'),
+    organizer: 'imani', guests: [['lars', 'yes'], ['mei', 'no'], ['dmitri', null]], answer: 'needs', mail: 'invite', reminder: '10 minutes before',
+    notes: ['The pre-read is the roadmap document from last week. Please answer by Wednesday so I can book the right room.',
+      { list: ['What shipped in Q3 and what slipped', 'The three bets for Q4', 'Headcount, once the budget is in'] }],
+    more: [['Status', 'confirmed'], ['Shown as', 'busy'], ['Privacy', 'default'], ['By phone', '+47 21 00 00 00, code 4471'], ['Changed', '23 Nov 14:05, by the organizer']] },
+  { id: 'vendor', account: 'work', day: '2026-11-26', start: '11:00', end: '12:00', title: 'Vendor call', link: MEET('vendor'), organizer: 'mei', answer: 'tentative' },
+  // Accepted from tuimex on an account whose own calendar it cannot write.
+  { id: 'migration', account: 'work', day: '2026-11-26', start: '20:00', end: '23:00', title: 'Staging migration window', organizer: 'lars', answer: 'accepted', local: true },
+  // The link's text names one host and it opens another (ADR-018).
+  { id: 'review', account: 'personal', day: '2026-11-27', start: '09:00', end: '09:30', title: 'Account review', where: 'https://bank.example.com/meet',
+    link: { host: 'bank.example.com.device-check.example.net', url: 'https://bank.example.com.device-check.example.net/meet', shown: 'bank.example.com' },
+    organizer: 'bank', answer: 'needs' },
+  { id: 'library', account: 'personal', day: '2026-11-27', allDay: true, title: 'Library books due', local: true },
+  { id: 'cabin', account: 'personal', day: '2026-11-27', days: 3, allDay: true, title: 'Cabin weekend', where: 'Ridge saddle hut' },
+  { id: 'bookclub', account: 'personal', day: '2026-12-03', start: '19:00', end: '21:00', title: 'Book club', where: 'at Greta\'s' },
+  { id: 'swap', account: 'personal', day: '2026-12-05', start: '10:00', end: '13:00', title: 'Gear swap', where: 'Fernway hall', local: true },
+  { id: 'oncall', account: 'work', day: '2026-12-07', days: 7, allDay: true, title: 'On call' },
+];
+
 const SECTIONS = [
   { name: 'Inbox', query: 'in:inbox' },
   { name: 'Unread', query: 'in:inbox is:unread' },
@@ -673,6 +786,7 @@ const SAY = {
   noKey: (who) => `not encrypted${then(`no key for ${who}`)}`,
   summaryAgent: (when) => `{agent|${G.agent} Written by an agent}${then(`${when} ${G.dot} files added by you`)}`,
   summaryAsk: (n, delay) => ask(`Send to ${n} recipients?`, [['y', `send, held ${delay}`], ['n', 'back']]),
+  inviteAsk: (n, delay) => ask(`Save, and mail the invitation to ${n} guests?`, [['y', `save and send, held ${delay}`], ['n', 'back']]),
 
   // Results.
   archived: (what) => `{ok|${G.ok}} Archived ${what}${then('u to undo')}`,
@@ -742,7 +856,7 @@ const SAY = {
   openFile: (file, mime) => ask(`Open ${file} (${mime}) in the system's program for it?`),
   unsubscribeAt: (host) => ask(`Unsubscribe at ${host}?`),
   loadImages: (n, hosts, room) => ask(`Load ${count(n, 'image')} from ${hostList(hosts, room)}?`),
-  answer: ask('Answer?', [['a', 'accept'], ['t', 'tentative'], ['d', 'decline'], ['Esc', 'cancel']]),
+  answer: ask('Answer?', [['a', 'accept'], ['t', 'tentative'], ['d', 'decline'], ['p', 'propose a time'], ['x', 'ignore'], ['Esc', 'cancel']]),
   opens: (url) => `{dim|opens} ${url}`,
 
   // `:agent` (ADR-031). The agent's mark leads whatever the agent is doing
@@ -772,6 +886,36 @@ const SAY = {
   // Finding and searching.
   finding: (here) => `{dim|${here} here ${G.dot}} Enter {dim|searches all mail}`,
   noMatch: (query, messages, accounts) => [`Nothing matches "${query}".`, `Searched ${messages} messages in ${count(accounts, 'account')}.`],
+
+  // The calendar (ADR-054). An answer says which account's calendar took
+  // it, and `local` when that is tuimex's own copy (ADR-055, ADR-057).
+  answered: (how, what, where) => `{ok|${G.ok}} ${how} ${what}${then(`in ${where} ${G.dot} u to undo`)}`,
+  proposed: (when, who) => `{ok|${G.ok}} Proposed ${when} to ${who}${then('u to undo')}`,
+  ignored: (what) => `{ok|${G.ok}} Ignored ${what}${then(`nothing sent ${G.dot} u to undo`)}`,
+  unanswered: (what) => `{ok|${G.ok}} Undone${then(`${what} is not answered`)}`,
+  added: (what, where) => `{ok|${G.ok}} Added ${what} to ${where}${then('u to undo')}`,
+  deleted: (what) => `{ok|${G.ok}} Deleted ${what}${then('u to undo')}`,
+  restored: (what) => `{ok|${G.ok}} Undone${then(`${what} is back`)}`,
+  joining: (host) => `Opening ${host}`,
+  proposes: (when) => `{dim|proposes} ${when}`,
+  goesTo: (day) => `{dim|goes to} ${day}`,
+  remindersOff: `Reminders off${then('gn turns them on')}`,
+  remindersOn: 'Reminders on',
+  freeDay: 'Nothing on this day.',
+  noCalendar: ['No calendar yet.', '`tuimex setup` asks each account for the address of its calendar.'],
+  onlyHere: 'local, only in tuimex',
+  readFrom: (age) => `its own calendar, read ${age} ago`,
+  needsAnswer: (who) => `{warn|${G.notice} Needs your answer}${then(`asked by ${who}`)}`,
+  onlyInTuimex: (account) => `{warn|${G.notice} Only in tuimex}${then(`${account}'s own calendar does not have it ${G.dot} :export writes it out`)}`,
+  waiting: (n) => `{warn|${n} to answer}`,
+  noEvent: (key) => `{err|E ${key}: no event is selected}`,
+  noEventLink: `{err|E o: this event has no link}`,
+  notInvited: `{err|E i: nobody asked for an answer to this event}`,
+  notADate: (typed) => `{err|E gd: not a date: "${typed}"}${then('2026-12-05, 5 dec, fri, +2w')}`,
+  // The right of the status line, with what mail puts there.
+  reminder: (what, lead) => `{warn|${G.notice} ${what} in ${lead}}${then('o joins')}`,
+  remindersAreOff: '{dim|reminders off}',
+  calendarUnread: (account, last) => `{err|${account}'s calendar not read}${then(`last read ${last} ago`)}`,
 
   // The right of the status line: only what is not normal (PLAN §4.2).
   sending: (delay) => `sending in ${delay}`,
@@ -1540,6 +1684,7 @@ function inviteRows(msg) {
   const card = msg.invite;
   const rows = [field('What', [run(card.what, 'fg', { b: true })]), field('When', [run(card.when)]), field('Where', references(card.where, 'fg')), field('Who', [run(card.who)])];
   if (card.repeats) rows.push(field('Repeats', [run(card.repeats)]));
+  rows.push(field('Calendar', m(`{${accountColour(msg.account)}|${msg.account}}{dim| ${G.dot} the account it came to}`)));
   return [...rows, []];
 }
 
@@ -1638,13 +1783,459 @@ function summaryScreen(width, height) {
     said(SAY.summaryAsk(draft.to.length + draft.cc.length, '10s')));
 }
 
+// ----------------------------------------------------------------- calendar
+//
+// One calendar across the accounts, in a place of its own (ADR-054). Three
+// views of the same events at the same date, and one rule for moving:
+// Enter goes deeper (month, day, event), Esc comes back, and h j k l move
+// the cursor in all of them.
+
+const C = LAYOUT.calendar;
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const WEEK = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const TODAY = dayNumber(NOW);
+const CLOCK = parts(NOW).time;
+
+const civil = (n) => { const d = new Date(n * 86400000); return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, dom: d.getUTCDate(), dow: d.getUTCDay() }; };
+const minutes = (clock) => { const [h, min] = clock.split(':').map(Number); return h * 60 + min; };
+const monday = (n) => n - (civil(n).dow + 6) % 7;
+const dayShort = (n) => { const d = civil(n); return `${DAYS[d.dow]} ${d.dom} ${MONTHS[d.month - 1]}`; };
+const dayLong = (n) => { const d = civil(n); return `${DAYS[d.dow]} ${d.dom} ${MONTH_NAMES[d.month - 1]}`; };
+// A day's label in a list of days: the two nearest are named.
+const dayLabel = (n) => `${n === TODAY ? `Today ${G.dot} ` : n === TODAY + 1 ? `Tomorrow ${G.dot} ` : ''}${dayLong(n)}`;
+
+function occursOn(ev, n) {
+  if (ev.weekdays) { const dow = civil(n).dow; return dow >= 1 && dow <= 5 && n >= dayNumber(ev.weekdays[0]) && n <= dayNumber(ev.weekdays[1]); }
+  const first = dayNumber(ev.day);
+  return n >= first && n < first + (ev.days || 1);
+}
+
+// What is on a day, as the views draw it: all-day events first, then by
+// the clock. o: { narrowed, hidden, changed }, where `hidden` lists the
+// calendars switched off as `account/source`, and `changed` replaces
+// fields of events by id, for a step of a flow.
+function eventsOn(n, o = {}) {
+  const sourceOf = (ev) => `${ev.account}/${ev.local ? 'local' : 'own'}`;
+  return [...EVENTS, ...(o.added || [])]
+    .map((ev) => ({ ...ev, ...((o.changed || {})[ev.id] || {}), n }))
+    .filter((ev) => !ev.gone && occursOn(ev, n) && (!o.narrowed || ev.account === o.narrowed) && !(o.hidden || []).includes(sourceOf(ev)))
+    .sort((a, b) => (a.allDay ? '' : a.start).localeCompare(b.allDay ? '' : b.start));
+}
+const occurrence = (id, n, o) => eventsOn(n, o).find((ev) => ev.id === id);
+const ended = (ev) => ev.n < TODAY || (ev.n === TODAY && !ev.allDay && ev.end <= CLOCK);
+const isWaiting = (ev) => ev.answer === 'needs';
+
+// The views as tabs, and at the right what the page shows.
+function calendarTabs(width, view, title) {
+  const tabs = ['Month', 'Week', 'Day'].flatMap((tab) => { const on = tab.toLowerCase() === view; return [run(tab, on ? 'acc' : 'dim', { b: on }), gap(3)]; });
+  return leftRight(heading(tabs), [gap(2), run(title, 'fg', { b: true }), gap(LAYOUT.margin)], width);
+}
+
+// What the right of the status line says in the calendar: what mail says
+// there, then a calendar that could not be read and reminders being off.
+function calendarAlerts(o = {}) {
+  const out = [alerts()];
+  if (o.reminder) out.unshift(SAY.reminder(...o.reminder));
+  if (o.unread) out.push(SAY.calendarUnread(...o.unread));
+  if (o.remindersOff) out.push(SAY.remindersAreOff);
+  return out.filter(Boolean).join(`{dim| ${G.dot} }`);
+}
+
+// The left of the status line: the day and how much is on it, or which of
+// the day's events is selected.
+function dayStatus(n, o = {}) {
+  const events = eventsOn(n, o);
+  const waiting = events.filter(isWaiting).length;
+  const at = o.selected ? events.findIndex((ev) => ev.id === o.selected.id) : -1;
+  const count = at >= 0 ? `${at + 1} of ${events.length}` : events.length === 1 ? '1 event' : `${events.length} events`;
+  return `{dim|${dayShort(n)} ${G.dot} ${count}}${waiting ? `{dim| ${G.dot} }${SAY.waiting(waiting)}` : ''}`;
+}
+
+function calendarHint(ev) {
+  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', 'calendar.mail', 'global.help');
+  const extra = [];
+  if (isWaiting(ev)) extra.push('calendar.answer');
+  if (ev.link) extra.push('calendar.join');
+  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', 'global.back', 'global.help');
+}
+
+// ------------------------------------------------------------ calendar: rows
+
+// One month, seven days wide. A day is bright when something is on it and
+// the accent when it is today; its mark says how much (one, two, more) and
+// is the warning colour while an invitation on it waits for an answer.
+function monthRows(year, month, o) {
+  const first = Date.UTC(year, month - 1, 1) / 86400000;
+  const length = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const lead = (civil(first).dow + 6) % 7;
+  const rows = [
+    [gap(1), run(`${MONTH_NAMES[month - 1]} ${year}`, o.current ? 'fg' : 'dim', { b: !!o.current })],
+    WEEK.flatMap((day) => [gap(1), run(day, 'dim'), gap(1)]),
+  ];
+  for (let at = -lead; at < length; at += 7) {
+    rows.push(Array.from({ length: 7 }, (_, i) => {
+      const dom = at + i + 1;
+      if (dom < 1 || dom > length) return [gap(C.cell)];
+      const n = first + dom - 1;
+      const events = eventsOn(n, o);
+      const mark = events.length ? run(events.length === 1 ? G.few : events.length === 2 ? ':' : G.many, events.some(isWaiting) ? 'warn' : 'dim') : gap(1);
+      const cell = [n === o.cursor ? run(G.cursor, o.unfocused ? 'dim' : 'acc') : gap(1), run(String(dom).padStart(2), n === TODAY ? 'acc' : events.length ? 'fg' : 'dim', { b: n === TODAY }), mark];
+      return n === o.cursor ? fill(cell, 'sel') : cell;
+    }).flat());
+  }
+  return rows.map((row) => fit(row, 7 * C.cell));
+}
+
+// The cursor's month and as many of the months after it as fit whole.
+function monthsColumn(room, o) {
+  const at = civil(o.cursor);
+  const rows = [];
+  for (let i = 0; i < 12; i++) {
+    const month = monthRows(at.year + Math.floor((at.month - 1 + i) / 12), (at.month - 1 + i) % 12 + 1, { ...o, current: i === 0 });
+    if (rows.length + month.length + (i ? 1 : 0) > room) break;
+    if (i) rows.push([]);
+    rows.push(...month);
+  }
+  return rows;
+}
+
+// What is not normal about an event, most useful first.
+function eventWords(ev) {
+  const words = [];
+  if (isWaiting(ev)) words.push(['needs answer', 'warn']);
+  if (ev.answer === 'tentative') words.push(['tentative']);
+  if (ev.answer === 'declined') words.push(['declined']);
+  if (ev.answer === 'proposed') words.push([`proposed ${ev.proposed}`]);
+  if (ev.local) words.push(['local']);
+  return words;
+}
+
+// An event as a row: the account, its hours, the title and where, then the
+// words. It needs you when it is bold; what has ended is dim.
+function eventRow(ev, width, o = {}) {
+  const narrow = width < C.narrow;
+  const letters = o.narrowed ? 0 : narrow ? LAYOUT.row.account.short : Math.max(...ACCOUNT_NAMES.map((a) => a.length));
+  const wordsWidth = narrow ? C.wordsNarrow : C.words;
+  const tone = (fg) => (o.faint ? 'faint' : fg);
+  const text = tone(ended(ev) ? 'dim' : 'fg');
+  const needle = o.faint ? null : o.needle;
+
+  const row = [o.selected ? run(G.cursor, o.unfocused ? 'dim' : 'acc') : gap(1), gap(LAYOUT.indent - 1)];
+  if (letters) row.push(...fit([run(accountShort(ev.account, letters), tone(accountColour(ev.account)))], letters + (narrow ? 2 : 3), false));
+  row.push(...fit([run(ev.allDay ? 'all day' : narrow ? ev.start : `${ev.start}-${ev.end}`, tone('dim'))], narrow ? C.timeNarrow : C.time, false), gap(2));
+
+  const colour = WORDS_COLOUR(ACCOUNT_NAMES.length) || 'dim';
+  const words = [];
+  for (const [word, fg] of eventWords(ev)) {
+    const next = [...(words.length ? [run(` ${G.dot} `, tone(colour))] : []), run(word, tone(fg || colour))];
+    if (cells(words) + cells(next) > wordsWidth) break;
+    words.push(...next);
+  }
+  const title = [...highlight(ev.title, needle, text, { b: isWaiting(ev) && !o.faint }), ...(ev.where && !ev.link ? [gap(2), ...highlight(ev.where, needle, tone('dim'))] : [])];
+  const room = width - cells(row) - LAYOUT.margin;
+  if (words.length) row.push(...fit(title, room - 3 - wordsWidth), gap(3 + wordsWidth - cells(words)), ...words);
+  else row.push(...fit(title, room));
+  row.push(gap(LAYOUT.margin));
+  return o.selected ? fill(row, 'sel') : row;
+}
+
+// Days from `from` on, each under its label, in exactly `room` rows. A day
+// with nothing on it is passed over, except the first, which says so. It
+// never ends on a label with no row under it.
+function agendaRows(from, room, width, o = {}) {
+  const lines = [];
+  const labels = new Set();
+  for (let n = from; lines.length < room && n < from + 92; n++) {
+    const events = eventsOn(n, o);
+    if (!events.length && n !== from) continue;
+    if (lines.length) lines.push([]);
+    const label = heading([run(dayLabel(n), 'dim', { b: true })]);
+    labels.add(label);
+    lines.push(label);
+    if (!events.length) lines.push([gap(LAYOUT.indent), run(SAY.freeDay, 'dim')]);
+    for (const ev of events) {
+      const selected = !!o.selected && o.selected.id === ev.id && o.selected.n === n;
+      lines.push(eventRow(ev, width, { ...o, selected, faint: o.needle != null && !`${ev.title} ${ev.where || ''}`.toLowerCase().includes(o.needle) }));
+    }
+  }
+  const out = lines.slice(0, room);
+  while (out.length && (!cells(out[out.length - 1]) || labels.has(out[out.length - 1]))) out.pop();
+  while (out.length < room) out.push([]);
+  return out.map((row) => fit(row, width));
+}
+
+// ---------------------------------------------------------- calendar: views
+
+// o: { width, height, cursor, narrowed, hidden, changed, panel, left, right,
+//      command }, and for the day and the week, selected: { id, n }.
+function monthScreen(o) {
+  const { width, height } = o;
+  const tail = settle(o.panel || [], width);
+  const room = height - 2 - 3 - tail.length;
+  const months = monthsColumn(room, o);
+  const leftWidth = LAYOUT.indent + 7 * C.cell + LAYOUT.margin;
+  const paneWidth = width - leftWidth - 1;
+  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, o);
+  const content = Array.from({ length: room }, (_, y) => [...fit([gap(LAYOUT.indent), ...(months[y] || [])], leftWidth), run(G.bar, 'faint'), ...fit(pane[y] || [], paneWidth)]);
+  const at = civil(o.cursor);
+  return [calendarTabs(width, 'month', `${MONTH_NAMES[at.month - 1]} ${at.year}`), [], ...content, ...tail, [],
+    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(null)];
+}
+
+// The day view is the list of mail again: events from the cursor's day on,
+// and the selected one below the divider, or beside it where there is room.
+function dayScreen(o) {
+  const { width, height } = o;
+  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
+  const place = ev ? previewPlace(width, height, o.preview) : 'off';
+  const tail = settle(o.panel || [], width);
+  const room = height - 2 - 3 - tail.length;
+  const paneWidth = previewWidth(width);
+  const listWidth = place === 'right' ? width - paneWidth - 1 : width;
+  let content;
+  if (place === 'below') {
+    const paneHeight = LAYOUT.preview.height(height) - tail.length;
+    content = [...agendaRows(o.cursor, room - paneHeight, width, o), [run(G.rule.repeat(width), 'faint')], ...eventPane(ev, width, paneHeight - 1)];
+  } else if (place === 'right') {
+    const pane = eventPane(ev, paneWidth, room);
+    content = agendaRows(o.cursor, room, listWidth, o).map((row, y) => [...row, run(G.bar, 'faint'), ...pane[y]]);
+  } else {
+    content = agendaRows(o.cursor, room, width, o);
+  }
+  const at = civil(o.cursor);
+  return [calendarTabs(width, 'day', `${dayLong(o.cursor)} ${at.year}`), [], ...content, ...tail, [],
+    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.selected ? o.selected.n : o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
+}
+
+// Days as columns against the clock. An event is a bar in its account's
+// colour down the rows it lasts, its title beside the first and its hours
+// beside the second. One that begins while another runs is drawn `step`
+// cells in, over the other's rows, so both titles stay whole and the
+// first one's bar still shows how long it lasts; two that begin together
+// halve the column. The hour it is now is in the accent. Nothing is filled
+// but the selected event.
+function weekScreen(o) {
+  const { width, height } = o;
+  const count = width >= C.weekFrom ? 7 : 3;
+  const first = count === 7 ? monday(o.cursor) : o.cursor - 1;
+  const days = Array.from({ length: count }, (_, i) => first + i);
+  const colWidth = Math.floor((width - LAYOUT.margin * 2 - C.axis) / count);
+  const tail = settle(o.panel || [], width);
+  const room = height - 2 - 3 - tail.length;
+  const isSelected = (ev) => !!o.selected && o.selected.id === ev.id && o.selected.n === ev.n;
+
+  // Row `y` of an event's block, `w` cells wide.
+  const block = (ev, y, w) => {
+    const selected = isSelected(ev);
+    const lead = selected ? run(G.cursor, 'acc') : run(G.bar, accountColour(ev.account));
+    const words = eventWords(ev)[0];
+    const text = y === 0 ? [run(ev.title, ended(ev) ? 'dim' : 'fg', { b: isWaiting(ev) })]
+      : y === 1 && !ev.allDay ? [run(`${ev.start}-${ev.end}`, 'dim')]
+      : y === 2 && words ? [run(words[0], words[1] || 'dim')] : [];
+    const row = [lead, ...fit(text, w - 2), gap(1)];
+    return selected ? fill(row, 'sel') : row;
+  };
+
+  const head = [gap(LAYOUT.margin + C.axis), ...days.flatMap((n) => {
+    const d = civil(n);
+    return fit([gap(1), run(`${DAYS[d.dow]} ${d.dom}`, n === TODAY ? 'acc' : n === o.cursor ? 'fg' : 'dim', { b: n === TODAY || n === o.cursor })], colWidth);
+  })];
+  const allDay = days.map((n) => eventsOn(n, o).filter((ev) => ev.allDay));
+  const allRows = Array.from({ length: Math.max(...allDay.map((list) => list.length)) }, (_, y) =>
+    [gap(LAYOUT.margin), ...fit(y ? [] : [run('all day', 'dim')], C.axis), ...allDay.flatMap((list) => (list[y] ? block(list[y], 0, colWidth) : [gap(colWidth)]))]);
+
+  // Each day's timed events, with the lane an overlap puts them in.
+  const timed = days.map((n) => {
+    const list = eventsOn(n, o).filter((ev) => !ev.allDay).map((ev) => ({ ...ev, from: Math.floor(minutes(ev.start) / C.slot) * C.slot, to: Math.max(minutes(ev.end), Math.floor(minutes(ev.start) / C.slot) * C.slot + C.slot) }));
+    const lanes = [];
+    for (const ev of list) {
+      let lane = lanes.findIndex((free) => free <= ev.from);
+      if (lane < 0) lane = lanes.length;
+      lanes[lane] = ev.to;
+      ev.lane = lane;
+      const meets = list.filter((other) => other !== ev && other.from < ev.to && ev.from < other.to);
+      ev.shares = meets.length > 0;
+      ev.abreast = meets.some((other) => other.from === ev.from);
+    }
+    return { list, lanes: Math.max(1, lanes.length) };
+  });
+
+  const slots = room - 1 - allRows.length - (allRows.length ? 1 : 0);
+  const picked = o.selected && timed.flatMap((day) => day.list).find(isSelected);
+  let from = minutes(C.dayFrom);
+  if (picked && picked.to > from + slots * C.slot) from = Math.ceil(picked.to / 60) * 60 - slots * C.slot;
+  if (picked && picked.from < from) from = Math.floor(picked.from / 60) * 60;
+  from = Math.max(0, Math.min(from, 24 * 60 - slots * C.slot));
+
+  const now = days.includes(TODAY) ? Math.floor(minutes(CLOCK) / 60) * 60 : -1;
+  const grid = Array.from({ length: slots }, (_, s) => {
+    const at = from + s * C.slot;
+    const clock = at % 60 ? [] : [run(`${String(at / 60).padStart(2, '0')}:00`, at === now ? 'acc' : 'dim', { b: at === now })];
+    const columns = timed.flatMap((day) => {
+      let cell = [gap(colWidth)];
+      for (const ev of day.list) {
+        if (at < ev.from || at >= ev.to) continue;
+        const x = !ev.shares ? 0 : ev.abreast ? ev.lane * Math.floor(colWidth / day.lanes) : ev.lane * C.step;
+        const w = ev.abreast ? Math.floor(colWidth / day.lanes) : colWidth - x;
+        // A blank cell before a block drawn over another parts the two.
+        const rows = block(ev, (at - ev.from) / C.slot, w);
+        cell = x && !ev.abreast ? overlay(cell, x - 1, [gap(1), ...rows]) : overlay(cell, x, rows);
+      }
+      return cell;
+    });
+    return [gap(LAYOUT.margin), ...fit(clock, C.axis), ...columns];
+  });
+
+  const a = civil(days[0]);
+  const b = civil(days[count - 1]);
+  const title = a.month === b.month ? `${a.dom} to ${b.dom} ${MONTH_NAMES[b.month - 1]} ${b.year}` : `${a.dom} ${MONTHS[a.month - 1]} to ${b.dom} ${MONTHS[b.month - 1]} ${b.year}`;
+  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
+  const content = [head, ...allRows, ...(allRows.length ? [[]] : []), ...grid].map((row) => fit(row, width));
+  return [calendarTabs(width, 'week', title), [], ...content, ...tail, [],
+    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
+}
+
+// ---------------------------------------------------------- calendar: event
+
+function whenOf(ev) {
+  const year = civil(ev.n).year;
+  const first = ev.weekdays ? ev.n : dayNumber(ev.day);
+  if (!ev.allDay) return `${dayShort(first)} ${year}, ${ev.start} to ${ev.end}`;
+  return ev.days > 1 ? `${dayShort(first)} to ${dayShort(first + ev.days - 1)} ${year}, all day` : `${dayShort(first)} ${year}, all day`;
+}
+
+function fromNow(ev) {
+  const days = ev.n - TODAY;
+  return days === 0 ? 'today' : days === 1 ? 'tomorrow' : days === -1 ? 'yesterday' : days > 0 ? `in ${days} days` : `${-days} days ago`;
+}
+
+const ANSWERS = { needs: '{warn|not answered}', accepted: 'accepted', tentative: 'tentative', declined: 'declined', proposed: 'proposed another time' };
+const SAID = { needs: '{warn|no answer}', accepted: '{dim|yes}', tentative: '{dim|maybe}', declined: '{dim|no}', proposed: '{dim|proposed another time}' };
+
+// Everyone asked, one never split across rows: the organizer, you, then
+// the others with what each has said.
+function guestsOf(ev) {
+  const others = (ev.guests || []).map(([who, said_]) => `${name(who)} {dim|${said_ || 'no answer'}}`);
+  return [`${name(ev.organizer)} {dim|organizer}`, ...(ev.answer ? [`you ${SAID[ev.answer]}`] : []), ...others];
+}
+
+// The header block of an event, in the reader's form. `brief` is the
+// preview's: it leaves out what the row already says.
+function eventFields(ev, brief, width) {
+  const label = LAYOUT.header.label;
+  const lines = (label_, value) => value.map((line, i) => [run((i ? '' : label_).padEnd(label), 'dim'), ...line]);
+  const calendar = CALENDARS.find((c) => c.account === ev.account && c.source === 'own');
+  const rows = [field('When', m(`${whenOf(ev)}{dim| ${G.dot} ${fromNow(ev)}}`))];
+  if (ev.where) rows.push(field('Where', [run(ev.where)]));
+  // The host a link really opens comes first, as in the links panel.
+  if (ev.link) rows.push(field('Join', m(`${ev.link.host} {dim|${ev.link.url}}`)));
+  rows.push(field('Calendar', m(`{${accountColour(ev.account)}|${ev.account}}{dim| ${G.dot} ${ev.local ? SAY.onlyHere : SAY.readFrom(calendar.read)}}`)));
+  if (ev.organizer) rows.push(...lines('Who', packed(guestsOf(ev).map(m), width - label, LAYOUT.header.rows[brief ? 'preview' : 'reader'])));
+  if (!brief && ev.answer) rows.push(field('Answer', m(ANSWERS[ev.answer])));
+  if (!brief && ev.repeats) rows.push(field('Repeats', [run(ev.repeats)]));
+  if (!brief && ev.reminder) rows.push(field('Reminder', [run(ev.reminder)]));
+  return rows.map((row) => fit(row, width));
+}
+
+function eventNotices(ev) {
+  const rows = [];
+  if (isWaiting(ev)) rows.push(m(SAY.needsAnswer(name(ev.organizer))));
+  if (ev.local) rows.push(m(SAY.onlyInTuimex(ev.account)));
+  return rows;
+}
+
+// The selected event as the day view shows it under the list.
+function eventPane(ev, width, height) {
+  const inner = width - LAYOUT.indent - LAYOUT.margin;
+  const notes = ev.notes ? [[], ...bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, inner))] : [];
+  const rows = [[gap(LAYOUT.margin), run(ev.title, 'fg', { b: true })], [], ...indent([...eventFields(ev, true, inner), ...notes])].slice(0, height).map((row) => fit(row, width));
+  while (rows.length < height) rows.push(fit([], width));
+  return rows;
+}
+
+// What only one provider sends is folded under More, so the fields every
+// event has stay where the eye expects them.
+function moreRows(ev, open) {
+  if (!ev.more) return [];
+  if (!open) return [[], [run(`${G.folded} More`, 'dim'), ...m(then(ev.more.map(([label]) => label.toLowerCase()).join(', ')))]];
+  return [[], [run(`${G.unfolded} More`, 'dim')], ...ev.more.map(([label, value]) => [gap(2), ...field(label, [run(value)])])];
+}
+
+function eventHint(ev) {
+  const extra = [];
+  if (isWaiting(ev)) extra.push('calendar.answer');
+  if (ev.link) extra.push('calendar.join');
+  if (ev.mail) extra.push('event.mail');
+  return hint(...extra, 'calendar.edit', 'calendar.delete', 'global.back');
+}
+
+// o: { width, height, ev, where, more, panel, left, right, command }
+function eventScreen(o) {
+  const { width, height, ev } = o;
+  const inner = width - LAYOUT.indent - LAYOUT.margin;
+  const title = leftRight(heading([run(ev.title, 'fg', { b: true })]), [gap(2), run(o.where || '', 'dim'), gap(LAYOUT.margin)], width);
+  const head = [title, [], ...indent(eventFields(ev, false, inner)), []];
+  const notices = eventNotices(ev).flatMap((row) => noticeLines(row, inner));
+  const notes = ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, inner)) : [];
+  const body = indent([...notices, ...(notices.length && notes.length ? [[]] : []), ...notes, ...moreRows(ev, o.more)]);
+  return frame(width, height, head, body, o.panel, statusRow(width, o.left || '', o.right != null ? o.right : calendarAlerts(o)), o.command || eventHint(ev));
+}
+
+// The form for a new event or a change to one, built as compose is: a field
+// to a row, the focused one with the cursor and a bold label, and the notes
+// below as the body. o: { ev, focused, typing, left, command }
+function eventFormScreen(width, height, o) {
+  const { ev } = o;
+  const calendars = CALENDARS.filter((c) => c.source === 'local').flatMap((c) => [run(`${c.account} local`, c.account === ev.account ? 'fg' : 'dim', { b: c.account === ev.account }), gap(3)]);
+  const fields = [
+    ['Title', [run(ev.title, 'fg', { b: true })]],
+    ['Calendar', calendars],
+    ['Starts', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.start}`)]],
+    ['Ends', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.end}`)]],
+    ['All day', [run('no', 'dim')]],
+    ['Repeats', [run(ev.repeats || 'never', ev.repeats ? 'fg' : 'dim')]],
+    ['Where', ev.where ? [run(ev.where)] : []],
+    ...(ev.invited || []).map((who, i) => [i ? '' : 'Guests', m(person(who))]),
+    ...(ev.invited ? [] : [['Guests', []]]),
+    ['Reminder', [run(ev.reminder || '10 minutes before')]],
+  ].map(([label, value]) => {
+    const on = !!label && label === o.focused;
+    return [on ? run(G.cursor, 'acc') : gap(1), gap(LAYOUT.indent - 1), run(label.padEnd(LAYOUT.header.label), on ? 'fg' : 'dim', { b: on }), ...value, ...(on && o.typing ? [caret] : [])];
+  });
+  const head = [heading([run(o.heading, 'fg', { b: true })]), [], ...fields, []].map((row) => fit(row, width));
+  const body = indent(ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin)) : [[run('No notes.', 'dim')]]);
+  return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|not saved}', calendarAlerts()),
+    o.command || hint(['Tab', 'next field'], 'event-form.choice', 'event-form.notes', 'event-form.save', 'event-form.close'));
+}
+
+// The calendars, each one a row to show or hide.
+function calendarEntries(hidden = []) {
+  return CALENDARS.map((c) => {
+    const off = hidden.includes(`${c.account}/${c.source}`);
+    const count = EVENTS.filter((ev) => ev.account === c.account && !!ev.local === (c.source === 'local')).length;
+    return [run(c.account.padEnd(11), off ? 'faint' : accountColour(c.account)), run((c.source === 'local' ? 'local' : 'its own').padEnd(10), off ? 'faint' : 'fg'),
+      run(`${count} event${count === 1 ? '' : 's'}`.padEnd(12), off ? 'faint' : 'dim'), run(c.source === 'local' ? 'only in tuimex' : `read ${c.read} ago`, off ? 'faint' : 'dim'), ...(off ? [gap(3), run('hidden', 'dim')] : [])];
+  });
+}
+
+// A few rows of a day, the status line and the command line: one step of a
+// flow in the calendar.
+function calendarStrip(n, o = {}) {
+  const width = LAYOUT.default.width;
+  const rows = eventsOn(n, o).map((ev) => eventRow(ev, width, { ...o, selected: !!o.selected && o.selected === ev.id }));
+  const tail = settle(o.panel || [], width);
+  const picked = o.selected ? { id: o.selected, n } : null;
+  return [heading([run(dayLabel(n), 'dim', { b: true })]), ...rows, ...tail, [],
+    statusRow(width, o.left != null ? o.left : dayStatus(n, { ...o, selected: picked }), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(picked && occurrence(o.selected, n, o))];
+}
+
 // --------------------------------------------------------------------- help
 
 // One page that scrolls from `top`. With nothing typed it is the keys in
 // three columns and then every command. Typing filters it to what matches,
 // in one column: a section whose title matches is shown whole, and a section
 // with nothing to show is left out.
-function helpScreen(width, height, needle, top = 0) {
+function helpScreen(width, height, needle, top = 0, place = 'mail') {
   const has = (...texts) => texts.some((text) => text.toLowerCase().includes(needle));
   const allKeys = KEYMAP.modes.flatMap((x) => x.keys);
   const commandText = (c) => `:${c.name} ${c.args}`;
@@ -1658,11 +2249,16 @@ function helpScreen(width, height, needle, top = 0) {
       const keyWidth = Math.max(...sections.flatMap((x) => x.keys.map((k) => k.keys.length))) + 2;
       return sections.flatMap((x) => [title(x.title), ...x.keys.map((k) => [run(k.keys.padEnd(keyWidth)), run(k.does, 'dim')]), []]);
     };
-    const columnsOf = [
+    // The keys of the place help was asked from; filtering reaches them all.
+    const columnsOf = (place === 'calendar' ? [
+      ['global', 'command', 'confirm', 'help'],
+      ['calendar'],
+      ['event', 'invite', 'calendars', 'event-form', 'links'],
+    ] : [
       ['global', 'command', 'confirm', 'compose', 'help'],
       ['list'],
       ['reader', 'preview', 'links', 'attachments', 'agent', 'invite'],
-    ].map(column);
+    ]).map(column);
     const widths = columnsOf.map((col) => Math.max(...col.map(cells)) + 2);
     const depth = Math.max(...columnsOf.map((col) => col.length));
     const keyRows = Array.from({ length: depth }, (_, y) => columnsOf.flatMap((col, i) => fit(col[y] || [], widths[i])));
@@ -2097,6 +2693,131 @@ function build(mode = {}) {
     { key: '', caption: 'Agent draft', note: 'The same mark wherever an agent\'s draft appears: the reader, compose, the send summary.', rows: noticeStrip(DRAFTS[0]) },
   ]);
 
+  // ---- calendar (ADR-054). The cursor is on Thursday, which holds one of
+  // everything: an invitation not yet answered, two events at once, one
+  // that is only in tuimex.
+  const thu = dayNumber('2026-11-26');
+  const fri = thu + 1;
+  const roadmap = { id: 'roadmap', n: thu };
+  const cut = (rows, n) => [...rows.slice(0, n), ...rows.slice(-3)];
+  const month = (size, more) => monthScreen({ ...size, cursor: thu, ...more });
+  screen('cal-month', 'Calendar, month', 'after gc: the cursor\'s month and the two after it, each day marked with how much is on it; beside them the cursor\'s day and the days that follow, each event with its account, its hours and what is not normal about it', month(LAYOUT.default));
+  alsoSmall('cal-month', 'Calendar, month', month(small));
+  screen('cal-month-account', 'Calendar, one account', 'after gt, or :account personal: only that account\'s events, in the grid\'s marks and in the list; the status line names it', month(LAYOUT.default, {
+    narrowed: 'personal', command: said(SAY.showingOnly('personal')),
+  }));
+  const allHidden = CALENDARS.map((c) => `${c.account}/${c.source}`);
+  screen('cal-empty', 'Calendar, none set up', 'with no calendar configured the grid still moves and the list says how to add one', monthScreen({
+    width: W, height: H, cursor: TODAY, hidden: allHidden, empty: SAY.noCalendar, left: '', command: hint('calendar.mail', 'global.help'),
+  }));
+  screen('cal-unread', 'Calendar, one that could not be read', 'a calendar that cannot be fetched says so on the status line, with how old what is shown is; its events stay', month(LAYOUT.default, { unread: ['personal', '2h'] }));
+  screen('cal-calendars', 'Calendars', 'after C: every calendar with where it is kept and when it was last read; Space hides one from every view', month(LAYOUT.default, {
+    hidden: ['personal/local'], panel: panel('Calendars', calendarEntries(['personal/local']), 1), left: '', command: hint('calendars.choose', 'calendars.toggle', 'calendars.close'),
+  }));
+
+  const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
+  screen('cal-week', 'Calendar, week', 'after w: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
+  alsoSmall('cal-week', 'Calendar, week', week(small));
+
+  const day = (size, more) => dayScreen({ ...size, cursor: thu, selected: roadmap, ...more });
+  screen('cal-day', 'Calendar, day', 'after Enter on a day, or d: the list of mail again, with events from that day on and the selected one below the divider', day(LAYOUT.default));
+  alsoSmall('cal-day', 'Calendar, day', day(small));
+  screen('cal-day-wide', 'Calendar, day, the event beside it', 'from 160 columns the selected event sits to the right of the list', day(wide), wide);
+  screen('cal-find', 'Calendar, finding', 'after /: what is typed is underlined where it matches and every other event goes faint', dayScreen({
+    width: W, height: H, cursor: TODAY, needle: 'call', left: '', command: typed('/call'),
+  }));
+
+  const theEvent = occurrence('roadmap', thu);
+  const event = (size, more) => eventScreen({ ...size, ev: theEvent, where: `2 of 4 on ${dayShort(thu)}`, ...more });
+  screen('cal-event', 'Event', 'after Enter on an event: when, where, the host its link really opens, which calendar holds it, everyone asked and what each has said, then its notes; what only one provider sends is folded under More', event(LAYOUT.default));
+  alsoSmall('cal-event', 'Event', event(small));
+  screen('cal-event-more', 'Event, More unfolded', 'after zo: the fields only this provider sends', event(LAYOUT.default, { more: true }));
+  screen('cal-event-answer', 'Event, the question', 'after i: the five answers, the same question the reader asks of the invitation\'s mail', event(LAYOUT.default, { command: said(SAY.answer) }));
+  screen('cal-event-local', 'Event, only in tuimex', 'an event tuimex alone holds says so before anything else', eventScreen({
+    width: W, height: H, ev: occurrence('migration', thu), where: `4 of 4 on ${dayShort(thu)}`,
+  }));
+
+  const offsite = { id: 'offsite', account: 'work', n: thu, day: '2026-11-26', start: '14:00', end: '15:00', title: 'Offsite planning', where: 'Room Fjord', invited: ['imani', 'lars'], local: true };
+  const form = (more) => eventFormScreen(W, H, { ev: offsite, heading: 'New event', focused: 'Title', typing: true, ...more });
+  screen('cal-edit', 'Event form', 'after c or e: a field to a row as in compose; a date is typed as words and the status line says what it was taken to mean', form());
+
+  screen('help-calendar', 'Help, in the calendar', '? in the calendar leads with the calendar\'s keys; typing filters every key and command as it does in mail', helpScreen(W, H, '', 0, 'calendar'));
+
+  flow('cal-zoom', 'Enter goes deeper, Esc comes back', [
+    { key: 'gc', caption: 'Month', note: 'From mail. The calendar opens where it was left; the first time, on today.', rows: cut(month(LAYOUT.default), 11) },
+    { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 11) },
+    { key: 'Enter', caption: 'Event', note: '[ and ] step to the events on either side without going back.', rows: cut(event(LAYOUT.default), 11) },
+    { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 11) },
+  ]);
+
+  const road = 'Q4 roadmap review';
+  flow('cal-answer', 'Answering an invitation', [
+    { key: 'i', caption: 'Asked', note: 'The same question in the calendar, on the event and in the reader.',
+      rows: calendarStrip(thu, { selected: 'roadmap', command: said(SAY.answer) }) },
+    { key: 'a', caption: 'Accepted', note: 'The reply waits in the Outbox for the send delay, from the account the invitation came to, and the event takes the answer in that account\'s calendar.',
+      rows: calendarStrip(thu, { selected: 'roadmap', changed: { roadmap: { answer: 'accepted' } }, command: said(SAY.answered('Accepted', road, 'work')) }) },
+    { key: 'u', caption: 'Undone', note: 'The reply never left and the event waits for an answer again.',
+      rows: calendarStrip(thu, { selected: 'roadmap', command: said(SAY.unanswered(road)) }) },
+  ]);
+  flow('cal-propose', 'Proposing another time', [
+    { key: 'i p', caption: 'Asked when', note: 'A date is typed as it is for gd.',
+      rows: calendarStrip(thu, { selected: 'roadmap', left: '', command: typed('Propose: ') }) },
+    { key: 'thu 14:00', caption: 'Typed', note: 'The status line says what the words were taken to mean, before anything is sent.',
+      rows: calendarStrip(thu, { selected: 'roadmap', left: SAY.proposes('Thu 26 Nov 14:00 to 15:30'), command: typed('Propose: thu 14:00') }) },
+    { key: 'Enter', caption: 'Proposed', note: 'The organizer gets the proposal as a calendar part and as a sentence. The event keeps its time until they answer.',
+      rows: calendarStrip(thu, { selected: 'roadmap', changed: { roadmap: { answer: 'proposed', proposed: 'Thu 14:00' } }, command: said(SAY.proposed('Thu 26 Nov 14:00', name('imani'))) }) },
+  ]);
+  flow('cal-ignore', 'Ignoring an invitation', [
+    { key: 'i', caption: 'Asked', note: 'An invitation nobody expected.',
+      rows: calendarStrip(fri, { selected: 'review', command: said(SAY.answer) }) },
+    { key: 'x', caption: 'Ignored', note: 'Nothing is sent and the event leaves the calendar. The mail stays and can still be answered.',
+      rows: calendarStrip(fri, { changed: { review: { gone: true } }, command: said(SAY.ignored('Account review')) }) },
+  ]);
+
+  const reviewLink = occurrence('review', fri).link;
+  flow('cal-join', 'Joining a meeting', [
+    { key: 'o', caption: 'Opened', note: 'One link: the status line shows where it really goes and it opens in the browser.',
+      rows: calendarStrip(thu, { selected: 'roadmap', left: SAY.opens(theEvent.link.url), command: said(SAY.joining(theEvent.link.host)) }) },
+    { key: 'o', caption: 'Asked first', note: 'A link whose text names another host is confirmed first, as in mail (ADR-018).',
+      rows: calendarStrip(fri, { selected: 'review', left: SAY.opens(reviewLink.url), command: said(SAY.deceptive(reviewLink.shown, reviewLink.host, true)) }) },
+    { key: 'n', caption: 'Not opened', note: 'Any key but y leaves it closed.',
+      rows: calendarStrip(fri, { selected: 'review' }) },
+  ]);
+
+  flow('cal-new', 'A new event with guests', [
+    { key: 'c', caption: 'The form', note: 'On the cursor\'s day, in the calendar of the account the view is narrowed to, or the first.', rows: cut(form(), 13) },
+    { key: '^s', caption: 'Who gets mail', note: 'Guests are mailed an invitation, so saving asks as sending does.',
+      rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 13) },
+    { key: 'y', caption: 'Added', note: 'The event is tuimex\'s own, and says so.',
+      rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
+  ]);
+  flow('cal-delete', 'Deleting, and undoing it', [
+    { key: 'x', caption: 'Deleted', note: 'No question first: u reverses it (ADR-015).',
+      rows: calendarStrip(thu, { changed: { vendor: { gone: true } }, command: said(SAY.deleted('Vendor call')) }) },
+    { key: 'u', caption: 'Undone', note: '',
+      rows: calendarStrip(thu, { selected: 'vendor', command: said(SAY.restored('Vendor call')) }) },
+  ]);
+
+  flow('cal-reminder', 'A reminder, and turning them off', [
+    { key: '', caption: 'Ten minutes before', note: 'While tuimex is open: the bell, this line wherever you are, and a desktop notification carrying the title alone (ADR-058).',
+      rows: calendarStrip(TODAY, { selected: 'halden-call', reminder: ['Halden contract call', '10 min'] }) },
+    { key: 'o', caption: 'Joined', note: 'o joins the event a reminder names, from mail as well.',
+      rows: calendarStrip(TODAY, { selected: 'halden-call', left: SAY.opens(occurrence('halden-call', TODAY).link.url), command: said(SAY.joining('meet.example.org')) }) },
+    { key: 'gn', caption: 'Off', note: 'Remembered across runs. Off is shown; on is not.',
+      rows: calendarStrip(TODAY, { selected: 'halden-call', remindersOff: true, command: said(SAY.remindersOff) }) },
+    { key: 'gn', caption: 'On again', note: '',
+      rows: calendarStrip(TODAY, { selected: 'halden-call', command: said(SAY.remindersOn) }) },
+  ]);
+
+  const dec5 = dayNumber('2026-12-05');
+  flow('cal-goto', 'Going to a date', [
+    { key: 'gd', caption: 'Asked', note: 'A date, a weekday, or a step: 2026-12-05, 5 dec, fri, +2w.',
+      rows: calendarStrip(thu, { left: '', command: typed('Go to: ') }) },
+    { key: '5 dec', caption: 'Typed', note: 'The status line says the day the words mean.',
+      rows: calendarStrip(thu, { left: SAY.goesTo(`${dayShort(dec5)} 2026`), command: typed('Go to: 5 dec') }) },
+    { key: 'Enter', caption: 'There', note: 'The view stays what it was; only the date moves.', rows: cut(month(LAYOUT.default, { cursor: dec5 }), 11) },
+  ]);
+
   return out;
 }
 
@@ -2112,6 +2833,6 @@ window.TUI = {
   contrast,
   accountOrder,
   wordsColour,
-  fixture: { now: NOW, accounts: ACCOUNTS, folders: FOLDERS, sections: SECTIONS, mail: MAIL, drafts: DRAFTS, outbox: OUTBOX },
+  fixture: { now: NOW, accounts: ACCOUNTS, folders: FOLDERS, sections: SECTIONS, mail: MAIL, drafts: DRAFTS, outbox: OUTBOX, calendars: CALENDARS, events: EVENTS },
 };
 })();
