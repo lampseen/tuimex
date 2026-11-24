@@ -81,7 +81,7 @@ pullpen has five of.
 
 *2026-11-24: the code figure is ADR-059's.*
 
-*2026-11-24: and then ADR-063's.*
+*2026-11-24: and then ADR-063's; the binary figure is ADR-064's.*
 
 ## ADR-005 — The dependency ceiling is a list
 
@@ -2007,3 +2007,36 @@ against a measurement, as ADR-059 said.
 
 **What it costs.** The fourth budget record. The guess it makes, 1,400
 for OpenPGP, is three records old and has been wrong in kind before.
+
+*2026-11-24: measured; see ADR-064.*
+
+## ADR-064 — The binary budget is 18 MiB
+
+`MAX_BINARY_BYTES` goes from 17,825,792 to 18,874,368. The other three
+budgets stand.
+
+With the calendar joined, the stripped release binary on x86-64 Linux
+(thin LTO, one codegen unit, `make budgets`) is 18,135,120 bytes, 17.30
+MiB, and 309,328 over ADR-049's cap. It was 16,697,288 when that record
+was written at 16,504 lines of code; the code is 26,121 lines now. So
+9,617 lines and one new crate, `roxmltree` (ADR-062), cost 1,437,832
+bytes: about 150 bytes a line, half of what ADR-049 measured, since the
+calendar brought code of tuimex's own and almost nothing of anyone
+else's. It is read and written over the `ureq` and TLS already linked.
+
+The strongest argument against is ADR-049's own: each raise makes the
+next one easier, and the cap is the only thing that makes anyone ask
+what a feature weighs. The answer here is that the question was asked
+and has a small answer. Nothing in the calendar is a dependency that
+could be left out for size; what would come out is the feature. Bryan's
+ruling of 2026-11-23 stands: "raise the cap if we need to, don't cut
+features".
+
+18 MiB is the measurement plus 739,248 bytes, 0.70 MiB. At 150 bytes a
+line the 1,879 lines left under ADR-063 fit in it with room; an OpenPGP
+library does not, and ADR-049 already said that crate needs a record of
+its own against its own measurement.
+
+**What it costs.** The second raise of this budget in two days. The
+download is 1 MiB larger than the one released as 0.1.0, and that is
+what a user pays for a calendar they may never open.
