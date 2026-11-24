@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: copy wiki/ to the wiki
         env:
           TOKEN: ${{ secrets.WIKI_TOKEN || github.token }}
@@ -51,4 +51,4 @@ jobs:
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
               commit -qm "sync wiki/ from ${GITHUB_SHA:0:7}"
           git push -q origin HEAD
-          echo "pushed $(ls *.md | wc -l) pages"
+          echo "pushed $(find . -maxdepth 1 -name '*.md' | wc -l) pages"

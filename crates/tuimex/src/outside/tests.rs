@@ -47,6 +47,14 @@ fn id() -> MessageId {
     MessageId { account: AccountId("test".into()), key: "one".into() }
 }
 
+/// A path as tuimex says it on this machine. The scratch root is under
+/// the home directory wherever the checkout is, as it is on a CI runner,
+/// and a path under home is said from a tilde.
+fn shown(path: &Path) -> String {
+    let home = directories::BaseDirs::new().map(|dirs| dirs.home_dir().to_path_buf());
+    homely(path, home.as_deref())
+}
+
 fn session(file: &str, test: &str) -> Session {
     let corpus = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus").join(file);
     let raw = std::fs::read(&corpus).unwrap();
@@ -253,7 +261,7 @@ fn a_file_is_saved_under_a_safe_name_inside_the_download_directory() {
     ] {
         let mut s = session(file, "saved");
         let downloads = s.root.join("downloads");
-        assert_eq!(s.keys("\ra\r").said(), format!("✓ Saved {}", downloads.join(name).display()), "{file}");
+        assert_eq!(s.keys("\ra\r").said(), format!("✓ Saved {}", shown(&downloads.join(name))), "{file}");
         assert_eq!(s.written(), [(downloads.join(name), 0o600)], "{file}");
         let data = tuimex_content::attachment(&s.raw, 0).unwrap().data;
         assert_eq!(std::fs::read(downloads.join(name)).unwrap(), data, "{file}");
@@ -276,11 +284,11 @@ fn a_file_is_saved_under_a_safe_name_inside_the_download_directory() {
 fn a_path_given_to_save_is_read_against_the_download_directory_and_never_written_over() {
     let mut s = session("attachment-path-traversal.eml", "path");
     let to = s.root.join("downloads/keys/mine.pub");
-    assert_eq!(s.keys("\r:save 1 keys/mine.pub\r").said(), format!("✓ Saved {}", to.display()));
+    assert_eq!(s.keys("\r:save 1 keys/mine.pub\r").said(), format!("✓ Saved {}", shown(&to)));
     assert_eq!(s.keys(":save 1 keys/mine.pub\r").said(), "E :save: mine.pub is there already");
     assert_eq!(
         s.keys(":save 1 keys\r").said(),
-        format!("✓ Saved {}", s.root.join("downloads/keys/authorized_keys").display())
+        format!("✓ Saved {}", shown(&s.root.join("downloads/keys/authorized_keys")))
     );
     assert_eq!(s.keys(":save 2\r").said(), "E :save: this message has no file 2 · a lists them");
     assert_eq!(s.written().len(), 2);
