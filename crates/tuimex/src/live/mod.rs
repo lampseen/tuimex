@@ -22,7 +22,7 @@ use crate::config::Config;
 use crate::outside::{self, Outside};
 use crate::paths::Dirs;
 use crate::term::{Backend, Refresh};
-use crate::{message, sync};
+use crate::{calendar, message, sync};
 
 /// How many asks are remembered for a refusal to name, as the engine
 /// remembers them (ADR-040), and how many read messages are kept for the
@@ -145,11 +145,13 @@ pub fn opener() -> outside::System {
 /// Returns the mailbox as the store has it now, before any server has
 /// answered, and the seconds a sent message is held for. `said` hears that
 /// the store is about to be opened, and then how far a rebuild of its
-/// index has come: whoever waits is shown it.
+/// index has come: whoever waits is shown it. `calendar` reads the
+/// calendars the config names, when it names any.
 pub fn start(
     config: &Config,
     dirs: &Dirs,
     downloads: PathBuf,
+    calendar: Option<calendar::Reader>,
     said: &mut dyn FnMut(Option<(usize, usize)>) -> Result<()>,
 ) -> Result<(Mailbox, Live, u32)> {
     if config.accounts.is_empty() {
@@ -172,7 +174,7 @@ pub fn start(
     // The system's opener is made here and nowhere else: no test may
     // start a browser or a viewer.
     let outside = move || Outside::new(Box::new(outside::System), downloads, &cache);
-    let (mailbox, live) = Live::over(store, accounts, sections(config), me, outside)?;
+    let (mailbox, live) = Live::with(store, accounts, sections(config), me, outside, calendar)?;
     Ok((mailbox, live, u32::try_from(delay.as_secs()).unwrap_or(u32::MAX)))
 }
 
@@ -189,13 +191,27 @@ fn held(mail: &mut [Listed], folders: &[Folder], delay: Duration) {
 }
 
 impl Live {
-    /// As `start`, over accounts however they are reached.
+    /// As `start`, over accounts however they are reached, with no
+    /// calendar.
+    #[cfg(test)]
     pub fn over(
         store: Store,
         accounts: Vec<(Account, Box<dyn Connect>)>,
         sections: Vec<Section>,
         me: Vec<String>,
         outside: impl FnOnce() -> Outside + Send + 'static,
+    ) -> Result<(Mailbox, Live)> {
+        Live::with(store, accounts, sections, me, outside, None)
+    }
+
+    /// As `start`, over accounts and calendars however they are reached.
+    pub fn with(
+        store: Store,
+        accounts: Vec<(Account, Box<dyn Connect>)>,
+        sections: Vec<Section>,
+        me: Vec<String>,
+        outside: impl FnOnce() -> Outside + Send + 'static,
+        calendar: Option<calendar::Reader>,
     ) -> Result<(Mailbox, Live)> {
         let (folders, mut mail) = (store.folders()?, store.listed(None)?);
         let delay = accounts.first().map_or(Duration::ZERO, |(account, _)| account.send_delay);
@@ -205,9 +221,12 @@ impl Live {
         let ((jobs, queue), (told, news), (events, heard)) = (mpsc::channel(), mpsc::channel(), mpsc::channel());
         let start = |(account, connect)| Engine::start(account, connect, store.clone(), events.clone());
         let engines: Vec<Engine> = accounts.into_iter().map(start).collect();
-        drop(events);
+        // The calendar thread says how its fetches went where the engines
+        // say how theirs did.
+        let calendar = calendar.map(|reader| (reader, events));
         let forward = jobs.clone();
-        // Ends when the engines have, and with them every sender of events.
+        // Ends when the engines and the calendar thread have, and with
+        // them every sender of events.
         thread::spawn(move || heard.into_iter().try_for_each(|event| forward.send(Job::Told(event))));
         let worker = Worker {
             engines: Engines::new(engines),
@@ -219,10 +238,11 @@ impl Live {
             read: Vec::new(),
             after: 0,
             owed: None,
+            calendar: None,
         };
         // What opens things is made on the worker's thread, which is the
         // only one to open anything.
-        let worker = thread::spawn(move || worker.run(&queue, &mut outside()));
+        let worker = thread::spawn(move || worker.run(&queue, &mut outside(), calendar));
         let live = Live {
             jobs,
             news,
@@ -239,6 +259,14 @@ impl Live {
     /// have written all it was handed. A message being handed to its
     /// server is not cut short (ADR-035), so `waiting` hears which
     /// accounts that wait is for.
+    ///
+    /// The calendar thread is not waited for at all. The worker ending
+    /// drops what nudges it, which ends it at once when it is between
+    /// passes. In the middle of a fetch it would be up to `sync::PATIENCE`
+    /// for each request before it looked, and it holds nothing worth that:
+    /// it writes only the cache of fetched calendars (ADR-055), which
+    /// SQLite keeps whole when a writer is cut off and the next fetch
+    /// fills again. It ends with the process.
     pub fn stop(mut self, waiting: impl Fn(&[String])) {
         // A worker that has gone has stopped the engines already.
         if self.jobs.send(Job::Stop).is_ok() {
@@ -332,6 +360,9 @@ struct Worker {
     /// every message. They are read once for all the jobs that were
     /// waiting together.
     owed: Option<(Instant, Option<Vec<MessageId>>)>,
+    /// The calendars, when the config names any: filled in by `run`,
+    /// which starts them on this thread.
+    calendar: Option<calendar::Reader>,
 }
 
 /// The longest the loop waits for rows while jobs keep coming.
@@ -341,6 +372,14 @@ impl Worker {
     fn tell(&self, news: News) {
         // A loop that has gone is one that is stopping; `Stop` follows.
         let _ = self.told.send(news);
+    }
+
+    /// Says why the calendar store could not be read, when it could not.
+    fn said(&self, read: Result<(), String>) {
+        if let Err(text) = read {
+            let account = AccountId(String::new());
+            self.tell(News::Told(Event::Notice { account, error: true, text, hint: String::new() }));
+        }
     }
 
     fn refuse(&self, serial: u64, reason: impl Into<String>) {
@@ -436,6 +475,9 @@ impl Worker {
             }
             _ => {}
         }
+        if let (Action::Sync { .. }, Some(calendar)) = (&ask.action, &self.calendar) {
+            calendar.nudge();
+        }
         let whole = matches!(ask.action, Action::EmptyTrash(_) | Action::CreateArchive(_) | Action::CreateTrash(_));
         let on = ask.on.clone();
         self.asked.push((serial, on.clone()));
@@ -511,6 +553,12 @@ impl Worker {
                 self.rows(Some(vec![id]));
             }
             Event::BodyReady { id, body } => self.read(id, body),
+            // The interface is told of a calendar by being handed the
+            // calendar, with the failure on it; the event is not shown.
+            Event::CalendarRead { .. } | Event::CalendarFailed { .. } => {
+                let read = self.calendar.as_mut().map_or(Ok(()), |calendar| calendar.told(&event));
+                self.said(read);
+            }
             other => self.tell(News::Told(other)),
         }
     }
@@ -537,7 +585,17 @@ impl Worker {
         self.rows(Some(vec![id]));
     }
 
-    fn run(mut self, queue: &Receiver<Job>, outside: &mut Outside) {
+    fn run(
+        mut self,
+        queue: &Receiver<Job>,
+        outside: &mut Outside,
+        calendar: Option<(calendar::Reader, Sender<Event>)>,
+    ) {
+        if let Some((mut reader, events)) = calendar {
+            let read = reader.start(events);
+            self.said(read);
+            self.calendar = Some(reader);
+        }
         loop {
             // A key held on an action is an ask for each repeat, and a
             // sync says what changed folder by folder: the rows for all

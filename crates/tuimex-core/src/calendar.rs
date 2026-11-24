@@ -13,11 +13,13 @@ use crate::Address;
 
 pub mod date;
 mod rules;
+mod same;
 #[cfg(test)]
 mod tests;
 mod words;
 
 pub use self::rules::{Standing, links_of, standing};
+pub use self::same::joined;
 pub use self::words::{alarm_words, repeat_words, rule_words};
 
 pub const DAY: i64 = 86_400;

@@ -54,6 +54,11 @@ impl std::io::Write for Glass {
     }
 }
 
+/// The loop's side of a calendar nobody sends, with nothing to remind of.
+pub(crate) fn no_calendar() -> crate::diary::Diary {
+    crate::diary::Diary::new(std::sync::mpsc::channel().1, None)
+}
+
 /// A backend that keeps what it was asked, and has nothing to tell.
 #[derive(Default)]
 struct Asked(Vec<Ask>);
@@ -86,7 +91,7 @@ fn typed(bursts: &[&str]) -> (usize, Vec<Ask>, String) {
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut bursts, mut asked) = (Bursts { keys, waiting: Default::default() }, Asked::default());
-        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked).unwrap();
+        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked, &mut no_calendar()).unwrap();
         let lines = app.lines(120, 40);
         let status: String = lines[38].iter().map(|span| span.text.as_str()).collect();
         (frames.borrow().len(), asked.0, status.trim().to_string())
@@ -169,7 +174,7 @@ fn the_preview_s_message_is_read_once_the_cursor_rests_and_not_while_a_key_is_he
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut typist, mut asked) = (Typist { keys, next: None, read: Vec::new() }, Asked::default());
-        event_loop(&mut terminal, &mut typist, &mut app, &mut asked).unwrap();
+        event_loop(&mut terminal, &mut typist, &mut app, &mut asked, &mut no_calendar()).unwrap();
         asked.0
     });
     let mail = tuimex_fixtures::design::inbox();
