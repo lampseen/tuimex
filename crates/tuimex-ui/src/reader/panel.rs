@@ -19,13 +19,17 @@ pub(crate) struct Look {
     pub scheme: String,
     /// Why it is confirmed before it opens, when it is.
     pub warning: Option<String>,
+    /// The host its text names, when that is another than it opens.
+    pub claims: Option<String>,
     /// Shown and never opened: neither the web nor mail (ADR-018).
     pub blocked: bool,
     pub mailto: bool,
     note: Option<&'static str>,
 }
 
-pub(crate) fn look(link: &Link, body: &Body) -> Look {
+/// `trackers` are the tracking services its message is known to use, by
+/// name.
+pub(crate) fn look(link: &Link, trackers: &[String]) -> Look {
     let found = assess(&link.url, &link.shown);
     let target = Url::parse(&link.url);
     // The host the text claims, as a reader would say it.
@@ -42,7 +46,11 @@ pub(crate) fn look(link: &Link, body: &Body) -> Look {
         let name = tracker.to_lowercase().replace(' ', "");
         found.host == name || found.host.split('.').any(|label| label == name)
     };
-    let note = if body.trackers.iter().any(tracks) {
+    let claims = found
+        .warnings
+        .contains(&Warning::TextNamesAnotherHost)
+        .then(|| named.clone().unwrap_or_else(|| link.shown.clone()));
+    let note = if trackers.iter().any(tracks) {
         Some("tracking service")
     } else if found.url != target.text {
         Some("tracking removed")
@@ -55,18 +63,26 @@ pub(crate) fn look(link: &Link, body: &Body) -> Look {
         (false, _) => found.host,
     };
     let mailto = target.scheme == "mailto";
-    Look { url: found.url, host, scheme: target.scheme, warning, blocked: found.blocked, mailto, note }
+    Look { url: found.url, host, scheme: target.scheme, warning, claims, blocked: found.blocked, mailto, note }
 }
 
-/// Each link by number, with the host it really opens.
+/// Each link of a message by number, with the host it really opens.
 pub(crate) fn links(body: &Body) -> Vec<Line> {
-    let looks: Vec<Look> = body.links.iter().map(|link| look(link, body)).collect();
-    let host_width = looks.iter().map(|l| l.host.chars().count()).max().unwrap_or(0) + 3;
-    let entry = |(link, look): (&Link, &Look)| {
+    let looks: Vec<Look> = body.links.iter().map(|link| look(link, &body.trackers)).collect();
+    let listed: Vec<(usize, &str, &Look)> =
+        body.links.iter().zip(&looks).map(|(link, look)| (link.n, link.shown.as_str(), look)).collect();
+    link_rows(&listed)
+}
+
+/// Links as the panel lists them, each its number, the host it really
+/// opens, what it is shown as, and what to know before opening it.
+pub(crate) fn link_rows(links: &[(usize, &str, &Look)]) -> Vec<Line> {
+    let host_width = links.iter().map(|(_, _, l)| l.host.chars().count()).max().unwrap_or(0) + 3;
+    let entry = |(n, shown, look): &(usize, &str, &Look)| {
         let mut row = vec![
-            run(format!("{:>2}  ", link.n), Tok::Link),
+            run(format!("{n:>2}  "), Tok::Link),
             run(format!("{:<host_width$}", look.host), Tok::Fg),
-            run(link.shown.as_str(), Tok::Dim),
+            run(*shown, Tok::Dim),
         ];
         let warning = if look.blocked { Some("will not open") } else { look.warning.as_deref() };
         match (warning, look.note) {
@@ -76,7 +92,7 @@ pub(crate) fn links(body: &Body) -> Vec<Line> {
         }
         row
     };
-    body.links.iter().zip(&looks).map(entry).collect()
+    links.iter().map(entry).collect()
 }
 
 /// Each file by number, with its size and type. `shown` are the pictures

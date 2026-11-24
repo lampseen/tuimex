@@ -169,8 +169,9 @@ fn moment(time: &EventTime) -> (String, String) {
     }
 }
 
-/// The card of ADR-021: what, when, where and who, then a blank row.
-pub(crate) fn invite(card: &Invite, me: &[String]) -> Vec<Line> {
+/// The card of ADR-021: what, when, where and who, the account whose
+/// calendar an answer goes into (ADR-057), then a blank row.
+pub(crate) fn invite(card: &Invite, me: &[String], account: (&str, Tok)) -> Vec<Line> {
     let field = |label: &str, value: crate::span::Span| vec![run(format!("{label:<9}"), Tok::Dim), value];
     let place = |place: &str| [vec![run(format!("{:<9}", "Where"), Tok::Dim)], references(place, Tok::Fg)].concat();
     let (day, time) = moment(&card.start);
@@ -198,6 +199,8 @@ pub(crate) fn invite(card: &Invite, me: &[String]) -> Vec<Line> {
     rows.extend(card.location.as_deref().map(place));
     rows.push(field("Who", run(who, Tok::Fg)));
     rows.extend(card.recurrence.as_deref().map(|rule| field("Repeats", run(rule, Tok::Fg))));
+    let came_to = run(format!(" {} the account it came to", crate::glyphs::DOT), Tok::Dim);
+    rows.push([field("Calendar", run(account.0, account.1)), vec![came_to]].concat());
     rows.push(Line::new());
     rows
 }

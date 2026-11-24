@@ -30,7 +30,7 @@ pub(crate) struct Pane {
 /// saying that the body is being fetched.
 pub(crate) fn pane(msg: &Listed, o: &super::List, width: usize, height: usize) -> Pane {
     let inner = width.saturating_sub(MARGIN);
-    let (head, mut text, _) = reader::block(msg, o.body, o.check, &[], width, true);
+    let (head, mut text, _) = reader::block(msg, o.body, o.check, &[], width, true, Tok::Fg);
     if o.arriving {
         text = vec![vec![gap(INDENT), run("Fetching this message.", Tok::Dim)]];
     }

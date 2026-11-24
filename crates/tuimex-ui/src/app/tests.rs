@@ -11,7 +11,7 @@ use crate::paint::Theme;
 use crate::palette::{Palette, Tier};
 use crate::span::Line;
 
-fn over(mail: Vec<Listed>) -> App {
+pub(super) fn over(mail: Vec<Listed>) -> App {
     let mailbox = Mailbox {
         now: fx::NOW,
         sections: fx::sections(),
@@ -22,16 +22,17 @@ fn over(mail: Vec<Listed>) -> App {
     };
     let mut app = App::new(Theme { palette: Palette::new(Tier::True), glyphs: Glyphs::Unicode }, mailbox);
     app.set_up(fx::identities(), true);
+    app.set_calendar(crate::calendar::tests::design());
     app
 }
 
-fn app() -> App {
+pub(super) fn app() -> App {
     over(fx::inbox().into_iter().chain(fx::outbox()).collect())
 }
 
 /// Types `keys`: a return is Enter, a tab Tab, an escape Esc, a delete
 /// Backspace, `^x` is the chord and `⌥x` is Alt with `x`.
-fn press(app: &mut App, keys: &str) {
+pub(super) fn press(app: &mut App, keys: &str) {
     let mut chars = keys.chars();
     while let Some(c) = chars.next() {
         app.key(match c {
@@ -65,19 +66,19 @@ fn reading(key: &str, keys: &str) -> App {
     app
 }
 
-fn after(keys: &str) -> App {
+pub(super) fn after(keys: &str) -> App {
     let mut app = app();
     press(&mut app, keys);
     app
 }
 
-fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
+pub(super) fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
     let lines = app.lines(width, height);
     lines.iter().map(|line| line.iter().map(|s| s.text.as_str()).collect::<String>().trim_end().to_string()).collect()
 }
 
 /// The status line's left and the command line, at 120 by 40.
-fn foot(app: &mut App) -> (String, String) {
+pub(super) fn foot(app: &mut App) -> (String, String) {
     let rows = screen(app, 120, 40);
     let left = rows[38].split("   ").next().unwrap().trim().to_string();
     (left, rows[39].trim().to_string())
@@ -188,6 +189,19 @@ fn every_key_of_the_table_does_something() {
         ("agent.tidy", _) => "c\t\t\t\tA",
         ("agent.link", _) => "jjjj\roA",
         ("agent.reply", _) => "jjA",
+        // Today has two events, the first with a link; `I` finds the
+        // invitation on Thursday, and a search for "call" two events.
+        ("calendar.match", "N") => "gc/call\rn",
+        ("calendar.match", _) => "gc/call\r",
+        ("calendar.today", _) => "gcl",
+        ("calendar.view-number", "1") => "gc2",
+        ("calendar.answer", _) => "gcI\r",
+        ("calendar.links" | "calendar.edit" | "calendar.delete", _) => "gc\r",
+        (id, _) if id.starts_with("calendar.") => "gc",
+        (id, _) if id.starts_with("event-form.") => "gcc",
+        (id, _) if id.starts_with("event.") => "gc\r\r",
+        ("calendars.choose", "k") => "gcCj",
+        (id, _) if id.starts_with("calendars.") => "gcC",
         (id, _) if id.starts_with("reader.") => "jjj\rbb",
         _ => "jj",
     };
@@ -526,7 +540,7 @@ fn a_confirm_takes_y_or_enter_and_any_other_key_cancels_and_is_dropped() {
 #[test]
 fn what_is_not_built_yet_says_so() {
     let invited = "E :invite: not built yet · arrives with invitations (M10)";
-    for keys in ["ia", "it", "id", ":invite accept\r"] {
+    for keys in ["ia", "it", "id", "ip", "ix", ":invite accept\r", ":invite propose\r"] {
         let mut app = reading("invite", keys);
         assert_eq!(foot(&mut app).1, invited, "{keys}");
         assert!(app.asks().is_empty());
@@ -603,7 +617,7 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     let mut app = after("?");
     let rows = screen(&mut app, 120, 40);
     assert_eq!((rows[0].as_str(), rows[39].as_str()), ("  Help", "  type to filter · ^d ^u scroll · Esc back"));
-    assert_eq!(rows[38].split("   ").next(), Some("  98 keys and commands · lines 1-35 of 62"));
+    assert_eq!(rows[38].split("   ").next(), Some("  140 keys and commands · lines 1-35 of 70"));
     // Scrolled to the end, then filtered to less than a page: the page
     // is shown from its top, and says no lines.
     press(&mut app, "^d^d^dagent");
@@ -615,18 +629,18 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     assert_eq!(shown[3..6], agent, "a section whose heading matches is shown whole");
     assert_eq!(shown[8..10], ["Commands", ":agent reply|tidy|link   reply, tidy or link: hand text to the agent"]);
     assert!(rows[14..37].iter().all(|row| row.is_empty()), "what does not match is not drawn: {rows:#?}");
-    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 98 shown"), "  /agent"));
+    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 140 shown"), "  /agent"));
     press(&mut app, "\x7f\x7f\x7f\x7f\x7fQq\x7f");
     assert!(!app.quit, "q is typed, not obeyed");
     let rows = screen(&mut app, 120, 40);
     assert_eq!(
         (rows[38].split("   ").next(), rows[39].as_str()),
-        (Some("  2 of 98 shown"), "  /Q"),
+        (Some("  2 of 140 shown"), "  /Q"),
         "whatever the case"
     );
     press(&mut app, "zzz");
     let rows = screen(&mut app, 120, 40);
-    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 98 shown"), "{rows:#?}");
+    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 140 shown"), "{rows:#?}");
     press(&mut app, "\x1b");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
 }

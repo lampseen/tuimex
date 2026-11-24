@@ -3,6 +3,7 @@
 //! key of its own.
 
 mod act;
+mod calendar;
 mod draft;
 mod filter;
 mod find;
@@ -51,6 +52,9 @@ enum Mode {
     /// `A` was pressed: the agent's menu is open, and the next key picks
     /// from it or closes it. Nothing has left the machine (ADR-031).
     Agent,
+    /// Something the calendar asked for is being typed: what the command
+    /// line shows before it, and the text so far.
+    Prompt(&'static str, Editor),
 }
 
 /// The conversations of one tab, kept for as long as the same messages
@@ -221,10 +225,13 @@ pub struct App {
     /// Whether any message is in an outbox, and the `version` that was
     /// true of.
     outbox: Cell<(u64, bool)>,
+    /// The calendar, which is a place beside mail (ADR-054).
+    cal: calendar::Place,
 }
 
 impl App {
     pub fn new(theme: Theme, mailbox: Mailbox) -> Self {
+        let now = mailbox.now;
         App {
             quit: false,
             theme,
@@ -271,6 +278,7 @@ impl App {
             threads: RefCell::default(),
             sifted: RefCell::default(),
             outbox: Cell::new((u64::MAX, false)),
+            cal: calendar::Place::new(now),
         }
     }
 
@@ -577,6 +585,7 @@ impl App {
         match &self.mode {
             Mode::Normal | Mode::Help(..) => (self.said.as_ref().map(|said| said.line(width)), no_panel),
             Mode::Filter(editor) => (Some(list::typed(&format!("/{}", editor.text))), no_panel),
+            Mode::Prompt(label, editor) => (Some(list::typed(&format!("{label}{}", editor.text))), no_panel),
             Mode::Confirm(question, _) => {
                 (Some(self.images_question(width).unwrap_or_else(|| question.line(width))), no_panel)
             }
@@ -616,9 +625,12 @@ impl App {
         self.reading.pictures.clear();
         let right = self.alerts();
         if let Mode::Help(needle, top) = &self.mode {
-            let drawn = help::screen(needle, *top, &right, width, height);
+            let drawn = help::screen(needle, *top, self.cal.open, &right, width, height);
             (self.room, self.mode) = (drawn.room, Mode::Help(needle.clone(), drawn.top));
             return drawn.lines;
+        }
+        if self.cal.open {
+            return self.calendar_lines(width, height, right);
         }
         if let Some(lines) = self.compose_lines(width, height) {
             return lines;
@@ -757,6 +769,7 @@ impl App {
             Mode::Normal => self.normal_key(key),
             Mode::Command(editor) => self.command_key(editor, key),
             Mode::Filter(editor) => self.filter_key(editor, key),
+            Mode::Prompt(label, editor) => self.prompt_key(label, editor, key),
             // `n`, Esc and every other key leave the question, and the key is
             // not then read as anything else.
             Mode::Confirm(question, action) => match keymap::find(&["confirm", "global"], &[key]) {
@@ -813,6 +826,9 @@ impl App {
             }
             self.mode = Mode::Command(editor);
             return;
+        }
+        if self.cal.open {
+            return self.calendar_key(key);
         }
         if self.reading.id().is_some() {
             return self.reader_key(key);
@@ -881,6 +897,7 @@ impl App {
             ("global.undo", _) => self.undo(),
             ("global.agent", _) => self.agent_menu(),
             ("global.redraw", _) => self.redraw = true,
+            ("global.calendar", _) => self.calendar_open(None),
             ("list.move", 0) => self.selected = (at + 1).min(last),
             ("list.move", _) => self.selected = at.saturating_sub(1),
             ("list.ends", 0) => self.selected = 0,
@@ -1072,6 +1089,13 @@ impl App {
         names
     }
 
+    /// The colour an account's name is drawn in.
+    pub(super) fn colour_of(&self, account: &AccountId) -> Tok {
+        let accounts: Vec<AccountId> = self.accounts().into_iter().map(|name| AccountId(name.to_string())).collect();
+        let colours = list::account_colours(&self.order, &accounts, &self.fixed);
+        accounts.iter().position(|a| a == account).and_then(|at| colours.get(at).copied()).unwrap_or(Tok::Fg)
+    }
+
     /// Tab on the command line: the commands while the first word is
     /// typed, and after it the names that command takes.
     fn complete(&self, editor: &mut Editor, forward: bool) {
@@ -1103,6 +1127,8 @@ impl App {
             }
             Some("account" | "empty-trash") => ("Accounts".to_string(), plain(self.accounts())),
             Some("preview") => ("Preview".to_string(), plain(vec!["auto", "right", "below", "off"])),
+            Some("calendar") => ("Views".to_string(), plain(vec!["month", "week", "day"])),
+            Some("notify") => ("Reminders".to_string(), plain(vec!["on", "off"])),
             Some("agent") if self.agent => match editor.text["agent ".len()..].split_once(' ') {
                 None => {
                     let agent = COMMANDS.iter().filter(|c| c.name == "agent");
@@ -1128,6 +1154,7 @@ impl App {
         let writing = self.compose.is_some() && !["", "send", "agent", "messages"].contains(&name);
         match name {
             "" => {}
+            _ if !writing && self.calendar_command(name, rest) => {}
             _ if writing => self.say(say::err(format!(":{name}: a draft is open")).then("Esc closes it")),
             "send" => self.send_command(),
             "agent" => self.agent_command(rest),

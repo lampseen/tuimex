@@ -456,7 +456,7 @@ impl App {
         if now == was {
             return false;
         }
-        self.mailbox.now = now;
+        (self.mailbox.now, self.cal.model.now) = (now, now);
         let left = |until: Timestamp| u32::try_from((until.0 - now.0).max(0)).unwrap_or(u32::MAX);
         // A date moves to another group, and a clock to another minute.
         let mut changed = now.0.div_euclid(60) != was.0.div_euclid(60);

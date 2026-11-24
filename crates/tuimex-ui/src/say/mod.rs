@@ -150,7 +150,11 @@ pub fn loading(rebuilt: Option<(usize, usize)>) -> Vec<Line> {
     lines
 }
 
-/// What `i` asks over an invitation.
+/// What `i` asks over an invitation, in the reader and in the calendar:
+/// each answer by its key in the keymap's `invite` table.
 pub fn answer() -> Question {
-    asked(vec![run("Answer?", Tok::Fg)], &[("a", "accept"), ("t", "tentative"), ("d", "decline"), ("Esc", "cancel")])
+    let ids = ["invite.accept", "invite.tentative", "invite.decline", "invite.propose", "invite.ignore"];
+    let mut keys: Vec<(&str, &str)> = ids.iter().map(|id| crate::keymap::hint(id)).collect();
+    keys.push(("Esc", "cancel"));
+    asked(vec![run("Answer?", Tok::Fg)], &keys)
 }

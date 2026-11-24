@@ -21,6 +21,7 @@ key on it is in that table.
 | `u` | undo the last action |
 | `A` | what the agent can do here |
 | `^l` | redraw |
+| `gc` | the calendar |
 
 No key quits: `:q` does.
 
@@ -63,6 +64,33 @@ The list's action keys work here too.
 | `Left` `Right` | who it is from, on From |
 | `Enter` | write the text in your editor |
 | `^a` `^s` `^d` | attach a file, the send summary, save the draft |
+
+## In the calendar
+
+`gc` opens the calendar and `gm` returns to mail; each keeps where it
+was. It is being built. The month is drawn; the week, the day and an
+event's own screen say they are not built. Only `tuimex --fixtures` has
+events to show: reading an account's calendar is not built.
+
+| key | does |
+|---|---|
+| `h` `l` | previous, next day |
+| `j` `k` | in the month, a week down or up; elsewhere the next, previous event |
+| `[` `]` | previous, next page: a month, a week or a day |
+| `J` `K` | next, previous event; in the month, the next day that has one |
+| `I` | the next invitation that waits for an answer |
+| `t` `gd` | today; go to a date, typed as `2026-12-05`, `5 dec`, `fri` or `+2w` |
+| `Tab` `S-Tab` | next, previous view |
+| `1` `2` `3` | month, week, day |
+| `Enter` `Esc` | deeper, to the day and then the event; back |
+| `/` then `n` `N` | find; `Enter` searches a year either side of today. The list of what it found is not built |
+| `gt` `gT` | next, previous account alone |
+| `C` | the calendars, each to show or hide with `Space` |
+| `o` | the selected event's links, the meeting's first, each with the host it really opens. Opening one is not built |
+| `gn` | reminders on, off. No reminder is given yet |
+
+Not built, and each says so: `i` to answer an invitation, `c` and `E` for
+the form, `d` to delete.
 
 ## Answering a question
 

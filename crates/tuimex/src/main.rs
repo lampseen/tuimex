@@ -26,10 +26,11 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail};
 use clap::Parser;
-use tuimex_core::{Action, Ask, Body, Draft, Event, MessageId};
+use tuimex_core::{AccountId, Action, Ask, Body, Draft, Event, MessageId, Timestamp};
 use tuimex_fixtures::design;
 use tuimex_store::files;
 use tuimex_ui::app::App;
+use tuimex_ui::calendar::{Calendar, Shelf};
 use tuimex_ui::mailbox::Mailbox;
 
 fn main() -> Result<ExitCode> {
@@ -110,6 +111,7 @@ fn main() -> Result<ExitCode> {
         let outside = outside::Outside::new(Box::new(Nowhere), downloads, &dirs.cache);
         let mut app = App::new(theme, fixture_mailbox());
         app.set_up(design::identities(), agent.is_some());
+        app.set_calendar(fixture_calendar());
         app.set_preview(preview);
         open(&mut app)?;
         term::Opening::new(theme).run(&mut app, &mut desk::Desk::new(Offline::new(outside), agent, &dirs.cache))?;
@@ -177,6 +179,21 @@ fn fixture_mailbox() -> Mailbox {
         synced: Some(design::SYNCED),
         me: design::addresses(),
     }
+}
+
+/// The design's calendars, each read as long ago as the design says, on
+/// the design's fixed afternoon and a clock that is UTC, as its mail is.
+fn fixture_calendar() -> Calendar {
+    let shelf = |kept: design::Kept| Shelf {
+        account: AccountId(kept.account.to_string()),
+        local: kept.local,
+        name: None,
+        read: kept.read.map(|ago| Timestamp(design::NOW.0 - i64::from(ago))),
+        failed: None,
+        events: kept.events,
+    };
+    let shelves = design::calendars().into_iter().map(shelf).collect();
+    Calendar { shelves, identities: design::identities(), ..Calendar::empty(design::NOW) }
 }
 
 /// What `--fixtures` opens a link or a file with: nothing, and it says

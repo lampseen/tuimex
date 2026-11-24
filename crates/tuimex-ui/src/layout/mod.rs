@@ -98,5 +98,24 @@ pub fn preview_height(rows: usize) -> usize {
 /// Body text wraps here however wide the terminal is.
 pub const MEASURE: usize = 76;
 
+/// The calendar. In the month grid a day is `CAL_CELL` cells: the cursor,
+/// two digits and a mark. The week shows seven days from `CAL_WEEK_FROM`
+/// columns and three below that, a row to `CAL_SLOT` minutes from
+/// `CAL_DAY_FROM`, beside an axis of `CAL_AXIS` cells; an event that begins
+/// while another runs is drawn `CAL_STEP` cells in. An event row gives its
+/// hours `CAL_TIME` cells and its words up to `CAL_WORDS`, and under
+/// `CAL_NARROW` cells the narrow form of each.
+pub const CAL_CELL: usize = 4;
+pub const CAL_WEEK_FROM: usize = 120;
+pub const CAL_SLOT: i64 = 30;
+pub const CAL_STEP: usize = 2;
+pub const CAL_DAY_FROM: &str = "08:00";
+pub const CAL_AXIS: usize = 7;
+pub const CAL_TIME: usize = 11;
+pub const CAL_TIME_NARROW: usize = 7;
+pub const CAL_WORDS: usize = 20;
+pub const CAL_WORDS_NARROW: usize = 12;
+pub const CAL_NARROW: usize = 70;
+
 #[cfg(test)]
 mod tests;

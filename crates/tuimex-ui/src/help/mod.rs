@@ -11,10 +11,17 @@ use crate::list::{heading, hint, status_row, typed};
 use crate::palette::Tok;
 use crate::span::{Line, cells, fit, gap, highlight, run};
 
-const COLUMNS: [&[&str]; 3] = [
+/// The keys of the place help was asked from, in three columns: mail's,
+/// and the calendar's. Filtering reaches every table from either.
+const MAIL: [&[&str]; 3] = [
     &["global", "command", "confirm", "compose", "help"],
     &["list"],
     &["reader", "preview", "links", "attachments", "agent", "invite"],
+];
+const CALENDAR: [&[&str]; 3] = [
+    &["global", "command", "confirm", "help"],
+    &["calendar"],
+    &["event", "invite", "calendars", "event-form", "links"],
 ];
 
 fn has(needle: &str, texts: &[&str]) -> bool {
@@ -46,8 +53,9 @@ fn column(modes: &[&str]) -> Vec<Line> {
 }
 
 /// The whole page: the keys in three columns, then the commands.
-fn page() -> Vec<Line> {
-    let columns: Vec<Vec<Line>> = COLUMNS.iter().map(|modes| column(modes)).collect();
+fn page(calendar: bool) -> Vec<Line> {
+    let places = if calendar { CALENDAR } else { MAIL };
+    let columns: Vec<Vec<Line>> = places.iter().map(|modes| column(modes)).collect();
     let widths: Vec<usize> = columns.iter().map(|c| c.iter().map(|l| cells(l)).max().unwrap_or(0) + 2).collect();
     let depth = columns.iter().map(Vec::len).max().unwrap_or(0);
     let name_width = COMMANDS.iter().map(|c| typed_as(c).chars().count()).max().unwrap_or(0) + 3;
@@ -97,11 +105,12 @@ pub struct Drawn {
     pub room: usize,
 }
 
-/// `top` is how many lines of the page are scrolled off, and `right` the
-/// right of the status line, as on every screen.
-pub fn screen(needle: &str, top: usize, right: &Line, width: usize, height: usize) -> Drawn {
+/// `top` is how many lines of the page are scrolled off, `calendar` whether
+/// help was asked for there, and `right` the right of the status line, as
+/// on every screen.
+pub fn screen(needle: &str, top: usize, calendar: bool, right: &Line, width: usize, height: usize) -> Drawn {
     let all = KEYMAP.iter().map(|t| t.keys.len()).sum::<usize>() + COMMANDS.len();
-    let (body, shown) = if needle.is_empty() { (page(), all) } else { matching(&needle.to_lowercase()) };
+    let (body, shown) = if needle.is_empty() { (page(calendar), all) } else { matching(&needle.to_lowercase()) };
     let room = height.saturating_sub(5);
     let top = top.min(body.len().saturating_sub(room));
     let last = body.len().min(top + room);

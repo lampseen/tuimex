@@ -320,7 +320,7 @@ impl App {
         let keys = |ids: &[&str]| list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>());
         let (mut panel, left, hint) = match (&open.panel, body) {
             (Panel::Links(at), Some(body)) => {
-                let url = body.links.get(*at).map(|link| reader::look(link, body).url);
+                let url = body.links.get(*at).map(|link| reader::look(link, &body.trackers).url);
                 let (entries, at) = window(reader::links(body), *at);
                 let opens = vec![run("opens", Tok::Dim), run(format!(" {}", url.unwrap_or_default()), Tok::Fg)];
                 let hint = keys(&["links.number", "links.choose", "global.agent", "links.close"]);
@@ -374,6 +374,7 @@ impl App {
                 body,
                 check: self.reading.checks.get(&open.id),
                 me: &self.mailbox.me,
+                account: self.colour_of(&msg.envelope.id.account),
                 place: (place, open.thread.len()),
                 top: open.top,
                 panel: if agent.is_some() {
@@ -499,7 +500,7 @@ impl App {
             "attachments.choose" => open.panel = Panel::Files(step(files)),
             "attachments.save" => self.save(at + 1, ""),
             "attachments.open" => self.open_file(at + 1),
-            "invite.accept" | "invite.tentative" | "invite.decline" => {
+            "invite.accept" | "invite.tentative" | "invite.decline" | "invite.propose" | "invite.ignore" => {
                 open.panel = Panel::None;
                 self.say(say::not_built(":invite", "invitations (M10)"));
             }
@@ -508,6 +509,7 @@ impl App {
             "global.undo" => self.undo(),
             "global.agent" => self.agent_menu(),
             "global.redraw" => self.redraw = true,
+            "global.calendar" => self.calendar_open(None),
             _ => {}
         }
     }
@@ -525,7 +527,7 @@ impl App {
     fn link_numbered(&mut self, command: &str, n: usize) -> Option<(Link, Look)> {
         let found = self.read_body().and_then(|(_, body)| {
             let link = body.links.iter().find(|link| link.n == n)?;
-            Some((link.clone(), reader::look(link, body)))
+            Some((link.clone(), reader::look(link, &body.trackers)))
         });
         match found {
             Some((_, look)) if look.blocked => {
@@ -582,7 +584,11 @@ impl App {
     /// the message open that can be asked about, with its real host.
     pub(super) fn link_choices(&self) -> Vec<(String, Line)> {
         let Some((_, body)) = self.read_body() else { return Vec::new() };
-        let looks = body.links.iter().map(|link| (link.n, reader::look(link, body))).filter(|(_, look)| !look.blocked);
+        let looks = body
+            .links
+            .iter()
+            .map(|link| (link.n, reader::look(link, &body.trackers)))
+            .filter(|(_, look)| !look.blocked);
         looks
             .map(|(n, look)| (n.to_string(), vec![run(format!("{n:<4}"), Tok::Link), run(look.host, Tok::Fg)]))
             .collect()
@@ -652,8 +658,9 @@ impl App {
         let name =
             |index: &usize| self.files().into_iter().find(|a| a.index == *index).map_or_else(String::new, |a| a.name);
         let host = |n: &usize| {
-            let link =
-                self.read_body().and_then(|(_, b)| b.links.iter().find(|l| l.n == *n).map(|l| reader::look(l, b)));
+            let link = self
+                .read_body()
+                .and_then(|(_, b)| b.links.iter().find(|l| l.n == *n).map(|l| reader::look(l, &b.trackers)));
             link.map_or_else(String::new, |look| look.host)
         };
         let loads = || {
