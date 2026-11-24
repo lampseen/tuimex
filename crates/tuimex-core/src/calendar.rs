@@ -13,10 +13,12 @@ use crate::Address;
 
 pub mod date;
 mod rules;
+mod same;
 #[cfg(test)]
 mod tests;
 
 pub use self::rules::{Standing, links_of, standing};
+pub use self::same::joined;
 
 pub const DAY: i64 = 86_400;
 
