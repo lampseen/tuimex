@@ -172,6 +172,7 @@ impl Compose {
             in_reply_to: self.in_reply_to.clone(),
             references: self.references.clone(),
             origin: if self.agent.is_some() { Origin::Agent } else { Origin::Local },
+            calendar: None,
         })
     }
 

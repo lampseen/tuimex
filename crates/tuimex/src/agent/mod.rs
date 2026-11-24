@@ -387,6 +387,7 @@ impl Agent<'_> {
             in_reply_to: answered.as_ref().and_then(|a| a.message_id.clone()),
             references: answered.iter().flat_map(|a| a.references.iter().chain(&a.message_id)).cloned().collect(),
             origin: Origin::Agent,
+            calendar: None,
         };
         let raw = message::build(&draft, Vec::new(), self.now.0, &key, message::Bcc::Written).map_err(error)?;
 

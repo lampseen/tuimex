@@ -1,0 +1,25 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Tue, 24 Nov 2026 09:30:00 +0000
+Message-ID: <invite-ics-octet-stream@example.com>
+Subject: Invitation: Review
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b-ics"
+
+--b-ics
+Content-Type: text/plain; charset=utf-8
+
+The invitation to the review is attached.
+--b-ics
+Content-Type: application/octet-stream; name="invite.ics"
+Content-Disposition: attachment; filename="invite.ics"
+Content-Transfer-Encoding: base64
+
+QkVHSU46VkNBTEVOREFSDQpWRVJTSU9OOjIuMA0KUFJPRElEOi0vL0V4YW1wbGUvL0NhbGVuZGFy
+Ly9FTg0KTUVUSE9EOlJFUVVFU1QNCkJFR0lOOlZFVkVOVA0KVUlEOnJldmlldy0yMDI2QGV4YW1w
+bGUuY29tDQpEVFNUQU1QOjIwMjYxMTI0VDA5MzAwMFoNCkRUU1RBUlQ6MjAyNjEyMDNUMTMwMDAw
+Wg0KRFRFTkQ6MjAyNjEyMDNUMTQwMDAwWg0KU1VNTUFSWTpSZXZpZXcNCk9SR0FOSVpFUjtDTj0i
+QWRhIEV4YW1wbGUiOm1haWx0bzphZGFAZXhhbXBsZS5jb20NCkFUVEVOREVFO0NOPUdyYWNlIEV4
+YW1wbGU7UEFSVFNUQVQ9TkVFRFMtQUNUSU9OO1JTVlA9VFJVRTptYWlsdG86Z3JhY2VAZXhhbXBs
+ZS5vcmcNCkVORDpWRVZFTlQNCkVORDpWQ0FMRU5EQVINCg==
+--b-ics--

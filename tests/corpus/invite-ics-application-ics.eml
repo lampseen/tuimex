@@ -1,0 +1,31 @@
+From: Ada Example <ada@example.com>
+To: Grace Example <grace@example.org>
+Date: Tue, 24 Nov 2026 09:45:00 +0000
+Message-ID: <invite-ics-application-ics@example.com>
+Subject: Invitation: Retrospective
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b-ics"
+
+--b-ics
+Content-Type: text/plain; charset=utf-8
+
+The invitation to the retrospective is attached.
+--b-ics
+Content-Type: application/ics; name="Retro.ICS"
+Content-Disposition: attachment; filename="Retro.ICS"
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Calendar//EN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:retro-2026@example.com
+DTSTAMP:20261124T094500Z
+DTSTART:20261204T150000Z
+DTEND:20261204T160000Z
+SUMMARY:Retrospective
+ORGANIZER;CN="Ada Example":mailto:ada@example.com
+ATTENDEE;CN=Grace Example;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:grace@example.org
+END:VEVENT
+END:VCALENDAR
+--b-ics--

@@ -1,4 +1,7 @@
-use tuimex_core::{AccountId, Address, Draft, MessageId, Origin};
+use std::collections::BTreeMap;
+
+use tuimex_core::calendar::{DAY, Event, Guest, Method, Moment, Said, days_from_civil};
+use tuimex_core::{AccountId, Address, CalendarPart, Draft, MessageId, Origin};
 
 use super::{Bcc, File, build, header_id, mime};
 
@@ -19,6 +22,7 @@ fn draft() -> Draft {
         in_reply_to: Some("<halden-3@design.example.net>".into()),
         references: vec!["<halden-1@design.example.net>".into(), "halden-3@design.example.net".into()],
         origin: Origin::Local,
+        calendar: None,
     }
 }
 
@@ -120,4 +124,106 @@ fn an_id_that_would_break_out_of_its_header_is_not_written() {
         Draft { in_reply_to: Some("x@example.com>\r\nBcc: eve@example.net".into()), references: Vec::new(), ..draft() };
     let raw = text(&build(&hostile, Vec::new(), 0, "k", Bcc::Withheld).unwrap());
     assert!(!raw.contains("eve@example.net") && !raw.contains("In-Reply-To"), "{raw}");
+}
+
+/// The bytes of a draft with no calendar part, as they were before a draft
+/// could carry one.
+#[test]
+fn a_draft_without_a_calendar_part_is_built_byte_for_byte_as_before() {
+    let raw = build(&draft(), Vec::new(), 1_795_443_600, "k1", Bcc::Written).unwrap();
+    let want = "Message-ID: <k1@example.org>\r\nDate: Mon, 23 Nov 2026 14:20:00 +0000\r\n\
+                From: \"Robin Vale\" <robin.vale@example.org>\r\n\
+                To: \"Raman, Priya\" <priya@example.org>, <dmitri@example.org>\r\n\
+                Subject: Re: Contract draft v3\r\nCc: =?utf-8?B?Wm/DqyDDhXN0csO2bQ==?= <zoe@example.net>\r\n\
+                Bcc: <audit@example.com>\r\nIn-Reply-To: <halden-3@design.example.net>\r\n\
+                References: <halden-1@design.example.net> <halden-3@design.example.net>\r\nMIME-Version: 1.0\r\n\
+                Content-Type: text/plain; charset=\"utf-8\"\r\nContent-Transfer-Encoding: 7bit\r\n\r\n\
+                Hi Priya,\r\n\r\n45 days is fine.\r\n";
+    assert_eq!(text(&raw), want);
+}
+
+/// An invitation whose title is long and not ASCII, as a calendar from
+/// anywhere may send.
+fn invitation() -> Event {
+    let summary: String = "Årsmøte – planlegging ✓ ".chars().cycle().take(300).collect();
+    let start = days_from_civil(2026, 12, 1) * DAY + 9 * 3_600;
+    Event {
+        uid: "planning-2026@example.com".into(),
+        sequence: 0,
+        instead_of: None,
+        summary: summary.trim().to_string(),
+        start: Moment::Utc(start),
+        end: Some(Moment::Utc(start + 3_600)),
+        location: Some("Møterom 4".into()),
+        description: None,
+        organizer: Some(person("Ada Example", "ada@example.com")),
+        guests: vec![Guest { who: person("Robin Vale", "robin.vale@example.org"), said: Said::Nothing }],
+        cancelled: false,
+        links: Vec::new(),
+        repeat: None,
+        excluded: Vec::new(),
+        alarms: Vec::new(),
+        more: Vec::new(),
+    }
+}
+
+/// The header block of a message.
+fn head_of(raw: &str) -> &str {
+    raw.split("\r\n\r\n").next().unwrap_or("")
+}
+
+/// Each method, alone and beside a file: the calendar text arrives as it
+/// was given, under the type a calendar reads, and the text is still the
+/// body.
+#[test]
+fn a_calendar_part_is_sent_beside_the_text_and_read_back_byte_for_byte() {
+    let (event, zones, stamp) = (invitation(), BTreeMap::new(), 1_795_443_600);
+    let me = person("Robin Vale", "robin.vale@example.org");
+    let proposed = Moment::Utc(event.start.wall() + DAY);
+    let texts = [
+        (Method::Request, "REQUEST", tuimex_content::request(&event, &zones, stamp)),
+        (Method::Reply, "REPLY", tuimex_content::reply(&event, &zones, &me, Said::Accepted, stamp).unwrap()),
+        (Method::Counter, "COUNTER", tuimex_content::counter(&event, &zones, &me, proposed, None, stamp).unwrap()),
+        (Method::Cancel, "CANCEL", tuimex_content::cancel(&event, &zones, stamp)),
+    ];
+    for (method, word, calendar) in texts {
+        assert!(calendar.contains("\r\n ") && calendar.len() > 600, "folded, long and CRLF: {calendar}");
+        for with_file in [false, true] {
+            let carrying = Draft {
+                subject: format!("{word}: {}", event.summary),
+                body: "Svar på invitasjonen – takk.\n".into(),
+                calendar: Some(CalendarPart { method, text: calendar.clone() }),
+                ..draft()
+            };
+            let files = if with_file {
+                vec![File { name: "agenda.txt".into(), bytes: b"1. budget\n".to_vec() }]
+            } else {
+                Vec::new()
+            };
+            let raw = build(&carrying, files, stamp, "k", Bcc::Withheld).unwrap();
+            let shown = text(&raw);
+            let outer = if with_file { "Content-Type: multipart/mixed" } else { "Content-Type: multipart/alternative" };
+            assert!(head_of(&shown).contains(outer), "{word} {with_file}: {shown}");
+            if with_file {
+                assert!(shown.contains("Content-Type: multipart/alternative"), "{shown}");
+            }
+            let typed = format!(
+                "\r\nContent-Type: text/calendar; method={word}; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n"
+            );
+            assert_eq!(shown.matches(typed.as_str()).count(), 1, "{word}: {shown}");
+            assert!(shown.find("text/plain").unwrap() < shown.find("text/calendar").unwrap(), "the text comes first");
+
+            let part = tuimex_content::calendar_part(&raw).unwrap().unwrap();
+            assert_eq!((part.method, part.text.as_bytes()), (method, calendar.as_bytes()), "{word} {with_file}");
+            let body = tuimex_content::body(&raw, 80).unwrap();
+            assert_eq!(body.text.trim(), "Svar på invitasjonen – takk.");
+            let names: Vec<&str> = body.attachments.iter().map(|a| a.name.as_str()).collect();
+            assert_eq!(names.contains(&"agenda.txt"), with_file, "{names:?}");
+            assert_eq!(tuimex_content::envelope(&raw).unwrap().subject, carrying.subject);
+            if method == Method::Request {
+                let card = body.invite.unwrap();
+                assert_eq!((card.uid.as_str(), card.summary.as_str()), (event.uid.as_str(), event.summary.as_str()));
+            }
+        }
+    }
 }

@@ -15,7 +15,7 @@ mod remote;
 mod thread;
 
 pub use action::{Action, Answer, Ask, Check, Event, Hit, Start};
-pub use compose::{AgentAsk, Attached, Draft, Identity, addresses, is_address, pieces, registrable};
+pub use compose::{AgentAsk, Attached, CalendarPart, Draft, Identity, addresses, is_address, pieces, registrable};
 pub use link::{Assessment, Url, Warning, assess};
 pub use listed::{Listed, Sending};
 pub use message::{
