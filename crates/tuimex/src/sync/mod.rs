@@ -89,7 +89,9 @@ pub(crate) fn account(
 /// every account. CalDAV signs in as the account's IMAP user does.
 pub fn calendars(config: &Config, only: Option<&str>) -> Result<Vec<Configured>> {
     let mut configured = Vec::new();
-    for calendar in config.calendars.iter().filter(|c| only.is_none_or(|o| o == c.account)) {
+    // A table with no `kind` only adds to the one that has it.
+    let tables = config.calendars.iter().filter(|c| c.kind.is_some());
+    for calendar in tables.filter(|c| only.is_none_or(|o| o == c.account)) {
         // `Config::parse` has refused a calendar of no account.
         let Some(account) = config.account(&calendar.account) else { continue };
         let source = match &calendar.url {

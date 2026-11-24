@@ -74,15 +74,27 @@ pub fn account(entry: &Entry) -> String {
     text
 }
 
-/// The `[[calendar]]` table of `account`: read over CalDAV at `url`, or
-/// with none, a feed whose address is in the keyring.
-pub fn calendar(account: &str, url: Option<&str>) -> String {
+/// The `[[calendar]]` table of `account`: read over CalDAV at `url`, and
+/// with `write` written there too; or with no address, a feed whose
+/// address is in the keyring.
+pub fn calendar(account: &str, url: Option<&str>, write: bool) -> String {
     let mut text = format!("[[calendar]]\naccount = {}\n", quoted(account));
     match url {
         Some(url) => text += &format!("kind = \"caldav\"\nurl = {}\n", quoted(url)),
         None => text += "kind = \"feed\"\n",
     }
+    if write {
+        text += "write = true\n";
+    }
     text
+}
+
+/// The table that says `account`'s calendar, which is already in the
+/// file, is written at its provider. A key cannot be added to a table
+/// that is not the last without rewriting the file (ADR-043), so it is a
+/// table of its own that adds to that one.
+pub fn written(account: &str) -> String {
+    format!("[[calendar]]\naccount = {}\nwrite = true\n", quoted(account))
 }
 
 /// `existing` with `tables` after it. An error when the result would not

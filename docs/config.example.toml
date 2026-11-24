@@ -37,6 +37,7 @@ preview = "auto"
 account = "personal"           # an [[account]]'s name
 kind = "caldav"                # caldav | feed (ADR-056, ADR-062). caldav signs in as the account's IMAP user, with its password, so not for gmail-oauth
 url = "https://www.google.com/calendar/dav/you@example.com/events/"   # caldav only, required, https:// with no user@
+# write = true                 # caldav only: events are written at the provider. Left out, every write for the account goes to its local calendar (ADR-062); `tuimex setup` adds it once a write has been tried
                                # a feed has no url: its address is a secret, kept in the keyring as "<account>/calendar-feed", or printed by address_cmd = ["pass", "show", "calendar/personal"] (argv, no shell, the first line)
 
 [notify]

@@ -200,9 +200,10 @@ fn a_calendar_is_caldav_with_an_address_or_a_feed_with_none() {
     );
     let config = Config::parse(&text).unwrap();
     let work = config.calendar("work").unwrap();
-    assert_eq!((work.kind.as_str(), work.url.as_deref(), work.address_cmd.as_ref()), ("caldav", Some(CALDAV), None));
+    let kept = (work.kind.as_deref(), work.url.as_deref(), work.address_cmd.as_ref());
+    assert_eq!(kept, (Some("caldav"), Some(CALDAV), None));
     let personal = config.calendar("personal").unwrap();
-    assert_eq!((personal.kind.as_str(), personal.url.as_deref()), ("feed", None));
+    assert_eq!((personal.kind.as_deref(), personal.url.as_deref()), (Some("feed"), None));
     assert_eq!(personal.address_cmd.as_deref(), Some(&["pass".to_string(), "show".into(), "cal".into()][..]));
     let bare = Config::parse(&format!("{TWO}[[calendar]]\naccount = \"personal\"\nkind = \"feed\"\n")).unwrap();
     assert!(bare.calendar("personal").unwrap().address_cmd.is_none() && bare.calendar("work").is_none());
@@ -258,4 +259,51 @@ fn a_calendar_table_that_is_wrong_says_which_key_and_never_quotes_a_feed_s_addre
         error.contains("work signs in with Google (auth = \"gmail-oauth\"); kind = \"feed\" is the way"),
         "{error}"
     );
+}
+
+/// ADR-062: a calendar is not written on a path nobody has tried, so the
+/// key that says it is written is false until a table says otherwise.
+#[test]
+fn a_caldav_calendar_is_written_only_where_a_table_says_so_and_a_feed_never() {
+    let caldav = format!("{TWO}[[calendar]]\naccount = \"work\"\nkind = \"caldav\"\nurl = \"{CALDAV}\"\n");
+    assert!(!Config::parse(&caldav).unwrap().writes("work"), "left out, it is read and never written");
+    let said = Config::parse(&format!("{caldav}write = true\n")).unwrap();
+    assert!(said.writes("work") && !said.writes("personal"));
+
+    // What setup appends when the write was proven after the table was
+    // written: it only ever adds to the end of the file (ADR-043).
+    let later_text = format!("{caldav}\n[[calendar]]\naccount = \"work\"\nwrite = true\n");
+    let later = Config::parse(&later_text).unwrap();
+    assert!(later.writes("work"));
+    assert_eq!(later.calendar("work").unwrap().url.as_deref(), Some(CALDAV), "the calendar is the table with a kind");
+    let with_servers = later_text.replace(
+        "address = \"ada@example.org\"",
+        "address = \"ada@example.org\"\nimap = { host = \"imap.example.org\", port = 993 }",
+    );
+    let read = crate::sync::calendars(&Config::parse(&with_servers).unwrap(), None).unwrap();
+    assert_eq!(read.len(), 1, "and is one calendar to read, not two");
+    let off = format!("{caldav}write = true\n\n[[calendar]]\naccount = \"work\"\nwrite = false\n");
+    assert!(!Config::parse(&off).unwrap().writes("work"), "the last table to say so decides");
+
+    let feed = format!("{TWO}[[calendar]]\naccount = \"work\"\nkind = \"feed\"\n");
+    let only_read = "[[calendar]] of work: `write` is for kind = \"caldav\"; a feed is only ever read";
+    let alone = "[[calendar]] of work: a table with no `kind` adds to the one above it, and holds `write` alone";
+    for (text, said) in [
+        (format!("{feed}write = true\n"), only_read),
+        (format!("{feed}\n[[calendar]]\naccount = \"work\"\nwrite = true\n"), only_read),
+        (
+            format!("{TWO}[[calendar]]\naccount = \"work\"\nwrite = true\n"),
+            "[[calendar]] of work: it has no `kind`, and no table above it to add to",
+        ),
+        (format!("{caldav}\n[[calendar]]\naccount = \"work\"\nurl = \"{CALDAV}\"\nwrite = true\n"), alone),
+        (format!("{caldav}\n[[calendar]]\naccount = \"work\"\n"), alone),
+    ] {
+        assert_eq!(error(&text), said, "{text}");
+    }
+
+    // Plain HTTP is for a server on this machine, which is all the engine
+    // sends it to; a host that only begins like one is not that.
+    assert!(Config::parse(&caldav.replace(CALDAV, "http://127.0.0.1:5232/ada/calendar/")).is_ok());
+    let elsewhere = error(&caldav.replace(CALDAV, "http://127.0.0.1.example.org/ada/calendar/"));
+    assert!(elsewhere.starts_with("[[calendar]] of work: `url` is fetched over TLS only"), "{elsewhere}");
 }

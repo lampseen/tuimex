@@ -63,6 +63,8 @@ pub enum CalendarError {
     Unread,
     #[error("the calendar could not be kept: {0}")]
     Store(String),
+    #[error("the system gave no randomness to name the event with")]
+    Random,
     /// Why the password or the feed's address could not be had, in words
     /// that hold neither.
     #[error("{0}")]
@@ -380,6 +382,14 @@ fn valid_name(name: &str) -> bool {
         && name.len() <= 200
         && !name.starts_with('.')
         && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
+}
+
+/// The UID of an event made here, from the system's randomness. What is
+/// before its `@` is also the name such an event is written under.
+pub fn new_uid() -> Result<String, CalendarError> {
+    let mut random = [0u8; 16];
+    getrandom::fill(&mut random).map_err(|_| CalendarError::Random)?;
+    Ok(tuimex_content::new_uid(random))
 }
 
 /// The tag the store holds for `href` of the calendar at `url`. A write is

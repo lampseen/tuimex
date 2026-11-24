@@ -9,12 +9,14 @@ mod providers;
 pub mod rename;
 mod write;
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::{Context, Result, anyhow, bail};
+use tuimex_core::calendar::{DAY, Event, Moment};
 use tuimex_core::{RemoteError, RemoteFolder, Role};
-use tuimex_engine::calendar::{CalendarError, Https, Wire};
+use tuimex_engine::calendar::{self as provider, CalendarError, Https, Wire};
 use tuimex_engine::oauth::{self, Endpoints, OauthError, SignIn, Tokens};
 use tuimex_engine::{Credential, Keyring, Protocol, Secret, Server, pin};
 
@@ -130,6 +132,15 @@ impl Setup<'_> {
             if let Some(n) = calendars {
                 menu.push(format!("  {n}) Add a calendar to an account that has none"));
             }
+            let read_only = |account: &&config::Account| {
+                let caldav = config.calendar(&account.name).is_some_and(|calendar| calendar.url.is_some());
+                caldav && !config.writes(&account.name)
+            };
+            let unwritten: Vec<&config::Account> = config.accounts.iter().filter(read_only).collect();
+            let writes = (!unwritten.is_empty()).then_some(menu.len() + 1);
+            if let Some(n) = writes {
+                menu.push(format!("  {n}) Find out whether a calendar that is only read can be written"));
+            }
             let quit = menu.len() + 1;
             menu.push(format!("  {quit}) Quit"));
             self.say(&format!("\nAccounts here: {}.\n{}", names.join(", "), menu.join("\n")));
@@ -142,6 +153,12 @@ impl Setup<'_> {
                 Some(n) if Some(n) == calendars => {
                     for account in bare {
                         self.calendar(account, None)?;
+                    }
+                    return Ok(());
+                }
+                Some(n) if Some(n) == writes => {
+                    for account in unwritten {
+                        self.written(account, &config)?;
                     }
                     return Ok(());
                 }
@@ -628,10 +645,7 @@ impl Setup<'_> {
         let by_google = net::auth(account)? == Auth::Gmail;
         let provider = providers::guess(&account.address).map(|at| PROVIDERS[at].short);
         let gmail = imap.host.eq_ignore_ascii_case("imap.gmail.com") || provider == Some("gmail");
-        self.say(&format!(
-            "\ntuimex can read {name}'s calendar too, to show beside the mail. The calendar's own screens are not \
-             built yet; `tuimex sync` reads it already."
-        ));
+        self.say(&format!("\ntuimex can read {name}'s calendar too, to show beside the mail: `gc` opens it."));
         let help = if gmail {
             providers::GOOGLE_FEED
         } else if provider == Some("proton") || imap.host == "127.0.0.1" {
@@ -663,16 +677,17 @@ impl Setup<'_> {
             }
         };
         let checked = password.and_then(|password| {
-            tuimex_engine::calendar::check_caldav(self.wire, &url, (&imap.user, &password)).map_err(|error| match error
-            {
+            let checked = provider::check_caldav(self.wire, &url, (&imap.user, &password));
+            checked.map(|_| password).map_err(|error| match error {
                 CalendarError::SignIn => "Google refused the app password for the calendar".to_string(),
                 other => other.to_string(),
             })
         });
         match checked {
-            Ok(_) => {
+            Ok(password) => {
                 self.say("Google's calendar took the sign-in.");
-                return self.save_calendar(name, Some(&url), None);
+                let write = self.try_write(name, &url, (&imap.user, &password))?;
+                return self.save_calendar(name, Some(&url), None, write);
             }
             Err(why) => self.say(&format!("The calendar could not be read that way: {why}.")),
         }
@@ -720,15 +735,117 @@ impl Setup<'_> {
         }
         let host = tuimex_engine::calendar::host(address.expose()).unwrap_or_default().to_string();
         self.say(&format!("{host} served a calendar."));
-        self.save_calendar(name, None, Some(address))
+        self.save_calendar(name, None, Some(address), false)
+    }
+
+    /// Asks whether to find out if the calendar at `url` can be written,
+    /// and finds out (ADR-062). Whether it was written and put back as it
+    /// was; any other outcome is said, and leaves the calendar read-only.
+    fn try_write(&mut self, name: &str, url: &str, sign_in: (&str, &Secret)) -> Result<bool> {
+        self.say(
+            "\nSo far tuimex only reads this calendar: an answer you give or an event you make is kept in a local \
+             calendar on this machine, and the provider's own apps do not see it. Whether tuimex can write to the \
+             calendar itself has to be tried once. Trying it adds one event named \"tuimex write test\", a year \
+             from today, and removes it again.",
+        );
+        if !yes(self.prompt, &format!("Try writing to {name}'s calendar now?"), false)? {
+            self.say("Nothing was written. The calendar is read, and what you do for it is kept locally.");
+            return Ok(false);
+        }
+        let tried = self.write_test(name, url, sign_in);
+        self.say(&match &tried {
+            Ok(()) => "The event was added and removed again: tuimex will write this calendar.".to_string(),
+            Err(why) => format!("{why} The calendar stays read-only here, and what you do for it is kept locally."),
+        });
+        Ok(tried.is_ok())
+    }
+
+    /// One whole-day event a year from today, put and deleted. Why it did
+    /// not work, as a sentence.
+    fn write_test(&self, name: &str, url: &str, sign_in: (&str, &Secret)) -> Result<(), String> {
+        let store = tuimex_store::calendar::Calendars::open(self.data, self.cache);
+        let store = store.map_err(|e| format!("The calendar store could not be opened: {e}."))?;
+        let unmade = |e: CalendarError| format!("The event could not be added: {e}.");
+        let uid = provider::new_uid().map_err(unmade)?;
+        let now = chrono::Utc::now().timestamp();
+        let day = now.div_euclid(DAY) + 365;
+        let event = Event {
+            uid: uid.clone(),
+            sequence: 0,
+            instead_of: None,
+            summary: "tuimex write test".to_string(),
+            start: Moment::Day(day),
+            end: Some(Moment::Day(day + 1)),
+            location: None,
+            description: None,
+            organizer: None,
+            guests: Vec::new(),
+            cancelled: false,
+            links: Vec::new(),
+            repeat: None,
+            excluded: Vec::new(),
+            alarms: Vec::new(),
+            more: Vec::new(),
+        };
+        let text = tuimex_content::event_text(&event, &BTreeMap::new(), now);
+        let key = uid.split('@').next().unwrap_or_default();
+        let href = provider::put_new(self.wire, &store, name, url, sign_in, &text, key).map_err(unmade)?;
+        let delete = || provider::delete(self.wire, &store, name, url, sign_in, &href);
+        let removed = match delete() {
+            // The server named no tag for what it took, and a delete is
+            // conditional on one: the days around the event are read, and
+            // it is tried again.
+            Err(CalendarError::Unread) => {
+                let read = provider::fetch_caldav(self.wire, &store, name, url, sign_in, (day - 1, day + 2), now);
+                read.and_then(|_| delete())
+            }
+            other => other,
+        };
+        removed.map_err(|e| {
+            format!(
+                "The event was added and could not be removed ({e}): delete \"tuimex write test\", a year from \
+                 today, in the calendar itself."
+            )
+        })
+    }
+
+    /// For a CalDAV calendar already in the config and only read: the
+    /// write is tried, and what it showed is added to the config.
+    fn written(&mut self, account: &config::Account, config: &Config) -> Result<()> {
+        let name = account.name.as_str();
+        let Some(url) = config.calendar(name).and_then(|calendar| calendar.url.clone()) else { return Ok(()) };
+        let (imap, _) = net::servers(account)?;
+        let password = match tuimex_engine::resolve(name, account.password_cmd.as_deref(), self.keyring) {
+            Ok(password) => password,
+            Err(error) => {
+                self.say(&format!("{error}. Nothing was tried for {name}'s calendar."));
+                return Ok(());
+            }
+        };
+        if !self.try_write(name, &url, (&imap.user, &password))? {
+            return Ok(());
+        }
+        let existing = std::fs::read_to_string(self.config_path)
+            .with_context(|| format!("reading {}", self.config_path.display()))?;
+        match write::appended(&existing, &[write::written(name)]) {
+            Ok(text) => {
+                write::save(self.config_path, &text, self.config_dir)?;
+                self.say(&format!(
+                    "Saved in {}: {name}'s calendar is written from now on.",
+                    self.config_path.display()
+                ));
+            }
+            Err(error) => self.say(&format!("{error}")),
+        }
+        Ok(())
     }
 
     /// Appends `name`'s `[[calendar]]` and keeps a feed's address, or
     /// says why neither was done.
-    fn save_calendar(&mut self, name: &str, url: Option<&str>, address: Option<Secret>) -> Result<()> {
+    fn save_calendar(&mut self, name: &str, url: Option<&str>, address: Option<Secret>, write: bool) -> Result<()> {
         let existing = std::fs::read_to_string(self.config_path)
             .with_context(|| format!("reading {}", self.config_path.display()))?;
-        let text = match write::appended(&existing, &[write::calendar(name, url)]) {
+        let text = match write::appended(&existing, &[write::calendar(name, url, write)]) {
             Ok(text) => text,
             Err(error) => {
                 self.say(&format!("{error}"));
@@ -743,7 +860,7 @@ impl Setup<'_> {
                  calendar's address comes from a command instead, as a password does. Add this to the config by \
                  hand, with the command that prints the address:\n\n{}address_cmd = [\"pass\", \"show\", \
                  \"calendar/{name}\"]\n\nNothing was saved.",
-                write::calendar(name, None)
+                write::calendar(name, None, false)
             ));
             return Ok(());
         }

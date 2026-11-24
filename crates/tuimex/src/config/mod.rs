@@ -47,13 +47,19 @@ pub struct Config {
 #[serde(deny_unknown_fields)]
 pub struct Calendar {
     pub account: String,
-    /// `caldav` or `feed`.
-    pub kind: String,
+    /// `caldav` or `feed`. A table without it adds to the account's
+    /// table above: setup can only append (ADR-043), so that is how it
+    /// records what it found out later.
+    pub kind: Option<String>,
     /// The CalDAV calendar's address. A feed has none here: its address
     /// is a secret (ADR-010).
     pub url: Option<String>,
     /// A feed's: argv, no shell, whose first line printed is the address.
     pub address_cmd: Option<Vec<String>>,
+    /// Whether events are written at the provider (ADR-062). Left out it
+    /// is false, and every write for the account goes to its local
+    /// calendar: a calendar is not written on a path nobody has tried.
+    pub write: Option<bool>,
 }
 
 /// No key here can hold a secret (ADR-010).
@@ -243,8 +249,17 @@ impl Config {
         }
         for (i, calendar) in config.calendars.iter().enumerate() {
             calendar.check(&config)?;
-            if config.calendars[..i].iter().any(|earlier| earlier.account == calendar.account) {
-                bail!("account {} has two [[calendar]] tables, and an account has one calendar", calendar.account);
+            let earlier = config.calendars[..i].iter().find(|earlier| earlier.account == calendar.account);
+            let name = &calendar.account;
+            match (earlier, &calendar.kind) {
+                (Some(_), Some(_)) => {
+                    bail!("account {name} has two [[calendar]] tables, and an account has one calendar")
+                }
+                (Some(first), None) if first.url.is_none() => {
+                    bail!("[[calendar]] of {name}: `write` is for kind = \"caldav\"; a feed is only ever read")
+                }
+                (None, None) => bail!("[[calendar]] of {name}: it has no `kind`, and no table above it to add to"),
+                _ => {}
             }
         }
         crate::notify::settings(config.notify.as_ref())?;
@@ -254,6 +269,13 @@ impl Config {
     /// The `[[calendar]]` of the account `name`.
     pub fn calendar(&self, name: &str) -> Option<&Calendar> {
         self.calendars.iter().find(|calendar| calendar.account == name)
+    }
+
+    /// Whether the account's calendar is written at its provider: what the
+    /// last of its tables to say `write` says.
+    pub fn writes(&self, name: &str) -> bool {
+        let mut said = self.calendars.iter().filter(|calendar| calendar.account == name).filter_map(|c| c.write);
+        said.next_back().unwrap_or(false)
     }
 
     pub fn account(&self, name: &str) -> Option<&Account> {
@@ -271,10 +293,19 @@ impl Calendar {
             bail!("[[calendar]] account = {name:?}: there is no [[account]] of that name");
         };
         let at = format!("[[calendar]] of {name}");
-        match (self.kind.as_str(), &self.url) {
+        let Some(kind) = self.kind.as_deref() else {
+            if self.write.is_none() || self.url.is_some() || self.address_cmd.is_some() {
+                bail!("{at}: a table with no `kind` adds to the one above it, and holds `write` alone");
+            }
+            return Ok(());
+        };
+        match (kind, &self.url) {
             ("caldav", None) => bail!("{at}: kind = \"caldav\" needs a `url`, the calendar's address"),
             ("caldav", Some(url)) => {
-                let Some(rest) = url.strip_prefix("https://") else {
+                // Plain HTTP is for a server on this machine alone, which is
+                // all the engine sends it to.
+                let local = url.strip_prefix("http://").filter(|rest| rest.starts_with("127.0.0.1:"));
+                let Some(rest) = url.strip_prefix("https://").or(local) else {
                     bail!("{at}: `url` is fetched over TLS only, so it begins https://");
                 };
                 let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
@@ -301,6 +332,9 @@ impl Calendar {
             ("feed", None) => {
                 if self.address_cmd.as_ref().is_some_and(Vec::is_empty) {
                     bail!("{at}: `address_cmd` names no program");
+                }
+                if self.write.is_some() {
+                    bail!("{at}: `write` is for kind = \"caldav\"; a feed is only ever read");
                 }
             }
             _ => bail!("{at}: `kind` is one of \"caldav\", \"feed\""),

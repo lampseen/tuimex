@@ -50,16 +50,18 @@ Absent, the account grants nothing. See [The agent](The-agent).
 
 ## `[[calendar]]`, at most once for each account
 
-An account's calendar, which `tuimex sync` reads and `tuimex doctor`
-names. It is a table of its own, after the accounts, because setup only
-adds to the end of the file. The calendar's screens are not built yet:
-nothing in the interface shows it.
+An account's calendar, which `gc` shows beside every other account's
+([Calendar](Calendar)), `tuimex sync` reads and `tuimex doctor` names. It
+is a table of its own, after the accounts, because setup only adds to
+the end of the file. An account with no table still has a calendar:
+its local one, which tuimex alone holds.
 
 | key | holds |
 |---|---|
 | `account` | the `name` of an `[[account]]`. One that is not there is an error naming it |
 | `kind` | `"caldav"` or `"feed"` |
-| `url` | `caldav` only, and required for it: the calendar's address, `https://` with no user name in it. For Gmail, `https://www.google.com/calendar/dav/<address>/events/` |
+| `url` | `caldav` only, and required for it: the calendar's address, `https://` with no user name in it. For Gmail, `https://www.google.com/calendar/dav/<address>/events/`. `http://127.0.0.1:<port>/` is taken too, for a server on this machine |
+| `write` | `caldav` only: `true` has tuimex write events at the provider. Left out, it is `false` |
 | `address_cmd` | `feed` only: a program and its arguments that print the feed's address, `["pass", "show", "calendar/home"]`. No shell reads it, and the first line printed is the address |
 
 ```toml
@@ -73,6 +75,28 @@ url = "https://www.google.com/calendar/dav/you@example.com/events/"
 and the same password, from the keyring or the account's `password_cmd`.
 There is no second password. An account with `auth = "gmail-oauth"`
 cannot use it; a feed is the way for that account.
+
+**`write`** is false until you or `tuimex setup` say otherwise, because
+writing to a provider is a path that has to be tried before it is
+trusted, and writing to Google's calendar has never been tried by
+anyone here ([What is proven](What-is-proven)). While it is false the
+calendar is read and never written: an answer, or an event you make for
+that account, is kept in the account's local calendar, exactly as for a
+feed. `tuimex setup` offers to find out: it adds one event named
+"tuimex write test" a year from today, removes it again, and sets the
+key when both worked. For a calendar that was already in the file it
+does that by adding a second, short table, since it only ever adds to
+the end of the file:
+
+```toml
+[[calendar]]
+account = "work"
+write = true
+```
+
+A table with no `kind` adds to the account's table above it and holds
+`write` alone. By hand, `write = true` in the calendar's own table says
+the same.
 
 **A feed** is a calendar's private address, which serves it in iCalendar
 format. Anyone holding the address can read the calendar, so it is never

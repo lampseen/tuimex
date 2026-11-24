@@ -256,17 +256,21 @@ END:VCALENDAR
 }
 
 /// Calendar servers: each request is answered by the first entry whose
-/// method and address it has and whose body holds the entry's words.
+/// method and address it has and whose body holds the entry's words. An
+/// entry's address that ends in `*` is every address that begins so: a
+/// new event's name is made when it is written.
 /// What it was asked, it keeps: method, address, and the sign-in's user.
 #[derive(Default)]
 pub(crate) struct FakeWire {
     pub served: Vec<(&'static str, &'static str, &'static str, u16, String)>,
     pub asked: RefCell<Vec<(String, String, Option<String>)>>,
+    /// The tag every answer carries, for a server that gives one.
+    pub etag: Option<&'static str>,
 }
 
 impl FakeWire {
     pub fn new(served: Vec<(&'static str, &'static str, &'static str, u16, String)>) -> FakeWire {
-        FakeWire { served, asked: RefCell::default() }
+        FakeWire { served, asked: RefCell::default(), etag: None }
     }
 }
 
@@ -275,12 +279,13 @@ impl Wire for FakeWire {
         let user = sent.sign_in.map(|(user, _)| user.to_string());
         self.asked.borrow_mut().push((sent.method.to_string(), sent.url.to_string(), user));
         let body = sent.body.map_or("", |body| body.text);
+        let at = |url: &str| url.strip_suffix('*').map_or(url == sent.url, |begins| sent.url.starts_with(begins));
         let found = self
             .served
             .iter()
-            .find(|(method, url, words, ..)| *method == sent.method && *url == sent.url && body.contains(words));
+            .find(|(method, url, words, ..)| *method == sent.method && at(url) && body.contains(words));
         let (.., status, body) = found.ok_or_else(|| CalendarError::Unreachable("its host was not found".into()))?;
-        Ok(Got { status: *status, body: body.clone(), etag: None })
+        Ok(Got { status: *status, body: body.clone(), etag: self.etag.map(str::to_string) })
     }
 }
 
@@ -795,7 +800,8 @@ fn a_gmail_account_s_calendar_is_read_over_caldav_with_its_app_password() {
     let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
     let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
     let wire = FakeWire::new(caldav(GOOGLE_DAV));
-    let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y"]);
+    // Yes to reading it, and no to trying a write.
+    let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y", "n"]);
     result.unwrap();
     let text = fs::read_to_string(run.config()).unwrap();
     assert!(
@@ -812,7 +818,126 @@ fn a_gmail_account_s_calendar_is_read_over_caldav_with_its_app_password() {
     assert_eq!(keyring.names(), ["gmail"], "nothing more is kept: the app password is the calendar's too");
     let shown = script.shown();
     assert!(shown.contains("Google's calendar took the sign-in.") && shown.contains("Saved gmail's calendar in"));
-    assert!(shown.contains("The calendar's own screens are not built yet"), "{shown}");
+    assert!(shown.contains("to show beside the mail: `gc` opens it."), "{shown}");
+    assert!(shown.contains("Nothing was written. The calendar is read"), "{shown}");
+    assert!(!config.writes("gmail"), "a write nobody tried is not a calendar tuimex writes");
+}
+
+/// The address a new event is put at and deleted from: a name tuimex
+/// makes under Google's calendar.
+const GOOGLE_EVENTS: &str = "https://www.google.com/calendar/dav/ada@gmail.com/events/*";
+
+fn methods(wire: &FakeWire) -> Vec<String> {
+    wire.asked.borrow().iter().map(|(method, ..)| method.clone()).collect()
+}
+
+/// ADR-062: writing is found out, not assumed. Setup says what it will
+/// do, asks, puts one event a year ahead and deletes it, and only then
+/// writes the key that has tuimex write the calendar.
+#[test]
+fn a_calendar_is_written_once_setup_has_put_an_event_there_and_removed_it_again() {
+    let root = scratch("calendar-write");
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let mut served = caldav(GOOGLE_DAV);
+    served.push(("PUT", GOOGLE_EVENTS, "SUMMARY:tuimex write test", 201, String::new()));
+    served.push(("DELETE", GOOGLE_EVENTS, "", 204, String::new()));
+    let wire = FakeWire { etag: Some("\"t1\""), ..FakeWire::new(served) };
+    let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y", "y"]);
+    result.unwrap();
+    let shown = script.shown();
+    let (told, asked) = (
+        shown.find("adds one event named \"tuimex write test\", a year from today, and removes"),
+        shown.find("Try writing to gmail's calendar now? [y/N]"),
+    );
+    assert!(told.is_some() && told < asked, "what it will do is said before it is asked: {shown}");
+    assert!(shown.contains("The event was added and removed again: tuimex will write this calendar."), "{shown}");
+    assert_eq!(methods(&wire), ["PROPFIND", "PUT", "DELETE"]);
+    let asked = wire.asked.borrow();
+    assert_eq!(asked[1].1, asked[2].1, "what was put is what was removed");
+    let name = asked[1].1.strip_prefix(GOOGLE_DAV).and_then(|name| name.strip_suffix(".ics")).expect("an .ics name");
+    assert!(name.len() == 32 && name.chars().all(|c| c.is_ascii_hexdigit()), "{name}");
+    let text = fs::read_to_string(run.config()).unwrap();
+    let table =
+        format!("\n[[calendar]]\naccount = \"gmail\"\nkind = \"caldav\"\nurl = \"{GOOGLE_DAV}\"\nwrite = true\n");
+    assert!(text.ends_with(&table), "{text}");
+    assert!(calendar_saved(&run).writes("gmail"));
+    let store = tuimex_store::calendar::Calendars::open(&root.join("data"), &root.join("cache")).unwrap();
+    assert!(store.held().unwrap().is_empty(), "nothing of the test is kept");
+}
+
+/// Whatever goes wrong is said as it happened, and the calendar is left
+/// one tuimex reads and does not write.
+#[test]
+fn a_write_that_fails_is_said_and_leaves_the_calendar_read_only() {
+    let ending = |root: &Path, put: u16, delete: u16| {
+        let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
+        let run = Run { root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+        let mut served = caldav(GOOGLE_DAV);
+        served.push(("PUT", GOOGLE_EVENTS, "", put, String::new()));
+        served.push(("DELETE", GOOGLE_EVENTS, "", delete, String::new()));
+        let wire = FakeWire { etag: Some("\"t1\""), ..FakeWire::new(served) };
+        let (result, script) = run.go_with(&wire, &["ada@gmail.com", "", "", "", PASSWORD, "n", "n", "y", "y"]);
+        result.unwrap();
+        let config = calendar_saved(&run);
+        assert_eq!(config.calendar("gmail").unwrap().url.as_deref(), Some(GOOGLE_DAV), "it is still read");
+        assert!(!config.writes("gmail"));
+        (script.shown(), methods(&wire))
+    };
+    let (shown, asked) = ending(&scratch("calendar-write-refused"), 403, 204);
+    let said = "The event could not be added: the calendar's server refused the sign-in. The calendar stays read-only \
+                here, and what you do for it is kept locally.";
+    assert!(shown.contains(said), "{shown}");
+    assert_eq!(asked, ["PROPFIND", "PUT"], "nothing was added, so nothing is removed");
+
+    let (shown, _) = ending(&scratch("calendar-write-left"), 201, 500);
+    let said = "The event was added and could not be removed (the calendar's server answered 500): delete \"tuimex \
+                write test\", a year from today, in the calendar itself. The calendar stays read-only here";
+    assert!(shown.contains(said), "{shown}");
+}
+
+/// A calendar that was in the file before the write was tried gains the
+/// key in a table of its own after everything that was there, which is
+/// kept to the byte (ADR-043).
+#[test]
+fn a_calendar_already_in_the_config_is_tried_from_the_menu_and_the_key_is_added_after_what_was_there() {
+    let root = scratch("calendar-write-later");
+    files::private_dir(&root.join("config")).unwrap();
+    let before = format!(
+        "# my mail\n[[account]]\nname = \"gmail\"\naddress = \"ada@gmail.com\"\n\
+         imap = {{ host = \"imap.gmail.com\", port = 993 }}\nsmtp = {{ host = \"smtp.gmail.com\", port = 465 }}\n\
+         auth = \"password\"\n\n[[calendar]]\naccount = \"gmail\"\nkind = \"caldav\"\nurl = \"{GOOGLE_DAV}\"\n\n\
+         [send]\ndelay = \"30s\"\n"
+    );
+    fs::write(root.join("config/config.toml"), &before).unwrap();
+    let (keyring, net) = (MemoryKeyring::default(), FakeNet { gmail: true, ..FakeNet::trusted() });
+    keyring.set("gmail", &Secret::new(PASSWORD.to_string())).unwrap();
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let served = vec![
+        ("PUT", GOOGLE_EVENTS, "SUMMARY:tuimex write test", 201, String::new()),
+        ("DELETE", GOOGLE_EVENTS, "", 204, String::new()),
+    ];
+    let wire = FakeWire { etag: Some("\"t1\""), ..FakeWire::new(served) };
+
+    // Asked and declined, nothing is sent and nothing written.
+    let (result, script) = run.go_with(&wire, &["5", "n"]);
+    result.unwrap();
+    let shown = script.shown();
+    assert!(shown.contains("  5) Find out whether a calendar that is only read can be written\n  6) Quit"), "{shown}");
+    assert!(wire.asked.borrow().is_empty());
+    assert_eq!(fs::read_to_string(run.config()).unwrap(), before);
+
+    let (result, script) = run.go_with(&wire, &["5", "y"]);
+    result.unwrap();
+    assert_eq!(methods(&wire), ["PUT", "DELETE"]);
+    let text = fs::read_to_string(run.config()).unwrap();
+    assert_eq!(text, format!("{before}\n[[calendar]]\naccount = \"gmail\"\nwrite = true\n"));
+    assert!(calendar_saved(&run).writes("gmail"));
+    assert!(script.shown().contains("gmail's calendar is written from now on."), "{}", script.shown());
+    // Written, it is no longer offered.
+    let (result, script) = run.go(&["5"]);
+    result.unwrap();
+    assert!(!script.shown().contains("Find out whether"), "{}", script.shown());
 }
 
 /// A refusal is said in plain words, and the feed is offered instead.
@@ -837,7 +962,7 @@ fn a_gmail_calendar_that_refuses_the_app_password_is_offered_by_its_secret_addre
     assert!(!shown.contains(FEED) && !shown.contains("SYNTHETIC-FEED-TOKEN"), "{shown}");
     let config = calendar_saved(&run);
     let calendar = config.calendar("gmail").unwrap();
-    assert_eq!((calendar.kind.as_str(), calendar.url.as_deref()), ("feed", None));
+    assert_eq!((calendar.kind.as_deref(), calendar.url.as_deref()), (Some("feed"), None));
     assert_eq!(keyring.get("gmail/calendar-feed").as_deref(), Some(FEED));
 }
 
