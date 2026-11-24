@@ -37,13 +37,19 @@ that every name on this page is a test that exists.
 
 ## Calendars
 
-The calendar's screens are not built: what is below is setup, the config,
-`tuimex sync` and `tuimex doctor`. The calendar servers in the unit tests
-are stand-ins that answer from a script. Reading and writing over CalDAV
-are also run against a real server, Radicale in a container, by
+The calendar servers in the unit tests are stand-ins: they answer from a
+script, or keep a table in memory with the preconditions a CalDAV server
+keeps. Reading and writing over CalDAV are also run against a real
+server, Radicale in a container, by
 `an_event_is_written_changed_answered_and_deleted_on_a_caldav_server` and
 `an_address_that_redirects_is_not_followed` under `make real-server`.
-Nothing has been written to Google's calendar.
+
+**Never run against the real thing:** Google's and Proton's own servers,
+by any test; writing to Google's calendar, by anyone, by hand or by a
+test; `notify-send` and `osascript`; and a Mac in a person's hands. The
+table at the end of this page says where each stands.
+
+### Reading, the config and setup
 
 | what is true | what proves it |
 |---|---|
@@ -59,19 +65,72 @@ Nothing has been written to Google's calendar.
 | A write goes only to an event under the calendar's own address on its own server; a refused sign-in, a redirect and any other refusal are said by kind and change nothing | `an_address_off_the_calendar_is_refused_before_anything_is_sent`, `a_write_the_server_refuses_says_what_kind_and_changes_nothing`, `a_read_carries_no_precondition_and_says_its_body_is_xml` |
 | `tuimex doctor` names each calendar's kind, its host, whether its password or address is found, and when it was last read, asking no calendar's server; `--redact` hides the host | `each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last_read` |
 | A feed's address is in no file under the config, data, cache and state directories and in nothing setup, sync, doctor or the calendar's thread says, read or failing | `a_secret_never_reaches_a_file_when_a_calendar_feed_is_set_up_and_read`, which the CI job `secret` runs by its name; `a_feed_s_address_is_printed_by_its_command_and_a_failing_command_says_so_without_it` |
+| A CalDAV calendar is written at its provider only where a table says `write = true`; left out it is false, a feed can never have it, and a table with no `kind` adds it to the account's table above. A server on this machine may be `http://127.0.0.1` and no other host may | `a_caldav_calendar_is_written_only_where_a_table_says_so_and_a_feed_never` |
+| Setup says it will add one event named "tuimex write test" a year from today and remove it, asks, does so, and only then writes `write = true`; a no writes nothing | `a_calendar_is_written_once_setup_has_put_an_event_there_and_removed_it_again`, `a_gmail_account_s_calendar_is_read_over_caldav_with_its_app_password`, against a stand-in. Against Google: never run |
+| A write that fails, or an event that was added and could not be removed, is said as it happened and leaves the calendar read-only | `a_write_that_fails_is_said_and_leaves_the_calendar_read_only` |
+| For a calendar already in the config the check is on setup's menu, and what it found is added after everything that was there, kept to the byte | `a_calendar_already_in_the_config_is_tried_from_the_menu_and_the_key_is_added_after_what_was_there` |
+
+### The views
+
+| what is true | what proves it |
+|---|---|
+| `gc` opens the calendar on today and `gm` returns to mail, each side where it was; the calendar's keys are read before mail's; a command that takes rows of mail is refused there and says `gm` returns | `gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was`, `the_calendar_s_keys_are_read_before_the_ones_of_everywhere`, `the_calendar_has_its_commands_and_refuses_the_ones_that_take_rows_of_mail`, `a_session_in_the_calendar_moves_by_days_and_returns_to_mail` |
+| The month, the week, the day, an event's own screen, the form, the calendars panel, a find and the empty calendar are each drawn as the design draws them, cell for cell, at 120 by 40 and at 80 by 24 in ASCII | `cal_month`, `cal_week`, `cal_day`, `cal_event`, `cal_edit`, `cal_calendars`, `cal_find`, `cal_search`, `cal_empty`, `every_cell_is_written_at_any_size_wherever_the_calendar_is` |
+| `h l j k [ ]` and `t` move the cursor, `Enter` goes deeper and `Esc` comes back, `J K` step through events across days, `gd` goes to a date and says what its words mean | `a_day_a_week_and_a_page_each_move_the_cursor_and_t_brings_it_back`, `enter_goes_deeper_and_esc_comes_back`, `events_are_stepped_through_across_days_in_the_order_they_are_drawn`, `gd_says_what_the_words_mean_and_goes_there`, `the_words_of_a_date_name_one_day` |
+| `/` finds as it is typed and `Enter` lists every match; `I` goes round the invitations that wait; `gt` shows one account's events and leaves mail's narrowing alone; `C` hides a calendar from every view | `a_find_is_typed_and_enter_searches_every_day`, `capital_i_goes_round_the_invitations_that_wait_for_an_answer`, `gt_shows_one_account_s_events_and_leaves_mail_as_it_was`, `the_calendars_panel_hides_a_calendar_from_every_view` |
+| A repeating event is on each of its days for the rules tuimex works out, keeps its hour when the clocks change, and is not drawn twice where a day is left out or stood in for; any other rule shows the event once and says so | `each_kind_of_rule_gives_its_days`, `a_repeat_keeps_its_hour_when_the_clocks_change`, `an_occurrence_left_out_or_replaced_is_not_drawn_twice`, `a_rule_tuimex_does_not_work_out_says_so` |
+| A time is placed on the clock only when its zone is known, from the calendar and then from the system; otherwise it is shown as written | `a_written_time_is_placed_only_when_its_zone_is_known` |
+| An event held by the provider and by a local answer is one event on screen, with the answer given here until the provider's copy has one | `the_same_uid_held_twice_is_one_event_with_the_answer_given_here_until_the_provider_has_one`, `an_answered_occurrence_joins_the_series_the_provider_holds` |
+| A calendar kept on disk is shown whatever its provider says, and one that cannot be fetched says so with how old it is; why it could not be read is kept for `:messages`, once for each failure | `a_calendar_kept_on_disk_is_shown_and_one_that_cannot_be_fetched_says_so`, `why_a_calendar_could_not_be_read_is_kept_for_messages_once` |
+
+### Answering an invitation
+
+| what is true | what proves it |
+|---|---|
+| `i` asks the five answers of an event somebody asked you to, and says why for one you organize or were not asked to; the reader's card answers the event its message carries | `i_asks_the_five_answers_of_an_event_somebody_asked_the_reader_to`, `an_event_the_reader_organizes_or_was_not_asked_to_says_why_it_is_not_answered`, `the_reader_s_card_answers_the_event_its_message_carries`, `a_card_whose_event_was_not_handed_over_says_it_could_not_be_read` |
+| Each answer is one mail to the organizer alone, from the invited address of the account the invitation came to; ignoring sends nothing; an address of another account is refused | `each_answer_is_one_mail_to_the_organizer_from_the_invited_identity`, `the_reply_goes_to_the_organizer_alone_however_many_are_invited`, `ignoring_sends_nothing`, `an_answer_from_an_address_of_another_account_is_refused` |
+| The reply is a `REPLY` that carries the event's identity and the one answer, and a proposal a `COUNTER` with the new time | `a_reply_carries_the_event_s_identity_and_one_answer`, `a_counter_proposes_a_time_as_one_tentative_guest` |
+| The reply waits in the Outbox of the account it came to, and `u` takes it back | `an_answer_waits_in_the_outbox_of_the_account_it_came_to_and_u_takes_it_back` |
+| An answer to an event of a feed, or of a CalDAV calendar that is not written, is kept as a local copy and not one request reaches the provider; `u` removes the copy and takes the reply out of the Outbox | `an_answer_to_an_event_of_a_feed_is_a_local_copy_and_a_reply_and_u_takes_both_back`, `a_calendar_the_config_does_not_say_is_written_is_never_written` |
+| In a written calendar the answer changes one value of the text the provider holds, conditional on the version last read; what the provider wrote and tuimex does not read is kept; `u` puts the text back; a calendar changed elsewhere is refused with what to do, and nothing is mailed | `an_answer_in_a_written_calendar_changes_one_line_at_the_provider_and_u_puts_the_text_back`, `an_answer_changes_one_line_of_the_provider_s_text` |
+| `u` on the reply's own row in the Outbox takes the calendar entry back with it; a reply that has left stands, and `u` says so; mail the engine refuses leaves no entry and no draft | `mail_s_own_undo_of_the_reply_takes_the_calendar_entry_back_and_a_reply_that_left_stands`, `an_answer_whose_mail_the_engine_refuses_leaves_no_calendar_entry` |
+| A time proposed and an invitation ignored are kept across runs, in a file beside the local events that only you can read; an answer outright settles a proposal | `a_time_proposed_and_an_invitation_ignored_are_the_reader_s_own_and_are_kept_across_runs`, `what_was_ignored_and_proposed_is_kept_across_runs_in_a_file_only_its_owner_reads` |
+| That file, when it does not read, is said at the start and never written over; an answer that does not need it still works | `answers_that_could_not_be_read_are_said_and_never_written_over`, `a_file_that_does_not_read_is_said_and_not_started_over` |
+| An invitation that is in an Inbox and in no calendar is on the calendar, stored nowhere, until it is answered or ignored; one its provider's calendar holds is one event; a later run reads only the messages that are new or still wait | `an_invitation_that_is_in_mail_alone_is_on_the_calendar_until_it_is_answered_or_ignored`, `an_invitation_its_provider_s_calendar_holds_is_one_event_and_one_for_a_written_calendar_is_shown_in_it`, `a_run_reads_the_messages_that_are_new_and_those_still_waiting_and_no_others` |
+| A new version and a cancellation from the organizer are applied to an event held locally and said once; a cancellation from anyone else changes nothing; a guest's reply to an event you organize is kept and said | `an_update_and_a_cancellation_from_the_organizer_are_applied_once_and_a_stranger_s_change_nothing`, `what_a_later_message_may_change`, `a_guest_s_reply_to_an_event_organized_here_is_kept_and_said` |
+| What cannot be done is refused in plain words and changes nothing: an event still being saved, one that has gone, an undo of something already taken back | `what_cannot_be_done_is_refused_in_plain_words_and_changes_nothing`, `a_refusal_puts_back_what_that_change_did_and_says_why` |
+| The whole path, in the interface over a mail server in memory: the invitation is on the calendar from mail, `i a` answers it, the event is a local file, the reply is the Outbox's row, `u` takes both back | `an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_the_entry_back` |
+| The same in the binary on a terminal, over stores on disk | `an_invitation_is_answered_in_the_calendar_its_reply_waits_in_the_outbox_and_u_takes_both_back` |
+| Against a real mail server and a real CalDAV server, for a calendar with `write = true`: the reply is read back from the organizer's Inbox and the event from the calendar's server | `an_invitation_is_answered_on_a_terminal_and_the_reply_and_the_event_are_read_back_from_the_servers`, by `make real-server`. Written on 2026-11-24 and **not yet run** when this page was last changed: until it has passed, this line is a test that exists, not a result |
+
+### Events of your own, links and export
+
+| what is true | what proves it |
+|---|---|
+| The form opens on the selected day, takes dates as words and says what they mean, refuses what cannot be saved with the reason, and asks before guests are mailed | `c_opens_a_new_event_at_nine_on_the_cursor_s_day_in_the_first_account`, `the_status_line_says_what_a_date_was_taken_to_mean_and_words_that_name_none_are_refused`, `each_refusal_on_save_says_why`, `guests_are_asked_about_first_and_only_y_saves` |
+| A new event is kept under a UID made here, as a local file or at a written provider under a name tuimex made, and `u` removes it | `a_new_event_is_kept_under_a_uid_made_here_locally_or_at_the_provider_and_u_removes_it` |
+| An event is changed in place and moved between calendars, and `u` puts each back with the text it had | `an_event_is_changed_in_place_and_moved_to_another_calendar_and_u_puts_each_back` |
+| One day of a repeating event is stood in for or left out, and the event stays; deleted whole, everything of it goes; `u` brings each back | `one_day_of_a_repeating_event_is_stood_in_for_or_left_out_and_the_event_stays`, `d_on_a_repeating_event_asks_and_this_one_leaves_the_other_days` |
+| Guests are mailed the invitation only when you agreed, and a cancellation when the organizer deletes; an event with no guests to mail is not saved as one that mailed them | `guests_are_mailed_an_invitation_when_the_reader_agreed_and_a_cancellation_when_the_event_is_deleted`, `an_event_made_here_is_sent_to_its_guests_and_so_is_its_cancellation` |
+| An event of a calendar that is only read is neither deleted nor changed, and the refusal says where to do it | `a_calendar_the_config_does_not_say_is_written_is_never_written` |
+| In the binary on a terminal: an event made with the form is an owner-only file, is there after a restart, and is deleted and brought back | `an_event_made_with_the_form_is_there_after_a_restart_and_is_deleted_and_brought_back` |
+| An event's link is listed with the host it really opens, a deceptive one asks first, and where it opens it is assessed again; the agent is asked as for a link in mail and opens nothing | `o_lists_the_selected_event_s_links_with_the_host_each_opens`, `a_deceptive_link_is_asked_about_and_opens_only_on_yes`, `an_event_s_link_is_assessed_again_where_it_opens_and_a_refusal_names_its_key`, `an_event_s_link_is_put_to_the_agent_with_its_names_redacted_and_answered_under_the_ask_s_serial` |
+| `:export` writes every local event, and nothing a provider holds, to one new owner-only file and never over one | `the_local_events_are_exported_as_one_calendar_and_an_event_is_found_as_an_ask_names_it`, `the_local_events_are_written_to_a_new_file_and_never_over_one`, `several_events_are_one_calendar_that_defines_each_zone_once` |
 
 ## Reminders
 
-Reminders are built and tested on their own, and not yet joined to the
-interface or its event loop: tuimex does not raise one yet. No test has
-run `notify-send` or `osascript`; every test hands the reminder to a
-notifier that records it.
+No test has run `notify-send` or `osascript`: every test hands the
+reminder to a notifier that records it, and nobody here has seen either
+program raise one.
 
 | what is true | what proves it |
 |---|---|
 | A reminder falls due at each of an event's own alarms, or `lead` before it; each occurrence of a repeat has its own; an all-day event has none without an alarm; a cancelled or declined event, and one in a zone nothing defines, has none; looks at the clock a step at a time see each once, also across the day the clocks go back | `each_rule_of_a_reminder_holds` |
 | One that fell due while nothing was looking is not raised late: after a gap of over five minutes, only what fell due in the last five, for an event not begun | `each_rule_of_a_reminder_holds`, `off_stays_off_across_a_restart_and_raises_nothing_and_no_backlog_when_turned_on` |
 | A reminder is raised once, with the event's title and nothing else of it | `a_reminder_is_raised_once_with_its_title_alone_and_handed_to_the_interface` |
+| What falls due is on the status line, in mail and in the calendar, until the event begins; the bell is written once, after the frame that shows it and never inside one | `what_falls_due_is_on_the_status_line_and_rings_the_bell_once`, `the_bell_is_written_once_after_the_frame_that_shows_what_fell_due`, `a_reminder_shows_in_mail_and_in_the_calendar_until_the_event_begins` |
+| A calendar you hid and an invitation you ignored remind nobody, and neither does an event the account that holds it declined | `a_hidden_calendar_and_an_ignored_invitation_remind_nobody`, `an_event_is_declined_by_the_account_that_holds_it_and_by_no_other` |
+| `gn` and `:notify` switch reminders, and off is what the status line says | `gn_turns_reminders_off_and_on_and_off_is_what_the_status_line_says`, `nothing_is_raised_while_off_and_the_switch_is_written_when_the_interface_s_changes` |
 | The title loses its control and direction characters and is cut to 120 characters; an escape in it cannot end the terminal's OSC 9 early | `a_hostile_title_is_one_line_with_nothing_to_steer_text_or_a_terminal`, `osc9_writes_the_cleaned_title_and_an_escape_in_it_cannot_end_the_sequence_early` |
 | `notify-send` is given the title as one argument after `--`, as its summary, which is plain text; `osascript` is given it as an argument to a fixed script | `the_title_is_one_argument_after_the_options_end_and_never_markup_or_script` (the argument list only: neither program is run) |
 | A notification program that cannot start is said once, naming it, and reminders still reach the interface | `a_program_that_is_not_there_is_a_sentence_naming_it`, `a_notifier_that_fails_is_said_once_and_reminders_still_reach_the_interface` |
@@ -142,7 +201,7 @@ notifier that records it.
 | Where the terminal has an image protocol (kitty, sixel, iTerm2) the picture's own bytes are handed to it over the placeholder; nothing is fetched. No test has a terminal to see the result on, and `--fixtures` has no picture bytes, so it has not been seen drawn | `an_attached_picture_is_sized_placed_and_drawn_from_the_message_s_own_bytes`, `a_terminal_with_a_protocol_gets_the_picture_over_its_placeholder`, `the_placeholder_stays_where_no_picture_can_be_drawn` |
 | Only png, jpeg, gif and webp are decoded, never one over 8192 pixels on a side, and damaged bytes fail without a panic | `another_format_is_not_a_picture`, `a_picture_claiming_more_than_the_cap_is_never_decoded`, `damaged_bytes_decode_or_fail_and_never_panic` |
 | A signed or encrypted message nobody verified says so and is never drawn as good; verifying is not built | `a_signed_message_without_a_verdict_claims_none` |
-| The answers to an invitation are not built: nothing hands the reader the event beside its card, so each says the invitation could not be read and changes nothing | `a_card_whose_event_was_not_handed_over_says_it_could_not_be_read` |
+| An invitation's card answers once the message has been read and its event handed over, and only an invitation to answer is: a cancellation or a reply has no event to answer. [Calendars](#answering-an-invitation) has what an answer then does | `a_message_read_tells_the_card_its_event_when_it_is_an_invitation_to_answer`, `an_invitation_s_card_in_the_reader_answers_once_its_message_has_been_read`, `the_reader_s_card_answers_the_event_its_message_carries`, `a_card_whose_event_was_not_handed_over_says_it_could_not_be_read` |
 
 ## Writing and sending
 
@@ -201,7 +260,9 @@ itself.
 | **Gmail, as Google runs it** | two accounts were set up and synced by hand on 2026-11-23. Which way each signed in, sending, and every other step were not recorded. The browser sign-in itself is tested only against a stand-in for Google |
 | **Proton Bridge** | one account was set up and synced by hand on 2026-11-23, with nothing else recorded. Pinning is tested against a container's certificate, not Bridge's |
 | **Fastmail and iCloud** | setup knows their servers. Nobody has run either |
-| **Calendars at Google and Proton** | no test fetches from either. A `PROPFIND` on Google's older CalDAV address with an app password answered 207 by hand on 2026-11-24; a whole fetch, and any feed from Google or Proton, have not been run against the real thing |
+| **Calendars at Google and Proton** | no test fetches from either. A `PROPFIND` on Google's older CalDAV address with an app password answered 207 by hand on 2026-11-24; a whole fetch, and any feed from Google or Proton, have not been run against the real thing. Whether Gmail has already put an invitation in the calendar by the time its mail is read, and so which of the two tuimex shows first, has not been observed |
+| **Writing to Google's calendar** | never done, by hand or by a test. `tuimex setup`'s write check is the first write there will be, on the account of whoever says yes to it. Every write tuimex makes is tested against stand-ins and Radicale |
+| **A `COUNTER` at a real provider** | a proposal is sent as one, with the same proposal as a sentence. Which providers act on the calendar part and which show only the sentence has not been tried |
 | **The system keyring** | every test uses a keyring in memory. The Secret Service and the macOS keychain have been used only in the two by-hand runs above |
 | **The real Claude CLI behind `use = "claude"`** | no test runs it, because running it sends text to a provider. A test holds the arguments tuimex gives it; that the program then behaves as its help says is not tested |
 | **Sending from the interface through a real provider** | sending is run against servers in containers by `make real-server`, and against no provider's own |
@@ -221,10 +282,10 @@ above.
 
 ## Not built
 
-OpenPGP (signing, encrypting, verifying, decrypting), answering an
-invitation, the calendar's screens, reminders in the interface (`gn`, `:notify`, the bell and the status line), the mouse, `NO_COLOR`, remapping keys under `[keys]`, new-mail
-notifications, and `ui.glyphs` and `ui.colors` in the config. Each is
-planned; none is claimed anywhere on these pages.
+OpenPGP (signing, encrypting, verifying, decrypting), the mouse,
+`NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
+`ui.glyphs` and `ui.colors` in the config. Each is planned; none is
+claimed anywhere on these pages.
 
 ---
 

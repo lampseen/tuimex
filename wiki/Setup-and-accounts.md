@@ -119,12 +119,12 @@ for <name>`. It is the same for any server you run yourself.
 
 ## Calendars
 
-tuimex can read each account's calendar. **The calendar's screens are
-not built yet**: `tuimex sync` reads it and `tuimex doctor` names it, and
-nothing in the interface shows it. Setup asks about it after an account is
-added, and from its menu for an account that has none. No, which Enter
+tuimex can read each account's calendar, and shows them all in one view
+behind `gc` ([Calendar](Calendar)). Setup asks about it after an account
+is added, and from its menu for an account that has none. No, which Enter
 gives, is a fine answer; it is not remembered, and the next run asks
-again.
+again. An account with no calendar still has a local one, and its
+invitations can be answered.
 
 **Gmail, with an app password.** Setup offers to read the calendar with
 the password the account already signs in with, over CalDAV at
@@ -133,6 +133,24 @@ whether the calendar takes that sign-in, and only then writes the
 `[[calendar]]` table. If Google refuses, setup says so and offers the
 secret address instead. A Gmail account that signs in through the browser
 is offered the secret address alone.
+
+**Writing to it is asked about separately.** A calendar over CalDAV is
+only read until a write has been tried. Setup says what trying means, in
+these words, and asks:
+
+```
+Trying it adds one event named "tuimex write test", a year from today,
+and removes it again.
+Try writing to gmail's calendar now? [y/N]
+```
+
+When both the adding and the removing worked, the calendar's table gets
+`write = true`, and from then on an answer or an event of yours for that
+account is written at Google. On any failure setup says what happened,
+and the calendar stays read-only; if the event was added and could not be
+removed, it says so and asks you to delete it in the calendar itself.
+Say no, and nothing is written: what you do for that account is kept in
+its local calendar on this machine, as it is for a feed.
 
 **Any other account** is asked for the calendar's private address, which
 serves it in iCalendar format. Setup says where that is found for the
@@ -153,9 +171,19 @@ machine with no keyring service setup saves nothing and prints the table
 to add by hand, with an `address_cmd`, a command that prints the address
 (see [Configuration](Configuration#calendar-at-most-once-for-each-account)).
 
+**Proton** has no other way: Proton Bridge carries mail and no calendar,
+and the private address only serves the calendar. So a Proton account's
+calendar is read-only here. An invitation that arrives in its mail is on
+tuimex's calendar from the mail itself, and answering it mails the
+organizer and keeps the event in the account's local calendar. Proton's
+own apps do not learn the answer.
+
 Nothing here has been run against Google or Proton by a test: CalDAV and
-feeds are tested against stand-ins. Google's older CalDAV address took an
-app password when it was tried by hand on 2026-11-24.
+feeds are tested against stand-ins and a CalDAV server in a container.
+Google's older CalDAV address took an app password for reading when it
+was tried by hand on 2026-11-24. Nothing has ever been written to a
+Google calendar by tuimex, by hand or by a test: the write check above is
+how that is found out, on your account, when you say so.
 
 ## Running setup again
 
@@ -167,13 +195,20 @@ With accounts already there, `tuimex setup` shows a menu:
   3) Accept a new certificate for work
   4) Rename an account
   5) Add a calendar to an account that has none
-  6) Quit
+  6) Find out whether a calendar that is only read can be written
+  7) Quit
 ```
 
-The calendar line is there while some account has no `[[calendar]]`.
+The first calendar line is there while some account has no
+`[[calendar]]`, and the second while some CalDAV calendar has no
+`write = true`.
 
 Setup only adds to the config file and keeps what was there to the byte;
-the one thing it changes in place is an account's name.
+the one thing it changes in place is an account's name. So what the
+write check found for a calendar that was already in the file is added
+as a short table of its own after everything else, which
+[Configuration](Configuration#calendar-at-most-once-for-each-account)
+explains.
 
 **Renaming** moves four things together: the account's mail on this
 computer, its sign-in in the keyring, its pinned certificate, and its name

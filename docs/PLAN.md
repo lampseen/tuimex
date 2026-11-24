@@ -51,7 +51,7 @@ Each row is settled. The ones with a record are answered by its number.
 | Secrets | `keyring`, or `password_cmd`; never the config | ADR-010 |
 | Gmail | XOAUTH2 with a user-supplied client; token requests through `ureq` | ADR-019 |
 | OpenPGP | the `gpg` binary | ADR-020 |
-| Calendar | Google over CalDAV with the app password, any other provider as an iCalendar feed, both through `ureq`; events made here are files; `roxmltree` reads CalDAV's answers; repeats and zones worked out by hand; planned, not built | ADR-054 to ADR-062 |
+| Calendar | Google over CalDAV with the app password, any other provider as an iCalendar feed, both through `ureq`; events made here are files; `roxmltree` reads CalDAV's answers; repeats and zones worked out by hand; a provider's calendar is written only where `write = true` | ADR-054 to ADR-062 |
 | Config | TOML at `$XDG_CONFIG_HOME/tuimex/config.toml`, or `--config`; never the current directory | ADR-011 |
 | Platforms | Linux and macOS, both proven in CI | ADR-022 |
 | Vocabulary | "folder" everywhere; Gmail labels are shown as folders | §4.1 |
@@ -405,6 +405,62 @@ is under way, and the engine's `Emptied { deleted, kept }` is then said
 is not cut short (ADR-035); the terminal is the user's again by then and
 says which account the wait is for.
 
+**The calendar** is the worker's too (ADR-054). It reads what the calendar
+store holds, joins each account's local events to its provider's copy of
+them (ADR-055), adds the invitations that are in an Inbox and in no
+calendar, and sends the whole calendar to the loop on a channel of its
+own, with the serial of the last ask it was read after; the loop hands it
+to the interface, which until then goes on showing what it changed
+itself (ADR-040). A calendar thread beside the engines fetches (ADR-056,
+ADR-062), and the worker reads the store again when it says a calendar
+was read.
+
+A calendar ask (`AnswerEvent`, `SaveEvent`, `DeleteEvent`, `UndoEvent`)
+names its event and no message. The worker carries it out at once, on its
+own thread, and waits there for a provider when there is one:
+
+- **Where it is written.** At the provider when the account's
+  `[[calendar]]` is CalDAV with `write = true`; otherwise as a file of the
+  account's local calendar, `<data>/.calendars/<account>/<key>.ics`
+  (ADR-055). An event and the events standing in for days of it are one
+  file, or one address at the provider. A calendar that is only read is
+  never changed: its event's answer is a local copy, and a delete or an
+  edit of it is refused.
+- **The mail.** A reply, a proposal, an invitation or a cancellation is
+  built as every message is (§4.4), filed as a draft and sent through the
+  account's Outbox under the ask's serial, so it waits out `send.delay`.
+- **`u`.** For each ask of the run the worker keeps the text every file or
+  address held before it, and the message it left in the Outbox.
+  `UndoEvent` puts the text back, then takes the message out of the
+  Outbox and discards it; mail's `Undo` of that message takes the calendar
+  entry back with it; a refusal by the engine of the ask's `Send` puts the
+  text back and discards the draft. Once the message has been sent the ask
+  stands, and `UndoEvent` is refused.
+- **Refusals** are `ActionFailed` naming the ask, with what to do as the
+  hint: an event changed at its provider since it was read says to sync
+  and do it again. `ActionDone` is never said for a calendar ask.
+- **What the reader decided** and no event's file says, the invitations
+  ignored and the times proposed, is `<data>/.calendars/answers.json`.
+- **Invitations in mail.** At start, when mail arrives and when an
+  invitation's body is read, the worker asks the index for the messages
+  in an Inbox that carry a calendar part. One not looked at before is
+  read: a later message for an event a local calendar holds is applied by
+  `invitation::later` and said once as a `Notice`. A `REQUEST` whose
+  event no calendar of its account holds, which was not ignored and whose
+  mail is not marked answered, is shown on the calendar and stored
+  nowhere until it is answered. What each message carried is cached
+  (`<cache>/invitations.json`), so a later start reads what is new and
+  what still waits.
+- **Outside.** `OpenEventLink` is assessed again and opened as a
+  message's link is, `AgentEventLink` is answered as `AgentLink` is, and
+  `Export` writes the local events as one `.ics` through the store's file
+  module.
+
+A reminder is the loop's: once a second it asks which of the events last
+handed over fall due, leaving out a calendar the interface says is hidden
+and an invitation it says is ignored, and hands the first to the status
+line; the bell is written after the frame that shows it (§6.6).
+
 ---
 
 ## 5. Content (`tuimex-content`)
@@ -506,6 +562,18 @@ copy · `e d s m M r R f` as in the list · `q Esc` back, cursor kept.
 completion) · `^s` send summary · `^d` save draft · `Esc` asks: keep the
 draft or discard.
 
+**Calendar**, after `gc` (ADR-054), as the design delivered it: `h l`
+previous, next day · `j k` a week in the month, else an event · `[ ]`
+page · `J K` next, previous event · `n N` match · `I` next invitation to
+answer · `t` today · `gd` go to a date · `Tab S-Tab` and `1 2 3` the view
+· `Enter` deeper, `Esc` back · `/` find · `gt gT` account · `C` calendars
+(then `j k`, `Space`) · `o` links · `i` answer (then `a t d p x`) · `c`
+new event · `E` edit · `d` delete (a repeat asks `t` this one, `a` all) ·
+`u` undo · `gn` reminders · `gm` mail. On an event: `j k ^d ^u gg G`
+scroll, `zo zc`, `v` the mail it came in. In the form: `Tab S-Tab`,
+`Left Right`, `Enter` notes in `$EDITOR`, `^s` save, `Esc`.
+`docs/keymap.md` is the table itself.
+
 **Command and confirm:** as pullpen's §6.2, unchanged: `Tab S-Tab` complete,
 `↑ ↓` history, `^w ^u`, `Enter Esc`; in a confirm `y Enter` yes, `n Esc` no,
 **any other key cancels and is discarded**.
@@ -524,7 +592,12 @@ remappable under `[keys]`.
 | `:browser` | The sealed copy (ADR-009). Asks before it may load remote pictures, naming the hosts. |
 | `:save <n> [path]` `:open <n>` | An attachment, to the download directory by default. Opening confirms with the file's type. |
 | `:link <n>` | Open a link after assessment (ADR-018). |
-| `:invite accept\|tentative\|decline` | ADR-021. |
+| `:invite accept\|tentative\|decline\|propose\|ignore` | An answer to the invitation open in the reader or selected in the calendar (ADR-057). |
+| `:calendar [month\|week\|day]` `:mail` | The calendar, where it was or in that view; back to mail (ADR-054). |
+| `:goto <date>` | A date in the calendar: `2026-12-05`, `5 dec`, `fri`, `+2w`. |
+| `:event [title]` | The form for a new event on the selected day. |
+| `:export [path]` | Every local event as one `.ics`, in the download directory by default, never over a file (ADR-055). |
+| `:notify on\|off` | Reminders (ADR-058). |
 | `:unsubscribe` | Composes the `mailto` for review, or opens the `https` link after assessment. Never automatic. |
 | `:agent reply [guidance]` `:agent tidy` `:agent link <n>` | Hands redacted text to the configured agent command and takes text back (ADR-031). Only when typed, or picked from the menu `A` opens; `reply` with no draft open starts the reply first. |
 | `:sync [all]` | A pass over every account now. |
@@ -561,16 +634,19 @@ a thread it claims to continue; the message is a draft an agent wrote.
 ### 6.6 New mail
 
 `NewMail` in a folder with the Inbox role rings the bell and sends an OSC 9
-notification, both configurable under `[notify]`. The one other thing that
-notifies is an event's reminder, while tuimex is open (ADR-058, M15).
+notification, both configurable under `[notify]`: not built. The one
+thing that notifies today is an event's reminder, while tuimex is open
+(ADR-058).
 
 A reminder falls due at each of the event's own alarms, or `notify.lead`
 before it when it has none; each occurrence of a repeat has its own. An
 all-day event has none without an alarm, and a cancelled or declined event
-has none. The event loop looks at the clock and is handed each reminder
+has none; nor has an event of a calendar the reader has hidden, or an
+invitation they ignored. The event loop looks at the clock and is handed each reminder
 once; one that fell due while tuimex was closed is not raised late: after a
 gap of more than five minutes, only what fell due in the last five, for an
-event that has not begun. It rings the bell, goes on the status line and,
+event that has not begun. It goes on the status line, the bell is written
+to the terminal once the frame that shows it has been flushed, and,
 by `notify.via`, raises `notify-send`'s summary (`osascript` on macOS, an
 argument to a fixed script) or an OSC 9. The title alone is sent, one
 argument, with its control and direction characters gone and cut to 120
@@ -728,6 +804,7 @@ it say which outputs are full screens and which are row strips.
 | The documents are true | `tests/docs.rs`, as pullpen's: budgets match the Makefile, every relative link resolves, every ADR number cited exists, the config example parses, no test module is inline, every crate edge is one §2 allows |
 | Fixtures are synthetic | test: every address in `tests/` and `tuimex-fixtures` is under a reserved example domain |
 
+| What is done in the calendar is carried out, kept for `u`, mailed and refused as §4.6 says (ADR-055, ADR-057) | `calendar::carry::tests` and `calendar::mail::tests`, over scratch stores, a provider in memory and a real engine on the fixtures' server; `live::tests` and `tests/terminal.rs` for the whole path from a key to a file; `make real-server` for GreenMail and Radicale together, a leg written and not yet run |
 | Setup saves nothing until both servers take the sign-in, and only adds to the config (ADR-043) | `setup::tests` against stand-ins; `make real-server`: a first launch on a terminal, the certificate shown and pinned, a second account, then `tuimex sync` and `tuimex doctor` with no answers |
 | Gmail's sign-in (ADR-019) | `oauth::tests` and `tests/oauth.rs` against a Google played on a loopback port: the redirect, PKCE, the state, refresh, revocation; `make real-server`: XOAUTH2 over IMAP and SMTP against GreenMail, which takes the account's password as the token |
 | No test reaches a keyring (ADR-053) | `every_harness_that_starts_the_binary_turns_the_keyring_off`; `doctor_with_the_keyring_turned_off_asks_no_keyring_service_and_says_what_turned_it_off`, on Linux and in the macOS job by name; `a_keyring_turned_off_is_asked_nothing_by_any_call`, asserted to have run in the `secret` job |
@@ -767,8 +844,8 @@ checklist for that.
 | A suspicious link can be given to an agent to review, when asked; the agent never opens it | M8 (ADR-031) |
 | An attachment opens in the system's program for its type | M8 |
 
-OpenPGP and invitations (M10) and the polish and release workflow (M11) come
-after it, and the calendar (M12 to M16) after those.
+OpenPGP (M10) and the polish and release workflow (M11) come after it.
+The calendar (M12 to M17) was built ahead of both (ADR-054's notes).
 
 ### M0 — Scaffold
 Repository `lampseen/tuimex`; workspace and seven crates with the edges of
@@ -878,15 +955,16 @@ message.
 
 ### The calendar (ADR-054)
 
-Five milestones, each one pull request and each useful without the next.
-The keys, commands, config keys and screens are the design's to state and
-are not listed here until M12 is merged; §6 and §11 are updated by the
-milestone that builds each.
+Planned as five milestones, each a pull request; built in order on one
+branch, `feat/calendar`, as one pull request (ADR-054's note), with CalDAV
+(M17) and the join that carries the interface's asks out. Each milestone
+below is followed by what was built. §4.6 says how the parts meet, §6 has
+the keys and commands, and §11 the config.
 
-Google's older CalDAV address accepts an app password (ADR-056's note),
-so CalDAV is how a Google account is read from M13 on and written from
-M14 on (ADR-062). The milestones are built in order on one branch and are
-one pull request (ADR-054's note).
+Google's older CalDAV address accepts an app password for reading
+(ADR-056's note), so CalDAV is how a Google account is read. It is
+written only where `write = true` (ADR-062), which `tuimex setup` sets
+once a write has been tried against that calendar.
 
 ### M12 — The calendar's design *(no Rust)*
 `design/tui.js` gains the calendar: fixtures (three accounts, an invitation
@@ -913,6 +991,8 @@ ADR-060 and ADR-061 say. Read-only.
 **Exit:** every calendar output of the design is drawn cell for cell; a
 corpus of hostile calendars, one test each; the secret job finds no feed
 address in any file; a feed that fails says so and keeps what it had.
+*Built.* The reason a calendar could not be read is also kept for
+`:messages`.
 
 ### M14 — Answer
 The five answers (ADR-057), which takes the invitation half of M10: the
@@ -923,6 +1003,13 @@ alone.
 `REPLY` parts, one valid `COUNTER`, and for ignore nothing sent; under
 `make real-server` the reply arrives from the account the invitation came
 to; a cancellation from anyone but the organizer changes nothing.
+*Built* (`calendar::carry::tests`, `calendar::mail::tests`). Beyond the
+plan: an invitation that is in mail alone is on the calendar until it is
+answered, which is every invitation of a Proton account; and the design
+draws no cancelled event, so one the organizer cancels is removed and
+said. The leg of `make real-server` that answers on a terminal and reads
+the reply and the event back from the two servers is written and, as
+this is written, not yet run.
 
 ### M15 — Remind
 Reminders while open, and the switch (ADR-058).
@@ -930,12 +1017,26 @@ Reminders while open, and the switch (ADR-058).
 notifier that records and never to the real desktop; a hostile title
 reaches it as one argument with nothing to render; off stays off across a
 restart.
+*Built*, with the status line and the bell (§6.6). No test runs
+`notify-send` or `osascript`, and nobody has seen either raise one.
 
 ### M16 — Edit
 The form; creating, changing and deleting an event, one occurrence or all;
 a `REQUEST` to the guests after the send summary (ADR-057); `:export`.
 **Exit:** an event made, changed and deleted round-trips through its file;
 the invitation it sends is read back by M13's parser as the same event.
+*Built.* The send summary is the form's own question, which names how
+many guests are mailed; a cancellation is mailed when an organizer
+deletes.
+
+### M17 — CalDAV, and writing only where it was tried
+A calendar read with `PROPFIND` and `REPORT` and written with conditional
+`PUT` and `DELETE` (ADR-062). `write` in `[[calendar]]` is false until
+`tuimex setup` has added and removed one event there, on the user's say.
+**Exit:** `make real-server` writes, changes, answers and deletes an
+event on Radicale through the real wire; every write for a calendar
+without the key stays local.
+*Built.* Writing to Google's calendar itself is untried.
 
 ---
 

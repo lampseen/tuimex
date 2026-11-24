@@ -46,7 +46,12 @@ the new size. A crash puts the terminal back before its message prints.
 `Alt-j` and its neighbours are read as Alt with the letter, or as `Esc`
 and the letter arriving together, whichever the terminal sends.
 
-Not built: the mouse, `NO_COLOR`, and desktop notifications.
+A reminder of an event rings the terminal's bell and, by `notify.via`,
+runs `notify-send` on Linux or `osascript` on macOS, or writes an OSC 9
+sequence for a terminal that shows one. No test runs either program, and
+neither has been seen to raise a notification by anyone here.
+
+Not built: the mouse, `NO_COLOR`, and notifications of new mail.
 
 The screens are compared with the design cell for cell in two renderings:
 truecolor with Unicode, and sixteen colours with ASCII. The 256-colour tier
@@ -65,6 +70,14 @@ and "should" is the honest word for most of them.
 | **Fastmail, iCloud** | setup knows their servers. Nobody has run them |
 | **anything else** | hosts and ports typed by hand in setup. How TLS begins on a port is found by trying |
 | **Microsoft 365** sign-in, **JMAP** | not built |
+
+## Calendars
+
+| | what has been run |
+|---|---|
+| **a CalDAV server in a container** | `make real-server`: Radicale, with an event written, changed, answered and deleted through the engine. A further leg answers an invitation in the interface on a terminal and reads the event back from Radicale; it was written on 2026-11-24 and had not been run when this page was last changed |
+| **Google**, over CalDAV with an app password | one request for a calendar's properties was answered by hand on 2026-11-24. A whole fetch has not been run, and nothing has ever been written |
+| **Proton** and any other feed | read from the private address. Tested against stand-ins; never fetched from Proton or Google |
 
 The by-hand script for real providers is
 [`docs/testing.md`](https://github.com/lampseen/tuimex/blob/main/docs/testing.md),

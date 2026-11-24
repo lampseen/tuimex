@@ -70,13 +70,13 @@ what you have typed; `^w` and `^u` delete a word and the line.
 | `:preview auto\|right\|below\|off` | where the preview sits |
 | `:sync [all]` | sync now |
 | `:empty-trash [account]` | delete an account's Trash for good, after a question with the count. `u` does not reach it |
-| `:invite accept\|tentative\|decline\|propose\|ignore` | answer an invitation. Not built: it says so and changes nothing |
-| `:calendar [month\|week\|day]` | open the calendar; alone, where it was. Only the month is drawn: the week and the day say they are not built |
+| `:invite accept\|tentative\|decline\|propose\|ignore` | answer the invitation of the message open in the reader, or of the event selected in the calendar. `propose` then asks for the time |
+| `:calendar [month\|week\|day]` | open the calendar; alone, where it was |
 | `:mail` | back to mail, where it was |
 | `:goto <date>` | go to a date in the calendar: `2026-12-05`, `5 dec`, `fri`, `+2w` |
-| `:notify on\|off` | reminders on or off, for this run. Not built beyond that: no reminder is given |
-| `:event [title]` | a new event on the selected day. Not built: the form says so |
-| `:export [path]` | write local events as .ics. Not built: it says so and writes nothing |
+| `:notify on\|off` | reminders on or off; the choice is remembered |
+| `:event [title]` | the form for a new event on the selected day |
+| `:export [path]` | write every local event to one `.ics` file, in the download directory or where the path says. Never over a file that is there |
 | `:messages` | the last results and errors |
 | `:q` | quit from the list; back elsewhere |
 | `:qa` | quit from anywhere |
@@ -96,5 +96,5 @@ you mean :archive? Tab to fix`.
 
 ---
 
-[Keys](Keys) · [The agent](The-agent) ·
+[Keys](Keys) · [Calendar](Calendar) · [The agent](The-agent) ·
 [Sections and search](Sections-and-search)

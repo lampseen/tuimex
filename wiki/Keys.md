@@ -68,9 +68,8 @@ The list's action keys work here too.
 ## In the calendar
 
 `gc` opens the calendar and `gm` returns to mail; each keeps where it
-was. It is being built. The month is drawn; the week, the day and an
-event's own screen say they are not built. Only `tuimex --fixtures` has
-events to show: reading an account's calendar is not built.
+was. A key that mail uses means the same here, except `h` and `l`.
+[Calendar](Calendar) says what each does at length.
 
 | key | does |
 |---|---|
@@ -83,14 +82,28 @@ events to show: reading an account's calendar is not built.
 | `Tab` `S-Tab` | next, previous view |
 | `1` `2` `3` | month, week, day |
 | `Enter` `Esc` | deeper, to the day and then the event; back |
-| `/` then `n` `N` | find; `Enter` searches a year either side of today. The list of what it found is not built |
+| `/` then `n` `N` | find; `Enter` lists every match a year either side of today |
 | `gt` `gT` | next, previous account alone |
 | `C` | the calendars, each to show or hide with `Space` |
-| `o` | the selected event's links, the meeting's first, each with the host it really opens. Opening one is not built |
-| `gn` | reminders on, off. No reminder is given yet |
+| `o` | the selected event's links, the meeting's first, each with the host it really opens; `Enter` or its number opens one |
+| `i` | answer an invitation: then `a` accept, `t` tentative, `d` decline, `p` propose another time, `x` ignore |
+| `c` `E` | a new event on the selected day; edit the selected event |
+| `d` | delete the selected event. One that repeats asks: `t` this one, `a` all of them |
+| `u` | take back the last thing done in the calendar |
+| `gn` | reminders on, off |
+| `gm` | back to mail |
 
-Not built, and each says so: `i` to answer an invitation, `c` and `E` for
-the form, `d` to delete.
+On an event's own screen `j` `k` `^d` `^u` `gg` `G` scroll, `zo` and `zc`
+unfold and fold what only some providers send, and `v` opens the mail the
+event came in. In the form:
+
+| key | does |
+|---|---|
+| `Tab` `S-Tab` | next, previous field |
+| `Left` `Right` | choose, where a field offers choices |
+| `Enter` | write the notes in your editor |
+| `^s` | save; guests are mailed after a question |
+| `Esc` | close; with changes, keep or discard |
 
 ## Answering a question
 

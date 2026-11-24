@@ -111,6 +111,19 @@ domain is nowhere in the conversation; only `y` sends, and for ten seconds
 after it `u` still stops the message.
 [Writing and sending](https://github.com/lampseen/tuimex/wiki/Writing-and-sending).
 
+## The calendar
+
+`gc` opens one calendar for every account, by month, week or day, and
+`gm` returns to mail. An invitation in your mail is on it before you have
+answered: `i` accepts, declines or proposes another time, the reply goes
+to the organizer from the account it came to, and `u` takes it back
+while it waits to be sent. Events of your own are made with `c`, and a
+reminder rings while tuimex is open. A provider's calendar is read; it is
+written only where `tuimex setup` has tried a write and it worked, and
+everything else is kept on this machine and marked `local`. Nothing has
+been run against Google's or Proton's own servers.
+[Calendar](https://github.com/lampseen/tuimex/wiki/Calendar).
+
 ## The agent
 
 Two things, both off until you turn them on. Inside tuimex, `A` hands a
@@ -126,8 +139,8 @@ subcommand that sends, moves, deletes or flags.
 
 ```
 ~/.config/tuimex/        your settings, a pinned certificate, a palette
-~/.local/share/tuimex/   your mail, one Maildir for each account
-~/.cache/tuimex/         the index and sealed copies, which can be rebuilt
+~/.local/share/tuimex/   your mail, one Maildir for each account, and your local events
+~/.cache/tuimex/         the index, sealed copies and fetched calendars, which can be rebuilt
 ~/.local/state/tuimex/   its log, and the record of every agent call
 ```
 
@@ -155,8 +168,8 @@ used tuimex on a Mac by hand.
 
 v1 leaves out, on purpose: Windows, Microsoft 365 sign-in and JMAP,
 composing HTML, remote content inside tuimex, search on the server,
-scripting and plugins, S/MIME, and a settings screen. OpenPGP and
-answering invitations are planned and not built.
+scripting and plugins, S/MIME, and a settings screen. OpenPGP is planned
+and not built.
 
 ## Contributing
 

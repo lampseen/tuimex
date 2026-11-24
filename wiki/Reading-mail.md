@@ -92,10 +92,24 @@ Above the text, one line each, only when true:
 
 ## An invitation
 
-A calendar invitation is shown as a card: what, when, where, who.
-Answering one is not built: `i` and `:invite` say so and change nothing.
+A calendar invitation is shown as a card: what, when, where, who. `i`
+asks `Answer?`, and the next key answers it: `a` accept, `t` tentative,
+`d` decline, `p` propose another time, `x` ignore. `:invite accept` and
+the rest do the same.
+
+An answer mails the organizer, from the account the invitation came to,
+and puts the event with your answer in that account's calendar; the
+result line says where, and `u` takes back both while the reply still
+waits in the Outbox. Ignoring sends nothing. An invitation you have not
+answered is on the calendar too, on its day, marked `needs answer`.
+[Calendar](Calendar#answering-an-invitation) has the whole of it.
+
+A card that answers nothing says why: the message's calendar part could
+not be read, the account organizes the event itself, or the invitation
+names no organizer to answer.
 
 ---
 
 [Links and the browser copy](Links-and-the-browser-copy) ·
-[Sections and search](Sections-and-search) · [Keys](Keys)
+[Calendar](Calendar) · [Sections and search](Sections-and-search) ·
+[Keys](Keys)
