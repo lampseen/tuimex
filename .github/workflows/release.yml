@@ -50,43 +50,56 @@ jobs:
       matrix:
         include:
           # The oldest Ubuntu images build the Linux binaries, so they run
-          # on any glibc at least that old. `is` is what `file` must say of
-          # the binary, so a build for the wrong machine is not packaged.
-          - { target: x86_64-unknown-linux-gnu, os: ubuntu-22.04, name: linux_amd64, is: 'ELF 64-bit.*x86-64' }
-          - { target: aarch64-unknown-linux-gnu, os: ubuntu-22.04-arm, name: linux_arm64, is: 'ELF 64-bit.*aarch64' }
-          # GitHub has retired its Intel macOS images; Apple silicon builds
-          # the Intel binary as a cross target, which Apple's clang does with
-          # the one SDK. Not pinned to a macOS version, as ci.yml is not: a
-          # pinned image is withdrawn in time, and a job on a withdrawn image
-          # is cancelled before it starts.
-          - { target: x86_64-apple-darwin, os: macos-latest, name: darwin_amd64, is: 'Mach-O 64-bit.*x86_64' }
-          - { target: aarch64-apple-darwin, os: macos-latest, name: darwin_arm64, is: 'Mach-O 64-bit.*arm64' }
+          # on any glibc at least that old.
+          - { os: ubuntu-22.04, builds: 'x86_64-unknown-linux-gnu=linux_amd64' }
+          - { os: ubuntu-22.04-arm, builds: 'aarch64-unknown-linux-gnu=linux_arm64' }
+          # One Mac builds both Mac binaries. GitHub has retired its Intel
+          # macOS images, and Apple silicon builds the Intel binary as a
+          # cross target with the one SDK; a second job would only be a
+          # second wait for a Mac runner, and those are the scarce ones.
+          # Not pinned to a macOS version, as ci.yml is not: a pinned image
+          # is withdrawn in time, and a job on a withdrawn image is
+          # cancelled before it starts.
+          - { os: macos-latest, builds: 'x86_64-apple-darwin=darwin_amd64 aarch64-apple-darwin=darwin_arm64' }
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
       - run: cc --version
-      - run: cargo build --release --locked --target ${{ matrix.target }}
-      - name: the binary is for the target
+      # No version in an archive's name, so /releases/latest/download/ URLs
+      # stay stable across releases. What `file` says of each binary is
+      # checked before it is packaged, so a build for the wrong machine
+      # never is.
+      - name: build, check and package each target
+        env:
+          BUILDS: ${{ matrix.builds }}
         run: |
           set -euo pipefail
-          file target/${{ matrix.target }}/release/tuimex | tee file.txt
-          grep -Eq '${{ matrix.is }}' file.txt
-      # No version in the archive name, so /releases/latest/download/ URLs
-      # stay stable across releases.
-      - name: package
-        run: |
-          set -euo pipefail
-          mkdir -p dist/pkg
-          cp target/${{ matrix.target }}/release/tuimex LICENSE README.md dist/pkg/
-          tar -czf dist/tuimex_${{ matrix.name }}.tar.gz -C dist/pkg tuimex LICENSE README.md
+          mkdir -p dist
+          for build in $BUILDS; do
+            target=${build%%=*}
+            name=${build##*=}
+            case "$target" in
+              x86_64-unknown-linux-gnu) is='ELF 64-bit.*x86-64' ;;
+              aarch64-unknown-linux-gnu) is='ELF 64-bit.*aarch64' ;;
+              x86_64-apple-darwin) is='Mach-O 64-bit.*x86_64' ;;
+              aarch64-apple-darwin) is='Mach-O 64-bit.*arm64' ;;
+              *) echo "::error::no check for $target"; exit 1 ;;
+            esac
+            rustup target add "$target"
+            cargo build --release --locked --target "$target"
+            file "target/$target/release/tuimex" | tee file.txt
+            grep -Eq "$is" file.txt
+            rm -rf dist/pkg && mkdir -p dist/pkg
+            cp "target/$target/release/tuimex" LICENSE README.md dist/pkg/
+            tar -czf "dist/tuimex_$name.tar.gz" -C dist/pkg tuimex LICENSE README.md
+            rm -rf dist/pkg
+          done
       - uses: actions/upload-artifact@v7
         with:
-          name: tuimex_${{ matrix.name }}
-          path: dist/tuimex_${{ matrix.name }}.tar.gz
+          name: archives-${{ matrix.os }}
+          path: dist/tuimex_*.tar.gz
           if-no-files-found: error
 
   # On a dry run this job still gathers the archives and writes the
