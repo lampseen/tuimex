@@ -1618,6 +1618,19 @@ tuimex for these accounts is `local` (ADR-055) and the provider's own apps
 do not know it. A leaked feed address cannot be revoked from tuimex, only
 at the provider.
 
+*2026-11-24, tried by hand.* A `PROPFIND` with depth 0 on
+`https://www.google.com/calendar/dav/<address>/events/`, signed in with
+the app password each account already keeps in the keyring, answered 207
+for both of Bryan's Google accounts, one at gmail.com and one on a domain
+Google hosts. The same request to
+`https://apidata.googleusercontent.com/caldav/v2/<address>/events/`
+answered 401 for both: that address wants OAuth2. So Google's older
+address accepts an app password for reading a calendar's properties.
+Whether it accepts a `PUT` is **unverified**: nothing was written, because
+a write would have put an event in a real calendar. CalDAV for Google gets
+its record and its stage (M17) on this result, and that record starts by
+trying the write against a calendar made for the purpose.
+
 ## ADR-057 — An answer goes to the organizer by mail, and into the calendar of the account it came to
 
 ADR-021 had three answers. There are five, on one question, from the
