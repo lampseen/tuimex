@@ -6,10 +6,16 @@
 //! Every request goes to an address the user configured, over TLS, with no
 //! redirect followed. Nothing a calendar names is fetched.
 
+use std::path::{Path, PathBuf};
+use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender};
+use std::thread::{self, JoinHandle};
+use std::time::{Duration, SystemTime};
+
 use tuimex_content::{DavItem, multistatus};
+use tuimex_core::{AccountId, Event, Timestamp};
 use tuimex_store::calendar::Calendars;
 
-use crate::Secret;
+use crate::{Keyring, Secret, SecretError, resolve};
 
 #[cfg(test)]
 mod tests;
@@ -45,6 +51,10 @@ pub enum CalendarError {
     Answer(String),
     #[error("the calendar could not be kept: {0}")]
     Store(String),
+    /// Why the password or the feed's address could not be had, in words
+    /// that hold neither.
+    #[error("{0}")]
+    Secret(String),
 }
 
 impl From<tuimex_store::Error> for CalendarError {
@@ -224,6 +234,19 @@ pub fn fetch_feed(
     address: &Secret,
     now: i64,
 ) -> Result<Fetch, CalendarError> {
+    let body = get_feed(wire, address)?;
+    let text = body.trim_start_matches('\u{feff}');
+    let unchanged =
+        store.held()?.iter().any(|h| h.account == account && h.calendar.as_deref() == Some(FEED) && h.text == text);
+    if !unchanged {
+        store.put(account, FEED, "", None, text)?;
+    }
+    store.read(account, FEED, None, None, now)?;
+    Ok(Fetch { unchanged, changed: usize::from(!unchanged), removed: 0 })
+}
+
+/// A feed's text, once it is known to be a calendar.
+fn get_feed(wire: &dyn Wire, address: &Secret) -> Result<String, CalendarError> {
     let url = address.expose();
     origin(url)?;
     let got = ok(wire.send(&Sent { method: "GET", url, depth: None, body: None, sign_in: None })?)?;
@@ -234,13 +257,274 @@ pub fn fetch_feed(
     if !text.trim_start().get(..15).is_some_and(|start| start.eq_ignore_ascii_case("BEGIN:VCALENDAR")) {
         return Err(CalendarError::NotACalendar);
     }
-    let unchanged =
-        store.held()?.iter().any(|h| h.account == account && h.calendar.as_deref() == Some(FEED) && h.text == text);
-    if !unchanged {
-        store.put(account, FEED, "", None, text)?;
+    Ok(got.body)
+}
+
+/// Whether `address` serves a calendar: one request, and nothing kept.
+pub fn check_feed(wire: &dyn Wire, address: &Secret) -> Result<(), CalendarError> {
+    get_feed(wire, address).map(drop)
+}
+
+/// Whether the CalDAV calendar at `url` takes the sign-in: one `PROPFIND`
+/// of the calendar alone, and nothing kept. The name it gives, if any.
+pub fn check_caldav(wire: &dyn Wire, url: &str, sign_in: (&str, &Secret)) -> Result<Option<String>, CalendarError> {
+    origin(url)?;
+    let sent = Sent { method: "PROPFIND", url, depth: Some(0), body: Some(PROPFIND), sign_in: Some(sign_in) };
+    let got = ok(wire.send(&sent)?)?;
+    let about = multistatus(&got.body).map_err(|e| CalendarError::Answer(e.to_string()))?;
+    Ok(about.into_iter().next().and_then(|item| item.name))
+}
+
+/// The host of an address tuimex may fetch, which is all of a feed's
+/// address that is ever shown (ADR-056).
+pub fn host(url: &str) -> Option<&str> {
+    origin(url).ok()?.split_once("://").map(|(_, host)| host)
+}
+
+/// The keyring entry of `account`'s feed address.
+pub fn feed_entry(account: &str) -> String {
+    format!("{account}/calendar-feed")
+}
+
+/// The address of `account`'s feed: what `address_cmd` prints, or else
+/// the keyring's entry, found the way an account's password is.
+pub fn feed_address(
+    account: &str,
+    address_cmd: Option<&[String]>,
+    keyring: &dyn Keyring,
+) -> Result<Secret, CalendarError> {
+    let whose = format!("address_cmd for {account}'s calendar");
+    resolve(&feed_entry(account), address_cmd, keyring).map_err(|error| {
+        CalendarError::Secret(match error {
+            SecretError::NoProgram { .. } => format!("{whose} names no program"),
+            SecretError::Spawn { program, source, .. } => format!("{whose} could not run {program}: {source}"),
+            SecretError::Failed { program, status, .. } => format!("{whose} failed: {program} ended with {status}"),
+            SecretError::Empty { .. } => format!("{whose} printed no address"),
+            SecretError::Keyring { reason, .. } => {
+                format!("the keyring could not be read for {account}'s calendar: {reason}")
+            }
+            SecretError::Missing { .. } => format!(
+                "there is no address for {account}'s calendar in the keyring, and no address_cmd; run `tuimex setup`"
+            ),
+        })
+    })
+}
+
+/// How a configured calendar is reached.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Source {
+    /// Signed in to as the account's mail is: as `user`, with the password
+    /// its `password_cmd` prints or the keyring holds.
+    CalDav { url: String, user: String, password_cmd: Option<Vec<String>> },
+    /// A private address, printed by `address_cmd` or kept in the keyring
+    /// under `feed_entry`.
+    Feed { address_cmd: Option<Vec<String>> },
+}
+
+/// One `[[calendar]]` of the config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Configured {
+    pub account: String,
+    pub source: Source,
+}
+
+impl Configured {
+    /// `caldav` or `feed`, as the config writes it.
+    pub fn kind(&self) -> &'static str {
+        match self.source {
+            Source::CalDav { .. } => "caldav",
+            Source::Feed { .. } => "feed",
+        }
     }
-    store.read(account, FEED, None, None, now)?;
-    Ok(Fetch { unchanged, changed: usize::from(!unchanged), removed: 0 })
+
+    /// What the store files the calendar under: a CalDAV calendar's
+    /// address, which is no secret, and never a feed's.
+    fn key(&self) -> &str {
+        match &self.source {
+            Source::CalDav { url, .. } => url,
+            Source::Feed { .. } => FEED,
+        }
+    }
+}
+
+/// What one calendar's part of a pass came to.
+#[derive(Debug)]
+pub struct Outcome {
+    pub account: String,
+    pub kind: &'static str,
+    /// The host asked, where it is known: a feed's is known only once its
+    /// address has been found.
+    pub host: Option<String>,
+    pub read: Result<Fetch, CalendarError>,
+    /// When the calendar was last read whole, this pass included.
+    pub read_at: Option<i64>,
+}
+
+/// The days either side of today that a CalDAV calendar is asked for.
+const BEFORE: i64 = 90;
+const AFTER: i64 = 730;
+const DAY: i64 = 86_400;
+
+fn fetch_one(
+    wire: &dyn Wire,
+    store: &Calendars,
+    keyring: &dyn Keyring,
+    calendar: &Configured,
+    now: i64,
+) -> (Option<String>, Result<Fetch, CalendarError>) {
+    let account = calendar.account.as_str();
+    match &calendar.source {
+        Source::CalDav { url, user, password_cmd } => {
+            let host = host(url).map(str::to_string);
+            let password = match resolve(account, password_cmd.as_deref(), keyring) {
+                Ok(password) => password,
+                Err(error) => return (host, Err(CalendarError::Secret(error.to_string()))),
+            };
+            let today = now.div_euclid(DAY);
+            (host, fetch_caldav(wire, store, account, url, (user, &password), (today - BEFORE, today + AFTER), now))
+        }
+        Source::Feed { address_cmd } => {
+            let address = match feed_address(account, address_cmd.as_deref(), keyring) {
+                Ok(address) => address,
+                Err(error) => return (None, Err(error)),
+            };
+            (host(address.expose()).map(str::to_string), fetch_feed(wire, store, account, &address, now))
+        }
+    }
+}
+
+/// Fetches each calendar once, in order; one that fails does not stop
+/// the rest.
+pub fn pass(
+    wire: &dyn Wire,
+    store: &Calendars,
+    keyring: &dyn Keyring,
+    calendars: &[Configured],
+    now: i64,
+) -> Vec<Outcome> {
+    let mut outcomes = Vec::new();
+    for calendar in calendars {
+        let (host, read) = fetch_one(wire, store, keyring, calendar, now);
+        // A store that cannot say when it last read a calendar is said as
+        // one never read: whether the store works is what `read` says.
+        let fetched = store.fetched().unwrap_or_default();
+        let read_at =
+            fetched.iter().find(|f| f.account == calendar.account && f.calendar == calendar.key()).map(|f| f.read_at);
+        outcomes.push(Outcome { account: calendar.account.clone(), kind: calendar.kind(), host, read, read_at });
+    }
+    outcomes
+}
+
+/// How often the calendar thread reads every calendar unasked.
+pub const EVERY: Duration = Duration::from_secs(15 * 60);
+
+/// What the calendar thread needs. It owns its own handle on the store,
+/// for writing; anyone else reads through one of their own.
+pub struct Runner {
+    pub calendars: Vec<Configured>,
+    pub wire: Box<dyn Wire + Send>,
+    pub keyring: Box<dyn Keyring>,
+    pub data: PathBuf,
+    pub cache: PathBuf,
+    /// `EVERY`, except in a test.
+    pub every: Duration,
+}
+
+/// Starts the calendar thread beside the mail's (ADR-006). It reads every
+/// calendar at once, then every `every` and whenever `nudges` delivers,
+/// and says how each went on `events`. It ends when `nudges` has no
+/// sender left, or nobody listens on `events`.
+pub fn start(runner: Runner, nudges: Receiver<()>, events: Sender<Event>) -> JoinHandle<()> {
+    thread::spawn(move || runner.run(&nudges, &events))
+}
+
+fn now() -> i64 {
+    // A clock set before 1970 is read as 1970: the times it gives are
+    // shown, and decide nothing.
+    let since = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default();
+    i64::try_from(since.as_secs()).unwrap_or(i64::MAX)
+}
+
+impl Runner {
+    fn run(&self, nudges: &Receiver<()>, events: &Sender<Event>) {
+        let mut store = None;
+        while self.once(&mut store, events) {
+            match nudges.recv_timeout(self.every) {
+                // Nudges that came while a pass ran are all answered by
+                // the next one.
+                Ok(()) => nudges.try_iter().for_each(drop),
+                Err(RecvTimeoutError::Timeout) => {}
+                Err(RecvTimeoutError::Disconnected) => return,
+            }
+        }
+    }
+
+    /// One pass, said on `events`; false once nobody listens.
+    fn once(&self, store: &mut Option<Calendars>, events: &Sender<Event>) -> bool {
+        if store.is_none() {
+            match Calendars::open(&self.data, &self.cache) {
+                Ok(opened) => *store = Some(opened),
+                Err(error) => {
+                    let reason = CalendarError::from(error).to_string();
+                    return self.calendars.iter().all(|calendar| {
+                        let account = AccountId(calendar.account.clone());
+                        events.send(Event::CalendarFailed { account, reason: reason.clone(), read_at: None }).is_ok()
+                    });
+                }
+            }
+        }
+        let Some(store) = store.as_ref() else { return true };
+        for outcome in pass(self.wire.as_ref(), store, self.keyring.as_ref(), &self.calendars, now()) {
+            let account = AccountId(outcome.account);
+            let event = match outcome.read {
+                Ok(fetch) => Event::CalendarRead { account, changed: fetch.changed + fetch.removed > 0 },
+                Err(error) => Event::CalendarFailed {
+                    account,
+                    reason: error.to_string(),
+                    read_at: outcome.read_at.map(Timestamp),
+                },
+            };
+            if events.send(event).is_err() {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+/// Something held of a calendar, parsed, with what the views say beside
+/// each of its events.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Kept {
+    pub account: String,
+    /// Only here, in a file of tuimex's own (ADR-055): drawn `local`.
+    pub local: bool,
+    /// The calendar's name, where its provider gave one.
+    pub name: Option<String>,
+    /// When its calendar was last read whole; None for a local event.
+    pub read_at: Option<i64>,
+    pub calendar: tuimex_core::calendar::Calendar,
+}
+
+/// Everything held, fetched and local, read through a handle of the
+/// caller's own: SQLite lets it read while the calendar thread writes.
+pub fn kept(data: &Path, cache: &Path) -> Result<Vec<Kept>, CalendarError> {
+    let store = Calendars::open(data, cache)?;
+    let fetched = store.fetched()?;
+    let kept = store.held()?.into_iter().map(|held| {
+        let about = held
+            .calendar
+            .as_ref()
+            .and_then(|calendar| fetched.iter().find(|f| f.account == held.account && f.calendar == *calendar));
+        Kept {
+            local: held.calendar.is_none(),
+            name: about.and_then(|f| f.name.clone()),
+            read_at: about.map(|f| f.read_at),
+            calendar: tuimex_content::calendar(&held.text),
+            account: held.account,
+        }
+    });
+    Ok(kept.collect())
 }
 
 /// The wire itself: `ureq` over TLS, told to follow no redirect and to
