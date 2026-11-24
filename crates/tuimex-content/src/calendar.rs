@@ -15,6 +15,9 @@ use crate::text::{clean, line, push_unique};
 
 #[cfg(test)]
 mod tests;
+mod write;
+
+pub use write::{cancel, counter, event_text, new_uid, reply, request, with_answer};
 
 struct Prop {
     name: String,
