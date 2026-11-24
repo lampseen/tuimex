@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
 
 use tuimex_core::calendar::{DAY, Event, Guest, Method, Moment, Said, days_from_civil};
-use tuimex_core::{AccountId, Address, CalendarPart, Draft, MessageId, Origin};
+use tuimex_core::invitation::answer;
+use tuimex_core::{AccountId, Address, Answer, CalendarPart, Draft, MessageId, Origin};
+use tuimex_engine::invitation::{About, draft as answer_draft};
 
 use super::{Bcc, File, build, header_id, mime};
 
@@ -226,4 +228,34 @@ fn a_calendar_part_is_sent_beside_the_text_and_read_back_byte_for_byte() {
             }
         }
     }
+}
+
+/// The answer as the engine hands it to the builder: from the invited
+/// identity, to the organizer alone, threaded under the invitation, with a
+/// subject the event's hostile title cannot add a header to.
+#[test]
+fn an_answer_is_built_as_one_message_to_the_organizer() {
+    let mut event = invitation();
+    event.summary = "Lunch\r\nBcc: eve@example.net\r\n\r\nforged body".into();
+    event.guests.extend((0..40).map(|n| Guest { who: person("", &format!("g{n}@example.net")), said: Said::Nothing }));
+    let identities = [person("", "work@example.org"), person("Robin Vale", "robin.vale@example.org")];
+    let answering = answer(&event, &identities, &Answer::Tentative).unwrap();
+    let zones = BTreeMap::new();
+    let about = About { event: &event, zones: &zones, answers: Some("<invite-1@example.com>"), stamp: 0 };
+    let carrying = answer_draft("work", answering.mail.as_ref().unwrap(), &about).unwrap();
+    let raw = build(&carrying, Vec::new(), 0, "k", Bcc::Withheld).unwrap();
+    let shown = text(&raw);
+
+    let head = tuimex_content::envelope(&raw).unwrap();
+    assert_eq!(head.from, [person("Robin Vale", "robin.vale@example.org")]);
+    assert_eq!(head.to, [person("Ada Example", "ada@example.com")]);
+    assert_eq!((head.cc.len(), head.bcc.len()), (0, 0));
+    assert_eq!(head.subject, "Tentative: Lunch Bcc: eve@example.net forged body");
+    assert!(!shown.lines().any(|l| l.to_ascii_lowercase().starts_with("bcc")), "{shown}");
+    assert!(shown.contains("In-Reply-To: <invite-1@example.com>"), "{shown}");
+    let sending = tuimex_content::submission(&raw).unwrap();
+    assert_eq!(sending.recipients, [person("Ada Example", "ada@example.com")]);
+    let part = tuimex_content::calendar_part(&raw).unwrap().unwrap();
+    assert_eq!(part.method, Method::Reply);
+    assert!(part.text.contains("PARTSTAT=TENTATIVE:mailto:robin.vale@example.org"), "{}", part.text);
 }

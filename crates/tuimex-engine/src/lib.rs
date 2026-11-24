@@ -8,6 +8,7 @@ pub mod agent;
 mod backoff;
 pub mod calendar;
 mod imap;
+pub mod invitation;
 pub mod oauth;
 mod outbox;
 pub mod pin;
