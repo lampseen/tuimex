@@ -844,3 +844,16 @@ fn a_long_answered_line_is_folded_and_unfolds_to_itself() {
     assert_eq!(changed(&text, &after).len(), 1);
     assert_eq!(calendar(&after).events[0].guests[0].said, Said::Accepted);
 }
+
+#[test]
+fn several_events_are_one_calendar_that_defines_each_zone_once() {
+    let berlin = |day: i64, hour: i64| wall(at(2026, 7, day, hour), Some("Europe/Berlin"));
+    let series = Event { repeat: Some(Repeat::Rule(rule(Freq::Weekly))), ..plain(berlin(1, 10)) };
+    let moved = Event { instead_of: Some(berlin(8, 10)), ..plain(berlin(8, 14)) };
+    let text = events_text(&[series.clone(), moved.clone()], &zones(), STAMP);
+    assert_well_formed(&text);
+    assert_eq!(text.matches("BEGIN:VCALENDAR").count(), 1);
+    assert_eq!(text.matches("BEGIN:VTIMEZONE").count(), 1);
+    assert_eq!(calendar(&text).events, [series.clone(), moved]);
+    assert_eq!(events_text(std::slice::from_ref(&series), &zones(), STAMP), event_text(&series, &zones(), STAMP));
+}

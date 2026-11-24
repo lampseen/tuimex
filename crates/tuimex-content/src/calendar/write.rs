@@ -26,8 +26,17 @@ const FOLD: usize = 75;
 /// event is PUT to a CalDAV server. `stamp` is the `DTSTAMP`, in seconds
 /// since the epoch.
 pub fn event_text(event: &Event, zones: &BTreeMap<String, Zone>, stamp: i64) -> String {
-    let mut out = Out::new(None, event_zones(event), zones);
-    out.event(event, stamp, Guests::AsSaid);
+    events_text(std::slice::from_ref(event), zones, stamp)
+}
+
+/// One calendar holding every one of `events`: an event with the events
+/// that stand in for days of it, which a provider keeps as one thing, and
+/// what `:export` writes.
+pub fn events_text(events: &[Event], zones: &BTreeMap<String, Zone>, stamp: i64) -> String {
+    let mut out = Out::new(None, events.iter().flat_map(event_zones).collect(), zones);
+    for event in events {
+        out.event(event, stamp, Guests::AsSaid);
+    }
     out.finish()
 }
 
