@@ -3,6 +3,7 @@
 //! workspace crate sits below this one (ADR-001).
 
 mod action;
+pub mod calendar;
 mod compose;
 mod link;
 mod listed;
