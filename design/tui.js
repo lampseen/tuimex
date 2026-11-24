@@ -220,7 +220,8 @@ const KEYMAP = {
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
     'the calendar is a place and not a section: `gc` opens it and `gm` returns, each side keeping where it was (ADR-054).',
     'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
-    'calendar: `e` edits; nothing there is archived.',
+    'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
+    'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -305,7 +306,8 @@ const KEYMAP = {
       { id: 'calendar.day', keys: 'h l', does: 'previous, next day' },
       { id: 'calendar.move', keys: 'j k', does: 'month: week; else: event' },
       { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
-      { id: 'calendar.event', keys: 'n N', does: 'next, previous event', hint: 'next event' },
+      { id: 'calendar.event', keys: 'J K', does: 'next, previous event', hint: 'next event' },
+      { id: 'calendar.match', keys: 'n N', does: 'next, previous match' },
       { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
       { id: 'calendar.today', keys: 't', does: 'today', hint: 'today' },
       { id: 'calendar.goto', keys: 'gd', does: 'go to a date', hint: 'go to' },
@@ -315,20 +317,19 @@ const KEYMAP = {
       { id: 'calendar.find', keys: '/', does: 'find events', hint: 'find' },
       { id: 'calendar.account', keys: 'gt gT', does: 'next, previous account' },
       { id: 'calendar.calendars', keys: 'C', does: 'show, hide calendars', hint: 'calendars' },
-      { id: 'calendar.join', keys: 'o', does: 'open the meeting link', hint: 'join' },
+      { id: 'calendar.links', keys: 'o', does: 'links; the meeting first', hint: 'links' },
       { id: 'calendar.answer', keys: 'i', does: 'answer an invitation', hint: 'answer' },
       { id: 'calendar.new', keys: 'c', does: 'new event here', hint: 'new event' },
-      { id: 'calendar.edit', keys: 'e', does: 'edit the event', hint: 'edit' },
+      { id: 'calendar.edit', keys: 'E', does: 'edit the event', hint: 'edit' },
       { id: 'calendar.delete', keys: 'd', does: 'delete the event', hint: 'delete' },
       { id: 'calendar.reminders', keys: 'gn', does: 'reminders on, off' },
       { id: 'calendar.mail', keys: 'gm', does: 'back to mail', hint: 'mail' },
     ] },
     { mode: 'event', title: 'Event', keys: [
       { id: 'event.scroll', keys: 'j k ^d ^u gg G', does: 'scroll' },
-      { id: 'event.step', keys: '[ ]', does: 'previous, next event' },
       { id: 'event.fold', keys: 'zo zc', does: 'unfold, fold More', hint: 'more' },
       { id: 'event.mail', keys: 'v', does: 'the mail it came in', hint: 'its mail' },
-      { id: 'event.actions', keys: 'o i e d n N I', does: 'as in the calendar' },
+      { id: 'event.actions', keys: 'o i E d J K I', does: 'as in the calendar' },
     ] },
     { mode: 'calendars', title: 'Calendars (after C)', keys: [
       { id: 'calendars.choose', keys: 'j k', does: 'choose', hint: 'choose' },
@@ -913,7 +914,7 @@ const SAY = {
   notInvited: `{err|E i: nobody asked for an answer to this event}`,
   notADate: (typed) => `{err|E gd: not a date: "${typed}"}${then('2026-12-05, 5 dec, fri, +2w')}`,
   // The right of the status line, with what mail puts there.
-  reminder: (what, lead) => `{warn|${G.notice} ${what} in ${lead}}${then('o joins')}`,
+  reminder: (what, lead) => `{warn|${G.notice} ${what} in ${lead}}${then('o for its link')}`,
   remindersAreOff: '{dim|reminders off}',
   calendarUnread: (account, last) => `{err|${account}'s calendar not read}${then(`last read ${last} ago`)}`,
 
@@ -1855,7 +1856,7 @@ function calendarHint(ev) {
   if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', 'calendar.mail', 'global.help');
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
-  if (ev.link) extra.push('calendar.join');
+  if (ev.link) extra.push('calendar.links');
   return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', 'global.back', 'global.help');
 }
 
@@ -2164,7 +2165,7 @@ function moreRows(ev, open) {
 function eventHint(ev) {
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
-  if (ev.link) extra.push('calendar.join');
+  if (ev.link) extra.push('calendar.links');
   if (ev.mail) extra.push('event.mail');
   return hint(...extra, 'calendar.edit', 'calendar.delete', 'global.back');
 }
@@ -2217,6 +2218,10 @@ function calendarEntries(hidden = []) {
       run(`${count} event${count === 1 ? '' : 's'}`.padEnd(12), off ? 'faint' : 'dim'), run(c.source === 'local' ? 'only in tuimex' : `read ${c.read} ago`, off ? 'faint' : 'dim'), ...(off ? [gap(3), run('hidden', 'dim')] : [])];
   });
 }
+
+// An event's link as the links panel lists it: the host it really opens,
+// and the warning when its text names another (ADR-018).
+const eventLinks = (ev) => linkEntries([{ n: 1, host: ev.link.host, shown: ev.link.shown || 'the meeting', url: ev.link.url, warning: ev.link.shown && SAY.link.textSays(ev.link.shown) }]);
 
 // A few rows of a day, the status line and the command line: one step of a
 // flow in the calendar.
@@ -2739,14 +2744,14 @@ function build(mode = {}) {
 
   const offsite = { id: 'offsite', account: 'work', n: thu, day: '2026-11-26', start: '14:00', end: '15:00', title: 'Offsite planning', where: 'Room Fjord', invited: ['imani', 'lars'], local: true };
   const form = (more) => eventFormScreen(W, H, { ev: offsite, heading: 'New event', focused: 'Title', typing: true, ...more });
-  screen('cal-edit', 'Event form', 'after c or e: a field to a row as in compose; a date is typed as words and the status line says what it was taken to mean', form());
+  screen('cal-edit', 'Event form', 'after c or E: a field to a row as in compose; a date is typed as words and the status line says what it was taken to mean', form());
 
   screen('help-calendar', 'Help, in the calendar', '? in the calendar leads with the calendar\'s keys; typing filters every key and command as it does in mail', helpScreen(W, H, '', 0, 'calendar'));
 
   flow('cal-zoom', 'Enter goes deeper, Esc comes back', [
     { key: 'gc', caption: 'Month', note: 'From mail. The calendar opens where it was left; the first time, on today.', rows: cut(month(LAYOUT.default), 11) },
     { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 11) },
-    { key: 'Enter', caption: 'Event', note: '[ and ] step to the events on either side without going back.', rows: cut(event(LAYOUT.default), 11) },
+    { key: 'Enter', caption: 'Event', note: 'J and K step to the events on either side without going back, as they do from a message.', rows: cut(event(LAYOUT.default), 11) },
     { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 11) },
   ]);
 
@@ -2775,10 +2780,15 @@ function build(mode = {}) {
   ]);
 
   const reviewLink = occurrence('review', fri).link;
+  const review = occurrence('review', fri);
   flow('cal-join', 'Joining a meeting', [
-    { key: 'o', caption: 'Opened', note: 'One link: the status line shows where it really goes and it opens in the browser.',
+    { key: 'o', caption: 'Its links', note: 'o is what it is in the reader: the links, each with the host it really opens. The meeting comes first and is selected.',
+      rows: calendarStrip(thu, { selected: 'roadmap', panel: panel('Links', eventLinks(theEvent), 0), left: SAY.opens(theEvent.link.url), command: linksHint() }) },
+    { key: 'Enter', caption: 'Opened', note: 'Enter, or 1, opens it in the browser.',
       rows: calendarStrip(thu, { selected: 'roadmap', left: SAY.opens(theEvent.link.url), command: said(SAY.joining(theEvent.link.host)) }) },
-    { key: 'o', caption: 'Asked first', note: 'A link whose text names another host is confirmed first, as in mail (ADR-018).',
+    { key: 'o', caption: 'A link that lies', note: 'A link whose text names another host says so in the panel.',
+      rows: calendarStrip(fri, { selected: 'review', panel: panel('Links', eventLinks(review), 0), left: SAY.opens(reviewLink.url), command: linksHint() }) },
+    { key: 'Enter', caption: 'Asked first', note: 'And is confirmed before it opens, as in mail (ADR-018).',
       rows: calendarStrip(fri, { selected: 'review', left: SAY.opens(reviewLink.url), command: said(SAY.deceptive(reviewLink.shown, reviewLink.host, true)) }) },
     { key: 'n', caption: 'Not opened', note: 'Any key but y leaves it closed.',
       rows: calendarStrip(fri, { selected: 'review' }) },
@@ -2801,7 +2811,7 @@ function build(mode = {}) {
   flow('cal-reminder', 'A reminder, and turning them off', [
     { key: '', caption: 'Ten minutes before', note: 'While tuimex is open: the bell, this line wherever you are, and a desktop notification carrying the title alone (ADR-058).',
       rows: calendarStrip(TODAY, { selected: 'halden-call', reminder: ['Halden contract call', '10 min'] }) },
-    { key: 'o', caption: 'Joined', note: 'o joins the event a reminder names, from mail as well.',
+    { key: 'o Enter', caption: 'Joined', note: 'The same two keys as anywhere: the links, then the one to open.',
       rows: calendarStrip(TODAY, { selected: 'halden-call', left: SAY.opens(occurrence('halden-call', TODAY).link.url), command: said(SAY.joining('meet.example.org')) }) },
     { key: 'gn', caption: 'Off', note: 'Remembered across runs. Off is shown; on is not.',
       rows: calendarStrip(TODAY, { selected: 'halden-call', remindersOff: true, command: said(SAY.remindersOff) }) },
