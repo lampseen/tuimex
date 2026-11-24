@@ -6,7 +6,7 @@ use tuimex_core::{Address, Attachment, Body, Head, Link, Security, Timestamp, Un
 
 use crate::sanitise::{IMAGE_TYPES, InlineImage, sanitise};
 use crate::text::{clean, line, push_unique};
-use crate::{Error, html, invite};
+use crate::{Error, html};
 
 #[cfg(test)]
 mod tests;
@@ -108,7 +108,7 @@ pub fn body(raw: &[u8], width: usize) -> Result<Body, Error> {
         text: shown,
         links,
         attachments: described.collect(),
-        invite: calendar.and_then(|c| invite::invite(&c)),
+        invite: calendar.and_then(|c| crate::calendar::invite(&c)),
         blocked_remote: page.remote,
         remote_images: page.images,
         image_hosts: page.image_hosts,

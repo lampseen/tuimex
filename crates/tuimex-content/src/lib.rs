@@ -2,9 +2,9 @@
 //! (ADR-007). It has no dependency that opens a file or a socket, so a
 //! parsing bug can produce wrong text and nothing worse.
 
+mod calendar;
 mod css;
 mod html;
-mod invite;
 mod message;
 mod sanitise;
 mod text;
@@ -12,7 +12,7 @@ mod trackers;
 
 use tuimex_core::Link;
 
-pub use invite::invite;
+pub use calendar::{calendar, invite};
 pub use message::{
     Payload, Structure, Submission, attachment, body, browser_copy, envelope, structure, submission, unsubscribe,
 };
