@@ -11,6 +11,7 @@ mod message;
 mod policy;
 mod query;
 mod redact;
+pub mod reminder;
 mod remote;
 mod thread;
 
