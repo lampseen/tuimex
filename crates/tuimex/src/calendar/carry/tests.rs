@@ -683,3 +683,27 @@ fn the_local_events_are_exported_as_one_calendar_and_an_event_is_found_as_an_ask
     assert_eq!(rig.reader.event(&id(false, "planning@example.com")).map(|e| e.summary.as_str()), Some("Planning"));
     assert_eq!(rig.reader.event(&id(true, "planning@example.com")), None, "in the calendar named, and no other");
 }
+
+/// The file of what was ignored and proposed is the reader's own. One
+/// that does not read is said at the start and never written over;
+/// everything that does not need it goes on working.
+#[test]
+fn answers_that_could_not_be_read_are_said_and_never_written_over() {
+    let root = scratch("own-unread");
+    let file = root.join("data/.calendars/answers.json");
+    std::fs::create_dir_all(file.parent().unwrap()).unwrap();
+    std::fs::write(&file, "{ not what tuimex wrote").unwrap();
+    let mut rig = Rig::over(root, Kind::Feed, &[ME]);
+    rig.calendars().put("work", provider::FEED, "", None, &invitation("planning@example.com", 0, None, "")).unwrap();
+    let (told, _events) = mpsc::channel();
+    let said = rig.reader.start(told).unwrap_err();
+    assert!(said.contains("answers.json"), "{said}");
+
+    let refused = rig.ask(answer(false, "planning@example.com", Answer::Ignore)).unwrap_err();
+    assert!(refused.reason.starts_with("what was ignored and proposed before could not be read"), "{}", refused.reason);
+    assert_eq!(refused.hint, "mend or remove that file, and start tuimex again");
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "{ not what tuimex wrote");
+    assert!(rig.shown().0.ignored.is_empty(), "and nothing is shown as ignored that was not kept");
+    rig.ask(answer(false, "planning@example.com", Answer::Accept)).expect("an answer outright needs none of it");
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "{ not what tuimex wrote");
+}

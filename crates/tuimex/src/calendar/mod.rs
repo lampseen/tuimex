@@ -173,6 +173,9 @@ pub struct Reader {
     writable: Vec<String>,
     wire: Option<(Box<dyn Wire + Send>, Box<dyn Keyring>)>,
     own: own::Own,
+    /// Why what the reader had ignored and proposed could not be read at
+    /// the start, when it could not: it is then never written over.
+    own_unread: Option<String>,
     mail: mail::Mail,
     /// The calendar asks of this run that were carried out, oldest first.
     done: Vec<carry::Done>,
@@ -226,6 +229,7 @@ impl Reader {
             writable: Vec::new(),
             wire: None,
             own: own::Own::default(),
+            own_unread: None,
             mail: mail::Mail::open(&cache),
             done: Vec::new(),
             data,
@@ -249,6 +253,7 @@ impl Reader {
     /// why the store could not be read; the thread is started all the same.
     pub fn start(&mut self, events: Sender<Event>) -> Result<(), String> {
         let own = own::Own::load(&self.data).map(|own| self.own = own);
+        self.own_unread = own.clone().err();
         let read = own.and(self.read());
         if let Some(runner) = self.runner.take() {
             let (nudges, nudged) = mpsc::channel();

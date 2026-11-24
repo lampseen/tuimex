@@ -333,9 +333,12 @@ impl Reader {
             let there = held.filter(|held| held.calendar.is_none() == step.local).find(|held| held.href == step.href);
             self.set(&store, &mut again.steps, &site, there.map(thing).as_ref(), step.was.as_deref())?;
         }
-        if let Some(own) = &done.own {
+        if let Some(own) = done.own.as_ref().filter(|own| **own != self.own) {
             again.own = Some(std::mem::replace(&mut self.own, own.clone()));
-            self.own.save(&self.data)?;
+            // A file that was never written over has nothing to put back.
+            if self.own_unread.is_none() {
+                self.save_own()?;
+            }
         }
         Ok(again)
     }
@@ -440,7 +443,22 @@ impl Reader {
             done.own = None;
             return Ok(());
         }
-        Ok(self.own.save(&self.data)?)
+        self.save_own()
+    }
+
+    /// Writes what the reader ignored and proposed. Where what an earlier
+    /// run kept could not be read, it is not written over: the file is
+    /// the reader's own, and whatever is wrong with it may be mended.
+    pub(super) fn save_own(&self) -> Result<(), Refusal> {
+        match &self.own_unread {
+            Some(why) => Err(Refusal {
+                reason: format!(
+                    "what was ignored and proposed before could not be read, and is not written over ({why})"
+                ),
+                hint: "mend or remove that file, and start tuimex again".to_string(),
+            }),
+            None => Ok(self.own.save(&self.data)?),
+        }
     }
 
     /// An answer (ADR-057): the calendar of the account it came to gains

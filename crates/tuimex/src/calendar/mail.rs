@@ -264,8 +264,11 @@ impl Reader {
             Later::Update => {
                 events.iter_mut().filter(|event| same(event)).for_each(|event| *event = incoming.clone());
                 // A time proposed was for the version this one replaces.
+                let proposed = self.own.proposed.len();
                 self.own.settle(account, &incoming.uid);
-                self.own.save(&self.data)?;
+                if self.own.proposed.len() != proposed {
+                    self.save_own()?;
+                }
                 format!("{title} was changed by its organizer")
             }
             // The design draws no cancelled event, so it goes, and this
