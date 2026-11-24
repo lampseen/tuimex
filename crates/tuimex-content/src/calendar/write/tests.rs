@@ -372,7 +372,8 @@ fn a_rule_is_written_as_rfc_5545_asks() {
     );
     assert_eq!(
         text(wall(0, Some("Europe/Berlin")), Rule { until, ..rule(Freq::Weekly) }).as_deref(),
-        Some("RRULE:FREQ=WEEKLY;UNTIL=20261231T235959Z")
+        Some("RRULE:FREQ=WEEKLY;UNTIL=20261231T225959Z"),
+        "the instant, for a start in a zone: a second before midnight in Berlin's winter is 22:59:59 UTC"
     );
     assert_eq!(
         text(wall(0, None), Rule { until, ..rule(Freq::Weekly) }).as_deref(),

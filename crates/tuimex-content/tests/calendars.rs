@@ -117,7 +117,9 @@ fn google_repeating() {
         Some(Moment::Wall { wall: at(2026, 11, 26, 9, 30), zone: Some("America/New_York".into()) })
     );
     let Some(Repeat::Rule(rule)) = &series.repeat else { panic!("the weekday rule is one tuimex works out") };
-    assert_eq!((rule.freq, rule.by_day.len(), rule.until), (Freq::Weekly, 5, Some(at(2026, 12, 31, 23, 59) + 59)));
+    // The end is written as an instant, 23:59:59 UTC, which on New York's
+    // clock, the one the series repeats on, is 18:59:59.
+    assert_eq!((rule.freq, rule.by_day.len(), rule.until), (Freq::Weekly, 5, Some(at(2026, 12, 31, 18, 59) + 59)));
 
     // Folded lines are one line again, parameters and all.
     let guests: Vec<(&str, Option<&str>, Said)> =

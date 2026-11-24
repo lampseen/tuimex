@@ -341,3 +341,33 @@ fn a_calendar_written_to_do_harm_is_only_text() {
     );
     assert_eq!(calendar(&long).events[0].summary.len(), 2_000_000);
 }
+
+#[test]
+fn a_series_ended_at_an_instant_ends_on_the_clock_it_repeats_on() {
+    // New York, 09:30 daily. The provider cut the series short before the
+    // 26th by writing the second before that occurrence, in UTC: 14:29:59.
+    // Read as a time on New York's clock it would be after 09:30, and the
+    // 26th would come back.
+    let cut = only("DTSTART;TZID=America/New_York:20261123T093000\r\nRRULE:FREQ=DAILY;UNTIL=20261126T142959Z");
+    let Some(Repeat::Rule(rule)) = cut.repeat else { panic!("a daily rule is one tuimex works out") };
+    assert_eq!(rule.until, Some(wall_at(2026, 11, 26, 9) + 29 * 60 + 59));
+    // A zone the calendar does not define cannot be converted, and a start
+    // with no zone or in UTC needs no conversion.
+    for start in ["DTSTART;TZID=Mars/Olympus:20261123T093000", "DTSTART:20261123T093000", "DTSTART:20261123T093000Z"] {
+        let Some(Repeat::Rule(rule)) = only(&format!("{start}\r\nRRULE:FREQ=DAILY;UNTIL=20261126T142959Z")).repeat
+        else {
+            panic!()
+        };
+        assert_eq!(rule.until, Some(wall_at(2026, 11, 26, 14) + 29 * 60 + 59), "{start}");
+    }
+}
+
+#[test]
+fn a_zone_s_name_is_unescaped_where_it_is_defined_as_where_it_is_used() {
+    let text = "BEGIN:VCALENDAR\r\nBEGIN:VTIMEZONE\r\nTZID:Office\\, second floor\r\n\
+        BEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETTO:+0300\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\n\
+        BEGIN:VEVENT\r\nDTSTART;TZID=\"Office, second floor\":20260701T100000\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+    let parsed = calendar(text);
+    let Moment::Wall { zone: Some(zone), .. } = &parsed.events[0].start else { panic!("a time in a named zone") };
+    assert_eq!(parsed.zones[zone].offset_at_wall(0), Some(3 * HOUR));
+}

@@ -89,7 +89,7 @@ pub fn calendar(text: &str) -> Calendar {
                     _ => Method::Other,
                 });
             }
-            "TZID" if path == "VCALENDAR/VTIMEZONE" => zone = line(&prop.value),
+            "TZID" if path == "VCALENDAR/VTIMEZONE" => zone = line(&unescape(&prop.value, ' ')),
             "TRIGGER" if path == "VCALENDAR/VEVENT/VALARM" => {
                 if let Some(raw) = raws.last_mut() {
                     raw.triggers.push(prop.value);
@@ -106,7 +106,7 @@ pub fn calendar(text: &str) -> Calendar {
     }
     let zones: BTreeMap<String, Zone> =
         zones.into_iter().filter_map(|(name, periods)| Some((name, Zone { periods: periods? }))).collect();
-    Calendar { method, events: raws.iter().filter_map(event).collect(), zones }
+    Calendar { method, events: raws.iter().filter_map(|raw| event(raw, &zones)).collect(), zones }
 }
 
 /// The first event in `calendar` as the invitation card shows it, or
@@ -162,7 +162,7 @@ fn person(p: &Prop) -> Address {
 }
 
 /// An event from its properties, or `None` without a start that reads.
-fn event(raw: &Raw) -> Option<Event> {
+fn event(raw: &Raw, zones: &BTreeMap<String, Zone>) -> Option<Event> {
     let get = |name: &str| raw.props.iter().find(|p| p.name == name);
     let all = |name: &'static str| raw.props.iter().filter(move |p| p.name == name);
     let text = |name: &str| get(name).map(|p| line(&unescape(&p.value, ' '))).filter(|t| !t.is_empty());
@@ -211,7 +211,7 @@ fn event(raw: &Raw) -> Option<Event> {
         cancelled: value("STATUS").as_deref() == Some("cancelled"),
         links,
         repeat: get("RRULE")
-            .map(|p| rule(&p.value, &start).map_or_else(|| Repeat::Unread(line(&p.value)), Repeat::Rule)),
+            .map(|p| rule(&p.value, &start, zones).map_or_else(|| Repeat::Unread(line(&p.value)), Repeat::Rule)),
         excluded: all("EXDATE")
             .flat_map(|p| p.value.split(',').filter_map(|v| moment_of(v, p.param("TZID"))).collect::<Vec<_>>())
             .collect(),
@@ -283,7 +283,7 @@ fn duration(value: &str) -> Option<i64> {
 
 /// A rule of the kinds ADR-060 names, or `None` for any other: the caller
 /// keeps the text and the event is shown once.
-fn rule(text: &str, start: &Moment) -> Option<Rule> {
+fn rule(text: &str, start: &Moment, zones: &BTreeMap<String, Zone>) -> Option<Rule> {
     let mut rule =
         Rule { freq: Freq::Daily, interval: 1, count: None, until: None, by_day: Vec::new(), by_month_day: Vec::new() };
     let (mut freq, mut by_month, mut week_start) = (None, None, 1);
@@ -302,9 +302,19 @@ fn rule(text: &str, start: &Moment) -> Option<Rule> {
             }
             "INTERVAL" => rule.interval = value.parse().ok().filter(|&n| n > 0)?,
             "COUNT" => rule.count = Some(value.parse().ok()?),
-            // A date alone means through that day.
+            // A date alone means through that day. An instant is put on
+            // the clock the event repeats on, where its zone is known,
+            // because that is the clock occurrences are counted on; a
+            // provider writes the end of a series cut short as the second
+            // before the first occurrence left out, and read on the wrong
+            // clock that occurrence comes back.
             "UNTIL" => {
-                rule.until = Some(wall(&value).map(|(at, date_only, _)| if date_only { at + DAY - 1 } else { at })?)
+                let (at, date_only, utc) = wall(&value)?;
+                let offset = match start {
+                    Moment::Wall { zone: Some(zone), .. } if utc => zones.get(zone).and_then(|z| z.offset_at(at)),
+                    _ => None,
+                };
+                rule.until = Some(if date_only { at + DAY - 1 } else { at + offset.unwrap_or(0) });
             }
             "BYDAY" => {
                 for day in value.split(',') {

@@ -221,13 +221,14 @@ enum Guests {
 }
 
 /// A calendar being written, line by line, each folded as it is added.
-struct Out {
+struct Out<'a> {
     text: String,
+    zones: &'a BTreeMap<String, Zone>,
 }
 
-impl Out {
-    fn new(method: Option<&str>, used: Vec<&str>, zones: &BTreeMap<String, Zone>) -> Out {
-        let mut out = Out { text: String::new() };
+impl<'a> Out<'a> {
+    fn new(method: Option<&str>, used: Vec<&str>, zones: &'a BTreeMap<String, Zone>) -> Out<'a> {
+        let mut out = Out { text: String::new(), zones };
         out.line("BEGIN:VCALENDAR");
         out.line("PRODID:-//tuimex//EN");
         out.line("VERSION:2.0");
@@ -331,7 +332,7 @@ impl Out {
             self.line(&format!("URL:{}", line(url)));
         }
         match &event.repeat {
-            Some(Repeat::Rule(rule)) => self.line(&format!("RRULE:{}", rule_text(rule, &event.start))),
+            Some(Repeat::Rule(rule)) => self.line(&format!("RRULE:{}", rule_text(rule, &event.start, self.zones))),
             Some(Repeat::Unread(text)) => self.line(&format!("RRULE:{}", line(text))),
             None => {}
         }
@@ -501,7 +502,7 @@ fn fold(content: &str, newline: &str) -> String {
     out
 }
 
-fn rule_text(rule: &Rule, start: &Moment) -> String {
+fn rule_text(rule: &Rule, start: &Moment, zones: &BTreeMap<String, Zone>) -> String {
     let freq = match rule.freq {
         Freq::Daily => "DAILY",
         Freq::Weekly => "WEEKLY",
@@ -516,13 +517,17 @@ fn rule_text(rule: &Rule, start: &Moment) -> String {
         parts.push(format!("COUNT={count}"));
     }
     if let Some(until) = rule.until {
-        // RFC 5545 asks for a date when the start is a day, UTC when the
-        // start names a zone, and a floating time when it does not. The
-        // reader reads the digits as a wall time whichever is written, so
-        // they are the wall time's digits.
+        // RFC 5545 asks for a date when the start is a day, an instant
+        // when the start names a zone, and a floating time when it does
+        // not. The limit is held on the clock the event repeats on, so
+        // for a zone that is known it is turned back into the instant.
         let written = match start {
             Moment::Day(_) if until.rem_euclid(DAY) == DAY - 1 => date(until.div_euclid(DAY)),
             Moment::Wall { zone: None, .. } => date_time(until),
+            Moment::Wall { zone: Some(zone), .. } => {
+                let offset = zones.get(zone).and_then(|z| z.offset_at_wall(until)).unwrap_or(0);
+                format!("{}Z", date_time(until - offset))
+            }
             _ => format!("{}Z", date_time(until)),
         };
         parts.push(format!("UNTIL={written}"));
