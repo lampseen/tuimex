@@ -213,12 +213,12 @@ fn an_event_is_written_changed_answered_and_deleted_on_a_caldav_server() {
     let wrong = Secret::new(format!("not-{}", server.password.expose()));
     let wrong_sign_in = (server.user.as_str(), &wrong);
     assert_eq!(
-        fetch_caldav(&wire, &reader, "work", &url, wrong_sign_in, window, now),
+        answered_by_the_server(|| fetch_caldav(&wire, &reader, "work", &url, wrong_sign_in, window, now)),
         Err(CalendarError::SignIn),
         "a wrong password on a read"
     );
     assert_eq!(
-        put_new(&wire, &writer, "work", &url, wrong_sign_in, &text, "k2"),
+        answered_by_the_server(|| put_new(&wire, &writer, "work", &url, wrong_sign_in, &text, "k2")),
         Err(CalendarError::SignIn),
         "and on a write"
     );
@@ -226,6 +226,24 @@ fn an_event_is_written_changed_answered_and_deleted_on_a_caldav_server() {
     println!(
         "real-server: ran caldav-write (made, read empty, put, read back, refused twice, changed, answered, deleted)"
     );
+}
+
+/// What the server answered, asking again while the connection was reset
+/// under the answer. Radicale's server refuses a sign-in without reading
+/// the request's body and then closes, and a close over unread bytes is a
+/// reset that can reach the client before the 401 does. Only an answer is
+/// evidence of what a wrong password is said as, so a reset is asked
+/// again; one that never stops is the failure it looks like.
+fn answered_by_the_server<T: PartialEq>(ask: impl Fn() -> Result<T, CalendarError>) -> Result<T, CalendarError> {
+    let reset = Err(CalendarError::Unreachable("the connection failed".to_string()));
+    let mut answer = ask();
+    for _ in 0..9 {
+        if answer != reset {
+            break;
+        }
+        answer = ask();
+    }
+    answer
 }
 
 /// Reads one request: its head, and as much body as it says it has.

@@ -200,6 +200,12 @@ calendar, the desktop's notification programs and a Mac have never had
 this run against them: [What is proven](What-is-proven#calendars) says
 which.
 
+One thing seen on the test server: it refuses a wrong password and hangs
+up in a way that sometimes loses its answer, and tuimex then says "the
+connection failed" where it would have said the sign-in was refused. If
+a calendar says that just after its password changed, suspect the
+password. Whether Google's server does this is not known.
+
 ---
 
 [Reading mail](Reading-mail) · [Keys](Keys) · [Commands](Commands) ·

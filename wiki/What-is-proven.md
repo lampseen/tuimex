@@ -101,7 +101,7 @@ table at the end of this page says where each stands.
 | What cannot be done is refused in plain words and changes nothing: an event still being saved, one that has gone, an undo of something already taken back | `what_cannot_be_done_is_refused_in_plain_words_and_changes_nothing`, `a_refusal_puts_back_what_that_change_did_and_says_why` |
 | The whole path, in the interface over a mail server in memory: the invitation is on the calendar from mail, `i a` answers it, the event is a local file, the reply is the Outbox's row, `u` takes both back | `an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_the_entry_back` |
 | The same in the binary on a terminal, over stores on disk | `an_invitation_is_answered_in_the_calendar_its_reply_waits_in_the_outbox_and_u_takes_both_back` |
-| Against a real mail server and a real CalDAV server, for a calendar with `write = true`: the reply is read back from the organizer's Inbox and the event from the calendar's server | `an_invitation_is_answered_on_a_terminal_and_the_reply_and_the_event_are_read_back_from_the_servers`, by `make real-server`. Written on 2026-11-24 and **not yet run** when this page was last changed: until it has passed, this line is a test that exists, not a result |
+| Against a real mail server and a real CalDAV server, for a calendar with `write = true`: the reply is read back from the organizer's Inbox and the event from the calendar's server | `an_invitation_is_answered_on_a_terminal_and_the_reply_and_the_event_are_read_back_from_the_servers`, by `make real-server`, against GreenMail and Radicale in containers; it passed there by hand on 2026-11-24. The `real-server` job runs the same script on every pull request |
 
 ### Events of your own, links and export
 

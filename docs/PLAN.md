@@ -804,7 +804,7 @@ it say which outputs are full screens and which are row strips.
 | The documents are true | `tests/docs.rs`, as pullpen's: budgets match the Makefile, every relative link resolves, every ADR number cited exists, the config example parses, no test module is inline, every crate edge is one §2 allows |
 | Fixtures are synthetic | test: every address in `tests/` and `tuimex-fixtures` is under a reserved example domain |
 
-| What is done in the calendar is carried out, kept for `u`, mailed and refused as §4.6 says (ADR-055, ADR-057) | `calendar::carry::tests` and `calendar::mail::tests`, over scratch stores, a provider in memory and a real engine on the fixtures' server; `live::tests` and `tests/terminal.rs` for the whole path from a key to a file; `make real-server` for GreenMail and Radicale together, a leg written and not yet run |
+| What is done in the calendar is carried out, kept for `u`, mailed and refused as §4.6 says (ADR-055, ADR-057) | `calendar::carry::tests` and `calendar::mail::tests`, over scratch stores, a provider in memory and a real engine on the fixtures' server; `live::tests` and `tests/terminal.rs` for the whole path from a key to a file; `make real-server` for GreenMail and Radicale together, which passed on 2026-11-24 |
 | Setup saves nothing until both servers take the sign-in, and only adds to the config (ADR-043) | `setup::tests` against stand-ins; `make real-server`: a first launch on a terminal, the certificate shown and pinned, a second account, then `tuimex sync` and `tuimex doctor` with no answers |
 | Gmail's sign-in (ADR-019) | `oauth::tests` and `tests/oauth.rs` against a Google played on a loopback port: the redirect, PKCE, the state, refresh, revocation; `make real-server`: XOAUTH2 over IMAP and SMTP against GreenMail, which takes the account's password as the token |
 | No test reaches a keyring (ADR-053) | `every_harness_that_starts_the_binary_turns_the_keyring_off`; `doctor_with_the_keyring_turned_off_asks_no_keyring_service_and_says_what_turned_it_off`, on Linux and in the macOS job by name; `a_keyring_turned_off_is_asked_nothing_by_any_call`, asserted to have run in the `secret` job |
@@ -1008,8 +1008,7 @@ plan: an invitation that is in mail alone is on the calendar until it is
 answered, which is every invitation of a Proton account; and the design
 draws no cancelled event, so one the organizer cancels is removed and
 said. The leg of `make real-server` that answers on a terminal and reads
-the reply and the event back from the two servers is written and, as
-this is written, not yet run.
+the reply and the event back from the two servers passed on 2026-11-24.
 
 ### M15 — Remind
 Reminders while open, and the switch (ADR-058).

@@ -1967,6 +1967,18 @@ The config also takes a `url` of `http://127.0.0.1:<port>/`, which the
 engine already took: the binary is run against a CalDAV server in a
 container by `make real-server`, and plain HTTP reaches no other host.
 
+*2026-11-24, a refusal that is not heard.* Radicale's server answers a
+wrong password without reading the request's body and closes, and about
+one time in three (3 of 8 runs here) the client is told the connection
+was reset before it has read the 401. tuimex then says "the connection
+failed", not that the sign-in was refused. Nothing in the client can
+read an answer the network has thrown away, so the test asks again when
+that happens and holds the answer, once heard, to be the refused
+sign-in. Whether Google's server does the same is **unobserved**. Until
+it is, "the connection failed" from a calendar whose password was just
+changed should be read as possibly a refused sign-in, and
+`wiki/Calendar.md` says so.
+
 ## ADR-063 — The code budget is 28,000 lines
 
 `MAX_CODE_LINES` goes from 26,000 to 28,000. The other three budgets
