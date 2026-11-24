@@ -1486,9 +1486,20 @@ between with `h` and `l`; a grid of days needs those keys for days. Inside,
 one rule carries the navigation: `Enter` goes deeper (month, day, event),
 `Esc` comes back, and `h` `j` `k` `l` always move the cursor. `Tab` and
 `1` `2` `3` change the view at the same date, as they change the section
-in mail. A key that removes something in mail removes in the calendar and
-does nothing else there: `d` deletes an event, so no view is on `d`
-(Bryan, 2026-11-24: "d doing 2 things is risky"). The keys and every screen are
+in mail.
+
+A key that mail uses does the same thing in the calendar, or nothing
+(Bryan, 2026-11-24: "d doing 2 things is risky", then "all keys should
+stay consistant"). `d` deletes an event as it trashes a message, so no
+view is on a letter. `o` lists an event's links, the meeting's first, as
+it lists a message's, and `Enter` opens one. `J` and `K` step through
+events as they step through the list from the reader, and `n` and `N`
+through what `/` found. `e` archives and `m` marks read in mail, so the
+calendar binds neither, and editing an event is `E`. The one exception is
+the one this record began with: `h` and `l` move by a day here and by a
+section in mail.
+
+The keys and every screen are
 `design/tui.js`'s to state (ADR-002), and nothing is built until Bryan has
 accepted that design.
 
