@@ -307,14 +307,14 @@ const KEYMAP = {
       { id: 'calendar.move', keys: 'j k', does: 'month: week; else: event' },
       { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
       { id: 'calendar.event', keys: 'J K', does: 'next, previous event', hint: 'next event' },
-      { id: 'calendar.match', keys: 'n N', does: 'next, previous match' },
+      { id: 'calendar.match', keys: 'n N', does: 'next, previous match', hint: 'next match' },
       { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
       { id: 'calendar.today', keys: 't', does: 'today', hint: 'today' },
       { id: 'calendar.goto', keys: 'gd', does: 'go to a date', hint: 'go to' },
       { id: 'calendar.view-cycle', keys: 'Tab S-Tab', does: 'next, previous view' },
       { id: 'calendar.view-number', keys: '1 2 3', does: 'month, week, day' },
       { id: 'calendar.open', keys: 'Enter', does: 'the day; then the event', hint: 'open' },
-      { id: 'calendar.find', keys: '/', does: 'find events', hint: 'find' },
+      { id: 'calendar.find', keys: '/', does: 'find; Enter: every day', hint: 'find' },
       { id: 'calendar.account', keys: 'gt gT', does: 'next, previous account' },
       { id: 'calendar.calendars', keys: 'C', does: 'show, hide calendars', hint: 'calendars' },
       { id: 'calendar.links', keys: 'o', does: 'links; the meeting first', hint: 'links' },
@@ -898,6 +898,10 @@ const SAY = {
   deleted: (what) => `{ok|${G.ok}} Deleted ${what}${then('u to undo')}`,
   restored: (what) => `{ok|${G.ok}} Undone${then(`${what} is back`)}`,
   joining: (host) => `Opening ${host}`,
+  // A repeating event is asked about before it is changed or deleted.
+  whichOnes: (verb) => ask(`${verb} which?`, [['t', 'this one'], ['a', 'all of them'], ['Esc', 'cancel']]),
+  deletedOne: (what, day) => `{ok|${G.ok}} Deleted ${what} on ${day}${then('u to undo')}`,
+  matching: (n, query) => `{dim|${n} ${n === 1 ? 'event matches' : 'events match'} "${query}"}`,
   proposes: (when) => `{dim|proposes} ${when}`,
   goesTo: (day) => `{dim|goes to} ${day}`,
   remindersOff: `Reminders off${then('gn turns them on')}`,
@@ -1819,7 +1823,7 @@ function eventsOn(n, o = {}) {
   const sourceOf = (ev) => `${ev.account}/${ev.local ? 'local' : 'own'}`;
   return [...EVENTS, ...(o.added || [])]
     .map((ev) => ({ ...ev, ...((o.changed || {})[ev.id] || {}), n }))
-    .filter((ev) => !ev.gone && occursOn(ev, n) && (!o.narrowed || ev.account === o.narrowed) && !(o.hidden || []).includes(sourceOf(ev)))
+    .filter((ev) => !ev.gone && !(ev.skip || []).includes(n) && occursOn(ev, n) && (o.only == null || `${ev.title} ${ev.where || ''}`.toLowerCase().includes(o.only)) && (!o.narrowed || ev.account === o.narrowed) && !(o.hidden || []).includes(sourceOf(ev)))
     .sort((a, b) => (a.allDay ? '' : a.start).localeCompare(b.allDay ? '' : b.start));
 }
 const occurrence = (id, n, o) => eventsOn(n, o).find((ev) => ev.id === id);
@@ -1827,8 +1831,9 @@ const ended = (ev) => ev.n < TODAY || (ev.n === TODAY && !ev.allDay && ev.end <=
 const isWaiting = (ev) => ev.answer === 'needs';
 
 // The views as tabs, and at the right what the page shows.
-function calendarTabs(width, view, title) {
-  const tabs = ['Month', 'Week', 'Day'].flatMap((tab) => { const on = tab.toLowerCase() === view; return [run(tab, on ? 'acc' : 'dim', { b: on }), gap(3)]; });
+function calendarTabs(width, view, title, search) {
+  const tabs = ['Month', 'Week', 'Day'].flatMap((tab) => { const on = search == null && tab.toLowerCase() === view; return [run(tab, on ? 'acc' : 'dim', { b: on }), gap(3)]; });
+  if (search != null) tabs.push(run('Search', 'acc', { b: true }), gap(1), run(search));
   return leftRight(heading(tabs), [gap(2), run(title, 'fg', { b: true }), gap(LAYOUT.margin)], width);
 }
 
@@ -1948,7 +1953,7 @@ function agendaRows(from, room, width, o = {}) {
   const labels = new Set();
   for (let n = from; lines.length < room && n < from + 92; n++) {
     const events = eventsOn(n, o);
-    if (!events.length && n !== from) continue;
+    if (!events.length && (n !== from || o.only != null)) continue;
     if (lines.length) lines.push([]);
     const label = heading([run(dayLabel(n), 'dim', { b: true })]);
     labels.add(label);
@@ -1985,6 +1990,8 @@ function monthScreen(o) {
 
 // The day view is the list of mail again: events from the cursor's day on,
 // and the selected one below the divider, or beside it where there is room.
+// With `only`, it is what a search found, from the first day that has any,
+// under a Search tab in place of the active one, as in mail.
 function dayScreen(o) {
   const { width, height } = o;
   const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
@@ -2004,7 +2011,7 @@ function dayScreen(o) {
     content = agendaRows(o.cursor, room, width, o);
   }
   const at = civil(o.cursor);
-  return [calendarTabs(width, 'day', `${dayLong(o.cursor)} ${at.year}`), [], ...content, ...tail, [],
+  return [calendarTabs(width, 'day', o.only != null ? '' : `${dayLong(o.cursor)} ${at.year}`, o.only), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.selected ? o.selected.n : o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
 
@@ -2732,6 +2739,12 @@ function build(mode = {}) {
     width: W, height: H, cursor: TODAY, needle: 'call', left: '', command: typed('/call'),
   }));
 
+  const halden = { id: 'halden-call', n: TODAY };
+  screen('cal-search', 'Calendar, a search', 'after / then Enter: every event that matches, on any day, in place of the active view until Esc; n and N step through them', dayScreen({
+    width: W, height: H, cursor: dayNumber('2026-11-01'), only: 'call', needle: 'call', selected: halden, left: SAY.matching(EVENTS.filter((ev) => ev.title.toLowerCase().includes('call')).length, 'call'),
+    command: hint('calendar.open', 'calendar.match', 'global.back', 'global.help'),
+  }));
+
   const theEvent = occurrence('roadmap', thu);
   const event = (size, more) => eventScreen({ ...size, ev: theEvent, where: `2 of 4 on ${dayShort(thu)}`, ...more });
   screen('cal-event', 'Event', 'after Enter on an event: when, where, the host its link really opens, which calendar holds it, everyone asked and what each has said, then its notes; what only one provider sends is folded under More', event(LAYOUT.default));
@@ -2806,6 +2819,15 @@ function build(mode = {}) {
       rows: calendarStrip(thu, { changed: { vendor: { gone: true } }, command: said(SAY.deleted('Vendor call')) }) },
     { key: 'u', caption: 'Undone', note: '',
       rows: calendarStrip(thu, { selected: 'vendor', command: said(SAY.restored('Vendor call')) }) },
+  ]);
+
+  flow('cal-repeating', 'A repeating event', [
+    { key: 'd', caption: 'Asked which', note: 'Deleting or editing (E) one day of an event that repeats asks whether it means that day or every day. Nothing else in the calendar asks first.',
+      rows: calendarStrip(thu, { selected: 'standup', command: said(SAY.whichOnes('Delete')) }) },
+    { key: 't', caption: 'This one', note: 'Thursday\'s is gone and the others stay.',
+      rows: calendarStrip(thu, { changed: { standup: { skip: [thu] } }, command: said(SAY.deletedOne('Standup', dayShort(thu))) }) },
+    { key: 'u', caption: 'Undone', note: '',
+      rows: calendarStrip(thu, { selected: 'standup', command: said(SAY.restored('Standup')) }) },
   ]);
 
   flow('cal-reminder', 'A reminder, and turning them off', [
