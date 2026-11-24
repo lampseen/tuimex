@@ -434,9 +434,9 @@ fn a_secret_never_reaches_a_file_or_anything_setup_or_doctor_says() {
     // accounts through the browser, the second with the kept client.
     let by_hand =
         ["ada@example.org", "5", "imap.example.org", "", "smtp.example.org", "587", "", "work", "1", PASSWORD];
-    setup(&run, &[&by_hand[..], &["y", "y", "y", "y"]].concat());
-    setup(&run, &["", "ada@gmail.com", "", "", "3", CLIENT_ID, CLIENT_SECRET, "y", "n", "n"]);
-    setup(&run, &["", "bob@gmail.com", "", "", "3", "y", "n", "n"]);
+    setup(&run, &[&by_hand[..], &["y", "y", "y", "y", ""]].concat());
+    setup(&run, &["", "ada@gmail.com", "", "", "3", CLIENT_ID, CLIENT_SECRET, "y", "n", "n", ""]);
+    setup(&run, &["", "bob@gmail.com", "", "", "3", "y", "n", "n", ""]);
     assert_eq!(keyring.names().len(), 5, "three sign-ins and the client's two entries");
     // Signing in again to each kind, afresh and with what is kept.
     setup(&run, &["2", PASSWORD]);
@@ -602,6 +602,118 @@ fn each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last
         assert!(!hidden.contains(held), "{held} in:\n{hidden}");
     }
     assert!(hidden.contains("over CalDAV from host-5, with its password"), "{hidden}");
+}
+
+/// ADR-010 and ADR-056 over a calendar feed: its address is set up, read
+/// by `tuimex sync` and by the calendar thread, fails each way, and is
+/// named by doctor; then every file under the scratch roots (config,
+/// data, cache, state) and everything shown, printed or sent as an event
+/// is searched for it.
+#[test]
+fn a_secret_never_reaches_a_file_when_a_calendar_feed_is_set_up_and_read() {
+    use std::sync::mpsc;
+    use std::time::Duration;
+    use tuimex_engine::calendar::{self, Configured, Runner, Source};
+
+    let root = scratch("secret-feed");
+    let elsewhere = scratch("secret-feed-elsewhere");
+    let keyring = MemoryKeyring::default();
+    let net = FakeNet::trusted();
+    let run = Run { root: &root, keyring: &keyring, net: &net, google: None, browser: false, claude: false };
+    let mut said: Vec<String> = Vec::new();
+    let mut setup = |run: &Run, wire: &FakeWire, answers: &[&str]| {
+        let (result, script) = run.go_with(wire, answers);
+        said.extend(script.said);
+        said.extend(result.err().map(|error| format!("{error:#} {error:?}")));
+    };
+    let serving = || FakeWire::new(vec![("GET", FEED, "", 200, DENTIST.to_string())]);
+    let page = FakeWire::new(vec![("GET", FEED, "", 200, "<html>Sign in</html>".to_string())]);
+    let by_hand =
+        ["ada@example.org", "5", "imap.example.org", "", "smtp.example.org", "587", "", "work", "1", PASSWORD];
+
+    // A web page first, then the feed itself; and on a machine with no
+    // keyring service, an account whose password a command prints.
+    setup(&run, &page, &[&by_hand[..], &["n", "n", "y", FEED]].concat());
+    setup(&run, &serving(), &["5", "y", FEED]);
+    assert_eq!(keyring.get("work/calendar-feed").as_deref(), Some(FEED));
+    let down = MemoryKeyring { down: Some("no such service"), ..MemoryKeyring::default() };
+    let by_command = [
+        "bob@example.org",
+        "5",
+        "imap.example.org",
+        "",
+        "smtp.example.org",
+        "587",
+        "",
+        "home",
+        "2",
+        "printf",
+        "%s",
+        PASSWORD,
+        "",
+        "n",
+        "n",
+        "y",
+        FEED,
+    ];
+    setup(&Run { root: &elsewhere, keyring: &down, ..run }, &serving(), &by_command);
+
+    // `tuimex sync`, reading it and failing to.
+    let config = Config::parse(&fs::read_to_string(root.join("config/config.toml")).unwrap()).unwrap();
+    for wire in [serving(), page, FakeWire::new(vec![("GET", FEED, "", 503, String::new())]), FakeWire::default()] {
+        let (lines, _) =
+            crate::sync::calendar_pass(&config, None, &wire, &keyring, &dirs(&root), 1_800_000_000).unwrap();
+        said.extend(lines);
+    }
+
+    // The calendar thread, once reading and once refused.
+    for status in [200, 404] {
+        let feed = MemoryKeyring::default();
+        feed.set("work/calendar-feed", &Secret::new(FEED.into())).unwrap();
+        let (nudge, nudges) = mpsc::channel();
+        let (sender, events) = mpsc::channel();
+        let runner = Runner {
+            calendars: vec![Configured { account: "work".into(), source: Source::Feed { address_cmd: None } }],
+            wire: Box::new(FakeWire::new(vec![("GET", FEED, "", status, DENTIST.to_string())])),
+            keyring: Box::new(feed),
+            data: root.join("data"),
+            cache: root.join("cache"),
+            every: Duration::from_secs(3_600),
+        };
+        let thread = calendar::start(runner, nudges, sender);
+        said.push(format!("{:?}", events.recv_timeout(Duration::from_secs(20)).unwrap()));
+        drop(nudge);
+        thread.join().unwrap();
+    }
+
+    // Doctor, plain and redacted.
+    let path = bin(&root, &["vi"]);
+    let case = Case { root: &root, keyring: &keyring, net: &net, google: None, path, editor: None };
+    said.extend([case.run().1, case.redacted().1]);
+
+    let mut written = Vec::new();
+    files_under(&root, &mut written);
+    files_under(&elsewhere, &mut written);
+    let names: Vec<String> = written.iter().map(|p| p.file_name().unwrap().to_string_lossy().into_owned()).collect();
+    for expected in ["config.toml", "calendar.sqlite"] {
+        assert!(names.iter().any(|name| name == expected), "{expected} was written: {names:?}");
+    }
+    assert!(
+        said.iter().any(|line| line.contains("calendar.example.net")),
+        "the host is said, so the search means something"
+    );
+    assert!(said.len() > 60, "too little was said: {}", said.len());
+    // The password is the other secret test's: here the second account's
+    // command prints it, so the config holds it by the user's own choice.
+    for secret in [FEED, "SYNTHETIC-FEED-TOKEN", "/api/calendar/v1/url/"] {
+        for path in &written {
+            let content = fs::read(path).unwrap();
+            let held = content.windows(secret.len()).any(|window| window == secret.as_bytes());
+            assert!(!held, "{} holds {secret}", path.display());
+        }
+        let leaks: Vec<&String> = said.iter().filter(|line| line.contains(secret)).collect();
+        assert_eq!(leaks, Vec::<&String>::new(), "things said that hold {secret}");
+    }
 }
 
 #[test]

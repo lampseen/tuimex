@@ -120,7 +120,8 @@ fn an_account_is_renamed_from_setup_s_menu_in_all_four_places_and_what_waited_fo
     let shown = script.shown();
     let menu = "\nAccounts here: work, home.\n  1) Add another account\n  2) Sign in again to work\n  \
                 3) Accept a new certificate for work\n  4) Sign in again to home\n  \
-                5) Accept a new certificate for home\n  6) Rename an account\n  7) Quit";
+                5) Accept a new certificate for home\n  6) Rename an account\n  \
+                7) Add a calendar to an account that has none\n  8) Quit";
     assert!(shown.contains(menu), "{shown}");
     assert_eq!(shown.matches("There is an account of that name already.").count(), 1, "{shown}");
     assert_eq!(shown.matches("Letters, digits, `-`, `_` and `.`; not starting with a dot.").count(), 2, "{shown}");

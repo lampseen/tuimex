@@ -174,7 +174,8 @@ fn setup_adds_two_accounts_from_nothing_and_sync_and_doctor_then_need_no_answers
     let sign_in =
         [("Which [1]:", "2"), ("Program:", "sh"), ("Argument:", "-c"), ("Argument:", &by_command), ("Argument:", "")];
     let mut steps = here.adding(0, "work", &sign_in);
-    steps.extend([("read this account", "y"), ("write drafts", "y"), ("Claude CLI", "y"), ("Unread", ":q")]);
+    steps.extend([("read this account", "y"), ("write drafts", "y"), ("Claude CLI", "y")]);
+    steps.extend([("calendar by its private address", ""), ("Unread", ":q")]);
     let (launched, status) = here.on_a_pty(&[], &steps);
     assert_eq!(status, 0, "{launched}");
     let (first, interface) = launched.split_once(ENTER_SCREEN).expect("the interface opened once setup was done");
@@ -231,7 +232,7 @@ fn setup_adds_two_accounts_from_nothing_and_sync_and_doctor_then_need_no_answers
         [("Which [1]:", "2"), ("Program:", "sh"), ("Argument:", "-c"), ("Argument:", &by_command), ("Argument:", "")];
     let mut steps = vec![("What would you like to do [1]:", "")];
     steps.extend(here.adding(1, "second", &sign_in));
-    steps.extend([("read this account", "n"), ("write drafts", "n")]);
+    steps.extend([("read this account", "n"), ("write drafts", "n"), ("calendar by its private address", "")]);
     let (second, status) = here.on_a_pty(&["setup"], &steps);
     assert_eq!(status, 0, "{second}");
     assert!(second.contains("Accounts here: work."), "{second}");
@@ -294,7 +295,8 @@ fn setup_adds_two_accounts_from_nothing_and_sync_and_doctor_then_need_no_answers
     assert_eq!(status, 0, "{again}");
     let menu = "Accounts here: work, second.\n  1) Add another account\n  2) Sign in again to work\n  \
                 3) Accept a new certificate for work\n  4) Sign in again to second\n  \
-                5) Accept a new certificate for second\n  6) Rename an account\n  7) Quit\n";
+                5) Accept a new certificate for second\n  6) Rename an account\n  \
+                7) Add a calendar to an account that has none\n  8) Quit\n";
     assert!(again.contains(menu), "{again}");
     assert!(
         again.contains(&format!("pinned:    {other_print}")) && again.contains(&format!("presented: {ca_print}")),

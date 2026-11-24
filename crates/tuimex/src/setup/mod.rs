@@ -14,6 +14,7 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, anyhow, bail};
 use tuimex_core::{RemoteError, RemoteFolder, Role};
+use tuimex_engine::calendar::{CalendarError, Https, Wire};
 use tuimex_engine::oauth::{self, Endpoints, OauthError, SignIn, Tokens};
 use tuimex_engine::{Credential, Keyring, Protocol, Secret, Server, pin};
 
@@ -63,6 +64,8 @@ pub struct Setup<'a> {
     pub browser: Option<&'a mut dyn Opener>,
     /// The Claude CLI, where one is on the path.
     pub claude: Option<PathBuf>,
+    /// What asks a calendar's server whether it answers.
+    pub wire: &'a dyn Wire,
 }
 
 /// What signing in needs kept once the servers have taken it: keyring
@@ -121,7 +124,13 @@ impl Setup<'_> {
             }
             let rename = menu.len() + 1;
             menu.push(format!("  {rename}) Rename an account"));
-            let quit = rename + 1;
+            let bare: Vec<&config::Account> =
+                config.accounts.iter().filter(|account| config.calendar(&account.name).is_none()).collect();
+            let calendars = (!bare.is_empty()).then_some(rename + 1);
+            if let Some(n) = calendars {
+                menu.push(format!("  {n}) Add a calendar to an account that has none"));
+            }
+            let quit = menu.len() + 1;
             menu.push(format!("  {quit}) Quit"));
             self.say(&format!("\nAccounts here: {}.\n{}", names.join(", "), menu.join("\n")));
             match number(self.prompt, "What would you like to do", quit, Some(1))? {
@@ -130,6 +139,12 @@ impl Setup<'_> {
                     return Ok(());
                 }
                 Some(n) if n == rename => return self.rename(&existing, &config),
+                Some(n) if Some(n) == calendars => {
+                    for account in bare {
+                        self.calendar(account, None)?;
+                    }
+                    return Ok(());
+                }
                 // Two lines to an account, after the first.
                 Some(n) if n > 1 => return self.again(&config.accounts[(n - 2) / 2], n % 2 == 0),
                 _ => {}
@@ -591,6 +606,153 @@ impl Setup<'_> {
             if keep.is_empty() { "" } else { " What signs it in is in the keyring, and in no file." },
             if pin.is_some() { " Its server's certificate is beside the config." } else { "" },
         ));
+        let added = Config::parse(&text)?;
+        let password = match credential {
+            Credential::Password(password) => Some(password),
+            Credential::Bearer(_) => None,
+        };
+        match added.account(&name) {
+            Some(account) => self.calendar(account, password),
+            None => Ok(()),
+        }
+    }
+
+    /// Asks about the calendar of `account`, which has none, and adds the
+    /// `[[calendar]]` it is given. No is an answer, and is not kept: the
+    /// next run asks again. One that cannot be read is said, and nothing
+    /// is saved; the account itself is already saved by then. `password`
+    /// is the one just typed for it, if any.
+    fn calendar(&mut self, account: &config::Account, password: Option<Secret>) -> Result<()> {
+        let name = account.name.as_str();
+        let (imap, _) = net::servers(account)?;
+        let by_google = net::auth(account)? == Auth::Gmail;
+        let provider = providers::guess(&account.address).map(|at| PROVIDERS[at].short);
+        let gmail = imap.host.eq_ignore_ascii_case("imap.gmail.com") || provider == Some("gmail");
+        self.say(&format!(
+            "\ntuimex can read {name}'s calendar too, to show beside the mail. The calendar's own screens are not \
+             built yet; `tuimex sync` reads it already."
+        ));
+        let help = if gmail {
+            providers::GOOGLE_FEED
+        } else if provider == Some("proton") || imap.host == "127.0.0.1" {
+            providers::PROTON_FEED
+        } else {
+            providers::ANY_FEED
+        };
+        if !gmail || by_google {
+            if by_google {
+                self.say(
+                    "It signs in with Google's sign-in, which tuimex does not use for the calendar; the calendar's \
+                     secret address reads it instead.",
+                );
+            }
+            return self.feed(name, help, false);
+        }
+        let url = format!("https://www.google.com/calendar/dav/{}/events/", account.address);
+        self.say(
+            "Google lets the app password this account signs in with read its calendar too: nothing more to make.",
+        );
+        if !yes(self.prompt, &format!("Read {name}'s Google calendar?"), false)? {
+            self.say("No calendar was added.");
+            return Ok(());
+        }
+        let password = match password {
+            Some(password) => Ok(password),
+            None => {
+                tuimex_engine::resolve(name, account.password_cmd.as_deref(), self.keyring).map_err(|e| e.to_string())
+            }
+        };
+        let checked = password.and_then(|password| {
+            tuimex_engine::calendar::check_caldav(self.wire, &url, (&imap.user, &password)).map_err(|error| match error
+            {
+                CalendarError::SignIn => "Google refused the app password for the calendar".to_string(),
+                other => other.to_string(),
+            })
+        });
+        match checked {
+            Ok(_) => {
+                self.say("Google's calendar took the sign-in.");
+                return self.save_calendar(name, Some(&url), None);
+            }
+            Err(why) => self.say(&format!("The calendar could not be read that way: {why}.")),
+        }
+        self.say(help);
+        if !yes(self.prompt, &format!("Add {name}'s calendar by its secret address instead?"), false)? {
+            self.say("No calendar was added.");
+            return Ok(());
+        }
+        self.feed(name, "", true)
+    }
+
+    /// A calendar read from its private address (ADR-056): asked for with
+    /// nothing shown, read once to see it is a calendar, and kept in the
+    /// keyring and in no file.
+    fn feed(&mut self, name: &str, help: &str, asked: bool) -> Result<()> {
+        if !asked {
+            self.say(help);
+            if !yes(self.prompt, &format!("Add {name}'s calendar by its private address?"), false)? {
+                self.say("No calendar was added.");
+                return Ok(());
+            }
+        }
+        let typed = self.prompt.secret("The calendar's address (it is not shown as you type):")?;
+        // A `webcal:` address is the same address over HTTPS, which is
+        // the only way tuimex fetches one.
+        let address = match typed.expose().trim() {
+            "" => {
+                self.say("No address was typed; no calendar was added.");
+                return Ok(());
+            }
+            text => Secret::new(match text.strip_prefix("webcal://") {
+                Some(rest) => format!("https://{rest}"),
+                None => text.to_string(),
+            }),
+        };
+        if let Err(error) = tuimex_engine::calendar::check_feed(self.wire, &address) {
+            self.say(&match error {
+                CalendarError::NotACalendar => "What that address served is not a calendar: a web page or a sign-in \
+                                                page, most likely. The address wanted is the private one in iCalendar \
+                                                format, which often ends .ics. No calendar was added."
+                    .to_string(),
+                other => format!("The address could not be read: {other}. No calendar was added."),
+            });
+            return Ok(());
+        }
+        let host = tuimex_engine::calendar::host(address.expose()).unwrap_or_default().to_string();
+        self.say(&format!("{host} served a calendar."));
+        self.save_calendar(name, None, Some(address))
+    }
+
+    /// Appends `name`'s `[[calendar]]` and keeps a feed's address, or
+    /// says why neither was done.
+    fn save_calendar(&mut self, name: &str, url: Option<&str>, address: Option<Secret>) -> Result<()> {
+        let existing = std::fs::read_to_string(self.config_path)
+            .with_context(|| format!("reading {}", self.config_path.display()))?;
+        let text = match write::appended(&existing, &[write::calendar(name, url)]) {
+            Ok(text) => text,
+            Err(error) => {
+                self.say(&format!("{error}"));
+                return Ok(());
+            }
+        };
+        if let Some(address) = &address
+            && let Err(reason) = self.keyring.set(&tuimex_engine::calendar::feed_entry(name), address)
+        {
+            self.say(&format!(
+                "The keyring would not keep the address: {reason}\nOn a machine with no keyring service a \
+                 calendar's address comes from a command instead, as a password does. Add this to the config by \
+                 hand, with the command that prints the address:\n\n{}address_cmd = [\"pass\", \"show\", \
+                 \"calendar/{name}\"]\n\nNothing was saved.",
+                write::calendar(name, None)
+            ));
+            return Ok(());
+        }
+        write::save(self.config_path, &text, self.config_dir)?;
+        self.say(&format!(
+            "Saved {name}'s calendar in {}.{}",
+            self.config_path.display(),
+            if address.is_some() { " Its address is in the keyring, and in no file." } else { "" }
+        ));
         Ok(())
     }
 
@@ -654,6 +816,7 @@ pub fn command(config: Option<&Path>) -> Result<bool> {
         endpoints: Endpoints::google(),
         browser,
         claude: crate::doctor::on_path("claude", &path_var),
+        wire: &Https::new(crate::sync::PATIENCE),
     };
     let done = setup.run();
     if let Err(error) = &done {
