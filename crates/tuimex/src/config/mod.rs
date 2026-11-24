@@ -36,6 +36,24 @@ pub struct Config {
     keys: Option<BTreeMap<String, String>>,
     pub section: Option<Vec<Section>>,
     pub agent: Option<AgentCommand>,
+    #[serde(default, rename = "calendar")]
+    pub calendars: Vec<Calendar>,
+}
+
+/// `[[calendar]]`: one account's calendar (ADR-056, ADR-062). A table of
+/// its own and not a key of the account's, since setup only appends and
+/// an account's sub-table cannot follow a later account (ADR-043).
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Calendar {
+    pub account: String,
+    /// `caldav` or `feed`.
+    pub kind: String,
+    /// The CalDAV calendar's address. A feed has none here: its address
+    /// is a secret (ADR-010).
+    pub url: Option<String>,
+    /// A feed's: argv, no shell, whose first line printed is the address.
+    pub address_cmd: Option<Vec<String>>,
 }
 
 /// No key here can hold a secret (ADR-010).
@@ -211,11 +229,70 @@ impl Config {
                 bail!("two accounts are named {}", account.name);
             }
         }
+        for (i, calendar) in config.calendars.iter().enumerate() {
+            calendar.check(&config)?;
+            if config.calendars[..i].iter().any(|earlier| earlier.account == calendar.account) {
+                bail!("account {} has two [[calendar]] tables, and an account has one calendar", calendar.account);
+            }
+        }
         Ok(config)
+    }
+
+    /// The `[[calendar]]` of the account `name`.
+    pub fn calendar(&self, name: &str) -> Option<&Calendar> {
+        self.calendars.iter().find(|calendar| calendar.account == name)
     }
 
     pub fn account(&self, name: &str) -> Option<&Account> {
         self.accounts.iter().find(|account| account.name == name)
+    }
+}
+
+impl Calendar {
+    /// Whether the table says one way to read one account's calendar.
+    /// No error quotes `url`: on a table that should have had none, it is
+    /// the feed's secret address.
+    fn check(&self, config: &Config) -> Result<()> {
+        let name = &self.account;
+        let Some(account) = config.account(name) else {
+            bail!("[[calendar]] account = {name:?}: there is no [[account]] of that name");
+        };
+        let at = format!("[[calendar]] of {name}");
+        match (self.kind.as_str(), &self.url) {
+            ("caldav", None) => bail!("{at}: kind = \"caldav\" needs a `url`, the calendar's address"),
+            ("caldav", Some(url)) => {
+                let Some(rest) = url.strip_prefix("https://") else {
+                    bail!("{at}: `url` is fetched over TLS only, so it begins https://");
+                };
+                let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
+                if authority.is_empty() {
+                    bail!("{at}: `url` names no host");
+                }
+                if authority.contains('@') {
+                    bail!("{at}: `url` cannot carry a user name; the account's own is signed in with");
+                }
+                if self.address_cmd.is_some() {
+                    bail!("{at}: `address_cmd` is a feed's; CalDAV signs in with the account's password");
+                }
+                if account.auth.as_deref() == Some("gmail-oauth") {
+                    bail!(
+                        "{at}: kind = \"caldav\" signs in with the account's password, and {name} signs in with \
+                         Google (auth = \"gmail-oauth\"); kind = \"feed\" is the way for it"
+                    );
+                }
+            }
+            ("feed", Some(_)) => bail!(
+                "{at}: a feed has no `url` in the config, since its address is a secret: it is kept in the \
+                 keyring by `tuimex setup`, or printed by an `address_cmd`"
+            ),
+            ("feed", None) => {
+                if self.address_cmd.as_ref().is_some_and(Vec::is_empty) {
+                    bail!("{at}: `address_cmd` names no program");
+                }
+            }
+            _ => bail!("{at}: `kind` is one of \"caldav\", \"feed\""),
+        }
+        Ok(())
     }
 }
 

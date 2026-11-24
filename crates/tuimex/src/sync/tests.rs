@@ -4,8 +4,13 @@ use std::time::Duration;
 use tuimex_core::Role;
 use tuimex_engine::sync::Policy;
 
-use super::{account, policy, send_delay};
+use tuimex_engine::calendar::{Configured, Source};
+use tuimex_engine::{Keyring, Secret};
+
+use super::{account, calendar_pass, calendars, policy, send_delay};
 use crate::config::Config;
+use crate::paths::Dirs;
+use crate::setup::tests::{DENTIST, FEED, FakeWire, GOOGLE_DAV, MemoryKeyring, PASSWORD, caldav, scratch};
 
 fn config(text: &str) -> Config {
     Config::parse(text).unwrap()
@@ -97,4 +102,128 @@ fn the_account_sends_from_its_address_and_its_identities_through_its_smtp_server
     assert_eq!((smtp.starttls, smtp.user.as_str()), (true, "ada"));
     let none = config(&format!("{WORK}imap = {{ host = \"imap.example.org\", port = 993 }}\n"));
     assert!(account(&none.accounts[0], &Policy::default(), DELAY, Path::new("/nowhere")).unwrap().1.smtp.is_none());
+}
+
+/// Four accounts: Gmail read over CalDAV, a feed whose address is in the
+/// keyring, a feed whose address is nowhere, and one with no calendar.
+const CALENDARS: &str = r#"
+[[account]]
+name = "gmail"
+address = "ada@gmail.com"
+imap = { host = "imap.gmail.com", port = 993 }
+
+[[account]]
+name = "home"
+address = "ada@example.com"
+imap = { host = "127.0.0.1", port = 1143, user = "bridge-user" }
+
+[[account]]
+name = "spare"
+address = "bob@example.com"
+imap = { host = "imap.example.com", port = 993 }
+
+[[account]]
+name = "plain"
+address = "eve@example.com"
+imap = { host = "imap.example.com", port = 993 }
+
+[[calendar]]
+account = "gmail"
+kind = "caldav"
+url = "https://www.google.com/calendar/dav/ada@gmail.com/events/"
+
+[[calendar]]
+account = "home"
+kind = "feed"
+
+[[calendar]]
+account = "spare"
+kind = "feed"
+address_cmd = ["pass", "show", "calendar/spare"]
+"#;
+
+#[test]
+fn each_calendar_is_signed_in_to_as_its_account_s_mail_or_read_from_its_feed() {
+    let c = config(CALENDARS);
+    let all = calendars(&c, None).unwrap();
+    assert_eq!(
+        all,
+        [
+            Configured {
+                account: "gmail".into(),
+                source: Source::CalDav { url: GOOGLE_DAV.into(), user: "ada@gmail.com".into(), password_cmd: None },
+            },
+            Configured { account: "home".into(), source: Source::Feed { address_cmd: None } },
+            Configured {
+                account: "spare".into(),
+                source: Source::Feed { address_cmd: Some(vec!["pass".into(), "show".into(), "calendar/spare".into()]) },
+            },
+        ]
+    );
+    assert_eq!(calendars(&c, Some("home")).unwrap(), all[1..2]);
+    assert!(calendars(&c, Some("plain")).unwrap().is_empty());
+}
+
+fn dirs_under(root: &Path) -> Dirs {
+    Dirs { config: root.join("config"), data: root.join("data"), cache: root.join("cache"), state: root.join("state") }
+}
+
+#[test]
+fn sync_says_a_line_for_each_calendar_and_a_feed_s_host_alone() {
+    let root = scratch("sync-calendars");
+    let dirs = dirs_under(&root);
+    // The spare feed's command is one that fails, so nothing is run here
+    // that could print anything.
+    let c = config(&CALENDARS.replace("[\"pass\", \"show\", \"calendar/spare\"]", "[\"false\"]"));
+    let keyring = MemoryKeyring::default();
+    keyring.set("gmail", &Secret::new(PASSWORD.into())).unwrap();
+    keyring.set("home/calendar-feed", &Secret::new(FEED.into())).unwrap();
+    let mut served = caldav(GOOGLE_DAV);
+    served.push(("GET", FEED, "", 200, DENTIST.to_string()));
+    let wire = FakeWire::new(served);
+
+    let (lines, failed) = calendar_pass(&c, None, &wire, &keyring, &dirs, 1_800_000_000).unwrap();
+    assert_eq!(
+        lines,
+        [
+            "gmail/calendar (caldav, www.google.com): 1 changed",
+            "home/calendar (feed, calendar.example.net): 1 changed",
+            "E sync: spare/calendar (feed): address_cmd for spare's calendar failed: false ended with exit status: 1",
+        ]
+    );
+    assert!(failed);
+    let signed: Vec<Option<String>> = wire.asked.borrow().iter().map(|(.., user)| user.clone()).collect();
+    assert_eq!(
+        signed[..3],
+        [Some("ada@gmail.com".to_string()), Some("ada@gmail.com".into()), Some("ada@gmail.com".into())]
+    );
+
+    // Again: Gmail's calendar has the same tag and is asked nothing more,
+    // and the feed is what it was.
+    let (lines, failed) = calendar_pass(&c, Some("gmail"), &wire, &keyring, &dirs, 1_800_000_100).unwrap();
+    assert_eq!((lines, failed), (vec!["gmail/calendar (caldav, www.google.com): nothing new".to_string()], false));
+    let (lines, _) = calendar_pass(&c, Some("home"), &wire, &keyring, &dirs, 1_800_000_100).unwrap();
+    assert_eq!(lines, ["home/calendar (feed, calendar.example.net): nothing new"]);
+
+    // A refused sign-in, and a feed that serves a web page.
+    let refusing = FakeWire::new(vec![
+        ("PROPFIND", GOOGLE_DAV, "", 401, String::new()),
+        ("GET", FEED, "", 200, "<!doctype html><title>Sign in</title>".to_string()),
+    ]);
+    let (lines, failed) = calendar_pass(&c, None, &refusing, &keyring, &dirs, 1_800_000_200).unwrap();
+    assert!(failed);
+    assert_eq!(
+        lines[..2],
+        [
+            "E sync: gmail/calendar (caldav, www.google.com): the calendar's server refused the sign-in",
+            "E sync: home/calendar (feed, calendar.example.net): what the address served is not a calendar",
+        ]
+    );
+    assert!(lines.iter().all(|line| !line.contains("SYNTHETIC-FEED-TOKEN") && !line.contains(PASSWORD)));
+
+    // An account with no calendar: no line, and no calendar store made.
+    let bare = scratch("sync-no-calendar");
+    let (lines, failed) = calendar_pass(&c, Some("plain"), &wire, &keyring, &dirs_under(&bare), 0).unwrap();
+    assert_eq!((lines.len(), failed), (0, false));
+    assert!(!bare.join("cache").exists());
 }

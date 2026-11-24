@@ -10,6 +10,7 @@ use std::thread;
 
 use anyhow::Result;
 use tuimex_core::{RemoteError, RemoteFolder};
+use tuimex_engine::calendar::{CalendarError, Got, Sent, Wire};
 use tuimex_engine::oauth::{self, Endpoints};
 use tuimex_engine::{Credential, Keyring, Protocol, Secret, Seen, Server, pin};
 use tuimex_fixtures::FakeGoogle;
@@ -200,6 +201,85 @@ impl Net for FakeNet {
         pinned: Option<Vec<u8>>,
     ) -> Result<(), tuimex_engine::Error> {
         Ok(self.admit(server, &self.smtp, credential, pinned)?)
+    }
+}
+
+/// A feed's private address, which no file and no line may hold.
+pub(crate) const FEED: &str = "https://calendar.example.net/api/calendar/v1/url/SYNTHETIC-FEED-TOKEN-4f1a/calendar.ics";
+/// Gmail's calendar for `ada@gmail.com`, as setup offers it.
+pub(crate) const GOOGLE_DAV: &str = "https://www.google.com/calendar/dav/ada@gmail.com/events/";
+
+pub(crate) const DENTIST: &str = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:d@example.net\r\n\
+                                  DTSTART:20261127T090000Z\r\nSUMMARY:Dentist\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+
+/// A CalDAV calendar's three answers: what it is, what it lists, and the
+/// events asked for, told apart by what each request's body asks.
+pub(crate) fn caldav(url: &'static str) -> Vec<(&'static str, &'static str, &'static str, u16, String)> {
+    let path = url.trim_start_matches("https://www.google.com");
+    vec![
+        (
+            "PROPFIND",
+            url,
+            "propfind",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/"><D:response><D:href>{path}</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:displayname>ada@gmail.com</D:displayname><CS:getctag>t1</CS:getctag></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+        (
+            "REPORT",
+            url,
+            "calendar-query",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:"><D:response><D:href>{path}standup.ics</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:getetag>"1"</D:getetag></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+        (
+            "REPORT",
+            url,
+            "calendar-multiget",
+            207,
+            format!(
+                r#"<D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav"><D:response><D:href>{path}standup.ics</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:standup@example.org
+DTSTART:20261126T100000Z
+SUMMARY:Standup
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data></D:prop></D:propstat></D:response></D:multistatus>"#
+            ),
+        ),
+    ]
+}
+
+/// Calendar servers: each request is answered by the first entry whose
+/// method and address it has and whose body holds the entry's words.
+/// What it was asked, it keeps: method, address, and the sign-in's user.
+#[derive(Default)]
+pub(crate) struct FakeWire {
+    pub served: Vec<(&'static str, &'static str, &'static str, u16, String)>,
+    pub asked: RefCell<Vec<(String, String, Option<String>)>>,
+}
+
+impl FakeWire {
+    pub fn new(served: Vec<(&'static str, &'static str, &'static str, u16, String)>) -> FakeWire {
+        FakeWire { served, asked: RefCell::default() }
+    }
+}
+
+impl Wire for FakeWire {
+    fn send(&self, sent: &Sent<'_>) -> Result<Got, CalendarError> {
+        let user = sent.sign_in.map(|(user, _)| user.to_string());
+        self.asked.borrow_mut().push((sent.method.to_string(), sent.url.to_string(), user));
+        let body = sent.body.unwrap_or_default();
+        let found = self
+            .served
+            .iter()
+            .find(|(method, url, words, ..)| *method == sent.method && *url == sent.url && body.contains(words));
+        let (.., status, body) = found.ok_or_else(|| CalendarError::Unreachable("its host was not found".into()))?;
+        Ok(Got { status: *status, body: body.clone() })
     }
 }
 

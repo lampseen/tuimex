@@ -189,3 +189,73 @@ fn an_account_s_color_is_one_of_the_four_accents_accounts_take() {
     let none = "[[account]]\nname = \"work\"\naddress = \"a@example.org\"\n";
     assert_eq!(super::colours(&Config::parse(none).unwrap().accounts).unwrap(), []);
 }
+
+const CALDAV: &str = "https://www.google.com/calendar/dav/ada@example.org/events/";
+
+#[test]
+fn a_calendar_is_caldav_with_an_address_or_a_feed_with_none() {
+    let text = format!(
+        "{TWO}\n[[calendar]]\naccount = \"work\"\nkind = \"caldav\"\nurl = \"{CALDAV}\"\n\n\
+         [[calendar]]\naccount = \"personal\"\nkind = \"feed\"\naddress_cmd = [\"pass\", \"show\", \"cal\"]\n"
+    );
+    let config = Config::parse(&text).unwrap();
+    let work = config.calendar("work").unwrap();
+    assert_eq!((work.kind.as_str(), work.url.as_deref(), work.address_cmd.as_ref()), ("caldav", Some(CALDAV), None));
+    let personal = config.calendar("personal").unwrap();
+    assert_eq!((personal.kind.as_str(), personal.url.as_deref()), ("feed", None));
+    assert_eq!(personal.address_cmd.as_deref(), Some(&["pass".to_string(), "show".into(), "cal".into()][..]));
+    let bare = Config::parse(&format!("{TWO}[[calendar]]\naccount = \"personal\"\nkind = \"feed\"\n")).unwrap();
+    assert!(bare.calendar("personal").unwrap().address_cmd.is_none() && bare.calendar("work").is_none());
+}
+
+/// Each way a `[[calendar]]` can be wrong, named with the key it is
+/// about; and a feed's address, given where it does not belong, is not
+/// repeated.
+#[test]
+fn a_calendar_table_that_is_wrong_says_which_key_and_never_quotes_a_feed_s_address() {
+    let secret = "https://calendar.example.net/api/calendar/v1/url/SECRET-TOKEN/calendar.ics";
+    let table = |keys: &str| format!("{TWO}[[calendar]]\n{keys}\n");
+    let work = "account = \"work\"\n";
+    for (keys, said) in [
+        (
+            "account = \"nobody\"\nkind = \"feed\"".to_string(),
+            "[[calendar]] account = \"nobody\": there is no [[account]] of that name".to_string(),
+        ),
+        (format!("{work}kind = \"ics\""), "[[calendar]] of work: `kind` is one of \"caldav\", \"feed\"".into()),
+        (format!("{work}kind = \"caldav\""), "[[calendar]] of work: kind = \"caldav\" needs a `url`".into()),
+        (
+            format!("{work}kind = \"caldav\"\nurl = \"http://dav.example.org/cal/\""),
+            "[[calendar]] of work: `url` is fetched over TLS only, so it begins https://".into(),
+        ),
+        (
+            format!("{work}kind = \"caldav\"\nurl = \"https://ada:pw@dav.example.org/cal/\""),
+            "[[calendar]] of work: `url` cannot carry a user name".into(),
+        ),
+        (
+            format!("{work}kind = \"caldav\"\nurl = \"https:///cal/\""),
+            "[[calendar]] of work: `url` names no host".into(),
+        ),
+        (
+            format!("{work}kind = \"caldav\"\nurl = \"{CALDAV}\"\naddress_cmd = [\"pass\"]"),
+            "[[calendar]] of work: `address_cmd` is a feed's".into(),
+        ),
+        (format!("{work}kind = \"feed\"\nurl = \"{secret}\""), "[[calendar]] of work: a feed has no `url`".into()),
+        (format!("{work}kind = \"feed\"\naddress_cmd = []"), "[[calendar]] of work: `address_cmd` names no".into()),
+        (format!("{work}kind = \"feed\"\naddress = \"{secret}\""), "line 14: unknown key `address`".into()),
+        (format!("{work}kind = \"feed\"\naddress_cmd = \"{secret}\""), "line 14: expected a sequence".into()),
+        (
+            format!("{work}kind = \"feed\"\n\n[[calendar]]\n{work}kind = \"feed\""),
+            "account work has two [[calendar]] tables, and an account has one calendar".into(),
+        ),
+    ] {
+        let error = error(&table(&keys));
+        assert!(error.starts_with(&said), "{keys}\n{error}");
+        assert!(!error.contains("SECRET-TOKEN") && !error.contains("calendar.example.net"), "{error}");
+    }
+    let google = TWO.replace("address = \"ada@example.org\"", "address = \"ada@example.org\"\nauth = \"gmail-oauth\"");
+    let error = error(&format!("{google}[[calendar]]\n{work}kind = \"caldav\"\nurl = \"{CALDAV}\"\n"));
+    assert!(
+        error.contains("work signs in with Google (auth = \"gmail-oauth\"); kind = \"feed\" is the way"),
+        "{error}"
+    );
+}

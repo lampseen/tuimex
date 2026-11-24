@@ -11,7 +11,9 @@ use tuimex_store::files;
 use super::{Doctor, Known, on_path, redact};
 use crate::config::Config;
 use crate::paths::Dirs;
-use crate::setup::tests::{CLIENT_ID, CLIENT_SECRET, FakeNet, MemoryKeyring, PASSWORD, Run, scratch};
+use crate::setup::tests::{
+    CLIENT_ID, CLIENT_SECRET, DENTIST, FEED, FakeNet, FakeWire, MemoryKeyring, PASSWORD, Run, scratch,
+};
 
 fn dirs(root: &Path) -> Dirs {
     Dirs { config: root.join("config"), data: root.join("data"), cache: root.join("cache"), state: root.join("state") }
@@ -531,6 +533,75 @@ fn a_secret_never_reaches_a_file_or_anything_setup_or_doctor_says() {
     let config = fs::read_to_string(root.join("config/config.toml")).unwrap();
     assert_eq!(config.matches("auth = \"gmail-oauth\"").count(), 2);
     assert!(oauth::client(&keyring).unwrap().is_some());
+}
+
+/// `WORK` reading a calendar over CalDAV, and a second account whose
+/// calendar is a feed.
+fn with_calendars() -> String {
+    format!(
+        "{WORK}\n[[account]]\nname = \"home\"\naddress = \"ada@example.com\"\n\
+         imap = {{ host = \"imap.example.com\", port = 993 }}\nsmtp = {{ host = \"smtp.example.com\", port = 465 }}\n\n\
+         [[calendar]]\naccount = \"work\"\nkind = \"caldav\"\nurl = \"https://dav.example.org/cal/work/\"\n\n\
+         [[calendar]]\naccount = \"home\"\nkind = \"feed\"\n"
+    )
+}
+
+#[test]
+fn each_calendar_is_named_with_its_kind_its_host_its_secret_and_when_it_was_last_read() {
+    let root = scratch("doctor-calendars");
+    let keyring = MemoryKeyring::default();
+    for (entry, secret) in [("work", PASSWORD), ("home", PASSWORD), ("home/calendar-feed", FEED)] {
+        keyring.set(entry, &Secret::new(secret.into())).unwrap();
+    }
+    let net = FakeNet::trusted();
+    let text = with_calendars();
+    config(&root, &text);
+    let path = bin(&root, &["vi"]);
+    let case = Case { root: &root, keyring: &keyring, net: &net, google: None, path, editor: None };
+    let (fine, printed) = case.run();
+    assert!(fine, "{printed}");
+    for line in [
+        "  ok     SMTP smtp.example.org:587: signed in, and nothing was sent\n\
+         \x20 ok     its calendar is read over CalDAV from dav.example.org, with its password\n\
+         \x20 note   its calendar has not been read yet; `tuimex sync` reads it\n",
+        "  ok     its calendar is a feed from calendar.example.net, whose address the keyring holds\n\
+         \x20 note   its calendar has not been read yet; `tuimex sync` reads it\n",
+    ] {
+        assert!(printed.contains(line), "wanted {line:?} in:\n{printed}");
+    }
+    assert!(!root.join("cache/calendar.sqlite").exists(), "doctor made no calendar store");
+
+    // Once read: when, for each.
+    let wire = FakeWire::new(vec![
+        ("PROPFIND", "https://dav.example.org/cal/work/", "", 207, r#"<D:multistatus xmlns:D="DAV:"/>"#.into()),
+        ("REPORT", "https://dav.example.org/cal/work/", "", 207, r#"<D:multistatus xmlns:D="DAV:"/>"#.into()),
+        ("GET", FEED, "", 200, DENTIST.to_string()),
+    ]);
+    let parsed = Config::parse(&text).unwrap();
+    let (lines, failed) =
+        crate::sync::calendar_pass(&parsed, None, &wire, &keyring, &dirs(&root), 1_800_000_000).unwrap();
+    assert!(!failed, "{lines:?}");
+    let (fine, printed) = case.run();
+    assert!(fine, "{printed}");
+    assert_eq!(printed.matches("  ok     its calendar was last read 2027-01-15 08:00 UTC\n").count(), 2, "{printed}");
+
+    // A feed whose address is nowhere, and one printed by a command.
+    keyring.remove("home/calendar-feed").unwrap();
+    let (fine, printed) = case.run();
+    let said = "  WRONG  its calendar is a feed: there is no address for home's calendar in the keyring, and no \
+                address_cmd; run `tuimex setup`";
+    assert!(!fine && printed.contains(said), "{printed}");
+    config(&root, &format!("{text}address_cmd = [\"printf\", \"%s\", \"{FEED}\"]\n"));
+    let (fine, printed) = case.run();
+    assert!(fine && printed.contains("feed from calendar.example.net, whose address its `address_cmd` printed"));
+    assert!(!printed.contains("SYNTHETIC-FEED-TOKEN"), "{printed}");
+
+    // Redacted, a calendar's host is a host like any other.
+    let hidden = case.redacted().1;
+    for held in ["dav.example.org", "calendar.example.net", "SYNTHETIC-FEED-TOKEN"] {
+        assert!(!hidden.contains(held), "{held} in:\n{hidden}");
+    }
+    assert!(hidden.contains("over CalDAV from host-5, with its password"), "{hidden}");
 }
 
 #[test]
