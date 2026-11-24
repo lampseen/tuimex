@@ -1487,7 +1487,15 @@ one rule carries the navigation: `Enter` goes deeper (month, day, event),
 `Esc` comes back, and `h` `j` `k` `l` always move the cursor. `m`, `w` and
 `d` change the view at the same date. The keys and every screen are
 `design/tui.js`'s to state (ADR-002), and nothing is built until Bryan has
-merged that design (ADR-024).
+accepted that design.
+
+ADR-024 made a draft the spec "when Bryan merges it", which was possible
+when nothing drew it. Now a test holds the keymap in Rust to the design's
+entry for entry, and another fails on any output of the design that is not
+drawn, so a design cannot merge ahead of its code. The calendar's draft is
+therefore a branch Bryan reads as rendered screens; his acceptance is
+written under this record; and each milestone merges the part of the
+accepted design it draws, with the Rust that draws it.
 
 A meeting link is a link (ADR-018): `o` on an event opens it after the same
 assessment, with its real host on the status line, and it is the user

@@ -879,8 +879,11 @@ screens and flows: month with the day's agenda, week, day, event, the
 form, the calendars panel, the empty and failing states, and the answer,
 propose, ignore, join, create, delete and reminder flows, each at 120x40
 and at 80x24 in ASCII and sixteen colours. Drafted on a branch and read by
-Bryan as the HTML preview (ADR-024).
-**Exit:** Bryan merges it. No golden is generated before that.
+Bryan as rendered screens (ADR-024). The branch is not merged: the tests
+that hold the Rust to the design would fail on screens nothing draws yet,
+so each later milestone merges the part it draws (ADR-054).
+**Exit:** Bryan accepts the draft, and a note under ADR-054 says so and
+lists what he changed.
 
 ### M13 — See
 Every event of a calendar read in `tuimex-content`; event files and their
