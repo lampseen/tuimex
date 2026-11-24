@@ -1,10 +1,21 @@
 //! The week view's outputs: `cal-week` and `cal-week-80-ascii`.
-//! None is drawn until what it shows is built: `DRAWN` lists those that are, and `draw` draws them.
 
 use tuimex_ui::span::Line;
 
-pub const DRAWN: &[&str] = &[];
+use super::{DEFAULT, TO_THURSDAY, both, check, typed};
 
-pub fn draw(_name: &str, _width: usize, _height: usize) -> Option<Vec<Line>> {
-    None
+pub const DRAWN: &[&str] = &["cal-week", "cal-week-80-ascii"];
+
+pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
+    Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
+        // The week view, and the second of Thursday's events.
+        "cal-week" => typed(&format!("{TO_THURSDAY}2jj")).lines(width, height),
+        _ => return None,
+    })
+}
+
+#[test]
+fn cal_week() {
+    both("cal-week");
+    check(DEFAULT, "cal-week-80-ascii");
 }
