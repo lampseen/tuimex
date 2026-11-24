@@ -42,7 +42,8 @@ pub struct Part {
 }
 
 /// The first event of the calendar part of a message; `None` for a
-/// message with no such part, or one that holds no event.
+/// message that does not parse, has no such part, or holds no event in
+/// it: each is a message that says nothing about any event.
 pub fn part(raw: &[u8]) -> Option<Part> {
     let part = content::calendar_part(raw).ok()??;
     let parsed = content::calendar(&part.text);

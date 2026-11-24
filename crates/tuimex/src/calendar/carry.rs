@@ -297,12 +297,15 @@ impl Reader {
                 let password = password.map_err(|e| e.to_string())?;
                 let (wire, url, sign_in) = (wire.as_ref(), dav.url.as_str(), (dav.user.as_str(), &password));
                 match (thing, text) {
-                    (None, text) => {
+                    (None, None) => return Ok(()),
+                    (None, Some(text)) => {
                         // Named by a key made here: an event's UID is text
-                        // from outside, and never becomes an address.
+                        // from outside, and never becomes an address. A
+                        // UID with nothing before its `@` is no name, and
+                        // the write then refuses it.
                         let name = provider::new_uid()?;
                         let name = name.split('@').next().unwrap_or_default();
-                        provider::put_new(wire, store, account, url, sign_in, text.unwrap_or_default(), name)?
+                        provider::put_new(wire, store, account, url, sign_in, text, name)?
                     }
                     (Some(thing), Some(text)) => {
                         provider::put_changed(wire, store, account, url, sign_in, &thing.href, text)?;
