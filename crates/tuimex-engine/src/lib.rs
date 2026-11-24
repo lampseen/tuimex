@@ -6,6 +6,7 @@ mod account;
 mod act;
 pub mod agent;
 mod backoff;
+pub mod calendar;
 mod imap;
 pub mod oauth;
 mod outbox;
