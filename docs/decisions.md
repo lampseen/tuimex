@@ -1484,8 +1484,11 @@ The calendar is not a section. `gc` opens it and `gm` returns to mail, and
 each side keeps where it was. A section is a saved query over mail, moved
 between with `h` and `l`; a grid of days needs those keys for days. Inside,
 one rule carries the navigation: `Enter` goes deeper (month, day, event),
-`Esc` comes back, and `h` `j` `k` `l` always move the cursor. `m`, `w` and
-`d` change the view at the same date. The keys and every screen are
+`Esc` comes back, and `h` `j` `k` `l` always move the cursor. `Tab` and
+`1` `2` `3` change the view at the same date, as they change the section
+in mail. A key that removes something in mail removes in the calendar and
+does nothing else there: `d` deletes an event, so no view is on `d`
+(Bryan, 2026-11-24: "d doing 2 things is risky"). The keys and every screen are
 `design/tui.js`'s to state (ADR-002), and nothing is built until Bryan has
 accepted that design.
 
