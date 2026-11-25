@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}Mail{default}   {brightblack}Calendar{default}                                                                                              
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
 {default}    {default b}Everywhere{default}                           {default b}List{default}                                 {default b}Reader{default}                                    
@@ -34,7 +35,6 @@
 {default}    ^d          {brightblack}save the draft{default}                                                a                {brightblack}accept{default}                   
 {default}    Esc         {brightblack}close; keep or discard{default}                                        t                {brightblack}tentative{default}                
 {default}                                                                              d                {brightblack}decline{default}                  
-{default}    {default b}Help (after ?){default}                                                            p                {brightblack}propose another time{default}     
 {default}                                                                                                                        
-{default}  {brightblack}144 keys and commands - lines 1-35 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}144 keys and commands - lines 1-34 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

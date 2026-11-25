@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {magenta b}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}                                                                                     {default b}November 2026{default}  
 {default}                                                                                                                        
 {default}     {default b}November 2026{default}                {brightblack}|{default}  {brightblack b}Thu 26 November{default}                                                                    
@@ -31,7 +32,6 @@
 {default}     {brightblack} 8{default}  {brightblack} 9{default}  {brightblack}10{default}  {brightblack}11{default}  {brightblack}12{default}  {brightblack}13{default}  {brightblack}14{default}   {brightblack}|{default}                                                                                     
 {default}     {brightblack}15{default}  {brightblack}16{default}  {brightblack}17{default}  {brightblack}18{default}  {brightblack}19{default}  {brightblack}20{default}  {brightblack}21{default}   {brightblack}|{default}                                                                                     
 {default}     {brightblack}22{default}  {brightblack}23{default}  {brightblack}24{default}  {brightblack}25{default}  {brightblack}26{default}  {brightblack}27{default}  {brightblack}28{default}   {brightblack}|{default}                                                                                     
-{default}                                  {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}                                                                                     

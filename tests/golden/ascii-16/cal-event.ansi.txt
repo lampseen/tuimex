@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {default b}Q4 roadmap review{default}                                                                               {brightblack}2 of 4 on Thu 26 Nov{default}  
 {default}                                                                                                                        
 {default}    {brightblack}When     {default}Thu 26 Nov 2026, 10:00 to 11:30{brightblack} - in 3 days{default}                                                                
@@ -18,7 +19,6 @@
 {default}    {brightblack}- {default}Headcount, once the budget is in                                                                                  
 {default}                                                                                                                        
 {default}    {brightblack}> More - status, shown as, privacy, by phone, changed{default}                                                               
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

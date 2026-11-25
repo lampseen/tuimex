@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {magenta b}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}                                                                                     {default b}November 2026{default}  
 {default}                                                                                                                        
 {default}     {default b}November 2026{default}                {brightblack}|{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                  

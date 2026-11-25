@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                                     November 2026  
                                                                                                                         
      November 2026                |  Thu 26 November                                                                    
@@ -31,7 +32,6 @@
       8   9  10  11  12  13  14   |                                                                                     
      15  16  17  18  19  20  21   |                                                                                     
      22  23  24  25  26  27  28   |                                                                                     
-                                  |                                                                                     
                                   |                                                                                     
                                   |                                                                                     
                                   |                                                                                     

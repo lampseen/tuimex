@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {brightblack}Month{default}   {brightblack}Week{default}   {magenta b}Day{default}                                                                              {default b}Thu 26 November 2026{default}  
 {default}                                                                                                                        
 {default}  {brightblack b}Thu 26 November{default}                                                                                                       
@@ -32,7 +33,6 @@
 {default}    {brightblack}- {default}What shipped in Q3 and what slipped                                                                               
 {default}    {brightblack}- {default}The three bets for Q4                                                                                             
 {default}    {brightblack}- {default}Headcount, once the budget is in                                                                                  
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

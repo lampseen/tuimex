@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {dim}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}   {acc b}Search{fg} nov                                        
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -23,7 +24,6 @@
 {fg}    {dim}From     {fg b}Mei Tanaka{fg} {dim}<mei@example.org>{fg}                                                                               
 {fg}    {dim}To       {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
 {fg}    {dim}Files    {fg}vendor-call.md {dim}9 KB{fg}                                                                                        
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

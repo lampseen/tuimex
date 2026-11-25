@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   This week: winter routes, a gear swap and one trail closure                                                           
                                                                                                                         
     From     Fernway Weekly <news@fernway.example.net>                                                                  
@@ -34,7 +35,6 @@
                                                                                                                         
     Mill creek is closed for bridge work. Details and the detour [3]                                                    
                                                                                                                         
-    You get this because you joined Fernway in 2023. Unsubscribe [4] or view it                                         
                                                                                                                         
-  lines 1-29 of 30                                                                          sending in 6s - 1 not sent  
+  lines 1-28 of 30                                                                          sending in 6s - 1 not sent  
   Load 8 images from img.fernway.example.net, cdn.example.net?  y yes - n no                                            

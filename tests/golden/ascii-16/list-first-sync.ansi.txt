@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {magenta b}Inbox{default} {default b}8{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}2{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}                                                                
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -24,7 +25,6 @@
 {default}                                                                                                                        
 {default}  {brightblack b}Earlier{default}                                                                                                               
 {default}    {brightblue}personal{default}   {brightblack}Greta Holm{default}              {brightblack}Book club pick for December{default}                                   {cyan}replied{default}  {brightblack}12 Nov{default}    
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

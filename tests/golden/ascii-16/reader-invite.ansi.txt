@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {default b}Invitation: Q4 roadmap review, Thu 26 Nov 10:00{default}                                                                       
 {default}                                                                                                                        
 {default}    {brightblack}From     {default b}Imani Castell{default} {brightblack}<imani@example.org>{default}                                                                          
@@ -13,7 +14,6 @@
 {default}                                                                                                                        
 {default}    The pre-read is the roadmap document from last week. Please answer by                                               
 {default}    Wednesday so I can book the right room.                                                                             
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

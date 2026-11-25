@@ -12,6 +12,7 @@ outside the terminal.
 ## The screen
 
 ```
+  tuimex   F1 Mail   F2 Calendar
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1
 
   Today
@@ -21,7 +22,13 @@ outside the terminal.
 ▌   work       Priya Raman     ▸ Contract draft v3            3 msg · 2 files   11:32 ★
 ```
 
-The top row is the sections, one tab each. A tab has a number only when the
+The first row is on every screen. It names the two places tuimex has,
+mail and the [calendar](Calendar), each by the key that goes to it, and
+the one you are in is the one in the accent colour and bold. In a draft,
+the event form and help, where a function key does nothing, it names the
+places without their keys.
+
+The row under it is the sections, one tab each. A tab has a number only when the
 number means "this needs you": unread rows in the Inbox, every row of a
 section of flagged mail, and in the Outbox what was not sent. The Outbox
 tab is there only while a message is waiting to go.

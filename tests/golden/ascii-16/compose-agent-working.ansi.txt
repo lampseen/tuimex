@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}Mail{default}   {brightblack}Calendar{default}                                                                                              
 {default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
 {default}                                                                                                                        
 {default}    {brightblack}From     robin@example.com{default}   {default b}robin.vale@example.org{default}   {brightblack}desk@example.org{default}                                              
@@ -7,7 +8,6 @@
 {default}    {brightblack}Subject  {default b}Re: Contract draft v3 for the Halden account{default}                                                               
 {default}                                                                                                                        
 {default}    {cyan}% Writing a reply{brightblack} - from the 3 messages of the thread{default}                                                               
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

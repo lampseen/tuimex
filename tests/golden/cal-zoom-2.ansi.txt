@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
 {fg}  {fg b}Q4 roadmap review{fg}                                                                               {dim}2 of 4 on Thu 26 Nov{fg}  
 {fg}                                                                                                                        
 {fg}    {dim}When     {fg}Thu 26 Nov 2026, 10:00 to 11:30{dim} · in 3 days{fg}                                                                

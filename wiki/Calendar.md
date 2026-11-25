@@ -7,6 +7,13 @@ to mail; each side keeps where it was. `F2` and `F1` do the same by one
 key each, wherever `gc` and `gm` are read: not while you are typing into
 the event form, a message, the command line or a prompt.
 
+The first row of every screen says which of the two you are in:
+`tuimex   F1 Mail   F2 Calendar`, with the place that is open in the
+accent colour and bold. In the event form, a draft and help it names the
+places without their keys, because the keys do nothing there. In a
+terminal too narrow for the whole row the place you are not in is cut
+short, and narrower still it is its key alone.
+
 A calendar is written by other people. Its events are text from outside,
 as mail is: nothing an event names is fetched, and a link in one opens
 only when you ask for that one link.

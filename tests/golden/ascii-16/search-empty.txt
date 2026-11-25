@@ -1,9 +1,9 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1   Search zebra                                      
                                                                                                                         
                                                                                                                         
     Nothing matches "zebra".                                                                                            
     Searched 9,240 messages in 2 accounts.                                                                              
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

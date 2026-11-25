@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
 {fg}  {dim}Month{fg}   {acc b}Week{fg}   {dim}Day{fg}                                                                            {fg b}23 to 29 November 2026{fg}  
 {fg}                                                                                                                        
 {fg}          {acc b}Mon 23{fg}         {dim}Tue 24{fg}         {dim}Wed 25{fg}        {dim bg=sel}▌{fg bg=sel b}Thu 26{fg bg=sel}        {fg} {dim}Fri 27{fg}         {dim}Sat 28{fg}         {dim}Sun 29{fg}              
@@ -34,7 +35,6 @@
 {fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {head}┃{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
 {fg}  {dim}22:00{fg}  {faint}│··············│··············│··············{head}┃{fg}              {faint}│··············│··············│··············{fg}      
 {fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {head}┃{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
-{fg}  {dim}23:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
 {fg}                                                                                                                        
 {fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                               

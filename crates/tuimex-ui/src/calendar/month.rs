@@ -129,7 +129,7 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let (year, month, _) = civil_from_days(o.cursor);
     let title = format!("{} {year}", MONTH_NAMES[(month - 1) as usize]);
     let (left, idle) = match none {
-        true => (Line::new(), list::hint(&[keymap::hint("calendar.mail"), keymap::hint("global.help")])),
+        true => (Line::new(), list::hint(&[keymap::hint("global.help")])),
         false => (parts::day_status(o, o.cursor), parts::hint(o.entry().filter(|_| o.focus).as_ref(), o.focus)),
     };
     parts::frame(o, width, &title, content.collect(), left, idle)

@@ -15,6 +15,7 @@ pub mod list;
 pub mod mailbox;
 pub mod paint;
 pub mod palette;
+pub mod places;
 pub mod reader;
 pub mod say;
 pub mod span;

@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                                                                                    
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                                                                                 
 {fg}                                                                                                                                                                                    
 {fg}  {dim b}Today{fg}                                                                                                        {faint}│{acc}▌{fg} {fg b}Staging database migration window{fg}                                 
@@ -39,7 +40,6 @@
 {fg}                                                                                                               {faint}│{fg}    target changed the same night, or the first nightly run will    
 {fg}                                                                                                               {faint}│{fg}    dump an idle database and report success.                       
 {fg}                                                                                                               {faint}│{fg}                                                                    
-{fg}                                                                                                               {faint}│{fg}    {fg b}What I need from you{fg}                                            
 {fg}                                                                                                                                                                                    
-{fg}  {dim}lines 15-52 of 59{fg}                                                                                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}lines 15-51 of 59{fg}                                                                                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  j k {dim}scroll · {fg}Alt-h {dim}list · {fg}Enter {dim}open · {fg}? {dim}help{fg}                                                                                                                                     

@@ -89,16 +89,16 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
     Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
         "cal-month" => typed(TO_THURSDAY).lines(width, height),
         "cal-month-list-focus" | "cal-month-wide-list-focus" => typed(LISTED).lines(width, height),
-        "cal-list-0" => cut(typed(LISTED).lines(120, 40), 11),
-        "cal-list-1" => cut(typed(&format!("{LISTED}j")).lines(120, 40), 11),
-        "cal-list-2" => cut(typed(&format!("{LISTED}l")).lines(120, 40), 11),
+        "cal-list-0" => cut(typed(LISTED).lines(120, 40), 12),
+        "cal-list-1" => cut(typed(&format!("{LISTED}j")).lines(120, 40), 12),
+        "cal-list-2" => cut(typed(&format!("{LISTED}l")).lines(120, 40), 12),
         "cal-list-3" => {
             // The design's `busy` Thursday, on a screen with eight rows for
             // it, and down to the last of its eight events.
             let mut calendar = calendar();
             let own = calendar.shelves.iter_mut().find(|shelf| shelf.account.0 == "personal" && !shelf.local).unwrap();
             own.events.extend(fx::busy());
-            over(calendar, &format!("{LISTED}jjjjjjj")).lines(120, 13)
+            over(calendar, &format!("{LISTED}jjjjjjj")).lines(120, 14)
         }
         "cal-month-account" => typed("gclllgt").lines(width, height),
         "cal-empty" => over(Calendar::empty(fx::NOW), "gc").lines(width, height),
@@ -112,8 +112,8 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
         }
         "cal-calendars" => typed("gclllCj ").lines(width, height),
         "help-calendar" => typed("gc?").lines(width, height),
-        "cal-zoom-0" => cut(typed(TO_THURSDAY).lines(120, 40), 11),
-        "cal-goto-2" => cut(typed("gclllgd5 dec\r").lines(120, 40), 11),
+        "cal-zoom-0" => cut(typed(TO_THURSDAY).lines(120, 40), 12),
+        "cal-goto-2" => cut(typed("gclllgd5 dec\r").lines(120, 40), 12),
         _ => {
             let others = [week::draw, day::draw, event::draw, form::draw, flows::draw];
             return others.iter().find_map(|draw| draw(name, width, height));

@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
 {fg}  {dim}Month{fg}   {dim}Week{fg}   {acc b}Day{fg}                                                                              {fg b}Mon 23 November 2026{fg}  
 {fg}                                                                                                                        
 {fg}  {dim b}Today · Mon 23 November{fg}                                                                                               
@@ -33,8 +34,7 @@
 {fg}  {dim b}Mon 30 November{fg}                                                                                                       
 {fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
 {fg}                                                                                                                        
-{fg}  {dim b}Tue 1 December{fg}                                                                                                        
-{fg}    {faint}work{fg}       {faint}09:30-09:45{fg}  {faint}Standup{fg}                                                                                     
+{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  /call{bg bg=acc} {fg}                                                                                                                

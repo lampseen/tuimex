@@ -29,8 +29,8 @@ const ROADMAP: &str = "gclll\rj";
 /// line under the blank row before them.
 fn strip(lines: Vec<Line>) -> Vec<Line> {
     let blank = |line: &Line| line.iter().all(|span| span.text.trim().is_empty());
-    let day = lines[2..].iter().take_while(|line| !blank(line)).count();
-    lines[2..2 + day].iter().chain(&lines[lines.len() - 3..]).cloned().collect()
+    let day = lines[3..].iter().take_while(|line| !blank(line)).count();
+    lines[3..3 + day].iter().chain(&lines[lines.len() - 3..]).cloned().collect()
 }
 
 pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
@@ -38,11 +38,11 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
         "cal-day" | "cal-day-wide" => typed(ROADMAP).lines(width, height),
         "cal-find" => typed("gc3/call").lines(width, height),
         "cal-search" => typed("gc/call\r").lines(width, height),
-        "cal-zoom-1" => cut(typed(ROADMAP).lines(120, 40), 11),
+        "cal-zoom-1" => cut(typed(ROADMAP).lines(120, 40), 12),
         "cal-zoom-3" => {
             let mut app = typed(&format!("{ROADMAP}\r"));
             app.key(Key::Esc);
-            cut(app.lines(120, 40), 11)
+            cut(app.lines(120, 40), 12)
         }
         "cal-goto-0" => strip(typed(&format!("{TO_THURSDAY}3gd")).lines(width, 40)),
         "cal-goto-1" => strip(typed(&format!("{TO_THURSDAY}3gd5 dec")).lines(width, 40)),

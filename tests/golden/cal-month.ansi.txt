@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
 {fg}  {acc b}Month{fg}   {dim}Week{fg}   {dim}Day{fg}                                                                                     {fg b}November 2026{fg}  
 {fg}                                                                                                                        
 {fg}     {fg b}November 2026{fg}                {faint}│{fg}  {dim b}Thu 26 November{fg}                                                                    
@@ -34,7 +35,6 @@
 {fg}                                  {faint}│{fg}  {dim b}Fri 4 December{fg}                                                                     
 {fg}                                  {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
 {fg}                                  {faint}│{fg}                                                                                     
-{fg}                                  {faint}│{fg}                                                                                     
 {fg}                                                                                                                        
 {fg}  {dim}Thu 26 Nov · 4 events · {warn}1 to answer{fg}                                                       sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm F1 {dim}mail · {fg}? {dim}help{fg}                                             
+{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}? {dim}help{fg}                                                          

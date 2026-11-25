@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {brightblack}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}   {magenta b}Search{default} nov                                        
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -23,7 +24,6 @@
 {default}    {brightblack}From     {default b}Mei Tanaka{default} {brightblack}<mei@example.org>{default}                                                                               
 {default}    {brightblack}To       {default}Robin Vale {brightblack}<robin.vale@example.org>{default}                                                                        
 {default}    {brightblack}Files    {default}vendor-call.md {brightblack}9 KB{default}                                                                                        
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

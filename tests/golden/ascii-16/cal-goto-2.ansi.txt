@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {magenta b}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}                                                                                     {default b}December 2026{default}  
 {default}                                                                                                                        
 {default}     {default b}December 2026{default}                {brightblack}|{default}  {brightblack b}Sat 5 December{default}                                                                     
@@ -11,4 +12,4 @@
 {default}     {brightblack}January 2027{default}                 {brightblack}|{default}    {brightyellow}work{default}       {brightblack}all day{default}      On call                                                  
 {default}                                                                                                                        
 {default}  {brightblack}Sat 5 Dec - 1 event{default}                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Enter {brightblack}open - {default}J K {brightblack}next event - {default}t {brightblack}today - {default}c {brightblack}new event - {default}gm F1 {brightblack}mail - {default}? {brightblack}help{default}                                             
+{default}  Enter {brightblack}open - {default}J K {brightblack}next event - {default}t {brightblack}today - {default}c {brightblack}new event - {default}? {brightblack}help{default}                                                          

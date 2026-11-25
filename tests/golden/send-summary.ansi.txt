@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}Mail{fg}   {dim}Calendar{fg}                                                                                              
 {fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg}Robin Vale {dim}<robin.vale@example.org>{fg}                                                                        
@@ -12,7 +13,6 @@
 {fg}    {dim}         {fg}not encrypted{dim} · no key for billing@halden.example.com{fg}                                                      
 {fg}                                                                                                                        
 {fg}    {agent}◇ Written by an agent{dim} · 23 Nov 13:52 · files added by you{fg}                                                           
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

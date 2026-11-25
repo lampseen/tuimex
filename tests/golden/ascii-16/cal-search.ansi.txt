@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {brightblack}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}   {magenta b}Search{default} call                                                                                      
 {default}                                                                                                                        
 {default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
@@ -27,7 +28,6 @@
 {default}                                                                                                                        
 {default}    Payment terms and the support clause. Draft v3 is attached to Priya's mail                                          
 {default}    of this morning.                                                                                                    
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

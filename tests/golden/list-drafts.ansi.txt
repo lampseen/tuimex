@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {dim}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {acc b}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -5,7 +6,6 @@
 {fg}                                                                                                                        
 {fg}  {dim b}Yesterday{fg}                                                                                                             
 {fg}    {link}personal{fg}   {dim}to Greta Holm{fg}           {dim}Packing list for the cabin{fg}                                             {dim} 22:15{fg}    
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

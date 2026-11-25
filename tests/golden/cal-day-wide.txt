@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                                                                                    
   Month   Week   Day                                                                                                                                          Thu 26 November 2026  
                                                                                                                                                                                     
   Thu 26 November                                                                                              │  Q4 roadmap review                                                 
@@ -39,7 +40,6 @@
                                                                                                                │                                                                    
   Mon 7 December                                                                                               │                                                                    
     work       all day      On call                                                                            │                                                                    
-    work       09:30-09:45  Standup                                                                            │                                                                    
                                                                                                                                                                                     
   Thu 26 Nov · 2 of 4 · 1 to answer                                                                                                                     sending in 6s · 1 not sent  
   Enter open · i answer · o links · E edit · d delete · Esc back · ? help                                                                                                           

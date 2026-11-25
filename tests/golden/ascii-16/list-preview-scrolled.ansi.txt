@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -34,7 +35,6 @@
 {default}    two reports. If the checksums match and the reports read the same, I am                                             
 {default}    comfortable.                                                                                                        
 {default}                                                                                                                        
-{default}    {default b}During the window{default}                                                                                                   
 {default}                                                                                                                        
-{default}  {brightblack}lines 15-29 of 55{default}                                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}lines 15-28 of 55{default}                                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  j k {brightblack}scroll - {default}Alt-k {brightblack}list - {default}Enter {brightblack}open - {default}? {brightblack}help{default}                                                                         

@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                                     November 2026  
                                                                                                                         
      November 2026                │  Thu 26 November                                                                    
@@ -34,7 +35,6 @@
                                   │  Fri 4 December                                                                     
                                   │    work       09:30-09:45  Standup                                                  
                                   │                                                                                     
-                                  │                                                                                     
                                                                                                                         
   Thu 26 Nov · 4 events · 1 to answer     sending in 6s · 1 not sent · personal's calendar not read · last read 2h ago  
-  Enter open · J K next event · t today · c new event · gm F1 mail · ? help                                             
+  Enter open · J K next event · t today · c new event · ? help                                                          

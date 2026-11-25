@@ -1,3 +1,4 @@
+  tuimex   Mail   Calendar                                                                                              
   Help                                                                                                                  
                                                                                                                         
     Everywhere                          Calendar (after gc)                    Event                                    
@@ -34,7 +35,6 @@
     Commands                                                                                                            
     :archive                                          archive what is selected                                          
     :trash                                            move what is selected to Trash                                    
-    :flag                                             flag or unflag what is selected                                   
                                                                                                                         
-  144 keys and commands - lines 1-35 of 64                                                  sending in 6s - 1 not sent  
+  144 keys and commands - lines 1-34 of 64                                                  sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {magenta b}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}                                                                                     {default b}November 2026{default}  
 {default}                                                                                                                        
 {default}     {default b}November 2026{default}                {brightblack}|{default}  {brightblack b}Thu 26 November{default}                                                                    
@@ -33,7 +34,6 @@
 {default}     {brightblack}22{default}  {brightblack}23{default}  {brightblack}24{default}  {brightblack}25{default}  {brightblack}26{default}  {brightblack}27{default}  {brightblack}28{default}   {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}  {brightblack b}Fri 4 December{default}                                                                     
 {default}                                  {brightblack}|{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                  
-{default}                                  {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}                                                                                     
 {default}                                                                                                                        
 {default}  {brightblack}Thu 26 Nov - 1 of 4 - {yellow}1 to answer{default}                                                         sending in 6s{brightblack} - {red}1 not sent{default}  

@@ -1,9 +1,9 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {dim}Inbox{fg}   {acc b}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                       
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}    Nothing here.                                                                                                       
 {fg}    {dim}Synced 1m ago.{fg}                                                                                                      
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

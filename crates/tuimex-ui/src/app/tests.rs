@@ -72,9 +72,26 @@ pub(super) fn after(keys: &str) -> App {
     app
 }
 
-pub(super) fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
-    let lines = app.lines(width, height);
+fn texts(lines: &[Line]) -> Vec<String> {
     lines.iter().map(|line| line.iter().map(|s| s.text.as_str()).collect::<String>().trim_end().to_string()).collect()
+}
+
+/// The `height` lines under the bar of places, which `bar` reads: a test of
+/// a screen counts its rows from the screen's own first.
+pub(super) fn under(app: &mut App, width: usize, height: usize) -> Vec<Line> {
+    app.lines(width, height + 1).split_off(1)
+}
+
+pub(super) fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
+    texts(&under(app, width, height))
+}
+
+/// The bar of places over the screen, and what of it is drawn as the place
+/// in view.
+pub(super) fn bar(app: &mut App) -> (String, String) {
+    let lines = app.lines(120, 41);
+    let in_view = lines[0].iter().filter(|span| span.fg == crate::palette::Tok::Acc && span.bold);
+    (texts(&lines[..1]).remove(0), in_view.map(|span| span.text.as_str()).collect())
 }
 
 /// The status line's left and the command line, at 120 by 40.
@@ -1149,6 +1166,11 @@ fn a_picture_is_reported_only_while_the_reader_s_own_frame_shows_its_placeholder
     assert!(shade(&mut app));
     let (id, placed) = app.pictures().expect("a message is open");
     assert_eq!((id.key.as_str(), placed.len()), ("photos", 1));
+    // The row it gives is counted from the top of the screen, which the
+    // bar of places is on.
+    let shaded = |line: &Line| line.iter().any(|span| span.text.contains("░░░░"));
+    let first = app.lines(120, 40).iter().position(shaded);
+    assert_eq!(app.pictures().map(|(_, placed)| placed[0].row), first);
     for (covered_by, back) in [("?", "\x1b"), ("r", "\x1b"), ("a", "\x1b")] {
         press(&mut app, covered_by);
         let drawn = shade(&mut app);
@@ -1299,7 +1321,7 @@ fn a_frame_from_the_rows_near_the_cursor_and_what_is_kept_is_the_frame_from_them
         }
         let (width, height) = (120, [40, 24, 12][step % 3]);
         let top = app.top;
-        let near = app.lines(width, height);
+        let near = app.lines_under(width, height);
         let (near_top, kept) = (std::mem::replace(&mut app.top, top), app.threads.take());
         let right = app.alerts();
         let all = app.list_lines(width, height, usize::MAX, right);
@@ -1381,7 +1403,7 @@ fn a_filter_typed_a_key_at_a_time_shows_and_finds_what_asking_every_row_afresh_d
 
             let (width, height) = (120, [40, 24, 12][step % 3]);
             let top = app.top;
-            let near = app.lines(width, height);
+            let near = app.lines_under(width, height);
             let near_top = std::mem::replace(&mut app.top, top);
             let right = app.alerts();
             let all = app.list_lines(width, height, usize::MAX, right);
@@ -1675,7 +1697,7 @@ fn account_column_of(
     width: usize,
     colours: &[crate::palette::Tok],
 ) -> Vec<(String, crate::palette::Tok)> {
-    let lines = app.lines(width, 40);
+    let lines = under(app, width, 40);
     let named = |line: &&Line| line.len() > 5 && fx::TRIO.iter().any(|name| name.contains(line[4].text.as_str()));
     let is_row = |line: &&Line| named(line) && line[4].text.len() >= 4 && colours.contains(&line[4].fg);
     lines[2..38].iter().filter(is_row).map(|line| (line[4].text.clone(), line[4].fg)).collect()
@@ -1772,7 +1794,7 @@ fn the_preview_and_the_status_line_are_of_the_selected_row_s_account() {
     assert_eq!(rows[20], "  Payroll corrections for November", "the preview is that row's message");
     press(&mut app, "gtgtgt");
     assert_eq!(foot(&mut app).0, "proton only · 1 of 6 · 1 message");
-    let status = &app.lines(120, 40)[38];
+    let status = &under(&mut app, 120, 40)[38];
     assert_eq!((status[1].text.as_str(), status[1].fg), ("proton", crate::palette::Tok::Ok), "in the account's colour");
     assert_eq!(screen(&mut app, 120, 40)[20], "  Payroll corrections for November", "and its first row is previewed");
 }
@@ -1796,7 +1818,7 @@ fn three_accounts_with_a_loaded_palette_take_the_order_its_colours_give() {
     let took = [("gmail-home".to_string(), Tok::Ok), ("gmail-work".into(), Tok::Link), ("proton".into(), Tok::Head)];
     assert_eq!(names(&mut app), took);
     press(&mut app, "gt");
-    let status = &app.lines(120, 40)[38];
+    let status = &under(&mut app, 120, 40)[38];
     assert_eq!((status[1].text.as_str(), status[1].fg), ("gmail-home", Tok::Ok), "and the status line follows");
 }
 
@@ -1820,7 +1842,7 @@ fn words_with_no_colour_that_would_show_are_told_apart_by_brightness() {
     use crate::palette::tests::{CYAN_AS_DIM, GREEN_AS_TEXT};
     let mut app = three_loaded(&[CYAN_AS_DIM, GREEN_AS_TEXT]);
     press(&mut app, "p");
-    let lines = app.lines(140, 40);
+    let lines = under(&mut app, 140, 40);
     let words = |subject: &str| -> Vec<(String, Tok)> {
         let line = lines.iter().find(|line| line.iter().any(|s| s.text.contains(subject))).unwrap();
         let from = line.iter().position(|s| s.text.contains(subject)).unwrap();
@@ -1837,7 +1859,7 @@ fn words_with_no_colour_that_would_show_are_told_apart_by_brightness() {
 
     let mut cyan = three_loaded(&[]);
     press(&mut cyan, "p");
-    let line = &cyan.lines(140, 40)[3];
+    let line = &under(&mut cyan, 140, 40)[3];
     assert!(line.iter().any(|s| s.text == "invite" && s.fg == Tok::Agent), "with an accent to spare they wear it");
 }
 

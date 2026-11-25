@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
 {fg}  {dim}Month{fg}   {dim}Week{fg}   {dim}Day{fg}   {acc b}Search{fg} call                                                                                      
 {fg}                                                                                                                        
 {fg}  {dim b}Today · Mon 23 November{fg}                                                                                               
@@ -27,7 +28,6 @@
 {fg}                                                                                                                        
 {fg}    Payment terms and the support clause. Draft v3 is attached to Priya's mail                                          
 {fg}    of this morning.                                                                                                    
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

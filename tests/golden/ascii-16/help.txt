@@ -1,3 +1,4 @@
+  tuimex   Mail   Calendar                                                                                              
   Help                                                                                                                  
                                                                                                                         
     Everywhere                           List                                 Reader                                    
@@ -34,7 +35,6 @@
     ^d          save the draft                                                a                accept                   
     Esc         close; keep or discard                                        t                tentative                
                                                                               d                decline                  
-    Help (after ?)                                                            p                propose another time     
                                                                                                                         
-  144 keys and commands - lines 1-35 of 70                                                  sending in 6s - 1 not sent  
+  144 keys and commands - lines 1-34 of 70                                                  sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

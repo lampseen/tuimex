@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                                                                                    
 {fg}  {dim}Month{fg}   {dim}Week{fg}   {acc b}Day{fg}                                                                                                                                          {fg b}Thu 26 November 2026{fg}  
 {fg}                                                                                                                                                                                    
 {fg}  {dim b}Thu 26 November{fg}                                                                                              {faint}│{fg}  {fg b}Q4 roadmap review{fg}                                                 
@@ -39,7 +40,6 @@
 {fg}                                                                                                               {faint}│{fg}                                                                    
 {fg}  {dim b}Mon 7 December{fg}                                                                                               {faint}│{fg}                                                                    
 {fg}    {head}work{fg}       {dim}all day{fg}      On call                                                                            {faint}│{fg}                                                                    
-{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                            {faint}│{fg}                                                                    
 {fg}                                                                                                                                                                                    
 {fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                                                                                           

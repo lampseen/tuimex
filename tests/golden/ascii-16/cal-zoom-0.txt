@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                                     November 2026  
                                                                                                                         
      November 2026                |  Thu 26 November                                                                    
@@ -11,4 +12,4 @@
                                   |    personal   all day      Cabin weekend  Ridge saddle hut                          
                                                                                                                         
   Thu 26 Nov - 4 events - 1 to answer                                                       sending in 6s - 1 not sent  
-  Enter open - J K next event - t today - c new event - gm F1 mail - ? help                                             
+  Enter open - J K next event - t today - c new event - ? help                                                          

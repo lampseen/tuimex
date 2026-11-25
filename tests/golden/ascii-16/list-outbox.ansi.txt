@@ -1,8 +1,8 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {brightblack}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {magenta b}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}    {brightblue}personal{default}   {default b}to Tomas Ferreira{default}       Re: Bike rack: still want it?                                   in 6s  {brightblack} 14:20{default}    
 {magenta}>{default}   {brightyellow}work{default}       {default b}to Imani Castell{default}        Offsite rooms  {red}refused by smtp.example.org: 552 me~{default}            {cyan}1 file{default}  {brightblack} 13:05{default}    
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -34,7 +35,6 @@
 {default}                                                                                                                        
 {default}    {default b}Route status{default}                                                                                                        
 {default}                                                                                                                        
-{default}    {brightblack}Route             Length   Status               {default}                                                                    
 {default}                                                                                                                        
 {default}  {brightblack}5 of 24 -{default} 1 message                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  Load 8 images from img.fernway.example.net, cdn.example.net?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}                                            

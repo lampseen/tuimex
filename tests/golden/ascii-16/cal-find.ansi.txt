@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {brightblack}Month{default}   {brightblack}Week{default}   {magenta b}Day{default}                                                                              {default b}Mon 23 November 2026{default}  
 {default}                                                                                                                        
 {default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
@@ -33,8 +34,7 @@
 {default}  {brightblack b}Mon 30 November{default}                                                                                                       
 {default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
 {default}                                                                                                                        
-{default}  {brightblack b}Tue 1 December{default}                                                                                                        
-{default}    {brightblack}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  /call{black bg=magenta} {default}                                                                                                                

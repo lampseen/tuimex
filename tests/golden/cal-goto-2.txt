@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                                     December 2026  
                                                                                                                         
      December 2026                │  Sat 5 December                                                                     
@@ -11,4 +12,4 @@
      January 2027                 │    work       all day      On call                                                  
                                                                                                                         
   Sat 5 Dec · 1 event                                                                       sending in 6s · 1 not sent  
-  Enter open · J K next event · t today · c new event · gm F1 mail · ? help                                             
+  Enter open · J K next event · t today · c new event · ? help                                                          

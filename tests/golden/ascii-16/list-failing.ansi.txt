@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -26,7 +27,6 @@
 {default}                                                                                                                        
 {default}    Count me in. Robin, can you take the second car? I will split the fuel, and                                         
 {default}    I can bring the roof box if yours is still at your brother's.                                                       
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

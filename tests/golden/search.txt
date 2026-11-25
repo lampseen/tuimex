@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1   Search nov                                        
                                                                                                                         
   Today                                                                                                                 
@@ -23,7 +24,6 @@
     From     Mei Tanaka <mei@example.org>                                                                               
     To       Robin Vale <robin.vale@example.org>                                                                        
     Files    vendor-call.md 9 KB                                                                                        
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

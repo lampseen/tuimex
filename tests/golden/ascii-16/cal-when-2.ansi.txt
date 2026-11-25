@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {brightblack}Mail{default}   {magenta b}Calendar{default}                                                                                              
 {default}  {default b}New event{default}                                                                                                             
 {default}                                                                                                                        
 {default}    {brightblack}Title    {default b}Offsite planning{default}                                                                                           

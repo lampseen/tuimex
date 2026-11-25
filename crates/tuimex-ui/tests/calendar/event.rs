@@ -32,7 +32,7 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
         "cal-event-more" => roadmap("zo").lines(width, height),
         "cal-event-answer" => roadmap("i").lines(width, height),
         "cal-event-local" => typed(&format!("{TO_THURSDAY}\rjjj\r")).lines(width, height),
-        "cal-zoom-2" => cut(roadmap("").lines(120, 40), 11),
+        "cal-zoom-2" => cut(roadmap("").lines(120, 40), 12),
         _ => return None,
     })
 }

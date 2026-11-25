@@ -17,14 +17,14 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
     Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
         "cal-edit" => typed(OFFSITE).lines(width, height),
         "cal-edit-choice" => typed(&format!("{OFFSITE}\t")).lines(width, height),
-        "cal-new-0" => cut(typed(OFFSITE).lines(120, 40), 13),
-        "cal-new-1" => cut(typed(&format!("{OFFSITE}^s")).lines(120, 40), 13),
+        "cal-new-0" => cut(typed(OFFSITE).lines(120, 40), 14),
+        "cal-new-1" => cut(typed(&format!("{OFFSITE}^s")).lines(120, 40), 14),
         // Two fields on from the title is Starts: a time alone is typed
         // there, the field is left, and words that name nothing follow.
-        "cal-when-0" => cut(typed(&format!("{OFFSITE}\t\t")).lines(120, 40), 13),
-        "cal-when-1" => cut(typed(&format!("{OFFSITE}\t\t15:30")).lines(120, 40), 13),
-        "cal-when-2" => cut(typed(&format!("{OFFSITE}\t\t15:30\t")).lines(120, 40), 13),
-        "cal-when-3" => cut(typed(&format!("{OFFSITE}\t\t15:30\tsoon")).lines(120, 40), 13),
+        "cal-when-0" => cut(typed(&format!("{OFFSITE}\t\t")).lines(120, 40), 14),
+        "cal-when-1" => cut(typed(&format!("{OFFSITE}\t\t15:30")).lines(120, 40), 14),
+        "cal-when-2" => cut(typed(&format!("{OFFSITE}\t\t15:30\t")).lines(120, 40), 14),
+        "cal-when-3" => cut(typed(&format!("{OFFSITE}\t\t15:30\tsoon")).lines(120, 40), 14),
         _ => return None,
     })
 }

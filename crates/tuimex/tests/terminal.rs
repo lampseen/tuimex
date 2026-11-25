@@ -96,7 +96,7 @@ fn fixtures_opens_the_list_and_the_quit_command_leaves_the_terminal_as_it_was() 
         "Today",
         ">   work  Imani Castell",
         "Invitation: Q4 roadmap re~         inv   14:05",
-        "Interview loop: backend c~          1f  21 Nov",
+        "Bike rack: still want it?               21 Nov",
         "1 of 24 - 1 message",
         "sending in 6s - 1 not sent",
         "Enter open - e archive - d trash - r reply - ? help",
@@ -167,7 +167,7 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
         "1 of 6 - 1 message",
         ":trash",
         "+ Trashed 1 message - u to undo",
-        "144 keys and commands - lines 1-19 of 70",
+        "144 keys and commands - lines 1-18 of 70",
     ];
     let mut last = 0;
     for words in steps {
@@ -182,8 +182,9 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
 }
 
 /// ADR-054: the calendar is a place beside mail in the real binary. One
-/// session: `gc` opens it on the calendars `--fixtures` hands over, three
-/// days on is the design's Thursday, and `gm` is back in mail where it was.
+/// session: `gc` opens it on the calendars `--fixtures` hands over, and the
+/// first row says which place is open by naming both. Three days on is the
+/// design's Thursday, and `gm` is back in mail where it was.
 /// On the way, Alt-l puts the focus in the list beside the month's grid, `j`
 /// steps to the next event there and Alt-h returns. F2 and F1 then do what
 /// `gc` and `gm` did, by each of the two sequences a terminal may send for
@@ -195,13 +196,14 @@ fn a_session_in_the_calendar_moves_by_days_and_returns_to_mail() {
     let screen = String::from_utf8(out.stdout).unwrap();
     assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
     let frames = frames(&screen);
+    let bar = "tuimex   F1 Mail   F2 Calendar";
     let steps: [&[&str]; 11] = [
-        &["2 of 24 - thread of 5"],
-        &["Month   Week   Day", "November 2026", "Mon 23 Nov - 2 events", "Halden contract call"],
-        &["Thu 26 Nov - 4 events - 1 to answer", "Q4 roadm~   needs answer", "gm F1 mail - ? help"],
+        &[bar, "2 of 24 - thread of 5"],
+        &[bar, "Month   Week   Day", "November 2026", "Mon 23 Nov - 2 events", "Halden contract call"],
+        &["Thu 26 Nov - 4 events - 1 to answer", "Q4 roadm~   needs answer", "c new event - ? help"],
         &["Thu 26 Nov - 1 of 4 - 1 to answer", "|>   work  09:30    Standup", "d delete - Alt-h grid - ? help"],
         &["Thu 26 Nov - 2 of 4 - 1 to answer", "|>   work  10:00    Q4 roadm~   needs answer", "i answer - o links"],
-        &["Thu 26 Nov - 4 events - 1 to answer", "|    work  10:00    Q4 roadm~", "gm F1 mail - ? help"],
+        &["Thu 26 Nov - 4 events - 1 to answer", "|    work  10:00    Q4 roadm~", "c new event - ? help"],
         &["Inbox 9", "2 of 24 - thread of 5"],
         &["Month   Week   Day", "Thu 26 Nov - 4 events - 1 to answer"],
         &["Inbox 9", "2 of 24 - thread of 5"],
@@ -412,7 +414,7 @@ fn a_session_in_the_reader_scrolls_lists_files_and_confirms_a_deceptive_link() {
     assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
     let frames = frames(&screen);
     let steps: [&[&str]; 6] = [
-        &["Contract draft v3 for the Halden account", "1 of 3 in the thread", "lines 2-12 of 30"],
+        &["Contract draft v3 for the Halden account", "1 of 3 in the thread", "lines 2-11 of 30"],
         &["Files", " 1  contract-v3.pdf    482 KB   application/pdf", "Enter save - O open - Esc close"],
         &["4 of 24 - thread of 3", "Enter open - zo unfold"],
         &["Links", " 1  bank.example.com.device-check.example.net   https://bank.example.com/co~"],
@@ -619,10 +621,10 @@ fn an_escape_and_a_letter_together_are_alt_and_apart_they_are_esc_then_the_lette
         "keys jjjzo",
         "wait 4 of 26 - 1 message of the thread",
         "keys \\x1bj",
-        "wait lines 1-15 of 37",
+        "wait lines 1-14 of 37",
         "wait j k scroll - Alt-k list - Enter open - ? help",
         "keys j",
-        "wait lines 2-16 of 37",
+        "wait lines 2-15 of 37",
         "keys \\x1b",
         "wait 4 of 26 - 1 message of the thread",
         "keys j",
@@ -654,8 +656,9 @@ fn every_frame_is_one_synchronised_update() {
     assert_eq!(screen.matches(BEGIN_FRAME).count(), screen.matches(END_FRAME).count());
 }
 
-/// PLAN §10 M6: resize is live. The preview needs thirty rows, so it is
-/// absent at 80x24 and present once the terminal has grown.
+/// PLAN §10 M6: resize is live. The preview needs thirty rows under the
+/// bar of places, so it is absent at 80x24 and present once the terminal
+/// has grown.
 #[test]
 fn a_resize_redraws_the_list_at_the_new_size() {
     let out = on_a_pty(&scratch_home("resize"), QUIT, &["--fixtures"], &[("ON_PTY_RESIZE", "40x120")]);

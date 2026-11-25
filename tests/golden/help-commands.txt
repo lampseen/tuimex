@@ -1,6 +1,6 @@
+  tuimex   Mail   Calendar                                                                                              
   Help                                                                                                                  
                                                                                                                         
-    ^d ^u       scroll                                                        x                ignore; nothing is sent  
                                                                                                                         
     Commands                                                                                                            
     :archive                                          archive what is selected                                          
@@ -36,5 +36,5 @@
     :q                                                quit from the list; back elsewhere                                
     :qa                                               quit                                                              
                                                                                                                         
-  144 keys and commands · lines 36-70 of 70                                                 sending in 6s · 1 not sent  
+  144 keys and commands · lines 37-70 of 70                                                 sending in 6s · 1 not sent  
   type to filter · ^d ^u scroll · Esc back                                                                              

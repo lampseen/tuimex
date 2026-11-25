@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Contract draft v3 for the Halden account                                                        1 of 3 in the thread  
                                                                                                                         
     From     Priya Raman <priya@example.org>                                                                            
@@ -35,6 +36,5 @@
     Thanks,                                                                                                             
     Priya                                                                                                               
                                                                                                                         
-                                                                                                                        
-  lines 1-27 of 30                                                                          sending in 6s - 1 not sent  
+  lines 1-26 of 30                                                                          sending in 6s - 1 not sent  
   r reply - e archive - n b next, previous - a files - Esc back                                                         

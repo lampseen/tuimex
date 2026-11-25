@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                                     November 2026  
                                                                                                                         
      November 2026                |  Thu 26 November                                                                    
@@ -28,7 +29,6 @@
                                   |                                                                                     
                                   |  Thu 3 December                                                                     
                                   |    work       09:30-09:45  Standup                                                  
-                                  |    personal   19:00-21:00  Book club  at Greta's                                    
                                                                                                                         
   Calendars                                                                                                             
     personal   its own   5 events    read 2m ago                                                                        

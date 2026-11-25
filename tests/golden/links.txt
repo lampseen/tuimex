@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   This week: winter routes, a gear swap and one trail closure                                                           
                                                                                                                         
     From     Fernway Weekly <news@fernway.example.net>                                                                  
@@ -27,7 +28,6 @@
                                                                                                                         
     │ We cleared forty pairs of skis last year and nobody went home with what                                           
     │ they brought. (Marta, swap organiser)                                                                             
-                                                                                                                        
                                                                                                                         
   Links                                                                                                                 
 ▌    1  fernway.example.net           Route notes and maps   tracking removed                                           

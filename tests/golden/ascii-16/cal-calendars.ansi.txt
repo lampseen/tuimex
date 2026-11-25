@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {magenta b}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}                                                                                     {default b}November 2026{default}  
 {default}                                                                                                                        
 {default}     {default b}November 2026{default}                {brightblack}|{default}  {brightblack b}Thu 26 November{default}                                                                    
@@ -28,7 +29,6 @@
 {default}                                  {brightblack}|{default}                                                                                     
 {default}                                  {brightblack}|{default}  {brightblack b}Thu 3 December{default}                                                                     
 {default}                                  {brightblack}|{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                  
-{default}                                  {brightblack}|{default}    {brightblue}personal{default}   {brightblack}19:00-21:00{default}  Book club  {brightblack}at Greta's{default}                                    
 {default}                                                                                                                        
 {default}  {default b}Calendars{default}                                                                                                             
 {default}    {brightblue}personal   {default}its own   {brightblack}5 events    read 2m ago{default}                                                                        

@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                            23 to 29 November 2026  
                                                                                                                         
           Mon 23         Tue 24         Wed 25        >Thu 26         Fri 27         Sat 28         Sun 29              
@@ -34,7 +35,6 @@
          |              |              |              #              |              |              |                    
   22:00  |--------------|--------------|--------------#              |--------------|--------------|--------------      
          |              |              |              #              |              |              |                    
-  23:00  |--------------|--------------|--------------|--------------|--------------|--------------|--------------      
                                                                                                                         
   Thu 26 Nov - 2 of 4 - 1 to answer                                                         sending in 6s - 1 not sent  
   Enter open - i answer - o links - E edit - d delete - Esc back - ? help                                               

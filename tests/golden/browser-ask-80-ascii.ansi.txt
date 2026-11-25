@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                
 {default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                   
 {default}                                                                                
 {default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                          
@@ -18,7 +19,6 @@
 {default}    {brightblack}Route             Length   Status               {default}                            
 {default}    Ridge loop        12 km    groomed                                          
 {default}    Saddle traverse   18 km    groomed                                          
-{default}    Mill creek        7 km     closed until 5 Dec                               
 {default}                                                                                
-{default}  {brightblack}lines 1-13 of 30{default}                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}lines 1-12 of 30{default}                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  Load 8 images from img.fernway.example.net, cdn.example.net?{brightblack}  {default}y {brightblack}yes - {default}n {brightblack}no{default}    

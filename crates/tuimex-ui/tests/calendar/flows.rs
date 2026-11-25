@@ -53,9 +53,9 @@ const FRI: &str = "gcllll\r";
 fn strip(app: &mut App, panel: usize) -> Vec<Line> {
     let lines = app.lines(120, 40);
     let blank = |line: &Line| line.iter().all(|span| span.text.trim().is_empty());
-    let day = lines[2..].iter().take_while(|line| !blank(line)).count();
+    let day = lines[3..].iter().take_while(|line| !blank(line)).count();
     let foot = lines.len() - 3;
-    lines[2..2 + day].iter().chain(&lines[foot - panel..]).cloned().collect()
+    lines[3..3 + day].iter().chain(&lines[foot - panel..]).cloned().collect()
 }
 
 /// Work's own calendar is one tuimex writes at its provider, which is

@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -25,7 +26,6 @@
 {fg}    {dim}Files    {fg}statement-2026-12.pdf {dim}118 KB{fg}                                                                               
 {fg}                                                                                                                        
 {fg}    {dim}Fetching this message.{fg}                                                                                              
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

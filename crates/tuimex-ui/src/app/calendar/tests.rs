@@ -4,7 +4,7 @@ use tuimex_core::{Action, Event, Timestamp};
 use tuimex_fixtures::design as fx;
 
 use crate::app::App;
-use crate::app::tests::{after, app as fresh, foot, press, screen};
+use crate::app::tests::{after, app as fresh, bar, foot, press, screen};
 use crate::calendar::Calendar;
 use crate::calendar::tests::design as calendar;
 use crate::keymap::Key;
@@ -20,7 +20,7 @@ fn said(keys: &str) -> String {
     foot(&mut after(keys)).1
 }
 
-const MONTH: &str = "Enter open · J K next event · t today · c new event · gm F1 mail · ? help";
+const MONTH: &str = "Enter open · J K next event · t today · c new event · ? help";
 
 #[test]
 fn gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was() {
@@ -70,6 +70,31 @@ fn f2_opens_the_calendar_and_f1_returns_to_mail_wherever_gc_and_gm_do() {
         app.key(Key::F(2));
         assert_eq!(screen(&mut app, 120, 40), was, "after {typing:?}");
     }
+}
+
+/// Bryan, 2026-11-24: "where is the indicator of what screen you are on".
+/// The first row of every screen names both places and marks the one in
+/// view. It names the function keys where they are read, and where letters
+/// are typed, which is where they do nothing, it names none.
+#[test]
+fn the_bar_of_places_marks_the_place_in_view_and_names_its_keys_only_where_they_are_read() {
+    let keyed = "  tuimex   F1 Mail   F2 Calendar".to_string();
+    let read = [("", "F1 Mail"), ("\r", "F1 Mail"), ("gc", "F2 Calendar"), ("gc2", "F2 Calendar")];
+    for (keys, in_view) in read.into_iter().chain([("gc3", "F2 Calendar"), ("gclll\r\r", "F2 Calendar")]) {
+        assert_eq!(bar(&mut after(keys)), (keyed.clone(), in_view.to_string()), "after {keys:?}");
+    }
+    let bare = "  tuimex   Mail   Calendar".to_string();
+    for (keys, in_view) in
+        [("c", "Mail"), ("c\t\t\t\t^s", "Mail"), ("?", "Mail"), ("gcc", "Calendar"), ("gc?", "Calendar")]
+    {
+        assert_eq!(bar(&mut after(keys)), (bare.clone(), in_view.to_string()), "after {keys:?}");
+    }
+    // The bar is the screen's and not the mode's: a command being typed
+    // over the list leaves it as it was.
+    assert_eq!(bar(&mut after(":")), (keyed, "F1 Mail".to_string()));
+    let mut app = after("gc");
+    assert_eq!(app.lines(120, 40).len(), 40, "the bar is one of the rows the screen is given");
+    assert_eq!(app.lines(20, 40)[0].iter().map(|span| span.text.chars().count()).sum::<usize>(), 20);
 }
 
 /// The month's hint while its list has the focus, on an event with a link.
@@ -170,7 +195,7 @@ fn the_focus_is_in_the_grid_after_another_view_and_only_the_month_has_a_list_to_
     let mut app = after("");
     app.set_calendar(Calendar::empty(fx::NOW));
     press(&mut app, "gc⌥l");
-    assert_eq!(foot(&mut app).1, "gm F1 mail · ? help", "with no calendar there is no list");
+    assert_eq!(foot(&mut app).1, "? help", "with no calendar there is no list");
     // A search shown over the focused list gives it back as it was.
     let mut app = after("gclll⌥lj/call\r");
     assert!(screen(&mut app, 120, 40)[0].contains("Search call"));

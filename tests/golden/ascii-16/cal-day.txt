@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Month   Week   Day                                                                              Thu 26 November 2026  
                                                                                                                         
   Thu 26 November                                                                                                       
@@ -32,7 +33,6 @@
     - What shipped in Q3 and what slipped                                                                               
     - The three bets for Q4                                                                                             
     - Headcount, once the budget is in                                                                                  
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

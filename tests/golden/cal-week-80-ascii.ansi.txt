@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                
 {default}  {brightblack}Month{default}   {magenta b}Week{default}   {brightblack}Day{default}                                    {default b}25 to 27 November 2026{default}  
 {default}                                                                                
 {default}          {brightblack}Wed 25{default}                {brightblack}>{default b}Thu 26{default}                 {brightblack}Fri 27{default}                  
@@ -18,7 +19,6 @@
 {default}         {brightblack}|{default}                      {brightblack}|{default}                      {brightblack}|{default}                        
 {default}  {brightblack}14:00{default}  {brightblack}|----------------------|----------------------|----------------------{default}  
 {default}         {brightblack}|{default}                      {brightblack}|{default}                      {brightblack}|{default}                        
-{default}  {brightblack}15:00{default}  {brightblack}|----------------------|----------------------|----------------------{default}  
 {default}                                                                                
 {default}  {brightblack}Thu 26 Nov - 2 of 4 - {yellow}1 to answer{default}                 sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  Enter {brightblack}open - {default}i {brightblack}answer - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back - {default}? {brightblack}help{default}       

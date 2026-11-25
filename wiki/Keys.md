@@ -68,8 +68,9 @@ The list's action keys work here too.
 ## In the calendar
 
 `gc` or `F2` opens the calendar and `gm` or `F1` returns to mail; each
-keeps where it was. A key that mail uses means the same here, except `h`
-and `l`.
+keeps where it was. The first row of every screen names both places by
+those function keys and marks the one you are in. A key that mail uses
+means the same here, except `h` and `l`.
 [Calendar](Calendar) says what each does at length.
 
 | key | does |

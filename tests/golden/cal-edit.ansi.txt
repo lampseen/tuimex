@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {dim}Mail{fg}   {acc b}Calendar{fg}                                                                                              
 {fg}  {fg b}New event{fg}                                                                                                             
 {fg}                                                                                                                        
 {acc}▌{fg}   {fg b}Title    Offsite planning{bg bg=acc} {fg}                                                                                          
@@ -12,7 +13,6 @@
 {fg}    {dim}Reminder {fg}10 minutes before                                                                                          
 {fg}                                                                                                                        
 {fg}    {dim}No notes.{fg}                                                                                                           
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

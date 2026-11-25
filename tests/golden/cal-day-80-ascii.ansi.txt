@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                
 {default}  {brightblack}Month{default}   {brightblack}Week{default}   {magenta b}Day{default}                                      {default b}Thu 26 November 2026{default}  
 {default}                                                                                
 {default}  {brightblack b}Thu 26 November{default}                                                               
@@ -17,7 +18,6 @@
 {default}                                                                                
 {default}  {brightblack b}Sun 29 November{default}                                                               
 {default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                     
-{default}                                                                                
 {default}                                                                                
 {default}                                                                                
 {default}  {brightblack}Thu 26 Nov - 2 of 4 - {yellow}1 to answer{default}                 sending in 6s{brightblack} - {red}1 not sent{default}  

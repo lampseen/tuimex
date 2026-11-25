@@ -201,9 +201,11 @@ impl Session {
         }
     }
 
+    /// The forty rows under the bar of places, so that a row is counted
+    /// from the first of whatever screen is open.
     fn screen(&mut self) -> Vec<String> {
-        let lines = self.app.lines(120, 40);
-        lines
+        let lines = self.app.lines(120, 41);
+        lines[1..]
             .iter()
             .map(|line| line.iter().map(|s| s.text.as_str()).collect::<String>().trim_end().to_string())
             .collect()

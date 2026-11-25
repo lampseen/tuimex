@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}             
 {default}                                                                                
 {default}  {brightblack b}Today{default}                                                                         
@@ -18,7 +19,6 @@
 {default}  {brightblack b}Past 7 days{default}                                                                   
 {default}    {green}prot{default}  {brightblack}Imani Castell{default}       {brightblack}Budget numbers for the of~{default}          {cyan}re{default}  {brightblack}21 Nov{default}    
 {default}    {brightblue}home{default}  {brightblack}Tomas Ferreira{default}      {brightblack}Bike rack: still want it?{default}               {brightblack}21 Nov{default}    
-{default}    {brightyellow}work{default}  {brightblack}Hiring Desk{default}         {brightblack}Interview loop: backend c~{default}          {cyan}1f{default}  {brightblack}21 Nov{default}    
 {default}                                                                                
 {default}  {brightblack}7 of 24 -{default} 1 message                               sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  Enter {brightblack}open - {default}e {brightblack}archive - {default}d {brightblack}trash - {default}r {brightblack}reply - {default}? {brightblack}help{default}                           

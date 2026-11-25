@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
 {default}  {default b}Q4 roadmap review{default}                                                                               {brightblack}2 of 4 on Thu 26 Nov{default}  
 {default}                                                                                                                        
 {default}    {brightblack}When     {default}Thu 26 Nov 2026, 10:00 to 11:30{brightblack} - in 3 days{default}                                                                
@@ -23,7 +24,6 @@
 {default}      {brightblack}Privacy  {default}default                                                                                                  
 {default}      {brightblack}By phone {default}+47 21 00 00 00, code 4471                                                                               
 {default}      {brightblack}Changed  {default}23 Nov 14:05, by the organizer                                                                           
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

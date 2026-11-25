@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -33,7 +34,6 @@
     confirm today, because the board date has moved up.                                                                 
                                                                                                                         
     Priya                                                                                                               
-                                                                                                                        
                                                                                                                         
                                                                                                                         
   lines 1-13 of 13                                                                          sending in 6s - 1 not sent  

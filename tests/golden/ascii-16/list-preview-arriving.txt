@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -25,7 +26,6 @@
     Files    statement-2026-12.pdf 118 KB                                                                               
                                                                                                                         
     Fetching this message.                                                                                              
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

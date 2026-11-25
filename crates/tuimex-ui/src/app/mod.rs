@@ -30,7 +30,7 @@ use crate::paint::{Theme, paint};
 use crate::palette::Tok;
 use crate::say::{self, Said};
 use crate::span::{Line, run};
-use crate::{help, when};
+use crate::{help, places, when};
 
 /// The tab that is there while a message is waiting to go or was refused.
 const OUTBOX: &str = "Outbox";
@@ -627,8 +627,21 @@ impl App {
         }
     }
 
-    /// The screen, one line to a row.
+    /// The screen, one line to a row: the bar of places, and under it
+    /// whatever is open.
     pub fn lines(&mut self, width: usize, height: usize) -> Vec<Line> {
+        let here = if self.cal.open { places::Place::Calendar } else { places::Place::Mail };
+        // The function keys are read where `gc` and `gm` are, which is not
+        // where letters are typed.
+        let typing = matches!(self.mode, Mode::Help(..)) || self.compose.is_some() || self.form_is_open();
+        let mut lines = vec![places::bar(here, !typing, width)];
+        lines.extend(self.lines_under(width, height.saturating_sub(1)));
+        self.reading.pictures.iter_mut().for_each(|placed| placed.row += 1);
+        lines
+    }
+
+    /// Everything under the bar of places, in the rows it leaves.
+    fn lines_under(&mut self, width: usize, height: usize) -> Vec<Line> {
         // A picture is where this frame's reader put it; a frame that draws
         // anything else over the reader has no picture to report.
         self.reading.pictures.clear();

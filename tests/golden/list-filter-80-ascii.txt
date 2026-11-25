@@ -1,3 +1,4 @@
+  tuimex   F1 Mail   F2 Calendar                                                
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1             
                                                                                 
   Today                                                                         
@@ -18,7 +19,6 @@
   Past 7 days                                                                   
     work  Imani Castell       Budget numbers for the of~          re  21 Nov    
     pers  Tomas Ferreira      Bike rack: still want it?               21 Nov    
-    work  Hiring Desk         Interview loop: backend c~          1f  21 Nov    
                                                                                 
   3 here - Enter searches all mail                  sending in 6s - 1 not sent  
   /nov                                                                          

@@ -238,24 +238,26 @@ pub fn day_status(o: &Scene, day: i64) -> Line {
 }
 
 /// The idle command line: a few keys for the selected event, or for the
-/// day when none is. With `listed`, the focus is in the month's list and
-/// the way out is back to the grid, by the Alt key that points at it: the
-/// list is beside the grid at every width.
+/// day when none is. A hint names one key for a thing, and the bar of
+/// places names the keys that change place, so no hint does. With
+/// `listed`, the focus is in the month's list and the way out is back to
+/// the grid, by the Alt key that points at it: the list is beside the grid
+/// at every width.
 pub fn hint(entry: Option<&Entry>, listed: bool) -> Line {
     let mut keys = vec![keymap::hint("calendar.open")];
-    let out = match entry {
+    let grid = ("Alt-h", keymap::hint("calendar.focus-grid").1);
+    match entry {
         None => {
             keys.extend(["calendar.event", "calendar.today", "calendar.new"].map(keymap::hint));
-            "calendar.mail"
+            keys.extend(listed.then_some(grid));
         }
         Some(entry) => {
             keys.extend(entry.waiting().then(|| keymap::hint("calendar.answer")));
             keys.extend((!links_of(entry.event).is_empty()).then(|| keymap::hint("calendar.links")));
             keys.extend(["calendar.edit", "calendar.delete"].map(keymap::hint));
-            "global.back"
+            keys.push(if listed { grid } else { keymap::hint("global.back") });
         }
-    };
-    keys.push(if listed { ("Alt-h", keymap::hint("calendar.focus-grid").1) } else { keymap::hint(out) });
+    }
     keys.push(keymap::hint("global.help"));
     list::hint(&keys)
 }

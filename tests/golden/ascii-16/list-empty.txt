@@ -1,9 +1,9 @@
+  tuimex   F1 Mail   F2 Calendar                                                                                        
   Inbox   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                       
                                                                                                                         
                                                                                                                         
     Nothing here.                                                                                                       
     Synced 1m ago.                                                                                                      
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

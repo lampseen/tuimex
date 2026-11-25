@@ -48,7 +48,7 @@ fn after(keys: &str) -> App {
 }
 
 fn screen(app: &mut App) -> Vec<String> {
-    let lines = app.lines(120, 40);
+    let lines = crate::app::tests::under(app, 120, 40);
     lines.iter().map(|line| line.iter().map(|s| s.text.as_str()).collect::<String>().trim_end().to_string()).collect()
 }
 

@@ -1,0 +1,1 @@
+{default}  {brightblack}tuimex{default}   {magenta b}Mail{default}   {brightblack}Calendar{default}                                                                                              

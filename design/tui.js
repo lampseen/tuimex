@@ -177,10 +177,11 @@ const LAYOUT = {
   groups: ['Today', 'Yesterday', 'Past 7 days', 'Earlier'],
   // `ui.preview = auto | right | below | off`. Auto puts the preview beside
   // the list from `besideFrom` columns and below it otherwise, and hides it
-  // when the terminal is shorter than `minHeight`. Beside, it takes `share`
-  // of the width, no less than `least` and no more than `most` cells, so the
-  // list gains from every column past the point where the text is at full
-  // measure; below, `height` rows of the terminal, its divider included.
+  // when fewer than `minHeight` rows are left under the bar of places.
+  // Beside, it takes `share` of the width, no less than `least` and no more
+  // than `most` cells, so the list gains from every column past the point
+  // where the text is at full measure; below, `height` of those rows, its
+  // divider included.
   preview: { besideFrom: 160, minHeight: 30, share: 0.38, least: 62, most: 82, height: (rows) => Math.floor(rows * 0.45) },
   // The header block is a label column and a value that wraps under itself.
   // Recipients and files wrap whole, one never split across rows, and stop
@@ -200,6 +201,15 @@ const LAYOUT = {
   // the hour it starts, and the words keep room for the longest one alone,
   // so `needs answer` is never the thing that is cut.
   calendar: { cell: 4, weekFrom: 120, slot: 30, step: 2, dayFrom: '08:00', axis: 7, time: 11, timeNarrow: 7, words: 20, wordsNarrow: 12, narrow: 70 },
+  // The bar of places, the first row of every screen: the program's name,
+  // then each place by the function key that goes to it, `gap` cells
+  // apart. `key` names the binding whose last key that is, and `short` is
+  // what the place not in view is called when the row is too narrow for
+  // its name.
+  places: { program: 'tuimex', gap: 3, list: [
+    { place: 'mail', key: 'calendar.mail', name: 'Mail', short: 'Mail' },
+    { place: 'calendar', key: 'global.calendar', name: 'Calendar', short: 'Cal' },
+  ] },
 };
 
 // ------------------------------------------------------------------- keymap
@@ -219,7 +229,7 @@ const KEYMAP = {
     'compose: `h` and `l`, or Left and Right, choose the identity while From is focused. The proposal did not say.',
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
-    'the calendar is a place and not a section: `gc` or F2 opens it and `gm` or F1 returns, each side keeping where it was (ADR-054).',
+    'the calendar is a place and not a section: `gc` or F2 opens it and `gm` or F1 returns, each side keeping where it was (ADR-054). The first row of every screen names both places by their function keys and marks the one in view.',
     'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
@@ -1070,9 +1080,10 @@ const settle = (rows, width) => rows.map((row) => (row.selected ? fill(fit(row.r
 // What completion offers: a name, what it takes, and one line about it.
 const choices = (list) => list.map((c) => [run(`${c.name} ${c.args || ''}`.padEnd(24)), run(c.does, 'dim')]);
 
-// head, as much of the body as fits, a blank row, the status line, the
-// command line.
-function frame(width, height, head, body, tail, status, command) {
+// The bar of places when `bar` is given, as [place, keys]; then head, as
+// much of the body as fits, a blank row, the status line, the command line.
+function frame(width, height, head, body, tail, status, command, bar) {
+  if (bar) head = [placesRow(width, ...bar), ...head];
   const foot = [...settle(tail || [], width), [], status, command || []];
   const room = height - head.length - foot.length;
   const middle = body.slice(0, room);
@@ -1370,6 +1381,28 @@ function grouped(rows, draw) {
 
 // ------------------------------------------------------------------- chrome
 
+// The bar of places: the program's name, then each place by the key that
+// goes to it. The place in view is drawn as the active tab is, in the accent
+// and bold, so it is told without colour too; of the other, the key is the
+// colour a hint's key is and the name is dim. `keys` is false on a screen
+// where letters are typed (compose, the send summary, the event form, help):
+// the function keys do nothing there, so the bar says where you are and
+// names no key. Too narrow for all of it, the place not in view takes its
+// short name, and narrower still is its key alone.
+function placesRow(width, place, keys = true) {
+  const P = LAYOUT.places;
+  const row = (form) => heading([run(P.program, 'dim'), ...P.list.flatMap((item) => {
+    const key = keys ? BINDING[item.key].keys.split(' ').pop() : '';
+    const on = item.place === place;
+    const name = on ? item.name : { name: item.name, short: item.short, key: '' }[form];
+    const said = [key, name].filter(Boolean).join(' ');
+    return [gap(P.gap), ...(on ? [run(said, 'acc', { b: true })] : [run(key), run(said.slice(key.length), 'dim')])];
+  })]);
+  const forms = keys ? ['name', 'short', 'key'] : ['name', 'short'];
+  const fits = forms.map(row).find((made) => cells(made) + LAYOUT.margin <= width);
+  return fit(fits || row(forms[forms.length - 1]), width);
+}
+
 // `search` is the query of a search being shown: it takes the place of the
 // active tab, after the others.
 function tabsRow(width, active, counts = COUNTS, search) {
@@ -1595,7 +1628,8 @@ function previewPlace(width, height, preview) {
 //      preview, focus, top, arriving, stale, narrowed, accounts, search,
 //      waiting, counts, empty, groups, panel, left, right, command }
 function listScreen(o) {
-  const { width, height } = o;
+  const { width } = o;
+  const height = o.height - 1;
   const selected = o.rows[o.selected];
   const place = selected ? previewPlace(width, height, o.preview) : 'off';
   const focused = o.focus === 'preview';
@@ -1643,7 +1677,7 @@ function listScreen(o) {
   const back = place === 'right' ? 'Alt-h' : 'Alt-k';
   const command = o.command || (focused ? hint(['j k', 'scroll'], [back, 'list'], 'list.open', 'global.help') : listHint(selected, o));
   const left = focused ? pane.lines : only(o) + (o.left || '');
-  return [tabsRow(width, o.section, o.counts, o.search), [], ...content, ...tail, [], statusRow(width, left, o.right), command];
+  return [placesRow(width, 'mail'), tabsRow(width, o.section, o.counts, o.search), [], ...content, ...tail, [], statusRow(width, left, o.right), command];
 }
 
 // How the status line begins while the list shows one account.
@@ -1677,7 +1711,8 @@ function readerHint(msg) {
 
 // o: { width, height, msg, where, between, top, panel, left, right, command }
 function readerScreen(o) {
-  const { width, height, msg } = o;
+  const { width, msg } = o;
+  const height = o.height - 1;
   const measure = Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin);
   const title = leftRight(heading([run(msg.subject, 'fg', { b: true })]), [gap(2), run(o.where || '', 'dim'), gap(LAYOUT.margin)], width);
   const head = [title, [], ...indent(headerBlock(msg, false, width - LAYOUT.indent - LAYOUT.margin)), []];
@@ -1687,8 +1722,8 @@ function readerScreen(o) {
   const top = o.top || 0;
   const last = Math.min(body.length, top + room);
   const scroll = body.length <= room ? '' : `{dim|lines ${top + 1}-${last} of ${body.length}}`;
-  return frame(width, height, head, body.slice(top, last), o.panel,
-    statusRow(width, o.left != null ? o.left : scroll, o.right), o.command || readerHint(msg));
+  return frame(width, o.height, head, body.slice(top, last), o.panel,
+    statusRow(width, o.left != null ? o.left : scroll, o.right), o.command || readerHint(msg), ['mail']);
 }
 
 // What a yes to the B question would load: a message's remote images and
@@ -1780,7 +1815,7 @@ function composeScreen(width, height, o = {}) {
   ].map((row) => fit(row, width));
   const body = draftBody(o.body || draft.body, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin));
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|draft saved 13:58}', o.right),
-    o.command || hint(['Tab', 'next field'], ...(focused === 'From' ? ['compose.identity'] : []), 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'));
+    o.command || hint(['Tab', 'next field'], ...(focused === 'From' ? ['compose.identity'] : []), 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'), ['mail', false]);
 }
 
 // The end of compose, enough for one step of a flow: the subject field, the
@@ -1803,7 +1838,7 @@ function summaryScreen(width, height) {
     ...indent([field('', [run('total'.padEnd(28), 'dim'), run(draft.attachedTotal.padStart(7))]), field('Signing', m(`signed${then('key 51F09A2C')}`)), field('', m(SAY.noKey(address('billing')))), [], m(SAY.summaryAgent('23 Nov 13:52'))]),
   ].map((row) => fit(row, width));
   return frame(width, height, head, [], null, statusRow(width),
-    said(SAY.summaryAsk(draft.to.length + draft.cc.length, '10s')));
+    said(SAY.summaryAsk(draft.to.length + draft.cc.length, '10s')), ['mail', false]);
 }
 
 // ----------------------------------------------------------------- calendar
@@ -1875,11 +1910,13 @@ function dayStatus(n, o = {}) {
   return `{dim|${dayShort(n)} ${G.dot} ${count}}${waiting ? `{dim| ${G.dot} }${SAY.waiting(waiting)}` : ''}`;
 }
 
-// With the month's list focused, the way back is to the grid, by the Alt key
-// that points at it: the list is beside the grid at every width.
+// A hint names one key for a thing, and the bar of places names the keys
+// that change place, so no hint does. With the month's list focused, the way
+// back is to the grid, by the Alt key that points at it: the list is beside
+// the grid at every width.
 function calendarHint(ev, focused) {
   const grid = ['Alt-h', BINDING['calendar.focus-grid'].hint];
-  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', focused ? grid : 'calendar.mail', 'global.help');
+  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', ...(focused ? [grid] : []), 'global.help');
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
   if (ev.link) extra.push('calendar.links');
@@ -2003,7 +2040,8 @@ function agendaRows(from, room, width, o = {}) {
 // beside the grid, which selects one as the day view does, and the grid's
 // cursor is dim, as the list's is in mail while the preview has the focus.
 function monthScreen(o) {
-  const { width, height } = o;
+  const { width } = o;
+  const height = o.height - 1;
   const focused = o.focus === 'list';
   const shown = { ...o, selected: focused ? o.selected : null };
   const tail = settle(o.panel || [], width);
@@ -2015,7 +2053,7 @@ function monthScreen(o) {
   const content = Array.from({ length: room }, (_, y) => [...fit([gap(LAYOUT.indent), ...(months[y] || [])], leftWidth), run(G.bar, 'faint'), ...fit(pane[y] || [], paneWidth)]);
   const at = civil(o.cursor);
   const ev = shown.selected && occurrence(shown.selected.id, shown.selected.n, o);
-  return [calendarTabs(width, 'month', `${MONTH_NAMES[at.month - 1]} ${at.year}`), [], ...content, ...tail, [],
+  return [placesRow(width, 'calendar'), calendarTabs(width, 'month', `${MONTH_NAMES[at.month - 1]} ${at.year}`), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, shown)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(focused ? ev : null, focused)];
 }
 
@@ -2024,7 +2062,8 @@ function monthScreen(o) {
 // With `only`, it is what a search found, from the first day that has any,
 // under a Search tab in place of the active one, as in mail.
 function dayScreen(o) {
-  const { width, height } = o;
+  const { width } = o;
+  const height = o.height - 1;
   const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
   const place = ev ? previewPlace(width, height, o.preview) : 'off';
   const tail = settle(o.panel || [], width);
@@ -2042,7 +2081,7 @@ function dayScreen(o) {
     content = agendaRows(o.cursor, room, width, o);
   }
   const at = civil(o.cursor);
-  return [calendarTabs(width, 'day', o.only != null ? '' : `${dayLong(o.cursor)} ${at.year}`, o.only), [], ...content, ...tail, [],
+  return [placesRow(width, 'calendar'), calendarTabs(width, 'day', o.only != null ? '' : `${dayLong(o.cursor)} ${at.year}`, o.only), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.selected ? o.selected.n : o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
 
@@ -2065,7 +2104,8 @@ function dayScreen(o) {
 // the hours. Nothing is filled but the cursor's header and the selected
 // event.
 function weekScreen(o) {
-  const { width, height } = o;
+  const { width } = o;
+  const height = o.height - 1;
   const count = width >= C.weekFrom ? 7 : 3;
   const first = count === 7 ? monday(o.cursor) : o.cursor - 1;
   const days = Array.from({ length: count }, (_, i) => first + i);
@@ -2152,7 +2192,7 @@ function weekScreen(o) {
   const b = civil(days[count - 1]);
   const title = a.month === b.month ? `${a.dom} to ${b.dom} ${MONTH_NAMES[b.month - 1]} ${b.year}` : `${a.dom} ${MONTHS[a.month - 1]} to ${b.dom} ${MONTHS[b.month - 1]} ${b.year}`;
   const content = [head, ...allRows, ...(allRows.length ? [parting] : []), ...grid].map((row) => fit(row, width));
-  return [calendarTabs(width, 'week', title), [], ...content, ...tail, [],
+  return [placesRow(width, 'calendar'), calendarTabs(width, 'week', title), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
 
@@ -2239,7 +2279,7 @@ function eventScreen(o) {
   const notices = eventNotices(ev).flatMap((row) => noticeLines(row, inner));
   const notes = ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, inner)) : [];
   const body = indent([...notices, ...(notices.length && notes.length ? [[]] : []), ...notes, ...moreRows(ev, o.more)]);
-  return frame(width, height, head, body, o.panel, statusRow(width, o.left || '', o.right != null ? o.right : calendarAlerts(o)), o.command || eventHint(ev));
+  return frame(width, height, head, body, o.panel, statusRow(width, o.left || '', o.right != null ? o.right : calendarAlerts(o)), o.command || eventHint(ev), ['calendar']);
 }
 
 // The fields of the form that are chosen from and not typed into. On one of
@@ -2278,7 +2318,7 @@ function eventFormScreen(width, height, o) {
   const head = [heading([run(o.heading, 'fg', { b: true })]), [], ...fields, []].map((row) => fit(row, width));
   const body = indent(ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin)) : [[run('No notes.', 'dim')]]);
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|not saved}', calendarAlerts()),
-    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), ...(DATED.includes(o.focused) ? [SAY.enough] : []), 'event-form.notes', 'event-form.save', 'event-form.close'));
+    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), ...(DATED.includes(o.focused) ? [SAY.enough] : []), 'event-form.notes', 'event-form.save', 'event-form.close'), ['calendar', false]);
 }
 
 // The calendars, each one a row to show or hide.
@@ -2352,13 +2392,13 @@ function helpScreen(width, height, needle, top = 0, place = 'mail') {
   }
 
   const lines = indent(body);
-  const room = height - 2 - 3;
+  const room = height - 1 - 2 - 3;
   const from = Math.max(0, Math.min(top, lines.length - room));
   const last = Math.min(lines.length, from + room);
   const scroll = lines.length > room ? ` ${G.dot} lines ${from + 1}-${last} of ${lines.length}` : '';
   const left = needle ? `{dim|${shown} of ${allKeys.length + COMMANDS.length} shown${scroll}}` : `{dim|${shown} keys and commands${scroll}}`;
   const command = needle ? typed('/' + needle) : hint(['type', 'to filter'], 'help.scroll', 'global.back');
-  return [heading(title('Help')), [], ...lines.slice(from, last), ...Array.from({ length: room - (last - from) }, () => []), [], statusRow(width, left), command];
+  return [placesRow(width, place, false), heading(title('Help')), [], ...lines.slice(from, last), ...Array.from({ length: room - (last - from) }, () => []), [], statusRow(width, left), command];
 }
 
 // -------------------------------------------------------------------- build
@@ -2664,6 +2704,17 @@ function build(mode = {}) {
   screen('help-commands', 'Help, the commands', 'the same page scrolled to its end: each : command, what it takes, and one line about it', helpScreen(W, H, '', 999));
   screen('help-filtered', 'Help, filtered', 'typing shows only what matches, under the headings it belongs to', helpScreen(W, H, 'agent'));
 
+  // ---- the bar of places
+  flow('places', 'The bar of places', [
+    { key: '', caption: 'In mail', note: 'The first row of every screen: the program, then each place by the key that goes to it. The one in view is the accent and bold, as the active tab is.',
+      rows: [placesRow(W, 'mail')] },
+    { key: 'F2', caption: 'In the calendar', note: 'The same row. F1 returns.', rows: [placesRow(W, 'calendar')] },
+    { key: 'c', caption: 'Where letters are typed', note: 'In compose, the send summary, the event form and help the function keys do nothing, so the bar names no key there.',
+      rows: [placesRow(W, 'mail', false)] },
+    { key: '', caption: 'Under 34 columns', note: 'The place not in view takes its short name.', rows: [placesRow(33, 'mail')] },
+    { key: '', caption: 'Under 29 columns', note: 'Then it is its key alone. The place in view keeps its name.', rows: [placesRow(28, 'mail')] },
+  ]);
+
   // ---- command line states
   const first = INBOX.slice(0, 5);
   const idle = at(INBOX, 1);
@@ -2785,7 +2836,7 @@ function build(mode = {}) {
   }));
   const allHidden = CALENDARS.map((c) => `${c.account}/${c.source}`);
   screen('cal-empty', 'Calendar, none set up', 'with no calendar configured the grid still moves and the list says how to add one', monthScreen({
-    width: W, height: H, cursor: TODAY, hidden: allHidden, empty: SAY.noCalendar, left: '', command: hint('calendar.mail', 'global.help'),
+    width: W, height: H, cursor: TODAY, hidden: allHidden, empty: SAY.noCalendar, left: '', command: hint('global.help'),
   }));
   screen('cal-unread', 'Calendar, one that could not be read', 'a calendar that cannot be fetched says so on the status line, with how old what is shown is; its events stay', month(LAYOUT.default, { unread: ['personal', '2h'] }));
   screen('cal-calendars', 'Calendars', 'after C: every calendar with where it is kept and when it was last read; Space hides one from every view', month(LAYOUT.default, {
@@ -2833,23 +2884,23 @@ function build(mode = {}) {
   screen('help-calendar', 'Help, in the calendar', '? in the calendar leads with the calendar\'s keys; typing filters every key and command as it does in mail', helpScreen(W, H, '', 0, 'calendar'));
 
   flow('cal-zoom', 'Enter goes deeper, Esc comes back', [
-    { key: 'gc', caption: 'Month', note: 'From mail. The calendar opens where it was left; the first time, on today.', rows: cut(month(LAYOUT.default), 11) },
-    { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 11) },
-    { key: 'Enter', caption: 'Event', note: 'J and K step to the events on either side without going back, as they do from a message.', rows: cut(event(LAYOUT.default), 11) },
-    { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 11) },
+    { key: 'gc', caption: 'Month', note: 'From mail. The calendar opens where it was left; the first time, on today.', rows: cut(month(LAYOUT.default), 12) },
+    { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 12) },
+    { key: 'Enter', caption: 'Event', note: 'J and K step to the events on either side without going back, as they do from a message.', rows: cut(event(LAYOUT.default), 12) },
+    { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 12) },
   ]);
 
   // A day with more on it than the list has rows for.
   const busy = [['12:30', '13:15', 'Lunch with Greta'], ['15:00', '15:30', 'Call the plumber'], ['17:30', '18:30', 'Climbing'], ['18:45', '19:30', 'Dinner']]
     .map(([start, end, title], i) => ({ id: `busy-${i}`, account: 'personal', day: '2026-11-26', start, end, title }));
   flow('cal-list', 'The month\'s list, focused', [
-    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 11) },
+    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 12) },
     { key: 'j', caption: 'The next event', note: 'The list moves as the day view does: j and k step through events, across days, Enter opens the one selected, and o, i, E and d act on it.',
-      rows: cut(listed(LAYOUT.default, { selected: roadmap }), 11) },
+      rows: cut(listed(LAYOUT.default, { selected: roadmap }), 12) },
     { key: 'l', caption: 'The next day', note: 'h and l move by a day here too. The grid\'s cursor goes with them and the first event of that day is selected.',
-      rows: cut(listed(LAYOUT.default, { cursor: fri, selected: { id: 'library', n: fri } }), 11) },
+      rows: cut(listed(LAYOUT.default, { cursor: fri, selected: { id: 'library', n: fri } }), 12) },
     { key: '', caption: 'More than fits', note: 'On a day with more events than there are rows, the list scrolls to keep the selected one in sight.',
-      rows: monthScreen({ width: W, height: 13, cursor: thu, focus: 'list', selected: { id: 'migration', n: thu }, added: busy }) },
+      rows: monthScreen({ width: W, height: 14, cursor: thu, focus: 'list', selected: { id: 'migration', n: thu }, added: busy }) },
   ]);
 
   const road = 'Q4 roadmap review';
@@ -2892,22 +2943,22 @@ function build(mode = {}) {
   ]);
 
   flow('cal-new', 'A new event with guests', [
-    { key: 'c', caption: 'The form', note: 'On the cursor\'s day, in the calendar of the account the view is narrowed to, or the first.', rows: cut(form(), 13) },
+    { key: 'c', caption: 'The form', note: 'On the cursor\'s day, in the calendar of the account the view is narrowed to, or the first.', rows: cut(form(), 14) },
     { key: '^s', caption: 'Who gets mail', note: 'Guests are mailed an invitation, so saving asks as sending does.',
-      rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 13) },
+      rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 14) },
     { key: 'y', caption: 'Added', note: 'The event is tuimex\'s own, and says so.',
       rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
   ]);
   const later = { ...offsite, start: '15:30', end: '16:30' };
   flow('cal-when', 'Changing only the time', [
     { key: 'Tab Tab', caption: 'On Starts', note: 'The field holds a date and a time, and the hint says a time or a date is enough.',
-      rows: cut(form({ focused: 'Starts', left: SAY.whenIs('starts', 'Thu 26 Nov 2026 14:00') }), 13) },
+      rows: cut(form({ focused: 'Starts', left: SAY.whenIs('starts', 'Thu 26 Nov 2026 14:00') }), 14) },
     { key: '15:30', caption: 'A time typed', note: 'A time alone keeps the date and a date alone keeps the time. The status line says what the field will hold.',
-      rows: cut(form({ focused: 'Starts', words: { Starts: '15:30' }, left: SAY.whenIs('starts', 'Thu 26 Nov 2026 15:30') }), 13) },
+      rows: cut(form({ focused: 'Starts', words: { Starts: '15:30' }, left: SAY.whenIs('starts', 'Thu 26 Nov 2026 15:30') }), 14) },
     { key: 'Tab', caption: 'Both moved', note: 'Leaving the field writes it whole again, and the end moves with the start, so the event is as long as it was.',
-      rows: cut(form({ ev: later, focused: 'Ends', left: SAY.whenIs('ends', 'Thu 26 Nov 2026 16:30') }), 13) },
+      rows: cut(form({ ev: later, focused: 'Ends', left: SAY.whenIs('ends', 'Thu 26 Nov 2026 16:30') }), 14) },
     { key: 'soon', caption: 'Words that name nothing', note: 'The status line says so. Left empty, the field keeps what it held.',
-      rows: cut(form({ ev: later, focused: 'Ends', words: { Ends: 'soon' }, left: SAY.notWhen }), 13) },
+      rows: cut(form({ ev: later, focused: 'Ends', words: { Ends: 'soon' }, left: SAY.notWhen }), 14) },
   ]);
   flow('cal-local', 'Kept local, where setup could change that', [
     { key: '^s', caption: 'Added', note: 'The account\'s own calendar is read over CalDAV and no write has been tried on it, so the event is kept here, and the line says what would find out whether it need be.',
@@ -2948,7 +2999,7 @@ function build(mode = {}) {
       rows: calendarStrip(thu, { left: '', command: typed('Go to: ') }) },
     { key: '5 dec', caption: 'Typed', note: 'The status line says the day the words mean.',
       rows: calendarStrip(thu, { left: SAY.goesTo(`${dayShort(dec5)} 2026`), command: typed('Go to: 5 dec') }) },
-    { key: 'Enter', caption: 'There', note: 'The view stays what it was; only the date moves.', rows: cut(month(LAYOUT.default, { cursor: dec5 }), 11) },
+    { key: 'Enter', caption: 'There', note: 'The view stays what it was; only the date moves.', rows: cut(month(LAYOUT.default, { cursor: dec5 }), 12) },
   ]);
 
   return out;

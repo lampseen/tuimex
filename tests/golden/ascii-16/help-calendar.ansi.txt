@@ -1,3 +1,4 @@
+{default}  {brightblack}tuimex{default}   {brightblack}Mail{default}   {magenta b}Calendar{default}                                                                                              
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
 {default}    {default b}Everywhere{default}                          {default b}Calendar (after gc){default}                    {default b}Event{default}                                    
@@ -34,7 +35,6 @@
 {default}    {default b}Commands{default}                                                                                                            
 {default}    :archive                                          {brightblack}archive what is selected{default}                                          
 {default}    :trash                                            {brightblack}move what is selected to Trash{default}                                    
-{default}    :flag                                             {brightblack}flag or unflag what is selected{default}                                   
 {default}                                                                                                                        
-{default}  {brightblack}144 keys and commands - lines 1-35 of 64{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}144 keys and commands - lines 1-34 of 64{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

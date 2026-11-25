@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -28,7 +29,6 @@
 {fg}                                                                                                                        
 {fg}    Hi Robin,                                                                                                           
 {fg}                                                                                                                        
-{fg}    One more change before you sign: our bank details have changed, and the new                                         
 {fg}                                                                                                                        
 {fg}  {fg b}Folders in work{fg}                                                                                                       
 {acc bg=sel}▌{fg bg=sel}   Sent        {dim bg=sel}   388{fg bg=sel}                                                                                                  

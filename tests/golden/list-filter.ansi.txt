@@ -1,3 +1,4 @@
+{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -31,7 +32,6 @@
 {fg}  {dim b}Earlier{fg}                                                                                                               
 {fg}    {faint}work{fg}       {faint}Mei Tanaka{fg}              {faint}Notes from the vendor call{fg}                                     {faint}1 file{fg}  {faint}14 Nov{fg}    
 {fg}    {faint}personal{fg}   {faint}Greta Holm{fg}              {faint}Book club pick for December{fg}                                   {faint}replied{fg}  {faint}12 Nov{fg}    
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

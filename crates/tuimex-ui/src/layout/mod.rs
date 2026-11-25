@@ -76,7 +76,8 @@ pub const WORDS_ON_SEL: f64 = 4.5;
 pub const WORDS_BRIGHT: [&str; 2] = ["invite", "replied"];
 
 /// The preview is beside the list from this many columns and below it
-/// otherwise, and hidden in a terminal shorter than `PREVIEW_MIN_HEIGHT`.
+/// otherwise, and hidden when fewer than `PREVIEW_MIN_HEIGHT` rows are left
+/// under the bar of places.
 pub const PREVIEW_BESIDE_FROM: usize = 160;
 pub const PREVIEW_MIN_HEIGHT: usize = 30;
 /// Beside the list it takes this share of the width, in hundredths, within
@@ -90,7 +91,7 @@ pub fn preview_width(width: usize) -> usize {
 }
 
 /// Its rows when it is below the list, the divider included: 45% of the
-/// terminal's.
+/// rows under the bar of places.
 pub fn preview_height(rows: usize) -> usize {
     rows * 45 / 100
 }
