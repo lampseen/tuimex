@@ -37,4 +37,4 @@
 {default}                                  {brightblack}|{default}                                                                                     
 {default}                                                                                                                        
 {default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  gm {brightblack}mail - {default}? {brightblack}help{default}                                                                                                      
+{default}  gm F1 {brightblack}mail - {default}? {brightblack}help{default}                                                                                                   

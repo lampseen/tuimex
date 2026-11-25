@@ -21,7 +21,7 @@ key on it is in that table.
 | `u` | undo the last action |
 | `A` | what the agent can do here |
 | `^l` | redraw |
-| `gc` | the calendar |
+| `gc` `F2` | the calendar |
 
 No key quits: `:q` does.
 
@@ -67,8 +67,9 @@ The list's action keys work here too.
 
 ## In the calendar
 
-`gc` opens the calendar and `gm` returns to mail; each keeps where it
-was. A key that mail uses means the same here, except `h` and `l`.
+`gc` or `F2` opens the calendar and `gm` or `F1` returns to mail; each
+keeps where it was. A key that mail uses means the same here, except `h`
+and `l`.
 [Calendar](Calendar) says what each does at length.
 
 | key | does |
@@ -91,7 +92,7 @@ was. A key that mail uses means the same here, except `h` and `l`.
 | `d` | delete the selected event. One that repeats asks: `t` this one, `a` all of them |
 | `u` | take back the last thing done in the calendar |
 | `gn` | reminders on, off |
-| `gm` | back to mail |
+| `gm` `F1` | back to mail |
 
 On an event's own screen `j` `k` `^d` `^u` `gg` `G` scroll, `zo` and `zc`
 unfold and fold what only some providers send, and `v` opens the mail the

@@ -11,4 +11,4 @@
      January 2027                 |    work       all day      On call                                                  
                                                                                                                         
   Sat 5 Dec - 1 event                                                                       sending in 6s - 1 not sent  
-  Enter open - J K next event - t today - c new event - gm mail - ? help                                                
+  Enter open - J K next event - t today - c new event - gm F1 mail - ? help                                             

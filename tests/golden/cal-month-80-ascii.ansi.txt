@@ -21,4 +21,4 @@
 {default}                                  {brightblack}|{default}                                             
 {default}                                                                                
 {default}  {brightblack}Thu 26 Nov - 4 events - {yellow}1 to answer{default}               sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Enter {brightblack}open - {default}J K {brightblack}next event - {default}t {brightblack}today - {default}c {brightblack}new event - {default}gm {brightblack}mail - {default}? {brightblack}help{default}        
+{default}  Enter {brightblack}open - {default}J K {brightblack}next event - {default}t {brightblack}today - {default}c {brightblack}new event - {default}gm F1 {brightblack}mail - {default}? {brightblack}help{default}     

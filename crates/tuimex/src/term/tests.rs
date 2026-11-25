@@ -212,7 +212,8 @@ fn the_keys_the_table_names_by_word_arrive_as_themselves() {
     assert_eq!(plain(KeyCode::Backspace), Some(Key::Backspace));
     assert_eq!(plain(KeyCode::Up), Some(Key::Up));
     assert_eq!(convert(KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT)), Some(Key::BackTab));
-    assert_eq!(plain(KeyCode::F(1)), None);
+    assert_eq!(plain(KeyCode::F(2)), Some(Key::F(2)));
+    assert_eq!(plain(KeyCode::Insert), None, "a key the table has no name for reaches nothing");
 }
 
 /// A terminal that keeps every byte written to it.

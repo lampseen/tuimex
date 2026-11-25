@@ -71,6 +71,15 @@ fn a_press_is_found_by_mode_and_says_which_of_the_binding_s_keys_it_was() {
 }
 
 #[test]
+fn a_function_key_is_one_press_and_not_its_letter_and_digit() {
+    assert_eq!(bound(&["list", "global"], &[Key::F(2)]), Some(("global.calendar", 1)));
+    assert_eq!(bound(&["calendar", "global"], &[Key::F(1)]), Some(("calendar.mail", 1)));
+    assert_eq!(bound(&["calendar"], &[Key::Char('g'), Key::Char('m')]), Some(("calendar.mail", 0)));
+    assert!(matches!(find(&["list", "global"], &[Key::Char('F')]), Found::Nothing), "F begins nothing");
+    assert_eq!(bound(&["list", "global"], &[Key::F(1)]), None, "F1 is the calendar's");
+}
+
+#[test]
 fn a_sequence_is_a_prefix_until_its_last_key() {
     let list = ["list", "global"];
     assert!(matches!(find(&list, &[Key::Char('g')]), Found::Prefix));

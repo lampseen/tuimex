@@ -37,4 +37,4 @@
 {fg}                                  {faint}│{fg}                                                                                     
 {fg}                                                                                                                        
 {fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  gm {dim}mail · {fg}? {dim}help{fg}                                                                                                      
+{fg}  gm F1 {dim}mail · {fg}? {dim}help{fg}                                                                                                   

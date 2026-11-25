@@ -3,7 +3,9 @@
 One calendar for every account: each account's own calendar, read from
 its provider, the events tuimex itself holds, and the invitations that
 are in your mail and in no calendar yet. `gc` opens it and `gm` returns
-to mail; each side keeps where it was.
+to mail; each side keeps where it was. `F2` and `F1` do the same by one
+key each, wherever `gc` and `gm` are read: not while you are typing into
+the event form, a message, the command line or a prompt.
 
 A calendar is written by other people. Its events are text from outside,
 as mail is: nothing an event names is fetched, and a link in one opens

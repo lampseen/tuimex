@@ -10,7 +10,7 @@
 {fg}    u          {dim}undo the last action{fg}     t          {dim}today{fg}                     a               {dim}accept{fg}                     
 {fg}    A          {dim}what the agent can do{fg}    gd         {dim}go to a date{fg}              t               {dim}tentative{fg}                  
 {fg}    ^l         {dim}redraw{fg}                   Tab S-Tab  {dim}next, previous view{fg}       d               {dim}decline{fg}                    
-{fg}    gc         {dim}the calendar{fg}             1 2 3      {dim}month, week, day{fg}          p               {dim}propose another time{fg}       
+{fg}    gc F2      {dim}the calendar{fg}             1 2 3      {dim}month, week, day{fg}          p               {dim}propose another time{fg}       
 {fg}                                        Enter      {dim}the day; then the event{fg}   x               {dim}ignore; nothing is sent{fg}    
 {fg}    {fg b}Command line{fg}                        /          {dim}find; Enter: every day{fg}                                               
 {fg}    Tab S-Tab  {dim}complete, cycle{fg}          gt gT      {dim}next, previous account{fg}    {fg b}Calendars (after C){fg}                        
@@ -21,7 +21,7 @@
 {fg}                                        E          {dim}edit the event{fg}            {fg b}Event form{fg}                                 
 {fg}    {fg b}Confirm{fg}                             d          {dim}delete the event{fg}          Tab S-Tab       {dim}next, previous field{fg}       
 {fg}    y Enter    {dim}yes{fg}                      gn         {dim}reminders on, off{fg}         Left Right      {dim}choose, where offered{fg}      
-{fg}    n Esc      {dim}no{fg}                       gm         {dim}back to mail{fg}              Enter           {dim}edit notes in $EDITOR{fg}      
+{fg}    n Esc      {dim}no{fg}                       gm F1      {dim}back to mail{fg}              Enter           {dim}edit notes in $EDITOR{fg}      
 {fg}    any other  {dim}cancels; key dropped{fg}                                          ^s              {dim}save; guests get mail{fg}      
 {fg}                                                                             Esc             {dim}close; keep or discard{fg}     
 {fg}    {fg b}Help (after ?){fg}                                                                                                      

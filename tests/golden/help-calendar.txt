@@ -10,7 +10,7 @@
     u          undo the last action     t          today                     a               accept                     
     A          what the agent can do    gd         go to a date              t               tentative                  
     ^l         redraw                   Tab S-Tab  next, previous view       d               decline                    
-    gc         the calendar             1 2 3      month, week, day          p               propose another time       
+    gc F2      the calendar             1 2 3      month, week, day          p               propose another time       
                                         Enter      the day; then the event   x               ignore; nothing is sent    
     Command line                        /          find; Enter: every day                                               
     Tab S-Tab  complete, cycle          gt gT      next, previous account    Calendars (after C)                        
@@ -21,7 +21,7 @@
                                         E          edit the event            Event form                                 
     Confirm                             d          delete the event          Tab S-Tab       next, previous field       
     y Enter    yes                      gn         reminders on, off         Left Right      choose, where offered      
-    n Esc      no                       gm         back to mail              Enter           edit notes in $EDITOR      
+    n Esc      no                       gm F1      back to mail              Enter           edit notes in $EDITOR      
     any other  cancels; key dropped                                          ^s              save; guests get mail      
                                                                              Esc             close; keep or discard     
     Help (after ?)                                                                                                      

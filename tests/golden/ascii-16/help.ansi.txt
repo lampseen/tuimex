@@ -10,7 +10,7 @@
 {default}    u           {brightblack}undo the last action{default}     V            {brightblack}mark a range{default}            B                {brightblack}sealed browser copy{default}      
 {default}    A           {brightblack}what the agent can do{default}    Enter        {brightblack}open; a draft, to edit{default}  e d s m M r R f  {brightblack}as in the list{default}           
 {default}    ^l          {brightblack}redraw{default}                   p            {brightblack}show or hide preview{default}                                              
-{default}    gc          {brightblack}the calendar{default}             P            {brightblack}preview beside, below{default}   {default b}Preview, focused{default}                          
+{default}    gc F2       {brightblack}the calendar{default}             P            {brightblack}preview beside, below{default}   {default b}Preview, focused{default}                          
 {default}                                         B            {brightblack}sealed browser copy{default}     j k ^d ^u gg G   {brightblack}scroll{default}                   
 {default}    {default b}Command line{default}                         Alt-j Alt-l  {brightblack}focus the preview{default}       Alt-k Alt-h      {brightblack}back to the list{default}         
 {default}    Tab S-Tab   {brightblack}complete, cycle{default}          gt gT        {brightblack}next, previous account{default}                                            

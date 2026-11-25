@@ -10,7 +10,7 @@
 {fg}    u           {dim}undo the last action{fg}     V            {dim}mark a range{fg}            B                {dim}sealed browser copy{fg}      
 {fg}    A           {dim}what the agent can do{fg}    Enter        {dim}open; a draft, to edit{fg}  e d s m M r R f  {dim}as in the list{fg}           
 {fg}    ^l          {dim}redraw{fg}                   p            {dim}show or hide preview{fg}                                              
-{fg}    gc          {dim}the calendar{fg}             P            {dim}preview beside, below{fg}   {fg b}Preview, focused{fg}                          
+{fg}    gc F2       {dim}the calendar{fg}             P            {dim}preview beside, below{fg}   {fg b}Preview, focused{fg}                          
 {fg}                                         B            {dim}sealed browser copy{fg}     j k ^d ^u gg G   {dim}scroll{fg}                   
 {fg}    {fg b}Command line{fg}                         Alt-j Alt-l  {dim}focus the preview{fg}       Alt-k Alt-h      {dim}back to the list{fg}         
 {fg}    Tab S-Tab   {dim}complete, cycle{fg}          gt gT        {dim}next, previous account{fg}                                            

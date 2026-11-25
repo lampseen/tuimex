@@ -7,6 +7,7 @@ use crate::app::App;
 use crate::app::tests::{after, app as fresh, foot, press, screen};
 use crate::calendar::Calendar;
 use crate::calendar::tests::design as calendar;
+use crate::keymap::Key;
 
 /// The left of the status line after `keys`. Today is Monday 23 November.
 fn at(keys: &str) -> String {
@@ -17,7 +18,7 @@ fn said(keys: &str) -> String {
     foot(&mut after(keys)).1
 }
 
-const MONTH: &str = "Enter open · J K next event · t today · c new event · gm mail · ? help";
+const MONTH: &str = "Enter open · J K next event · t today · c new event · gm F1 mail · ? help";
 
 #[test]
 fn gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was() {
@@ -34,6 +35,39 @@ fn gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was() {
     press(&mut app, "gm");
     assert_eq!(foot(&mut app).0, "5 of 24 · 1 message");
     assert!(app.asks().is_empty(), "moving about asks for nothing");
+}
+
+/// F2 and F1 are `gc` and `gm` by one key each: read where those are, and
+/// nowhere else. Where letters are typed a function key types nothing.
+#[test]
+fn f2_opens_the_calendar_and_f1_returns_to_mail_wherever_gc_and_gm_do() {
+    let top = |app: &mut App| screen(app, 120, 40)[0].clone();
+    let mut app = after("jjj");
+    app.key(Key::F(1));
+    assert_eq!(foot(&mut app).0, "4 of 24 · thread of 3", "F1 in mail is where it already is");
+    app.key(Key::F(2));
+    assert!(top(&mut app).starts_with("  Month"), "{}", top(&mut app));
+    press(&mut app, "lll");
+    app.key(Key::F(2));
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 4 events · 1 to answer", "F2 in the calendar changes nothing");
+    app.key(Key::F(1));
+    assert_eq!(foot(&mut app).0, "4 of 24 · thread of 3", "mail's cursor is where it was");
+    // From the reader, and back to the message; and from an event's screen.
+    let mut app = after("\r");
+    app.key(Key::F(2));
+    assert!(top(&mut app).starts_with("  Month"));
+    press(&mut app, "lll\r\r");
+    assert!(top(&mut app).starts_with("  Standup"), "{}", top(&mut app));
+    app.key(Key::F(1));
+    assert!(top(&mut app).starts_with("  Invitation: Q4 roadmap review"), "{}", top(&mut app));
+    // The form, compose, the command line and a prompt take neither.
+    for typing in ["gcc", "c", ":", "gcgd", "/"] {
+        let mut app = after(typing);
+        let was = screen(&mut app, 120, 40);
+        app.key(Key::F(1));
+        app.key(Key::F(2));
+        assert_eq!(screen(&mut app, 120, 40), was, "after {typing:?}");
+    }
 }
 
 #[test]

@@ -218,7 +218,7 @@ const KEYMAP = {
     'compose: Left and Right choose the identity while From is focused. The proposal did not say.',
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
-    'the calendar is a place and not a section: `gc` opens it and `gm` returns, each side keeping where it was (ADR-054).',
+    'the calendar is a place and not a section: `gc` or F2 opens it and `gm` or F1 returns, each side keeping where it was (ADR-054).',
     'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
@@ -235,7 +235,7 @@ const KEYMAP = {
       { id: 'global.undo', keys: 'u', does: 'undo the last action', hint: 'undo' },
       { id: 'global.agent', keys: 'A', does: 'what the agent can do', hint: 'agent' },
       { id: 'global.redraw', keys: '^l', does: 'redraw' },
-      { id: 'global.calendar', keys: 'gc', does: 'the calendar', hint: 'calendar' },
+      { id: 'global.calendar', keys: 'gc F2', does: 'the calendar', hint: 'calendar' },
     ] },
     { mode: 'list', title: 'List', keys: [
       { id: 'list.move', keys: 'j k', does: 'down, up' },
@@ -323,7 +323,7 @@ const KEYMAP = {
       { id: 'calendar.edit', keys: 'E', does: 'edit the event', hint: 'edit' },
       { id: 'calendar.delete', keys: 'd', does: 'delete the event', hint: 'delete' },
       { id: 'calendar.reminders', keys: 'gn', does: 'reminders on, off' },
-      { id: 'calendar.mail', keys: 'gm', does: 'back to mail', hint: 'mail' },
+      { id: 'calendar.mail', keys: 'gm F1', does: 'back to mail', hint: 'mail' },
     ] },
     { mode: 'event', title: 'Event', keys: [
       { id: 'event.scroll', keys: 'j k ^d ^u gg G', does: 'scroll' },

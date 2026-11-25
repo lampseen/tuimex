@@ -562,14 +562,14 @@ copy · `e d s m M r R f` as in the list · `q Esc` back, cursor kept.
 completion) · `^s` send summary · `^d` save draft · `Esc` asks: keep the
 draft or discard.
 
-**Calendar**, after `gc` (ADR-054), as the design delivered it: `h l`
+**Calendar**, after `gc` or `F2` (ADR-054), as the design delivered it: `h l`
 previous, next day · `j k` a week in the month, else an event · `[ ]`
 page · `J K` next, previous event · `n N` match · `I` next invitation to
 answer · `t` today · `gd` go to a date · `Tab S-Tab` and `1 2 3` the view
 · `Enter` deeper, `Esc` back · `/` find · `gt gT` account · `C` calendars
 (then `j k`, `Space`) · `o` links · `i` answer (then `a t d p x`) · `c`
 new event · `E` edit · `d` delete (a repeat asks `t` this one, `a` all) ·
-`u` undo · `gn` reminders · `gm` mail. On an event: `j k ^d ^u gg G`
+`u` undo · `gn` reminders · `gm` or `F1` mail. On an event: `j k ^d ^u gg G`
 scroll, `zo zc`, `v` the mail it came in. In the form: `Tab S-Tab`,
 `Left Right`, `Enter` notes in `$EDITOR`, `^s` save, `Esc`.
 `docs/keymap.md` is the table itself.

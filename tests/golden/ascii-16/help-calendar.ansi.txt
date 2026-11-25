@@ -10,7 +10,7 @@
 {default}    u          {brightblack}undo the last action{default}     t          {brightblack}today{default}                     a               {brightblack}accept{default}                     
 {default}    A          {brightblack}what the agent can do{default}    gd         {brightblack}go to a date{default}              t               {brightblack}tentative{default}                  
 {default}    ^l         {brightblack}redraw{default}                   Tab S-Tab  {brightblack}next, previous view{default}       d               {brightblack}decline{default}                    
-{default}    gc         {brightblack}the calendar{default}             1 2 3      {brightblack}month, week, day{default}          p               {brightblack}propose another time{default}       
+{default}    gc F2      {brightblack}the calendar{default}             1 2 3      {brightblack}month, week, day{default}          p               {brightblack}propose another time{default}       
 {default}                                        Enter      {brightblack}the day; then the event{default}   x               {brightblack}ignore; nothing is sent{default}    
 {default}    {default b}Command line{default}                        /          {brightblack}find; Enter: every day{default}                                               
 {default}    Tab S-Tab  {brightblack}complete, cycle{default}          gt gT      {brightblack}next, previous account{default}    {default b}Calendars (after C){default}                        
@@ -21,7 +21,7 @@
 {default}                                        E          {brightblack}edit the event{default}            {default b}Event form{default}                                 
 {default}    {default b}Confirm{default}                             d          {brightblack}delete the event{default}          Tab S-Tab       {brightblack}next, previous field{default}       
 {default}    y Enter    {brightblack}yes{default}                      gn         {brightblack}reminders on, off{default}         Left Right      {brightblack}choose, where offered{default}      
-{default}    n Esc      {brightblack}no{default}                       gm         {brightblack}back to mail{default}              Enter           {brightblack}edit notes in $EDITOR{default}      
+{default}    n Esc      {brightblack}no{default}                       gm F1      {brightblack}back to mail{default}              Enter           {brightblack}edit notes in $EDITOR{default}      
 {default}    any other  {brightblack}cancels; key dropped{default}                                          ^s              {brightblack}save; guests get mail{default}      
 {default}                                                                             Esc             {brightblack}close; keep or discard{default}     
 {default}    {default b}Help (after ?){default}                                                                                                      

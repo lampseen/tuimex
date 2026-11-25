@@ -673,7 +673,7 @@ impl App {
             "account" | "qa" | "sync" | "messages" | "preview" => return false,
             // The rows a command of mail's would take are out of sight.
             _ if COMMANDS.iter().any(|command| command.name == name) => {
-                let mail = format!("{} returns to mail", keymap::hint("calendar.mail").0);
+                let mail = format!("{} returns to mail", key_name("calendar.mail", 0));
                 self.say(say::err(format!(":{name}: the calendar is open")).key(mail));
             }
             _ => return false,

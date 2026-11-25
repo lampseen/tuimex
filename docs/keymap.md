@@ -17,7 +17,7 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `u` | undo the last action |
 | `A` | what the agent can do |
 | `^l` | redraw |
-| `gc` | the calendar |
+| `gc F2` | the calendar |
 
 ## List
 
@@ -127,7 +127,7 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `E` | edit the event |
 | `d` | delete the event |
 | `gn` | reminders on, off |
-| `gm` | back to mail |
+| `gm F1` | back to mail |
 
 ## Event
 
