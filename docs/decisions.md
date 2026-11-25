@@ -1654,6 +1654,70 @@ authority above.
    an event one row long, which would cost most of the title at 120
    columns.
 
+*2026-11-24, after Bryan used it again.* Two more, each in
+`design/tui.js` first, approved by the agent leading the build. They
+replace what items 1, 3 and 4 say of the hint and of the list.
+
+8. **The first row of every screen is a bar of places**:
+   `tuimex   F1 Mail   F2 Calendar`, the one in view marked. Bryan: "where
+   is the indicator of what screen you are on. See how ../sentry
+   implements f(keys)". Decided:
+   - *A row of its own, as in sentry.* The argument against is the row it
+     costs every screen. Sharing the row of tabs does not survive 80
+     columns: mail's tabs take 70 of them with the Outbox, and more with a
+     search, so the bar would fit there only as bare keys. The preview's
+     thirty rows and its 45% are now counted under the bar.
+   - *The place in view is drawn as the active tab is*, in the accent and
+     bold. Sentry inverts it; this design fills nothing but the selected
+     row, and in sixteen colours that fill is not there at all (ADR-003),
+     so bold is what carries it without colour, as it does for a tab. Of
+     the other place the key is the colour a hint's key is and the name is
+     dim.
+   - *Narrow*, which for two places is under 34 columns: the place not in
+     view takes a short name (`Cal`), then is its key alone. The place in
+     view and the program keep their names.
+   - *Where the keys do nothing* (compose, the send summary, the event
+     form, help) the bar is still drawn, so nothing moves by a row when a
+     form opens, and names the places without their keys. It is the
+     screen's and not the mode's: a command or a prompt typed over the
+     list or the calendar leaves it as it was. The screen shown before
+     any place is open (`Opening mail`) has no bar.
+   - *No hint names the keys that change place.* The bar does, so the
+     calendar's hints lose `gm F1 mail`, which read as one odd key, and
+     the empty calendar's hint is `? help` alone. Help still lists `gc F2`
+     and `gm F1`.
+9. **The month's list always has an event selected while it has the
+   focus.** Bryan: "still not able to nav to the list on the right to nav
+   events". Alt-l did arrive and `j` did step, in a terminal as in the
+   tests; from a day with nothing on it the focus selected nothing, and
+   only the hint showed it had moved. Now:
+   - Alt-l leaves the list as it is drawn and selects the first event of
+     the cursor's day, or the first listed after it. The row is filled as
+     in the day view, and the grid's cursor dims and goes to that event's
+     day: while the list has the focus the cursor is always on the
+     selected event's day, so the status line counts that day. Alt-h,
+     Alt-k and Esc leave it there.
+   - `j` `k` (and `J` `K`) step through every event listed. The list
+     stays where it began and scrolls by the rule of item 4, its days
+     going on as far as the selection. Decided: `k` on the first event
+     listed goes to the one before it, on whatever earlier day, and the
+     list then begins there, since a list that stopped at its top would
+     make the way back Alt-h, `h`, Alt-l. A step still looks 92 days
+     either side of the cursor, so a gap longer than that ends it.
+   - `h` `l` keep the exception: they are days. The brief gave an empty
+     day the next event listed after it, which for `h` is the event just
+     left; so each goes to the nearest day its way that has an event.
+   - `t`, `gd`, `[` and `]` go to a day as in the grid; the list begins
+     on it again and the first event from it on is selected. With none,
+     the focus is the grid's. `I` selects the invitation it finds, and
+     the list begins on its day. What is deleted, or hidden with `C`,
+     leaves the selection to the next event listed; it used to leave none.
+   - Where the list shows no event, Alt-l stays in the grid and says
+     `the list shows no event`; with no calendar it says the same.
+   - The hint is `j k move · Enter open`, then `i answer` and `o links`
+     where they apply, `Alt-h grid` and `? help`. `E edit` and `d delete`
+     still work and are left to help: with them the hint is 86 cells.
+
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
 This is ADR-013 again, for events. An event tuimex itself holds (one
