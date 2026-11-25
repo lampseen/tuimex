@@ -103,6 +103,7 @@ const GLYPHS = {
   shade:     { unicode: '░', ascii: ':', means: 'the cells an inline image occupies' },
   few:       { unicode: '∙', ascii: '.', means: 'a day with one event; two is a colon in both tiers' },
   many:      { unicode: '⋮', ascii: '#', means: 'a day with three events or more' },
+  block:     { unicode: '┃', ascii: '#', means: 'the edge of an event in the week, down every row it lasts' },
 };
 
 const G = Object.fromEntries(Object.entries(GLYPHS).map(([name, g]) => [name, g.unicode]));
@@ -2045,13 +2046,24 @@ function dayScreen(o) {
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.selected ? o.selected.n : o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
 
-// Days as columns against the clock. An event is a bar in its account's
-// colour down the rows it lasts, its title beside the first and its hours
-// beside the second. One that begins while another runs is drawn `step`
-// cells in, over the other's rows, so both titles stay whole and the
-// first one's bar still shows how long it lasts; two that begin together
-// halve the column. The hour it is now is in the accent. Nothing is filled
-// but the selected event.
+// Days as columns against the clock, on a grid in the faintest tone: a rule
+// down the left of each day and a dotted line across at each hour, so a
+// cell is traced to its day and its hour and nothing on the grid is louder
+// than an event. The cursor's day is the column whose header is filled and
+// whose rules are a step brighter, all the way down. Today's header is the
+// accent, as in the month, and the half hour it is now is a line in the
+// accent across today's column.
+//
+// An event is a block: a heavy edge in its account's colour down every row
+// it lasts, its title beside the first in the text's own colour, its hours
+// beside the second, and no grid behind it. The week does not dim what has
+// ended; the line of the present says what is past. One that begins while
+// another runs is drawn `step` cells in, over the other's rows, so both
+// titles stay whole and the first one's edge still shows how long it
+// lasts; two that begin together halve the column, each behind its own
+// edge. What lasts all day is a block too, over a rule that parts it from
+// the hours. Nothing is filled but the cursor's header and the selected
+// event.
 function weekScreen(o) {
   const { width, height } = o;
   const count = width >= C.weekFrom ? 7 : 3;
@@ -2061,26 +2073,35 @@ function weekScreen(o) {
   const tail = settle(o.panel || [], width);
   const room = height - 2 - 3 - tail.length;
   const isSelected = (ev) => !!o.selected && o.selected.id === ev.id && o.selected.n === ev.n;
+  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
+  // The grid of a day: a step brighter in the cursor's column.
+  const tone = (n) => (n === o.cursor ? 'dim' : 'faint');
+  const empty = (n, across) => [run(G.bar, tone(n)), ...(across || [gap(colWidth - 1)])];
 
   // Row `y` of an event's block, `w` cells wide.
   const block = (ev, y, w) => {
     const selected = isSelected(ev);
-    const lead = selected ? run(G.cursor, 'acc') : run(G.bar, accountColour(ev.account));
+    const lead = selected ? run(G.cursor, 'acc') : run(G.block, accountColour(ev.account));
     const words = eventWords(ev)[0];
-    const text = y === 0 ? [run(ev.title, ended(ev) ? 'dim' : 'fg', { b: isWaiting(ev) })]
+    const text = y === 0 ? [run(ev.title, 'fg', { b: isWaiting(ev) })]
       : y === 1 && !ev.allDay ? [run(`${ev.start}-${ev.end}`, 'dim')]
       : y === 2 && words ? [run(words[0], words[1] || 'dim')] : [];
     const row = [lead, ...fit(text, w - 2), gap(1)];
     return selected ? fill(row, 'sel') : row;
   };
 
+  // The cursor is on a day until an event is selected, and is then dim
+  // here, as a pane's is while another has the focus.
   const head = [gap(LAYOUT.margin + C.axis), ...days.flatMap((n) => {
     const d = civil(n);
-    return fit([gap(1), run(`${DAYS[d.dow]} ${d.dom}`, n === TODAY ? 'acc' : n === o.cursor ? 'fg' : 'dim', { b: n === TODAY || n === o.cursor })], colWidth);
+    const on = n === o.cursor;
+    const label = fit([on ? run(G.cursor, ev ? 'dim' : 'acc') : gap(1), run(`${DAYS[d.dow]} ${d.dom}`, n === TODAY ? 'acc' : on ? 'fg' : 'dim', { b: n === TODAY || on })], colWidth);
+    return on ? fill(label, 'sel') : label;
   })];
   const allDay = days.map((n) => eventsOn(n, o).filter((ev) => ev.allDay));
   const allRows = Array.from({ length: Math.max(...allDay.map((list) => list.length)) }, (_, y) =>
-    [gap(LAYOUT.margin), ...fit(y ? [] : [run('all day', 'dim')], C.axis), ...allDay.flatMap((list) => (list[y] ? block(list[y], 0, colWidth) : [gap(colWidth)]))]);
+    [gap(LAYOUT.margin), ...fit(y ? [] : [run('all day', 'dim')], C.axis), ...allDay.flatMap((list, i) => (list[y] ? block(list[y], 0, colWidth) : empty(days[i])))]);
+  const parting = [gap(LAYOUT.margin + C.axis), run(G.rule.repeat(count * colWidth), 'faint')];
 
   // Each day's timed events, with the lane an overlap puts them in.
   const timed = days.map((n) => {
@@ -2099,18 +2120,21 @@ function weekScreen(o) {
   });
 
   const slots = room - 1 - allRows.length - (allRows.length ? 1 : 0);
-  const picked = o.selected && timed.flatMap((day) => day.list).find(isSelected);
+  const picked = ev && timed.flatMap((day) => day.list).find(isSelected);
   let from = minutes(C.dayFrom);
   if (picked && picked.to > from + slots * C.slot) from = Math.ceil(picked.to / 60) * 60 - slots * C.slot;
   if (picked && picked.from < from) from = Math.floor(picked.from / 60) * 60;
   from = Math.max(0, Math.min(from, 24 * 60 - slots * C.slot));
 
   const now = days.includes(TODAY) ? Math.floor(minutes(CLOCK) / 60) * 60 : -1;
+  const present = Math.floor(minutes(CLOCK) / C.slot) * C.slot;
+  const across = (glyph, fg) => [run(glyph.repeat(colWidth - 1), fg)];
   const grid = Array.from({ length: slots }, (_, s) => {
     const at = from + s * C.slot;
     const clock = at % 60 ? [] : [run(`${String(at / 60).padStart(2, '0')}:00`, at === now ? 'acc' : 'dim', { b: at === now })];
-    const columns = timed.flatMap((day) => {
-      let cell = [gap(colWidth)];
+    const columns = timed.flatMap((day, i) => {
+      const n = days[i];
+      let cell = empty(n, n === TODAY && at === present ? across(G.rule, 'acc') : at % 60 ? null : across(G.dot, tone(n)));
       for (const ev of day.list) {
         if (at < ev.from || at >= ev.to) continue;
         const x = !ev.shares ? 0 : ev.abreast ? ev.lane * Math.floor(colWidth / day.lanes) : ev.lane * C.step;
@@ -2127,8 +2151,7 @@ function weekScreen(o) {
   const a = civil(days[0]);
   const b = civil(days[count - 1]);
   const title = a.month === b.month ? `${a.dom} to ${b.dom} ${MONTH_NAMES[b.month - 1]} ${b.year}` : `${a.dom} ${MONTHS[a.month - 1]} to ${b.dom} ${MONTHS[b.month - 1]} ${b.year}`;
-  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
-  const content = [head, ...allRows, ...(allRows.length ? [[]] : []), ...grid].map((row) => fit(row, width));
+  const content = [head, ...allRows, ...(allRows.length ? [parting] : []), ...grid].map((row) => fit(row, width));
   return [calendarTabs(width, 'week', title), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
@@ -2775,7 +2798,7 @@ function build(mode = {}) {
   screen('cal-month-wide-list-focus', 'Calendar, month at 180 columns, the list focused', 'the list is beside the grid at every width, so it is Alt-l that focuses it and Alt-h that returns', listed(wide), wide);
 
   const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
-  screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
+  screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock, on a faint grid of days and hours; an event is a block behind an edge in its account\'s colour for as long as it lasts, two at once share a column, the cursor\'s day is the column that is brighter, and the time it is now is a line across today', week(LAYOUT.default));
   alsoSmall('cal-week', 'Calendar, week', week(small));
 
   const day = (size, more) => dayScreen({ ...size, cursor: thu, selected: roadmap, ...more });

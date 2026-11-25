@@ -104,9 +104,9 @@ fn three_that_overlap_each_step_in_and_two_that_begin_together_halve_the_column(
     let (ten, (_, col)) = (row_of(&rows, "10:00"), columns(120));
     let thursday = 2 + 7 + 3 * col;
     let cell = |y: usize| rows[y].chars().skip(thursday).take(col).collect::<String>();
-    assert_eq!(cell(ten).trim_end(), "│One");
-    assert_eq!(cell(ten + 1).trim_end(), "│ │Two", "a blank cell parts it from the one it is drawn over");
-    assert_eq!(cell(ten + 2).trim_end(), "│ │ │Three");
+    assert_eq!(cell(ten).trim_end(), "┃One");
+    assert_eq!(cell(ten + 1).trim_end(), "┃ ┃Two", "a blank cell parts it from the one it is drawn over");
+    assert_eq!(cell(ten + 2).trim_end(), "┃ ┃ ┃Three");
 }
 
 #[test]
@@ -144,7 +144,8 @@ fn the_window_moves_to_a_selected_event_before_it_or_after_it_and_stays_in_the_d
     let late = drawn(&calendar, Some(("Late", fx::THU)), 120, 30);
     let last = late.len() - 4;
     assert!(late[last - 1].starts_with("  23:00") && late[last - 1].contains('▌'), "{late:?}");
-    assert!(late[last].is_empty(), "the window ends on the hour after it ends: {late:?}");
+    let grid_alone = |row: &str| row.chars().all(|c| c == ' ' || c == '│');
+    assert!(grid_alone(&late[last]), "the window ends on the hour after it ends: {late:?}");
 }
 
 #[test]
@@ -184,4 +185,71 @@ fn a_block_drawn_over_half_a_wide_character_leaves_a_space_and_the_column_its_wi
     overlay(&mut cell, 1, &[gap(1), run("x", Tok::Fg)]);
     assert_eq!(text(&cell), "  x  notes");
     assert_eq!(cells(&cell), 10);
+}
+
+/// The design's week, where today is Monday the 23rd at 14:20 and the
+/// cursor is on Thursday: the cells of row `y` under day `d` of the week.
+fn design_cells(picked: Option<&Picked>, y: usize, d: usize) -> Line {
+    let calendar = crate::calendar::tests::design();
+    let accounts = [account(), AccountId("personal".to_string())];
+    let o = Scene { colours: &[Tok::Link, Tok::Head], ..scene(&calendar, &accounts, picked) };
+    let col = columns(120).1;
+    explode(&screen(&o, 120, 40)[y]).into_iter().skip(2 + 7 + d * col).take(col).collect()
+}
+
+/// Bryan could not trace an event to its day or its hour, nor tell which
+/// day was selected, which was today, or what time it was.
+#[test]
+fn the_grid_is_faint_a_step_brighter_under_the_cursor_and_the_present_is_a_line_across_today() {
+    let look = |cell: &crate::span::Span| (cell.text.clone(), cell.fg);
+    // Row 6 is 08:00, an hour; row 7 the half hour after it.
+    let (monday, thursday) = (design_cells(None, 6, 0), design_cells(None, 6, 3));
+    assert_eq!((look(&monday[0]), look(&monday[1])), (("│".into(), Tok::Faint), ("·".into(), Tok::Faint)));
+    assert!(monday[1..].iter().all(|cell| cell.text == "·"), "the hour is dotted across the day");
+    assert_eq!((look(&thursday[0]), look(&thursday[1])), (("│".into(), Tok::Dim), ("·".into(), Tok::Dim)));
+    let half = design_cells(None, 7, 0);
+    assert_eq!(look(&half[0]), ("│".into(), Tok::Faint));
+    assert!(half[1..].iter().all(|cell| cell.text == " "), "and the half hour is not");
+    // 14:00 is row 18: the half hour it is now, across today and no other day.
+    let now = design_cells(None, 18, 0);
+    assert!(now[1..].iter().all(|cell| cell.text == "─" && cell.fg == Tok::Acc), "{}", text(&now));
+    assert_eq!(look(&design_cells(None, 18, 1)[1]), ("·".into(), Tok::Faint));
+
+    // The headers: today in the accent, the cursor's day filled across.
+    let (today, cursor) = (design_cells(None, 2, 0), design_cells(None, 2, 3));
+    assert!(text(&today).trim_start().starts_with("Mon 23") && today[1].fg == Tok::Acc && today[1].bold);
+    assert_eq!(look(&cursor[0]), ("▌".into(), Tok::Acc));
+    assert!(cursor.iter().all(|cell| cell.bg == Some(Tok::Sel)), "the whole of its header is filled");
+    assert!(today.iter().all(|cell| cell.bg.is_none()));
+}
+
+#[test]
+fn an_event_is_a_block_behind_its_account_s_edge_and_is_not_dimmed_when_it_has_ended() {
+    // Monday's standup ended at 09:45 and it is 14:20; row 9 is 09:30.
+    let standup = design_cells(None, 9, 0);
+    assert_eq!((standup[0].text.as_str(), standup[0].fg), ("┃", Tok::Link), "work's colour");
+    assert_eq!((standup[1].text.as_str(), standup[1].fg), ("S", Tok::Fg), "what has ended is as bright");
+    assert!(standup.iter().all(|cell| cell.text != "·" && cell.text != "│"), "no grid shows through a block");
+    // What lasts all day is a block too, in its account's colour, over a
+    // rule that parts it from the hours.
+    let library = design_cells(None, 3, 4);
+    assert_eq!((library[0].text.as_str(), library[0].fg), ("┃", Tok::Head));
+    assert_eq!(design_cells(None, 3, 0)[0].text, "│", "a day with nothing all day keeps its rule");
+    let parting = design_cells(None, 5, 2);
+    assert!(parting.iter().all(|cell| cell.text == "─" && cell.fg == Tok::Faint));
+
+    // Selected, an event is filled down every row it lasts, and the
+    // header's cursor dims: the cursor is on the event.
+    let calendar = crate::calendar::tests::design();
+    let days = calendar.days(fx::THU, fx::THU + 1, None);
+    let roadmap = days.on(fx::THU).iter().find(|entry| entry.event.summary.starts_with("Q4")).unwrap().pick();
+    for y in [10, 11, 12] {
+        let cell = &design_cells(Some(&roadmap), y, 3)[0];
+        assert_eq!((cell.text.as_str(), cell.fg, cell.bg), ("▌", Tok::Acc, Some(Tok::Sel)), "row {y}");
+    }
+    let header = design_cells(Some(&roadmap), 2, 3);
+    assert_eq!((header[0].text.as_str(), header[0].fg), ("▌", Tok::Dim));
+    // The vendor call begins while it runs: a step in, behind its own edge.
+    let vendor = design_cells(Some(&roadmap), 12, 3);
+    assert_eq!((vendor[1].text.as_str(), vendor[2].text.as_str(), vendor[2].fg), (" ", "┃", Tok::Link));
 }

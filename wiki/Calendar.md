@@ -19,6 +19,12 @@ only when you ask for that one link.
 | **week** | seven days against the clock, with what lasts all day above; three days where the terminal is narrow |
 | **day** | the selected day's events in order, then the days after it that have any |
 
+In the week a faint rule runs down the left of each day and a dotted
+line across at each hour. An event is a block behind an edge in its
+account's colour, down every row it lasts. The selected day is the column
+whose header is filled and whose lines are brighter, today's header is in
+the accent colour, and the time it is now is a line across today.
+
 `Tab` and `S-Tab` step through them, and `1` `2` `3` choose one, at the
 same date. `Enter` goes deeper, from the month to the day and from a
 selected event to the event's own screen: when, where, which calendar,

@@ -503,14 +503,14 @@ fn export_asks_for_the_local_events_to_be_written_and_says_where_they_went() {
 #[test]
 fn the_calendar_has_its_commands_and_refuses_the_ones_that_take_rows_of_mail() {
     let mut app = after(":calendar week\r");
-    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "the week, a column to a day");
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("▌Mon 23"), "the week, a column to a day");
     press(&mut app, ":archive\r");
     assert_eq!(foot(&mut app).1, "E :archive: the calendar is open · gm returns to mail");
     assert!(app.asks().is_empty());
     press(&mut app, ":mail\r");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
     press(&mut app, ":calendar\r");
-    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "alone, where it was");
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("▌Mon 23"), "alone, where it was");
     assert_eq!(said(":calendar year\r"), "E :calendar: it takes month, week or day · Tab completes");
     press(&mut app, ":calendar month\r\r\r");
     assert_eq!(screen(&mut app, 120, 40)[0], format!("  Standup{}1 of 2 on Mon 23 Nov", " ".repeat(89)));
