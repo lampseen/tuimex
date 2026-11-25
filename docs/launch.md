@@ -7,13 +7,13 @@ How tuimex goes from a local repository to the public
 each step says what to run and how to tell it worked, and carries its
 state.
 
-**Where it stands on 2026-11-24: sections 2 to 8 are done but for the
-steps marked otherwise; 9 and 10 are not.** The repository is public, every
-job of `ci.yml` has passed on `main`, the ruleset is on, and the release
-workflow has built and packaged all four targets in a dry run. No release
-has been cut and `v0.1.0` is not tagged, so attesting and publishing have
-never run. Each step carries the run, pull request, issue or ruleset that
-shows it; a step with none says what is unverified.
+**Where it stands on 2026-11-24: sections 2 to 8 and 10 are done but for
+the steps marked otherwise; 9 is not.** The repository is public, every
+job of `ci.yml` has passed on `main`, the ruleset is on, and `v0.1.0` is
+tagged and published: the release workflow built, attested and published
+all four archives at its first attempt (run 45454590282). Each step
+carries the run, pull request, issue or ruleset that shows it; a step with
+none says what is unverified.
 
 [What the launch taught](#what-the-launch-taught), at the end, is for the
 next project that follows this list.
@@ -221,7 +221,7 @@ release workflow runs.
   jobs to the runner queue; pull request #3 made one Mac job build both
   Mac targets, and run 45448989344, from its branch, passed at the first
   attempt. In both the attest and publish steps were skipped, as a dry run
-  skips them: neither has ever run.*
+  skips them; they first ran on the tag, in section 10.*
 
   ```sh
   gh workflow run release.yml
@@ -237,8 +237,10 @@ release workflow runs.
 - [ ] **Download the one for a machine you have**, unpack it, and run
   `tuimex --version` and `tuimex --fixtures`. On a Mac, note here what
   Gatekeeper said and whether `wiki/Installing.md` describes it. *Not
-  done: no archive of a dry run has been unpacked and started by hand, and
-  none on a Mac.*
+  done: no archive of a dry run has been unpacked and started by hand. The
+  published Linux x86-64 archive was unpacked and answered `--version` on
+  2026-11-24, in section 10; `--fixtures` from it is not recorded, and no
+  archive has been unpacked or started on a Mac.*
 
 ## 9. The by-hand script
 
@@ -253,17 +255,36 @@ release workflow runs.
 ## 10. The release
 
 `Cargo.toml` already says 0.1.0, so the first release needs no bump:
-`make release VERSION=x.y.z` is for the ones after it.
+`make release VERSION=x.y.z` is for the ones after it, and has opened no
+bump pull request yet: unverified against GitHub.
 
-- [ ] **Tag it.** *Not done.*
+- [x] **Tag it.** *Done 2026-11-24: `make release-tag` pushed `v0.1.0` at
+  c8d9559, the head of `main`, where `ci.yml` had passed (run
+  45453808396).*
 
   ```sh
   git switch main && git pull
   make release-tag
   ```
 
-- [ ] **Watch the workflow**, then check what it published, from a clean
-  directory. *Not done.*
+- [x] **Watch the workflow**, then check what it published, from a clean
+  directory. *Done 2026-11-24: run 45454590282 passed at its first
+  attempt, in `check`, the three build jobs and `release`, whose attest and
+  publish steps ran. The release "tuimex 0.1.0" is published, neither a
+  draft nor a pre-release, with six assets: the four archives,
+  `checksums.txt` and `attestation.jsonl`. On a Linux x86-64 machine the
+  download below succeeded, and `checksums.txt` beside it;
+  `sha256sum -c --ignore-missing checksums.txt` said
+  `tuimex_linux_amd64.tar.gz: OK`; `gh attestation verify` exited 0 for the
+  archive and for `checksums.txt`, and its JSON names the predicate
+  `https://slsa.dev/provenance/v1`, five subjects (the four archives and
+  `checksums.txt`) and `.github/workflows/release.yml` at
+  `refs/tags/v0.1.0` in this repository; a copy of the archive with one
+  byte appended failed it with exit 1; the archive holds `tuimex`,
+  `LICENSE` and `README.md`, and the binary printed `tuimex 0.1.0`. The
+  other three archives' links answered 200 and no more was asked of them:
+  neither Mac archive has been unpacked or run by anyone, and the Linux
+  arm64 one has not been run on an arm64 machine.*
 
   ```sh
   curl -LO https://github.com/lampseen/tuimex/releases/latest/download/tuimex_linux_amd64.tar.gz
@@ -271,15 +292,21 @@ release workflow runs.
   ```
 
   **See** the download succeed under that fixed name, and the attestation
-  name this repository's release workflow. It is the first time the attest
-  and publish steps run at all.
+  name this repository's release workflow. On `v0.1.0` it was the first
+  time the attest and publish steps ran at all.
 
 - [ ] **Read the README's Install section and `wiki/Installing.md` once
   more against the release page.** They were written before a release
-  existed and worded to be true on this day. *Not done.*
+  existed and worded to be true on this day. *Read 2026-11-24 against the
+  release's assets: the archive names, the `latest` links and the
+  attestation command are what the release holds and what was run above on
+  Linux x86-64, and the sentence in `wiki/Installing.md` that explained a
+  404 by there being no release went. What both say of macOS has been
+  tried by nobody: unverified.*
 - [ ] **The Homebrew formula** in `packaging/homebrew/` is a template; a
   tap is a later step and the README says "to follow" until it exists.
-  *Not done: nothing has installed from it.*
+  *Not done: its version and checksums are still placeholders, there is
+  no tap, and nothing has installed from it.*
 
 ## The weekly check
 

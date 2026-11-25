@@ -21,8 +21,11 @@ as on Linux (`~/.config/tuimex` and the rest), not `~/Library`.
 names, the keyring and the paths would each need a second branch.
 
 Release archives are built for x86_64 and arm64 on both systems: the
-release workflow has built and packaged all four in a dry run, and no
-archive has been started by hand on a Mac. See [Installing](Installing).
+release workflow built, attested and published all four for the first
+release on 2026-11-24. The Linux x86_64 one has been downloaded, checked
+and started by hand. Neither Mac archive has been unpacked or run by
+anyone, and the Linux arm64 one has not been run on an arm64 machine. See
+[Installing](Installing).
 
 ## Terminals
 

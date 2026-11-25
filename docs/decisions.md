@@ -1367,6 +1367,21 @@ fifteen minutes in its queue, and a release that needs two scarce runners
 at once waits twice as often as one that needs one. The Intel binary was
 already a cross build, so nothing about what is built changed.
 
+*2026-11-24, the first release: the attest and publish steps have run.*
+`make release-tag` pushed `v0.1.0` at the head of `main` and run 45454590282
+passed at its first attempt, attesting and publishing for the first time.
+The release holds the four archives, `checksums.txt` and `attestation.jsonl`. What
+verified it, by hand on Linux x86-64 that day: `tuimex_linux_amd64.tar.gz`
+from its `/releases/latest/download/` link matched `checksums.txt`;
+`gh attestation verify` exited 0 for it and for `checksums.txt`, naming
+`https://slsa.dev/provenance/v1`, the four archives and `checksums.txt` as
+subjects, and `.github/workflows/release.yml` at `refs/tags/v0.1.0`; a copy
+with one byte appended failed it; and the unpacked binary printed
+`tuimex 0.1.0`.
+Still unproven: either Mac archive unpacked or run, the ARM Linux archive
+run on an ARM machine, the Homebrew template, and `make release
+VERSION=…` opening a bump pull request for a real release.
+
 ## ADR-052 — What is published about other projects' weaknesses
 
 The review that most of the security records answer (ADR-007 to ADR-018)
