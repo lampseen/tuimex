@@ -2,11 +2,12 @@
 //! see (ADR-007).
 
 use mail_parser::{AddressList, HeaderName, Message, MessageParser, MessagePart, PartKind};
-use tuimex_core::{Address, Attachment, Body, Head, Link, Security, Timestamp, Unsubscribe, Url};
+use tuimex_core::calendar::Method;
+use tuimex_core::{Address, Attachment, Body, CalendarPart, Head, Link, Security, Timestamp, Unsubscribe, Url};
 
 use crate::sanitise::{IMAGE_TYPES, InlineImage, sanitise};
 use crate::text::{clean, line, push_unique};
-use crate::{Error, html, invite};
+use crate::{Error, html};
 
 #[cfg(test)]
 mod tests;
@@ -103,12 +104,12 @@ pub fn body(raw: &[u8], width: usize) -> Result<Body, Error> {
         size: u32::try_from(part.decoded_len()).unwrap_or(u32::MAX),
         inline: part.is_inline(),
     });
-    let calendar = own_parts(&message).find(is_calendar).and_then(|p| p.text());
+    let calendar = calendar_of(&message).map(|p| calendar_text(&p));
     Ok(Body {
         text: shown,
         links,
         attachments: described.collect(),
-        invite: calendar.and_then(|c| invite::invite(&c)),
+        invite: calendar.and_then(|c| crate::calendar::invite(&c)),
         blocked_remote: page.remote,
         remote_images: page.images,
         image_hosts: page.image_hosts,
@@ -240,8 +241,47 @@ fn attachments<'m>(message: &'m Message) -> impl Iterator<Item = MessagePart<'m>
         })
 }
 
+/// A `text/calendar` part, or a file named `*.ics` sent under a type that
+/// says nothing, as some senders attach an invitation.
 fn is_calendar(part: &MessagePart) -> bool {
-    part.is_content_type("text", "calendar")
+    let generic = part.is_content_type("application", "octet-stream") || part.is_content_type("application", "ics");
+    let named = part.attachment_name().is_some_and(|name| {
+        let name = name.trim().to_ascii_lowercase();
+        name.len() > 4 && name.ends_with(".ics")
+    });
+    part.is_content_type("text", "calendar") || (generic && named)
+}
+
+/// The message's calendar: its first `text/calendar` part, or failing
+/// that its first `.ics` file.
+fn calendar_of<'m>(message: &'m Message) -> Option<MessagePart<'m>> {
+    let typed = own_parts(message).find(|p| p.is_content_type("text", "calendar"));
+    typed.or_else(|| own_parts(message).find(is_calendar))
+}
+
+/// A calendar part's text. A part sent as bytes has no charset to decode
+/// by, and iCalendar is UTF-8 (RFC 5545 §3.1.4).
+fn calendar_text(part: &MessagePart) -> String {
+    part.text().map_or_else(|| String::from_utf8_lossy(&part.decoded()).into_owned(), |t| t.into_owned())
+}
+
+/// The message's calendar part, with what it asks: the `method` its type
+/// names, or failing that the calendar's own `METHOD` (RFC 6047 §2.4).
+/// `None` for a message with no calendar part.
+pub fn calendar_part(raw: &[u8]) -> Result<Option<CalendarPart>, Error> {
+    let message = parse(raw)?;
+    let Some(part) = calendar_of(&message) else { return Ok(None) };
+    let text = calendar_text(&part);
+    let named = part.content_type().and_then(|c| c.attribute("method")).map(|m| m.trim().to_ascii_uppercase());
+    let method = match named.as_deref() {
+        Some("REQUEST") => Method::Request,
+        Some("REPLY") => Method::Reply,
+        Some("CANCEL") => Method::Cancel,
+        Some("COUNTER") => Method::Counter,
+        Some(_) => Method::Other,
+        None => crate::calendar::calendar(&text).method.unwrap_or(Method::Other),
+    };
+    Ok(Some(CalendarPart { method, text }))
 }
 
 /// The HTML body, with its parts run together so one pass numbers the links.

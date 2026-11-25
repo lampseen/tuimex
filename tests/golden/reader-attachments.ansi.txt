@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Photos from Saturday{fg}                                                                                                  
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Greta Holm{fg} {dim}<greta@example.com>{fg}                                                                             
@@ -22,7 +23,6 @@
 {fg}    {faint}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░{fg}                                                                    
 {fg}                                                                                                                        
 {fg}    G.                                                                                                                  
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

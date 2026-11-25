@@ -1,13 +1,16 @@
 //! tuimex: a terminal mail client that treats mail as hostile input.
 
 mod agent;
+mod calendar;
 mod cli;
 mod config;
 mod desk;
+mod diary;
 mod doctor;
 mod live;
 mod message;
 mod net;
+mod notify;
 mod outside;
 mod palette;
 mod paths;
@@ -21,15 +24,16 @@ use std::collections::HashMap;
 use std::io::IsTerminal;
 use std::path::Path;
 use std::process::ExitCode;
-use std::sync::Mutex;
+use std::sync::{Mutex, mpsc};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail};
 use clap::Parser;
-use tuimex_core::{Action, Ask, Body, Draft, Event, MessageId};
+use tuimex_core::{AccountId, Action, Ask, Body, Draft, Event, MessageId, Timestamp};
 use tuimex_fixtures::design;
 use tuimex_store::files;
 use tuimex_ui::app::App;
+use tuimex_ui::calendar::{Calendar, Shelf};
 use tuimex_ui::mailbox::Mailbox;
 
 fn main() -> Result<ExitCode> {
@@ -106,31 +110,51 @@ fn main() -> Result<ExitCode> {
         Some(name) if !app.section(name) => bail!("--section {name}: there is no section of that name"),
         _ => Ok(()),
     };
+    // Every calendar reaches the interface the one way: sent whole to the
+    // loop, which hands it over.
+    let (shown, arriving) = mpsc::channel();
     if args.fixtures {
         let outside = outside::Outside::new(Box::new(Nowhere), downloads, &dirs.cache);
         let mut app = App::new(theme, fixture_mailbox());
         app.set_up(design::identities(), agent.is_some());
+        // Taken by the loop before its first frame. `arriving` is held
+        // until then, so there is always someone to send to.
+        let _ = shown.send(calendar::Handed::Calendar { calendar: Box::new(fixture_calendar()), carried: 0 });
         app.set_preview(preview);
         open(&mut app)?;
-        term::Opening::new(theme).run(&mut app, &mut desk::Desk::new(Offline::new(outside), agent, &dirs.cache))?;
+        let mut desk = desk::Desk::new(Offline::new(outside), agent, &dirs.cache);
+        // No reminders: the design's afternoon has no clock to fall due on.
+        term::Opening::new(theme).run(&mut app, &mut desk, &mut diary::Diary::new(arriving, None))?;
         return Ok(ExitCode::SUCCESS);
     }
     tuimex_ui::when::set_zone(zone);
+    let reminding = notify::settings(config.notify.as_ref())?;
+    let calendar = calendar::reader(&config, &dirs, i64::from(zone(chrono::Utc::now().timestamp())), shown)?;
     if let Some((old, new)) = setup::rename::unfinished(&dirs.data)? {
         bail!(setup::rename::interrupted(&old, &new));
     }
     // The screen is taken once the config has been found good and before
     // the store is opened, so that a wait for the index is said on it.
     let mut opening = term::Opening::new(theme);
-    let (mailbox, live, delay) = live::start(&config, &dirs, downloads, &mut |rebuilt| opening.say(rebuilt))?;
+    let calendar = Some(calendar);
+    let (mailbox, live, delay) = live::start(&config, &dirs, downloads, calendar, &mut |rebuilt| opening.say(rebuilt))?;
     let mut app = App::new(theme, mailbox);
     app.set_up(live::identities(&config), agent.is_some());
+    app.set_writable_calendars(calendar::writable(&config).into_iter().map(AccountId).collect());
+    app.set_unwritten_calendars(calendar::unwritten(&config).into_iter().map(AccountId).collect());
     app.set_delay(delay);
     app.set_colours(colours);
     app.set_preview(preview);
     let mut desk = desk::Desk::new(live, agent, &dirs.cache);
+    // OSC 9 goes to standard output, which is what the frames are written
+    // to, from the loop's own thread between two frames: each frame is
+    // flushed whole before the loop does anything else, so a reminder
+    // cannot land inside one.
+    let notifier = notify::notifier(reminding.via, || Box::new(std::io::stdout()));
+    let reminders = notify::Reminders::new(reminding, notifier, dirs.state.clone());
+    let mut diary = diary::Diary::new(arriving, Some(reminders));
     let ran = match open(&mut app) {
-        Ok(()) => opening.run(&mut app, &mut desk),
+        Ok(()) => opening.run(&mut app, &mut desk, &mut diary),
         Err(error) => {
             drop(opening);
             Err(error)
@@ -177,6 +201,21 @@ fn fixture_mailbox() -> Mailbox {
         synced: Some(design::SYNCED),
         me: design::addresses(),
     }
+}
+
+/// The design's calendars, each read as long ago as the design says, on
+/// the design's fixed afternoon and a clock that is UTC, as its mail is.
+fn fixture_calendar() -> Calendar {
+    let shelf = |kept: design::Kept| Shelf {
+        account: AccountId(kept.account.to_string()),
+        local: kept.local,
+        name: None,
+        read: kept.read.map(|ago| Timestamp(design::NOW.0 - i64::from(ago))),
+        failed: None,
+        events: kept.events,
+    };
+    let shelves = design::calendars().into_iter().map(shelf).collect();
+    Calendar { shelves, identities: design::identities(), ..Calendar::empty(design::NOW) }
 }
 
 /// What `--fixtures` opens a link or a file with: nothing, and it says

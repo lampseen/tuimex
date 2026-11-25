@@ -33,7 +33,7 @@ it, with its files, its Bcc and its whole text.
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | on From, choose who the message is from |
+| `h` `l` | on From, choose who the message is from; `Left` `Right` do the same |
 | `Enter` | on the text, open your editor |
 | `^a` | attach a file; `Tab` completes its path |
 | `^s` | the send summary |

@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                         
   This week: winter routes, a gear swap and one trail closure                   
                                                                                 
     From     Fernway Weekly <news@fernway.example.net>                          
@@ -18,7 +19,6 @@
     Route             Length   Status                                           
     Ridge loop        12 km    groomed                                          
     Saddle traverse   18 km    groomed                                          
-    Mill creek        7 km     closed until 5 Dec                               
                                                                                 
-  lines 1-13 of 30                                  sending in 6s - 1 not sent  
+  lines 1-12 of 30                                  sending in 6s - 1 not sent  
   Load 8 images from img.fernway.example.net, cdn.example.net?  y yes - n no    

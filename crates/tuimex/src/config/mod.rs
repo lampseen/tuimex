@@ -30,12 +30,36 @@ pub struct Config {
     pub sync: Option<Sync>,
     pub send: Option<Send>,
     pub ui: Option<Ui>,
-    notify: Option<unread::Notify>,
+    pub notify: Option<Notify>,
     pgp: Option<unread::Pgp>,
     pub paths: Option<Paths>,
     keys: Option<BTreeMap<String, String>>,
     pub section: Option<Vec<Section>>,
     pub agent: Option<AgentCommand>,
+    #[serde(default, rename = "calendar")]
+    pub calendars: Vec<Calendar>,
+}
+
+/// `[[calendar]]`: one account's calendar (ADR-056, ADR-062). A table of
+/// its own and not a key of the account's, since setup only appends and
+/// an account's sub-table cannot follow a later account (ADR-043).
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Calendar {
+    pub account: String,
+    /// `caldav` or `feed`. A table without it adds to the account's
+    /// table above: setup can only append (ADR-043), so that is how it
+    /// records what it found out later.
+    pub kind: Option<String>,
+    /// The CalDAV calendar's address. A feed has none here: its address
+    /// is a secret (ADR-010).
+    pub url: Option<String>,
+    /// A feed's: argv, no shell, whose first line printed is the address.
+    pub address_cmd: Option<Vec<String>>,
+    /// Whether events are written at the provider (ADR-062). Left out it
+    /// is false, and every write for the account goes to its local
+    /// calendar: a calendar is not written on a path nobody has tried.
+    pub write: Option<bool>,
 }
 
 /// No key here can hold a secret (ADR-010).
@@ -175,17 +199,29 @@ pub struct Section {
     pub threaded: Option<bool>,
 }
 
+/// `[notify]`. `bell` and `osc9` are for new mail (PLAN §6.6), which is
+/// not built; the other three are an event's reminder (ADR-058).
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Notify {
+    #[expect(dead_code, reason = "new mail does not notify yet")]
+    bell: Option<bool>,
+    #[expect(dead_code, reason = "new mail does not notify yet")]
+    osc9: Option<bool>,
+    /// Whether a first run starts with reminders on; the switch then
+    /// remembers.
+    pub events: Option<bool>,
+    /// Such as `10m`: how long before its start an event with no alarm of
+    /// its own is reminded.
+    pub lead: Option<String>,
+    /// `desktop`, `osc9` or `none`.
+    pub via: Option<String>,
+}
+
 mod unread {
     #![expect(dead_code, reason = "the shapes of tables no code reads yet")]
 
     use serde::Deserialize;
-
-    #[derive(Debug, Deserialize)]
-    #[serde(deny_unknown_fields)]
-    pub struct Notify {
-        bell: Option<bool>,
-        osc9: Option<bool>,
-    }
 
     #[derive(Debug, Deserialize)]
     #[serde(deny_unknown_fields)]
@@ -211,11 +247,105 @@ impl Config {
                 bail!("two accounts are named {}", account.name);
             }
         }
+        for (i, calendar) in config.calendars.iter().enumerate() {
+            calendar.check(&config)?;
+            let earlier = config.calendars[..i].iter().find(|earlier| earlier.account == calendar.account);
+            let name = &calendar.account;
+            match (earlier, &calendar.kind) {
+                (Some(_), Some(_)) => {
+                    bail!("account {name} has two [[calendar]] tables, and an account has one calendar")
+                }
+                (Some(first), None) if first.url.is_none() => {
+                    bail!("[[calendar]] of {name}: `write` is for kind = \"caldav\"; a feed is only ever read")
+                }
+                (None, None) => bail!("[[calendar]] of {name}: it has no `kind`, and no table above it to add to"),
+                _ => {}
+            }
+        }
+        crate::notify::settings(config.notify.as_ref())?;
         Ok(config)
+    }
+
+    /// The `[[calendar]]` of the account `name`.
+    pub fn calendar(&self, name: &str) -> Option<&Calendar> {
+        self.calendars.iter().find(|calendar| calendar.account == name)
+    }
+
+    /// Whether the account's calendar is written at its provider: what the
+    /// last of its tables to say `write` says.
+    pub fn writes(&self, name: &str) -> bool {
+        let mut said = self.calendars.iter().filter(|calendar| calendar.account == name).filter_map(|c| c.write);
+        said.next_back().unwrap_or(false)
+    }
+
+    /// Whether the account's calendar is one setup could find out how to
+    /// write: read over CalDAV, and not written. A feed never is.
+    pub fn unwritten(&self, name: &str) -> bool {
+        self.calendar(name).is_some_and(|calendar| calendar.url.is_some()) && !self.writes(name)
     }
 
     pub fn account(&self, name: &str) -> Option<&Account> {
         self.accounts.iter().find(|account| account.name == name)
+    }
+}
+
+impl Calendar {
+    /// Whether the table says one way to read one account's calendar.
+    /// No error quotes `url`: on a table that should have had none, it is
+    /// the feed's secret address.
+    fn check(&self, config: &Config) -> Result<()> {
+        let name = &self.account;
+        let Some(account) = config.account(name) else {
+            bail!("[[calendar]] account = {name:?}: there is no [[account]] of that name");
+        };
+        let at = format!("[[calendar]] of {name}");
+        let Some(kind) = self.kind.as_deref() else {
+            if self.write.is_none() || self.url.is_some() || self.address_cmd.is_some() {
+                bail!("{at}: a table with no `kind` adds to the one above it, and holds `write` alone");
+            }
+            return Ok(());
+        };
+        match (kind, &self.url) {
+            ("caldav", None) => bail!("{at}: kind = \"caldav\" needs a `url`, the calendar's address"),
+            ("caldav", Some(url)) => {
+                // Plain HTTP is for a server on this machine alone, which is
+                // all the engine sends it to.
+                let local = url.strip_prefix("http://").filter(|rest| rest.starts_with("127.0.0.1:"));
+                let Some(rest) = url.strip_prefix("https://").or(local) else {
+                    bail!("{at}: `url` is fetched over TLS only, so it begins https://");
+                };
+                let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
+                if authority.is_empty() {
+                    bail!("{at}: `url` names no host");
+                }
+                if authority.contains('@') {
+                    bail!("{at}: `url` cannot carry a user name; the account's own is signed in with");
+                }
+                if self.address_cmd.is_some() {
+                    bail!("{at}: `address_cmd` is a feed's; CalDAV signs in with the account's password");
+                }
+                if account.auth.as_deref() == Some("gmail-oauth") {
+                    bail!(
+                        "{at}: kind = \"caldav\" signs in with the account's password, and {name} signs in with \
+                         Google (auth = \"gmail-oauth\"); kind = \"feed\" is the way for it"
+                    );
+                }
+            }
+            ("feed", Some(_)) => bail!(
+                "{at}: a feed has no `url` in the config, since its address is a secret: it is kept in the \
+                 keyring by `tuimex setup`, or printed by an `address_cmd`"
+            ),
+            ("feed", None) => {
+                if self.address_cmd.as_ref().is_some_and(Vec::is_empty) {
+                    bail!("{at}: `address_cmd` names no program");
+                }
+                if self.write.is_some() {
+                    bail!("{at}: `write` is for kind = \"caldav\"; a feed is only ever read");
+                }
+            }
+            _ => bail!("{at}: `kind` is one of \"caldav\", \"feed\""),
+        }
+        Ok(())
     }
 }
 

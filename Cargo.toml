@@ -51,6 +51,8 @@ ratatui = "0.30.2"
 # No default features: `chafa-dyn` links a system library, and
 # `image-defaults` would bring back every decoder `image` left out.
 ratatui-image = { version = "11.1.0", default-features = false, features = ["crossterm"] }
+# Reads a CalDAV server's answers, in tuimex-content (ADR-062).
+roxmltree = "0.21.1"
 rusqlite = { version = "0.43.0", features = ["bundled"] }
 # ring, as lettre and ureq are built with, so one crypto provider is linked.
 rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12", "logging"] }

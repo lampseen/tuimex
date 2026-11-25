@@ -172,6 +172,7 @@ impl Compose {
             in_reply_to: self.in_reply_to.clone(),
             references: self.references.clone(),
             origin: if self.agent.is_some() { Origin::Agent } else { Origin::Local },
+            calendar: None,
         })
     }
 
@@ -260,9 +261,12 @@ impl Compose {
             Some(what) => vec![run("agent saw placeholders for", Tok::Dim), run(format!(" {what}"), Tok::Fg)],
             None => view.right.clone(),
         };
-        let keys = ["compose.identity", "compose.editor", "global.agent", "compose.summary", "compose.close"];
-        let keys = keys.map(keymap::hint);
-        let hint = || list::hint(&[&[("Tab", "next field")], &keys[..]].concat());
+        // The keys that choose who it is from are letters in a field that
+        // is typed into, so they are named only on From.
+        let identity = (self.focus == Field::From).then_some("compose.identity");
+        let ids = identity.into_iter().chain(["compose.editor", "global.agent", "compose.summary", "compose.close"]);
+        let keys: Vec<_> = [("Tab", "next field")].into_iter().chain(ids.map(keymap::hint)).collect();
+        let hint = || list::hint(&keys);
         let status = list::status_row(width, &left, &right);
         let foot = [view.panel.clone(), vec![Line::new(), status, view.command.clone().unwrap_or_else(hint)]].concat();
         frame(head, body, foot, height)

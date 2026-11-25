@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {acc b}Inbox{fg} {fg b}8{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}2{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}                                                                
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -24,7 +25,6 @@
 {fg}                                                                                                                        
 {fg}  {dim b}Earlier{fg}                                                                                                               
 {fg}    {link}personal{fg}   {dim}Greta Holm{fg}              {dim}Book club pick for December{fg}                                   {agent}replied{fg}  {dim}12 Nov{fg}    
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

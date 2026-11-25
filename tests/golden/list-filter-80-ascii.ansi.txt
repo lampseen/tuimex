@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                         
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}             
 {default}                                                                                
 {default}  {brightblack b}Today{default}                                                                         
@@ -18,7 +19,6 @@
 {default}  {brightblack b}Past 7 days{default}                                                                   
 {default}    {brightblack}work{default}  {brightblack}Imani Castell{default}       {brightblack}Budget numbers for the of~{default}          {brightblack}re{default}  {brightblack}21 Nov{default}    
 {default}    {brightblack}pers{default}  {brightblack}Tomas Ferreira{default}      {brightblack}Bike rack: still want it?{default}               {brightblack}21 Nov{default}    
-{default}    {brightblack}work{default}  {brightblack}Hiring Desk{default}         {brightblack}Interview loop: backend c~{default}          {brightblack}1f{default}  {brightblack}21 Nov{default}    
 {default}                                                                                
 {default}  {brightblack}3 here -{default} Enter {brightblack}searches all mail{default}                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  /nov{black bg=magenta} {default}                                                                         

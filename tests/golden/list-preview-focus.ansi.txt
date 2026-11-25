@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -33,7 +34,6 @@
 {fg}    confirm today, because the board date has moved up.                                                                 
 {fg}                                                                                                                        
 {fg}    Priya                                                                                                               
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}  {dim}lines 1-13 of 13{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  

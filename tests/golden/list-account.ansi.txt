@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {acc b}Inbox{fg} {fg b}5{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -26,7 +27,6 @@
 {fg}                                                                                                                        
 {fg}    The pre-read is the roadmap document from last week. Please answer by                                               
 {fg}    Wednesday so I can book the right room.                                                                             
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

@@ -1,0 +1,40 @@
+{default}  {brightblack}Mail{default}   {default b}Calendar{default}                                                                                                       
+{default}  {default b}Help{default}                                                                                                                  
+{default}                                                                                                                        
+{default}    {default b}Everywhere{default}                          {default b}Calendar (after gc){default}                    {default b}Event{default}                                    
+{default}    :          {brightblack}command line{default}             h l          {brightblack}previous, next day{default}        j k ^d ^u gg G  {brightblack}scroll{default}                   
+{default}    ?          {brightblack}help; type to filter{default}     j k          {brightblack}grid: week; else: event{default}   zo zc           {brightblack}unfold, fold More{default}        
+{default}    Esc        {brightblack}back; clear find, marks{default}  [ ]          {brightblack}previous, next page{default}       v               {brightblack}the mail it came in{default}      
+{default}    h S-Tab    {brightblack}previous section{default}         Alt-j Alt-l  {brightblack}month: focus the events{default}   o i E d J K I   {brightblack}as in the calendar{default}       
+{default}    l Tab      {brightblack}next section{default}             Alt-k Alt-h  {brightblack}back to the grid{default}                                                   
+{default}    1-9        {brightblack}section by position{default}      J K          {brightblack}next, previous event{default}      {default b}Invitation (after i){default}                     
+{default}    u          {brightblack}undo the last action{default}     n N          {brightblack}next, previous match{default}      a               {brightblack}accept{default}                   
+{default}    A          {brightblack}what the agent can do{default}    I            {brightblack}next invite to answer{default}     t               {brightblack}tentative{default}                
+{default}    ^l         {brightblack}redraw{default}                   t            {brightblack}today{default}                     d               {brightblack}decline{default}                  
+{default}    gc F2      {brightblack}the calendar{default}             gd           {brightblack}go to a date{default}              p               {brightblack}propose another time{default}     
+{default}                                        Tab S-Tab    {brightblack}next, previous view{default}       x               {brightblack}ignore; nothing is sent{default}  
+{default}    {default b}Command line{default}                        1 2 3        {brightblack}month, week, day{default}                                                   
+{default}    Tab S-Tab  {brightblack}complete, cycle{default}          Enter        {brightblack}the day; then the event{default}   {default b}Calendars (after C){default}                      
+{default}    Up Down    {brightblack}history, by prefix{default}       /            {brightblack}find; Enter: every day{default}    j k             {brightblack}choose{default}                   
+{default}    ^w ^u      {brightblack}delete word, line{default}        gt gT        {brightblack}next, previous account{default}    Space           {brightblack}show or hide{default}             
+{default}    Enter      {brightblack}run{default}                      C            {brightblack}show, hide calendars{default}      Esc             {brightblack}close{default}                    
+{default}    Esc        {brightblack}cancel{default}                   o            {brightblack}links; the meeting first{default}                                           
+{default}                                        i            {brightblack}answer an invitation{default}      {default b}Event form{default}                               
+{default}    {default b}Confirm{default}                             c            {brightblack}new event here{default}            Tab S-Tab       {brightblack}next, previous field{default}     
+{default}    y Enter    {brightblack}yes{default}                      E            {brightblack}edit the event{default}            h l             {brightblack}choose, where offered{default}    
+{default}    n Esc      {brightblack}no{default}                       d            {brightblack}delete the event{default}          Left Right      {brightblack}as h and l{default}               
+{default}    any other  {brightblack}cancels; key dropped{default}     gn           {brightblack}reminders on, off{default}         Enter           {brightblack}edit notes in $EDITOR{default}    
+{default}                                        gm F1        {brightblack}back to mail{default}              ^s              {brightblack}save; guests get mail{default}    
+{default}    {default b}Help (after ?){default}                                                             Esc             {brightblack}close; keep or discard{default}   
+{default}    ^d ^u      {brightblack}scroll{default}                                                                                                   
+{default}                                                                               {default b}Links (after o){default}                          
+{default}                                                                               1-9             {brightblack}open that link{default}           
+{default}                                                                               j k Enter       {brightblack}choose, then open{default}        
+{default}                                                                               Esc             {brightblack}close{default}                    
+{default}                                                                                                                        
+{default}    {default b}Commands{default}                                                                                                            
+{default}    :archive                                          {brightblack}archive what is selected{default}                                          
+{default}    :trash                                            {brightblack}move what is selected to Trash{default}                                    
+{default}                                                                                                                        
+{default}  {brightblack}144 keys and commands - lines 1-34 of 64{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

@@ -3,18 +3,21 @@
 //! transcribed so the renderer can be compared with the design's own
 //! drawing (ADR-002). A message's key is its `id` there.
 //!
-//! What only the reader draws of a message is in `bodies`. `DRAFTS` is not
-//! here beyond the one the send flows hold.
+//! What only the reader draws of a message is in `bodies`, and `CALENDARS`
+//! with `EVENTS` in `calendar`. `DRAFTS` is not here beyond the one the send
+//! flows hold.
 
 use tuimex_core::{
     AccountId, Address, Attachment, Envelope, Flags, FolderId, Listed, MessageId, Origin, Security, Sending, Timestamp,
 };
 
 mod bodies;
+mod calendar;
 mod compose;
 mod session;
 
 pub use self::bodies::{addresses, body, check};
+pub use self::calendar::{DEC_5, FRI, Kept, THU, busy, calendars};
 pub use self::compose::{AGENT_TIDIED, AGENT_WROTE, YOURS, agent_draft, drafts, identities, own_reply};
 pub use self::session::{Fake, draft, folders, folders_of, sections};
 

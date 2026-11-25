@@ -1,0 +1,17 @@
+  Mail   Calendar                                                                                                       
+  New event                                                                                                             
+                                                                                                                        
+    Title    Offsite planning                                                                                           
+    Calendar personal local   work local                                                                                
+▌   Starts   Thu 26 Nov 2026 14:00                                                                                      
+    Ends     Thu 26 Nov 2026 15:00                                                                                      
+    All day  no                                                                                                         
+    Repeats  never                                                                                                      
+    Where    Room Fjord                                                                                                 
+    Guests   Imani Castell <imani@example.org>                                                                          
+             Lars Lindqvist <lars@example.org>                                                                          
+    Reminder 10 minutes before                                                                                          
+                                                                                                                        
+                                                                                                                        
+  starts Thu 26 Nov 2026 14:00                                                              sending in 6s · 1 not sent  
+  Tab next field · 14:30 or fri is enough · Enter notes · ^s save · Esc close                                           

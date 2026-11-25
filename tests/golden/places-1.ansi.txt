@@ -1,0 +1,1 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 

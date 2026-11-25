@@ -2,9 +2,10 @@
 //! (ADR-007). It has no dependency that opens a file or a socket, so a
 //! parsing bug can produce wrong text and nothing worse.
 
+mod calendar;
 mod css;
+mod dav;
 mod html;
-mod invite;
 mod message;
 mod sanitise;
 mod text;
@@ -12,9 +13,11 @@ mod trackers;
 
 use tuimex_core::Link;
 
-pub use invite::invite;
+pub use calendar::{calendar, cancel, counter, event_text, events_text, invite, new_uid, reply, request, with_answer};
+pub use dav::{DavItem, multistatus};
 pub use message::{
-    Payload, Structure, Submission, attachment, body, browser_copy, envelope, structure, submission, unsubscribe,
+    Payload, Structure, Submission, attachment, body, browser_copy, calendar_part, envelope, structure, submission,
+    unsubscribe,
 };
 pub use sanitise::{InlineImage, sanitise};
 
@@ -26,6 +29,8 @@ pub enum Error {
     NoSuchAttachment(usize),
     #[error("the HTML could not be read: {0}")]
     Html(String),
+    #[error("the calendar server's answer could not be read: {0}")]
+    Dav(String),
 }
 
 /// HTML as the reader shows it, and the links its `[n]` marks stand for.

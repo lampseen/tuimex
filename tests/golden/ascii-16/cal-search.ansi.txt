@@ -1,0 +1,40 @@
+{default}  {brightblack}F1 Mail{default}   {default b}F2 Calendar{default}                                                                                                 
+{default}  {brightblack}Month{default}   {brightblack}Week{default}   {brightblack}Day{default}   {magenta b}Search{default} call                                                                                      
+{default}                                                                                                                        
+{default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}15:00-16:00{default}  Halden contract {default b u}call{default}                                                                        
+{default}                                                                                                                        
+{default}  {brightblack b}Thu 26 November{default}                                                                                                       
+{default}    {brightyellow}work{default}       {brightblack}11:00-12:00{default}  Vendor {default b u}call{default}                                                                      {cyan}tentative{default}  
+{default}                                                                                                                        
+{default}  {brightblack b}Mon 7 December{default}                                                                                                        
+{default}    {brightyellow}work{default}       {brightblack}all day{default}      On {default b u}call{default}                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Tue 8 December{default}                                                                                                        
+{default}    {brightyellow}work{default}       {brightblack}all day{default}      On {default b u}call{default}                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Wed 9 December{default}                                                                                                        
+{default}    {brightyellow}work{default}       {brightblack}all day{default}      On {default b u}call{default}                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack b}Thu 10 December{default}                                                                                                       
+{default}    {brightyellow}work{default}       {brightblack}all day{default}      On {default b u}call{default}                                                                                     
+{brightblack}------------------------------------------------------------------------------------------------------------------------
+{default}  {default b}Halden contract call{default}                                                                                                  
+{default}                                                                                                                        
+{default}    {brightblack}When     {default}Mon 23 Nov 2026, 15:00 to 16:00{brightblack} - today{default}                                                                    
+{default}    {brightblack}Join     {default}meet.example.org {brightblack}https://meet.example.org/r/halden{default}                                                         
+{default}    {brightblack}Calendar {brightyellow}work{brightblack} - its own calendar, read 20s ago{default}                                                                      
+{default}    {brightblack}Who      {default}Priya Raman {brightblack}organizer, {default}you {brightblack}yes, {default}Dmitri Volkov {brightblack}yes{default}                                                          
+{default}                                                                                                                        
+{default}    Payment terms and the support clause. Draft v3 is attached to Priya's mail                                          
+{default}    of this morning.                                                                                                    
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}3 events match "call"{default}                                                                     sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}n N {brightblack}next match - {default}Esc {brightblack}back - {default}? {brightblack}help{default}                                                                       

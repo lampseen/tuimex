@@ -11,8 +11,9 @@
 use std::fs;
 use std::path::PathBuf;
 
-use tuimex_content::{Structure, attachment, body, browser_copy, envelope, structure, unsubscribe};
+use tuimex_content::{Structure, attachment, body, browser_copy, calendar_part, envelope, structure, unsubscribe};
 use tuimex_core::Warning::{BareIpAddress, CarriesCredentials, MixedScripts, TextNamesAnotherHost};
+use tuimex_core::calendar::Method;
 use tuimex_core::{Address, EventTime, Security, Timestamp, Unsubscribe, Warning, assess};
 
 struct Case {
@@ -294,6 +295,17 @@ corpus! {
     unsubscribe_other_scheme: "unsubscribe-other-scheme.eml" { text: &["News."] }
     invite_request: "invite-request.eml" {
         text: &["You are invited to Planning, part two."], no_text: &["VCALENDAR"], attachments: &[("attachment", "text/calendar", false)],
+    }
+    invite_method_in_calendar_only: "invite-method-in-calendar-only.eml" {
+        text: &["Planning is cancelled."], no_text: &["VCALENDAR"], attachments: &[("attachment", "text/calendar", false)],
+    }
+    invite_ics_octet_stream: "invite-ics-octet-stream.eml" {
+        text: &["The invitation to the review is attached."], no_text: &["VCALENDAR"],
+        attachments: &[("invite.ics", OCTETS, false)],
+    }
+    invite_ics_application_ics: "invite-ics-application-ics.eml" {
+        text: &["The invitation to the retrospective is attached."], no_text: &["VCALENDAR"],
+        attachments: &[("Retro.ICS", "application/ics", false)],
     }
     signed_pgp_mime: "signed-pgp-mime.eml" { text: &["Signed text, with a trailing space \nand a second line."], no_text: &["BEGIN PGP"] }
     encrypted_pgp_mime: "encrypted-pgp-mime.eml" { no_text: &["BEGIN PGP", "Version"] }
@@ -634,6 +646,35 @@ fn an_invitation_is_read_as_its_card() {
         ]
     );
     assert_eq!(invite.recurrence.as_deref(), Some("every 2 weeks on Tue, Thu, 6 times"));
+}
+
+/// What a calendar part asks is read from its type, and from the
+/// calendar itself when the type does not say (RFC 6047 §2.4).
+#[test]
+fn a_calendar_part_says_what_it_asks() {
+    let method = |file: &str| calendar_part(&read(file)).unwrap().map(|part| part.method);
+    assert_eq!(method("invite-request.eml"), Some(Method::Request));
+    assert_eq!(method("invite-method-in-calendar-only.eml"), Some(Method::Cancel));
+    assert_eq!(method("invite-ics-octet-stream.eml"), Some(Method::Request));
+    assert_eq!(method("invite-ics-application-ics.eml"), Some(Method::Request));
+    assert_eq!(method("plain-text-links.eml"), None);
+    let text = calendar_part(&read("invite-method-in-calendar-only.eml")).unwrap().unwrap().text;
+    assert!(text.starts_with("BEGIN:VCALENDAR") && text.contains("STATUS:CANCELLED"), "{text}");
+}
+
+/// Some senders attach an invitation as a file named `.ics` under a type
+/// that says nothing; it is still the invitation, and still a file.
+#[test]
+fn an_ics_file_under_a_generic_type_is_read_as_the_invitation() {
+    let at = |day: i64, hour: i64| tuimex_core::calendar::days_from_civil(2026, 12, day) * 86_400 + hour * 3_600;
+    for (file, uid, summary, start) in [
+        ("invite-ics-octet-stream.eml", "review-2026@example.com", "Review", at(3, 13)),
+        ("invite-ics-application-ics.eml", "retro-2026@example.com", "Retrospective", at(4, 15)),
+    ] {
+        let invite = body(&read(file), 72).unwrap().invite.unwrap_or_else(|| panic!("{file}: no card"));
+        assert_eq!((invite.uid.as_str(), invite.summary.as_str()), (uid, summary), "{file}");
+        assert_eq!(invite.start, EventTime::At(Timestamp(start)), "{file}");
+    }
 }
 
 #[test]

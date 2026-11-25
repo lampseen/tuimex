@@ -1,40 +1,40 @@
+{fg}  {fg b}Mail{fg}   {dim}Calendar{fg}                                                                                                       
 {fg}  {fg b}Help{fg}                                                                                                                  
 {fg}                                                                                                                        
-{fg}    ^a          {dim}attach a file{fg}                                                 t                {dim}tidy, in compose{fg}         
-{fg}    ^s          {dim}send summary{fg}                                                  l                {dim}review a link, in links{fg}  
-{fg}    ^d          {dim}save the draft{fg}                                                                                          
-{fg}    Esc         {dim}close; keep or discard{fg}                                        {fg b}Invitation (after i){fg}                      
-{fg}                                                                              a                {dim}accept{fg}                   
-{fg}    {fg b}Help (after ?){fg}                                                            t                {dim}tentative{fg}                
-{fg}    ^d ^u       {dim}scroll{fg}                                                        d                {dim}decline{fg}                  
 {fg}                                                                                                                        
 {fg}    {fg b}Commands{fg}                                                                                                            
-{fg}    :archive                           {dim}archive what is selected{fg}                                                         
-{fg}    :trash                             {dim}move what is selected to Trash{fg}                                                   
-{fg}    :flag                              {dim}flag or unflag what is selected{fg}                                                  
-{fg}    :read                              {dim}mark what is selected read{fg}                                                       
-{fg}    :unread                            {dim}mark what is selected unread{fg}                                                     
-{fg}    :move <folder>                     {dim}move what is selected to a folder{fg}                                                
-{fg}    :section <name>                    {dim}switch to a section by name{fg}                                                      
-{fg}    :account [name]                    {dim}show one account only; alone, every account{fg}                                      
-{fg}    :agent reply|tidy|link             {dim}reply, tidy or link: hand text to the agent{fg}                                      
-{fg}    :compose [address]                 {dim}write a new message{fg}                                                              
-{fg}    :reply                             {dim}reply to the sender{fg}                                                              
-{fg}    :replyall                          {dim}reply to everyone{fg}                                                                
-{fg}    :forward                           {dim}forward the message{fg}                                                              
-{fg}    :send                              {dim}the send summary, then confirm{fg}                                                   
-{fg}    :browser                           {dim}open the sealed browser copy; asks before images{fg}                                 
-{fg}    :save <n> [path]                   {dim}save an attachment to downloads{fg}                                                  
-{fg}    :open <n>                          {dim}open an attachment, after asking{fg}                                                 
-{fg}    :link <n>                          {dim}open a link, after assessment{fg}                                                    
-{fg}    :invite accept|tentative|decline   {dim}answer an invitation{fg}                                                             
-{fg}    :unsubscribe                       {dim}prepare an unsubscribe for review{fg}                                                
-{fg}    :preview auto|right|below|off      {dim}where the preview sits{fg}                                                           
-{fg}    :sync [all]                        {dim}sync this section, or all{fg}                                                        
-{fg}    :empty-trash [account]             {dim}delete an account's Trash for good{fg}                                               
-{fg}    :messages                          {dim}the last results and errors{fg}                                                      
-{fg}    :q                                 {dim}quit from the list; back elsewhere{fg}                                               
-{fg}    :qa                                {dim}quit{fg}                                                                             
+{fg}    :archive                                          {dim}archive what is selected{fg}                                          
+{fg}    :trash                                            {dim}move what is selected to Trash{fg}                                    
+{fg}    :flag                                             {dim}flag or unflag what is selected{fg}                                   
+{fg}    :read                                             {dim}mark what is selected read{fg}                                        
+{fg}    :unread                                           {dim}mark what is selected unread{fg}                                      
+{fg}    :move <folder>                                    {dim}move what is selected to a folder{fg}                                 
+{fg}    :section <name>                                   {dim}switch to a section by name{fg}                                       
+{fg}    :account [name]                                   {dim}show one account only; alone, every account{fg}                       
+{fg}    :agent reply|tidy|link                            {dim}reply, tidy or link: hand text to the agent{fg}                       
+{fg}    :compose [address]                                {dim}write a new message{fg}                                               
+{fg}    :reply                                            {dim}reply to the sender{fg}                                               
+{fg}    :replyall                                         {dim}reply to everyone{fg}                                                 
+{fg}    :forward                                          {dim}forward the message{fg}                                               
+{fg}    :send                                             {dim}the send summary, then confirm{fg}                                    
+{fg}    :browser                                          {dim}open the sealed browser copy; asks before images{fg}                  
+{fg}    :save <n> [path]                                  {dim}save an attachment to downloads{fg}                                   
+{fg}    :open <n>                                         {dim}open an attachment, after asking{fg}                                  
+{fg}    :link <n>                                         {dim}open a link, after assessment{fg}                                     
+{fg}    :invite accept|tentative|decline|propose|ignore   {dim}answer an invitation{fg}                                              
+{fg}    :calendar [month|week|day]                        {dim}the calendar; alone, where it was{fg}                                 
+{fg}    :mail                                             {dim}back to mail, where it was{fg}                                        
+{fg}    :goto <date>                                      {dim}go to a date: 5 dec, fri, +2w{fg}                                     
+{fg}    :event [title]                                    {dim}a new event on the selected day{fg}                                   
+{fg}    :export [path]                                    {dim}write local events as .ics{fg}                                        
+{fg}    :notify on|off                                    {dim}reminders on or off{fg}                                               
+{fg}    :unsubscribe                                      {dim}prepare an unsubscribe for review{fg}                                 
+{fg}    :preview auto|right|below|off                     {dim}where the preview sits{fg}                                            
+{fg}    :sync [all]                                       {dim}sync this section, or all{fg}                                         
+{fg}    :empty-trash [account]                            {dim}delete an account's Trash for good{fg}                                
+{fg}    :messages                                         {dim}the last results and errors{fg}                                       
+{fg}    :q                                                {dim}quit from the list; back elsewhere{fg}                                
+{fg}    :qa                                               {dim}quit{fg}                                                              
 {fg}                                                                                                                        
-{fg}  {dim}98 keys and commands · lines 28-62 of 62{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}144 keys and commands · lines 37-70 of 70{fg}                                                 sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

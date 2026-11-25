@@ -21,6 +21,11 @@ fn the_numbers_are_the_design_s_layout() {
         "preview: {{ besideFrom: {PREVIEW_BESIDE_FROM}, minHeight: {PREVIEW_MIN_HEIGHT}, share: 0.{PREVIEW_SHARE}, \
          least: {PREVIEW_LEAST}, most: {PREVIEW_MOST}, height: (rows) => Math.floor(rows * 0.45) }},"
     ));
+    has(format!(
+        "calendar: {{ cell: {CAL_CELL}, weekFrom: {CAL_WEEK_FROM}, slot: {CAL_SLOT}, step: {CAL_STEP}, dayFrom: \
+         '{CAL_DAY_FROM}', axis: {CAL_AXIS}, time: {CAL_TIME}, timeNarrow: {CAL_TIME_NARROW}, words: {CAL_WORDS}, \
+         wordsNarrow: {CAL_WORDS_NARROW}, narrow: {CAL_NARROW} }},"
+    ));
     let steps: Vec<String> = table
         .lines()
         .filter_map(|line| {

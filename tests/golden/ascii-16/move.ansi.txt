@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -28,7 +29,6 @@
 {default}                                                                                                                        
 {default}    Hi Robin,                                                                                                           
 {default}                                                                                                                        
-{default}    One more change before you sign: our bank details have changed, and the new                                         
 {default}                                                                                                                        
 {default}  {default b}Folders in work{default}                                                                                                       
 {magenta}>{default}   Sent        {brightblack}   388{default}                                                                                                  

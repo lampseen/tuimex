@@ -21,8 +21,11 @@ as on Linux (`~/.config/tuimex` and the rest), not `~/Library`.
 names, the keyring and the paths would each need a second branch.
 
 Release archives are built for x86_64 and arm64 on both systems: the
-release workflow has built and packaged all four in a dry run, and no
-archive has been started by hand on a Mac. See [Installing](Installing).
+release workflow built, attested and published all four for the first
+release on 2026-11-24. The Linux x86_64 one has been downloaded, checked
+and started by hand. Neither Mac archive has been unpacked or run by
+anyone, and the Linux arm64 one has not been run on an arm64 machine. See
+[Installing](Installing).
 
 ## Terminals
 
@@ -46,7 +49,12 @@ the new size. A crash puts the terminal back before its message prints.
 `Alt-j` and its neighbours are read as Alt with the letter, or as `Esc`
 and the letter arriving together, whichever the terminal sends.
 
-Not built: the mouse, `NO_COLOR`, and desktop notifications.
+A reminder of an event rings the terminal's bell and, by `notify.via`,
+runs `notify-send` on Linux or `osascript` on macOS, or writes an OSC 9
+sequence for a terminal that shows one. No test runs either program, and
+neither has been seen to raise a notification by anyone here.
+
+Not built: the mouse, `NO_COLOR`, and notifications of new mail.
 
 The screens are compared with the design cell for cell in two renderings:
 truecolor with Unicode, and sixteen colours with ASCII. The 256-colour tier
@@ -65,6 +73,14 @@ and "should" is the honest word for most of them.
 | **Fastmail, iCloud** | setup knows their servers. Nobody has run them |
 | **anything else** | hosts and ports typed by hand in setup. How TLS begins on a port is found by trying |
 | **Microsoft 365** sign-in, **JMAP** | not built |
+
+## Calendars
+
+| | what has been run |
+|---|---|
+| **a CalDAV server in a container** | `make real-server`: Radicale, with an event written, changed, answered and deleted through the engine. A further leg answers an invitation in the interface on a terminal and reads the event back from Radicale and the reply from the mail server; it passed on 2026-11-24 and runs in the CI job `real-server` |
+| **Google**, over CalDAV with an app password | two accounts' calendars, one of them on a Google-hosted domain, were set up and read by hand on 2026-11-24, and their owner said the calendar looked right; it was not compared event by event. The same day setup's write check passed on both, and an event made in tuimex was seen in Google Calendar and, deleted there, went from tuimex at the next `:sync`. Changing an event, answering an invitation and deleting from tuimex have not been tried there |
+| **Proton** and any other feed | read from the private address. One Proton calendar was set up and read by hand on 2026-11-24, with the same caveat. No feed from Google has been read |
 
 The by-hand script for real providers is
 [`docs/testing.md`](https://github.com/lampseen/tuimex/blob/main/docs/testing.md),

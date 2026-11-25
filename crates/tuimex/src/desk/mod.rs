@@ -9,7 +9,7 @@ use std::process::Command;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::Duration;
 
-use tuimex_core::{Action, AgentAsk, Ask, Attached, Body, Event, Links, MessageId, assess, redact};
+use tuimex_core::{Action, AgentAsk, Ask, Attached, Body, Event, Link, Links, MessageId, assess, redact};
 use tuimex_engine::agent::{self, Agent, AgentError, Cancel};
 use tuimex_store::files;
 use tuimex_store::maildir::new_key;
@@ -214,14 +214,17 @@ impl<B> Desk<B> {
     /// and the message with `names` and its addresses redacted go to the
     /// agent, and its one line comes back as advice. Nothing here opens
     /// the link, and the advice decides nothing.
-    fn advise(&mut self, serial: u64, n: usize, names: &[String], body: &Body) {
+    fn advise(&mut self, serial: u64, n: usize, names: &[String], (of, links, text): (&str, &[Link], &str)) {
         let failed = |reason: &str| Event::ActionFailed { serial, reason: reason.to_string(), hint: String::new() };
-        let Some(link) = body.links.iter().find(|link| link.n == n) else {
-            return self.told.push(failed("the message has no such link"));
+        if self.agent.is_none() {
+            return self.told.push(failed("no [agent] table in the config"));
+        }
+        let Some(link) = links.iter().find(|link| link.n == n) else {
+            return self.told.push(failed(&format!("the {of} has no such link")));
         };
         let assessed = assess(&link.url, &link.shown);
         let names: Vec<&str> = names.iter().map(String::as_str).collect();
-        let redacted = redact(&body.text, &names, Links::Kept);
+        let redacted = redact(text, &names, Links::Kept);
         let shown = link.shown.clone();
         self.told.push(Event::AgentAsked { serial, replaced: redacted.replaced() });
         // Not stopped by Esc: the question it joins is answered without it.
@@ -262,7 +265,7 @@ impl<B: Backend> Backend for Desk<B> {
             // and whatever asks regardless is the mail backend's to refuse.
             Action::AgentLink(n) if self.agent.is_some() => {
                 match ask.on.first().and_then(|id: &MessageId| self.inner.shown(id)) {
-                    Some((names, body)) => self.advise(ask.serial, n, &names, &body),
+                    Some((names, body)) => self.advise(ask.serial, n, &names, ("message", &body.links, &body.text)),
                     None => {
                         let reason = "the message has not been read".to_string();
                         self.told.push(Event::ActionFailed { serial: ask.serial, reason, hint: String::new() });
@@ -280,6 +283,12 @@ impl<B: Backend> Backend for Desk<B> {
             told.extend(ended);
         }
         told.extend(self.inner.events());
+        // An event's link is advised on as a message's is, once the
+        // backend has found the event.
+        for asked in self.inner.asked() {
+            self.advise(asked.serial, asked.n, &asked.names, ("event", &asked.links, &asked.text));
+        }
+        told.append(&mut self.told);
         told
     }
 

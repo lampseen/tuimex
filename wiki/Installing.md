@@ -17,8 +17,7 @@ mkdir -p ~/.local/bin && mv tuimex ~/.local/bin/
 ```
 
 Use the archive name for your system: `darwin_arm64` on an Apple silicon
-Mac, `darwin_amd64` on an Intel one. If the link answers 404, there is no
-release yet: build from source, below.
+Mac, `darwin_amd64` on an Intel one.
 
 Every archive, and the `checksums.txt` that covers them, is attested by
 the workflow that built it: a signature made without a private key,

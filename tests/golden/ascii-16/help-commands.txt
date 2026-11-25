@@ -1,40 +1,40 @@
+  Mail   Calendar                                                                                                       
   Help                                                                                                                  
                                                                                                                         
-    ^a          attach a file                                                 t                tidy, in compose         
-    ^s          send summary                                                  l                review a link, in links  
-    ^d          save the draft                                                                                          
-    Esc         close; keep or discard                                        Invitation (after i)                      
-                                                                              a                accept                   
-    Help (after ?)                                                            t                tentative                
-    ^d ^u       scroll                                                        d                decline                  
                                                                                                                         
     Commands                                                                                                            
-    :archive                           archive what is selected                                                         
-    :trash                             move what is selected to Trash                                                   
-    :flag                              flag or unflag what is selected                                                  
-    :read                              mark what is selected read                                                       
-    :unread                            mark what is selected unread                                                     
-    :move <folder>                     move what is selected to a folder                                                
-    :section <name>                    switch to a section by name                                                      
-    :account [name]                    show one account only; alone, every account                                      
-    :agent reply|tidy|link             reply, tidy or link: hand text to the agent                                      
-    :compose [address]                 write a new message                                                              
-    :reply                             reply to the sender                                                              
-    :replyall                          reply to everyone                                                                
-    :forward                           forward the message                                                              
-    :send                              the send summary, then confirm                                                   
-    :browser                           open the sealed browser copy; asks before images                                 
-    :save <n> [path]                   save an attachment to downloads                                                  
-    :open <n>                          open an attachment, after asking                                                 
-    :link <n>                          open a link, after assessment                                                    
-    :invite accept|tentative|decline   answer an invitation                                                             
-    :unsubscribe                       prepare an unsubscribe for review                                                
-    :preview auto|right|below|off      where the preview sits                                                           
-    :sync [all]                        sync this section, or all                                                        
-    :empty-trash [account]             delete an account's Trash for good                                               
-    :messages                          the last results and errors                                                      
-    :q                                 quit from the list; back elsewhere                                               
-    :qa                                quit                                                                             
+    :archive                                          archive what is selected                                          
+    :trash                                            move what is selected to Trash                                    
+    :flag                                             flag or unflag what is selected                                   
+    :read                                             mark what is selected read                                        
+    :unread                                           mark what is selected unread                                      
+    :move <folder>                                    move what is selected to a folder                                 
+    :section <name>                                   switch to a section by name                                       
+    :account [name]                                   show one account only; alone, every account                       
+    :agent reply|tidy|link                            reply, tidy or link: hand text to the agent                       
+    :compose [address]                                write a new message                                               
+    :reply                                            reply to the sender                                               
+    :replyall                                         reply to everyone                                                 
+    :forward                                          forward the message                                               
+    :send                                             the send summary, then confirm                                    
+    :browser                                          open the sealed browser copy; asks before images                  
+    :save <n> [path]                                  save an attachment to downloads                                   
+    :open <n>                                         open an attachment, after asking                                  
+    :link <n>                                         open a link, after assessment                                     
+    :invite accept|tentative|decline|propose|ignore   answer an invitation                                              
+    :calendar [month|week|day]                        the calendar; alone, where it was                                 
+    :mail                                             back to mail, where it was                                        
+    :goto <date>                                      go to a date: 5 dec, fri, +2w                                     
+    :event [title]                                    a new event on the selected day                                   
+    :export [path]                                    write local events as .ics                                        
+    :notify on|off                                    reminders on or off                                               
+    :unsubscribe                                      prepare an unsubscribe for review                                 
+    :preview auto|right|below|off                     where the preview sits                                            
+    :sync [all]                                       sync this section, or all                                         
+    :empty-trash [account]                            delete an account's Trash for good                                
+    :messages                                         the last results and errors                                       
+    :q                                                quit from the list; back elsewhere                                
+    :qa                                               quit                                                              
                                                                                                                         
-  98 keys and commands - lines 28-62 of 62                                                  sending in 6s - 1 not sent  
+  144 keys and commands - lines 37-70 of 70                                                 sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

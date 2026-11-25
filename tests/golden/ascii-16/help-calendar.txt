@@ -1,0 +1,40 @@
+  Mail   Calendar                                                                                                       
+  Help                                                                                                                  
+                                                                                                                        
+    Everywhere                          Calendar (after gc)                    Event                                    
+    :          command line             h l          previous, next day        j k ^d ^u gg G  scroll                   
+    ?          help; type to filter     j k          grid: week; else: event   zo zc           unfold, fold More        
+    Esc        back; clear find, marks  [ ]          previous, next page       v               the mail it came in      
+    h S-Tab    previous section         Alt-j Alt-l  month: focus the events   o i E d J K I   as in the calendar       
+    l Tab      next section             Alt-k Alt-h  back to the grid                                                   
+    1-9        section by position      J K          next, previous event      Invitation (after i)                     
+    u          undo the last action     n N          next, previous match      a               accept                   
+    A          what the agent can do    I            next invite to answer     t               tentative                
+    ^l         redraw                   t            today                     d               decline                  
+    gc F2      the calendar             gd           go to a date              p               propose another time     
+                                        Tab S-Tab    next, previous view       x               ignore; nothing is sent  
+    Command line                        1 2 3        month, week, day                                                   
+    Tab S-Tab  complete, cycle          Enter        the day; then the event   Calendars (after C)                      
+    Up Down    history, by prefix       /            find; Enter: every day    j k             choose                   
+    ^w ^u      delete word, line        gt gT        next, previous account    Space           show or hide             
+    Enter      run                      C            show, hide calendars      Esc             close                    
+    Esc        cancel                   o            links; the meeting first                                           
+                                        i            answer an invitation      Event form                               
+    Confirm                             c            new event here            Tab S-Tab       next, previous field     
+    y Enter    yes                      E            edit the event            h l             choose, where offered    
+    n Esc      no                       d            delete the event          Left Right      as h and l               
+    any other  cancels; key dropped     gn           reminders on, off         Enter           edit notes in $EDITOR    
+                                        gm F1        back to mail              ^s              save; guests get mail    
+    Help (after ?)                                                             Esc             close; keep or discard   
+    ^d ^u      scroll                                                                                                   
+                                                                               Links (after o)                          
+                                                                               1-9             open that link           
+                                                                               j k Enter       choose, then open        
+                                                                               Esc             close                    
+                                                                                                                        
+    Commands                                                                                                            
+    :archive                                          archive what is selected                                          
+    :trash                                            move what is selected to Trash                                    
+                                                                                                                        
+  144 keys and commands - lines 1-34 of 64                                                  sending in 6s - 1 not sent  
+  type to filter - ^d ^u scroll - Esc back                                                                              

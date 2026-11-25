@@ -3,6 +3,7 @@
 //! key of its own.
 
 mod act;
+mod calendar;
 mod draft;
 mod filter;
 mod find;
@@ -29,7 +30,7 @@ use crate::paint::{Theme, paint};
 use crate::palette::Tok;
 use crate::say::{self, Said};
 use crate::span::{Line, run};
-use crate::{help, when};
+use crate::{help, places, when};
 
 /// The tab that is there while a message is waiting to go or was refused.
 const OUTBOX: &str = "Outbox";
@@ -51,6 +52,9 @@ enum Mode {
     /// `A` was pressed: the agent's menu is open, and the next key picks
     /// from it or closes it. Nothing has left the machine (ADR-031).
     Agent,
+    /// Something the calendar asked for is being typed: what the command
+    /// line shows before it, and the text so far.
+    Prompt(&'static str, Editor),
 }
 
 /// The conversations of one tab, kept for as long as the same messages
@@ -221,10 +225,13 @@ pub struct App {
     /// Whether any message is in an outbox, and the `version` that was
     /// true of.
     outbox: Cell<(u64, bool)>,
+    /// The calendar, which is a place beside mail (ADR-054).
+    cal: calendar::Place,
 }
 
 impl App {
     pub fn new(theme: Theme, mailbox: Mailbox) -> Self {
+        let now = mailbox.now;
         App {
             quit: false,
             theme,
@@ -271,6 +278,7 @@ impl App {
             threads: RefCell::default(),
             sifted: RefCell::default(),
             outbox: Cell::new((u64::MAX, false)),
+            cal: calendar::Place::new(now),
         }
     }
 
@@ -518,7 +526,16 @@ impl App {
         tabs
     }
 
+    /// The right of the status line: a reminder that is due, wherever
+    /// the reader is (ADR-058), then what is not normal about the mail.
     fn alerts(&self) -> Line {
+        let reminder = self.reminding().map(|(what, lead)| crate::calendar::parts::reminder(what, &lead));
+        let parts: Vec<Line> =
+            reminder.into_iter().chain([self.mail_alerts()]).filter(|part| !part.is_empty()).collect();
+        parts.join(&run(format!(" {} ", crate::glyphs::DOT), Tok::Dim))
+    }
+
+    fn mail_alerts(&self) -> Line {
         let held = self.held().find_map(|m| match m.sending {
             Some(Sending::Held { seconds }) => Some(seconds),
             _ => None,
@@ -577,6 +594,7 @@ impl App {
         match &self.mode {
             Mode::Normal | Mode::Help(..) => (self.said.as_ref().map(|said| said.line(width)), no_panel),
             Mode::Filter(editor) => (Some(list::typed(&format!("/{}", editor.text))), no_panel),
+            Mode::Prompt(label, editor) => (Some(list::typed(&format!("{label}{}", editor.text))), no_panel),
             Mode::Confirm(question, _) => {
                 (Some(self.images_question(width).unwrap_or_else(|| question.line(width))), no_panel)
             }
@@ -609,16 +627,33 @@ impl App {
         }
     }
 
-    /// The screen, one line to a row.
+    /// The screen, one line to a row: the bar of places, and under it
+    /// whatever is open.
     pub fn lines(&mut self, width: usize, height: usize) -> Vec<Line> {
+        let here = if self.cal.open { places::Place::Calendar } else { places::Place::Mail };
+        // The function keys are read where `gc` and `gm` are, which is not
+        // where letters are typed.
+        let typing = matches!(self.mode, Mode::Help(..)) || self.compose.is_some() || self.form_is_open();
+        let mut lines = vec![places::bar(here, !typing, width)];
+        lines.extend(self.lines_under(width, height.saturating_sub(1)));
+        self.reading.pictures.iter_mut().for_each(|placed| placed.row += 1);
+        lines
+    }
+
+    /// Everything under the bar of places, in the rows it leaves.
+    fn lines_under(&mut self, width: usize, height: usize) -> Vec<Line> {
         // A picture is where this frame's reader put it; a frame that draws
         // anything else over the reader has no picture to report.
         self.reading.pictures.clear();
         let right = self.alerts();
         if let Mode::Help(needle, top) = &self.mode {
-            let drawn = help::screen(needle, *top, &right, width, height);
+            let drawn = help::screen(needle, *top, self.cal.open, &right, width, height);
             (self.room, self.mode) = (drawn.room, Mode::Help(needle.clone(), drawn.top));
             return drawn.lines;
+        }
+        if self.cal.open {
+            let mail = self.mail_alerts();
+            return self.calendar_lines(width, height, mail);
         }
         if let Some(lines) = self.compose_lines(width, height) {
             return lines;
@@ -749,6 +784,7 @@ impl App {
         // A question that is still there has not been answered.
         if confirming && !matches!(self.mode, Mode::Confirm(..)) {
             self.reader_answered();
+            self.calendar_answered();
         }
     }
 
@@ -757,6 +793,7 @@ impl App {
             Mode::Normal => self.normal_key(key),
             Mode::Command(editor) => self.command_key(editor, key),
             Mode::Filter(editor) => self.filter_key(editor, key),
+            Mode::Prompt(label, editor) => self.prompt_key(label, editor, key),
             // `n`, Esc and every other key leave the question, and the key is
             // not then read as anything else.
             Mode::Confirm(question, action) => match keymap::find(&["confirm", "global"], &[key]) {
@@ -814,6 +851,9 @@ impl App {
             self.mode = Mode::Command(editor);
             return;
         }
+        if self.cal.open {
+            return self.calendar_key(key);
+        }
         if self.reading.id().is_some() {
             return self.reader_key(key);
         }
@@ -821,7 +861,14 @@ impl App {
         let modes: &[&str] = if self.focus { &["preview", "list", "global"] } else { &["list", "global"] };
         match keymap::find(modes, &self.pending) {
             Found::Prefix => {}
-            Found::Nothing => self.pending.clear(),
+            Found::Nothing => {
+                self.pending.clear();
+                // A reminder offers its event's links by the key that
+                // lists links in the calendar, which the list does not bind.
+                if matches!(keymap::find(&["calendar"], &[key]), Found::Bound(b, _) if b.id == "calendar.links") {
+                    self.reminder_links();
+                }
+            }
             Found::Bound(binding, i) => {
                 self.pending.clear();
                 self.run(binding.id, i);
@@ -881,6 +928,7 @@ impl App {
             ("global.undo", _) => self.undo(),
             ("global.agent", _) => self.agent_menu(),
             ("global.redraw", _) => self.redraw = true,
+            ("global.calendar", _) => self.calendar_open(None),
             ("list.move", 0) => self.selected = (at + 1).min(last),
             ("list.move", _) => self.selected = at.saturating_sub(1),
             ("list.ends", 0) => self.selected = 0,
@@ -1072,6 +1120,13 @@ impl App {
         names
     }
 
+    /// The colour an account's name is drawn in.
+    pub(super) fn colour_of(&self, account: &AccountId) -> Tok {
+        let accounts: Vec<AccountId> = self.accounts().into_iter().map(|name| AccountId(name.to_string())).collect();
+        let colours = list::account_colours(&self.order, &accounts, &self.fixed);
+        accounts.iter().position(|a| a == account).and_then(|at| colours.get(at).copied()).unwrap_or(Tok::Fg)
+    }
+
     /// Tab on the command line: the commands while the first word is
     /// typed, and after it the names that command takes.
     fn complete(&self, editor: &mut Editor, forward: bool) {
@@ -1103,6 +1158,11 @@ impl App {
             }
             Some("account" | "empty-trash") => ("Accounts".to_string(), plain(self.accounts())),
             Some("preview") => ("Preview".to_string(), plain(vec!["auto", "right", "below", "off"])),
+            Some("calendar") => ("Views".to_string(), plain(vec!["month", "week", "day"])),
+            Some("notify") => ("Reminders".to_string(), plain(vec!["on", "off"])),
+            Some("invite") => {
+                ("Answers".to_string(), plain(vec!["accept", "tentative", "decline", "propose", "ignore"]))
+            }
             Some("agent") if self.agent => match editor.text["agent ".len()..].split_once(' ') {
                 None => {
                     let agent = COMMANDS.iter().filter(|c| c.name == "agent");
@@ -1128,6 +1188,7 @@ impl App {
         let writing = self.compose.is_some() && !["", "send", "agent", "messages"].contains(&name);
         match name {
             "" => {}
+            _ if !writing && self.calendar_command(name, rest) => {}
             _ if writing => self.say(say::err(format!(":{name}: a draft is open")).then("Esc closes it")),
             "send" => self.send_command(),
             "agent" => self.agent_command(rest),

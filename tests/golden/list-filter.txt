@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -31,7 +32,6 @@
   Earlier                                                                                                               
     work       Mei Tanaka              Notes from the vendor call                                     1 file  14 Nov    
     personal   Greta Holm              Book club pick for December                                   replied  12 Nov    
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

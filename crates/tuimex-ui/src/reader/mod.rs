@@ -2,11 +2,11 @@
 //! and `noticeRows`, ported and kept behaviourally identical (ADR-002).
 
 mod panel;
-mod text;
+pub(crate) mod text;
 
 use tuimex_core::{Address, Body, Check, Listed, Origin, Security};
 
-pub(crate) use self::panel::{Look, files, links, look};
+pub(crate) use self::panel::{Look, files, link_rows, links, look};
 pub use self::text::Placed;
 use crate::glyphs::{AGENT, BAD, DOT, NOTICE, OK};
 use crate::keymap;
@@ -41,12 +41,12 @@ pub(crate) fn size_text(bytes: u32) -> String {
 /// The design's `LAYOUT.header`: the label column, and how many rows a
 /// list of recipients or files may take in the preview and in the reader
 /// before it says how many more there are.
-const LABEL: usize = 9;
-const ROWS: (usize, usize) = (2, 6);
+pub(crate) const LABEL: usize = 9;
+pub(crate) const ROWS: (usize, usize) = (2, 6);
 
 /// A value under its label: the label on the first row, and every row
 /// after it under the value.
-fn field(label: &str, value: Vec<Line>) -> Vec<Line> {
+pub(crate) fn field(label: &str, value: Vec<Line>) -> Vec<Line> {
     let row = |(i, line): (usize, Line)| {
         [vec![run(format!("{:<LABEL$}", if i == 0 { label } else { "" }), Tok::Dim)], line].concat()
     };
@@ -61,7 +61,7 @@ fn explode(line: &[Span]) -> Line {
 /// Styled text wrapped at spaces to `width`, each word keeping its style:
 /// the design's `wrapRuns`. A word is broken only when it alone is wider
 /// than the row.
-fn wrap_runs(line: &[Span], width: usize) -> Vec<Line> {
+pub(crate) fn wrap_runs(line: &[Span], width: usize) -> Vec<Line> {
     let (width, cells) = (width.max(1), explode(line));
     let mut lines: Vec<Line> = vec![Line::new()];
     // The space before a word, which goes with it onto a row it shares.
@@ -92,7 +92,7 @@ fn wrap_runs(line: &[Span], width: usize) -> Vec<Line> {
 /// with a comma between them: the design's `packed`. An item moves to the
 /// next row sooner than be split. Past `most` rows the last ends `and N
 /// more`.
-fn packed(items: Vec<Line>, width: usize, most: usize) -> Vec<Line> {
+pub(crate) fn packed(items: Vec<Line>, width: usize, most: usize) -> Vec<Line> {
     let used = |row: &[Line]| row.iter().map(|item| cells(item) + 2).sum::<usize>().saturating_sub(2);
     let mut rows: Vec<Vec<Line>> = Vec::new();
     for item in &items {
@@ -121,7 +121,7 @@ fn packed(items: Vec<Line>, width: usize, most: usize) -> Vec<Line> {
     rows.into_iter().enumerate().flat_map(line).collect()
 }
 
-fn person(a: &Address) -> Line {
+pub(crate) fn person(a: &Address) -> Line {
     match a.name.as_deref().filter(|n| !n.is_empty()) {
         Some(name) => vec![run(format!("{name} "), Tok::Fg), run(format!("<{}>", a.email), Tok::Dim)],
         None => vec![run(a.email.as_str(), Tok::Fg)],
@@ -130,8 +130,18 @@ fn person(a: &Address) -> Line {
 
 /// A mark and what is so, in the colour of how serious it is, and the
 /// detail after a dot.
-fn notice(mark: char, tok: Tok, what: &str, detail: String) -> Line {
+pub(crate) fn notice(mark: char, tok: Tok, what: &str, detail: String) -> Line {
     vec![run(format!("{mark} {what}"), tok), run(format!(" {DOT} {detail}"), Tok::Dim)]
+}
+
+/// A notice wrapped under its own text, clear of its mark: the design's
+/// `noticeLines`. Each word keeps its colour, so a headline that wraps is
+/// still the colour of its mark.
+pub(crate) fn notice_lines(notice: &[Span], width: usize) -> Vec<Line> {
+    let all = explode(notice);
+    let (mark, text) = all.split_at(2.min(all.len()));
+    let wrapped = wrap_runs(text, width.saturating_sub(2)).into_iter().enumerate();
+    wrapped.map(|(i, line)| [if i == 0 { mark.to_vec() } else { vec![gap(2)] }, line].concat()).collect()
 }
 
 /// PLAN §6.5: one line each, only when true. A signed or encrypted message
@@ -213,12 +223,7 @@ pub(crate) fn header(msg: &Listed, body: Option<&Body>, check: Option<&Check>, b
     let notices = notices(msg, body, check);
     if !notices.is_empty() {
         rows.push(Line::new());
-        for notice in notices {
-            let all = explode(&notice);
-            let (mark, text) = all.split_at(2.min(all.len()));
-            let wrapped = wrap_runs(text, width.saturating_sub(2)).into_iter().enumerate();
-            rows.extend(wrapped.map(|(i, line)| [if i == 0 { mark.to_vec() } else { vec![gap(2)] }, line].concat()));
-        }
+        rows.extend(notices.iter().flat_map(|notice| notice_lines(notice, width)));
     }
     rows
 }
@@ -233,6 +238,7 @@ pub(crate) fn block(
     me: &[String],
     width: usize,
     brief: bool,
+    account: Tok,
 ) -> (Vec<Line>, Vec<Line>, Vec<Placed>) {
     let indent = |row: Line| if row.is_empty() { row } else { [vec![gap(INDENT)], row].concat() };
     let inner = width.saturating_sub(INDENT + MARGIN);
@@ -241,7 +247,8 @@ pub(crate) fn block(
     let shown = body.map(|b| b.text.as_str()).or(msg.text.as_deref()).unwrap_or(&msg.snippet);
     // The card is the reader's: the preview is the message's own text.
     let card = body.filter(|_| !brief).and_then(|b| b.invite.as_ref());
-    let mut rows = card.map_or_else(Vec::new, |card| text::invite(card, me));
+    let came_to = (msg.envelope.id.account.0.as_str(), account);
+    let mut rows = card.map_or_else(Vec::new, |card| text::invite(card, me, came_to));
     let (lines, mut placed) = text::rows(shown, measure(width), body);
     placed.iter_mut().for_each(|p| p.row += rows.len());
     rows.extend(lines);
@@ -255,6 +262,9 @@ pub struct Reader<'a> {
     pub check: Option<&'a Check>,
     /// The addresses mail arrives at, which an invitation calls "you".
     pub me: &'a [String],
+    /// The colour of the message's account, which an invitation's card
+    /// names.
+    pub account: Tok,
     /// Which message of how many in its thread this is, counted from 1.
     pub place: (usize, usize),
     /// How many lines of the body are scrolled off the top.
@@ -310,7 +320,7 @@ pub fn screen(o: &Reader, width: usize, height: usize) -> Drawn {
         &[gap(2), run(place, Tok::Dim), gap(MARGIN)],
         width,
     );
-    let (head, body, placed) = block(o.msg, o.body, o.check, o.me, width, false);
+    let (head, body, placed) = block(o.msg, o.body, o.check, o.me, width, false, o.account);
     let mut lines = vec![title, Line::new()];
     lines.extend(head);
     lines.push(Line::new());

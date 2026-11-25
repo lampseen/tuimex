@@ -1,8 +1,8 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
     personal   to Tomas Ferreira       Re: Bike rack: still want it?                                   in 6s   14:20    
 ▌   work       to Imani Castell        Offsite rooms  refused by smtp.example.org: 552 me…            1 file   13:05    
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

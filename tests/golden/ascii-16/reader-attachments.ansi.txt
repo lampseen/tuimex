@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {default b}Photos from Saturday{default}                                                                                                  
 {default}                                                                                                                        
 {default}    {brightblack}From     {default b}Greta Holm{default} {brightblack}<greta@example.com>{default}                                                                             
@@ -22,7 +23,6 @@
 {default}    {brightblack}::::::::::::::::::::::::::::::::::::::::::::::::{default}                                                                    
 {default}                                                                                                                        
 {default}    G.                                                                                                                  
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

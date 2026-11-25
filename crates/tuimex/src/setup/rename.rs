@@ -10,7 +10,7 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, anyhow, bail};
-use tuimex_engine::{Keyring, oauth};
+use tuimex_engine::{Keyring, calendar, oauth};
 use tuimex_store::files;
 
 use super::write;
@@ -53,8 +53,8 @@ pub fn interrupted(old: &str, new: &str) -> String {
 
 /// The keyring entries that are an account's own, under a name. The
 /// client every Gmail account shares is nobody's and stays.
-fn entries(name: &str) -> [String; 2] {
-    [name.to_string(), oauth::refresh_entry(name)]
+fn entries(name: &str) -> [String; 3] {
+    [name.to_string(), oauth::refresh_entry(name), calendar::feed_entry(name)]
 }
 
 /// Moves `from` to `to`, or finds it already moved. Both there is a
@@ -92,8 +92,11 @@ const STEPS: [(&str, Step); 6] = [
     // Before the mail moves: the index names every message by its
     // account, and one that outlived the move would name files that are
     // gone. Without it the next start reads the Maildir again (ADR-013).
+    // What was fetched of calendars is filed by account too, and is
+    // fetched again (ADR-055).
     ("dropping the index, which is rebuilt from the mail", |at, _, _| {
-        for file in ["index.sqlite", "index.sqlite-wal", "index.sqlite-shm"] {
+        let calendars = ["calendar.sqlite", "calendar.sqlite-wal", "calendar.sqlite-shm"];
+        for file in ["index.sqlite", "index.sqlite-wal", "index.sqlite-shm"].into_iter().chain(calendars) {
             match fs::remove_file(at.cache.join(file)) {
                 Err(e) if e.kind() != ErrorKind::NotFound => return Err(e).context(format!("removing {file}")),
                 _ => {}
@@ -101,7 +104,12 @@ const STEPS: [(&str, Step); 6] = [
         }
         Ok(None)
     }),
-    ("moving the mail", |at, old, new| moved(&at.data.join(old), &at.data.join(new)).map(|()| None)),
+    // The account's own events go with its mail (ADR-055).
+    ("moving the mail", |at, old, new| {
+        moved(&at.data.join(old), &at.data.join(new))?;
+        let events = at.data.join(tuimex_store::calendar::LOCAL);
+        moved(&events.join(old), &events.join(new)).map(|()| None)
+    }),
     ("moving the pinned certificate", |at, old, new| {
         moved(&at.config_dir.join(format!("{old}.pem")), &at.config_dir.join(format!("{new}.pem"))).map(|()| None)
     }),

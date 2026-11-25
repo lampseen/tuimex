@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 8   Unread   Flagged 2   Drafts   Sent   Archive                                                                
                                                                                                                         
   Today                                                                                                                 
@@ -24,7 +25,6 @@
                                                                                                                         
   Earlier                                                                                                               
     personal   Greta Holm              Book club pick for December                                   replied  12 Nov    
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

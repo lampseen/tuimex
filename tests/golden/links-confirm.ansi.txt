@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Action needed: confirm your new device{fg}                                                                                
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Example Bank{fg} {dim}<security@examplebank.example.net>{fg}                                                            
@@ -13,7 +14,6 @@
 {fg}    {link}[2]{fg}                                                                                                                 
 {fg}                                                                                                                        
 {fg}    Example Bank Security Team                                                                                          
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

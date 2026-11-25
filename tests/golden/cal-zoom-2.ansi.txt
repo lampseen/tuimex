@@ -1,0 +1,15 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {fg b}Q4 roadmap review{fg}                                                                               {dim}2 of 4 on Thu 26 Nov{fg}  
+{fg}                                                                                                                        
+{fg}    {dim}When     {fg}Thu 26 Nov 2026, 10:00 to 11:30{dim} · in 3 days{fg}                                                                
+{fg}    {dim}Where    {fg}Room Fjord                                                                                                 
+{fg}    {dim}Join     {fg}meet.example.org {dim}https://meet.example.org/r/q4-roadmap{fg}                                                     
+{fg}    {dim}Calendar {head}work{dim} · its own calendar, read 20s ago{fg}                                                                      
+{fg}    {dim}Who      {fg}Imani Castell {dim}organizer, {fg}you {warn}no answer{dim}, {fg}Lars Lindqvist {dim}yes, {fg}Mei Tanaka {dim}no, {fg}Dmitri Volkov {dim}no answer{fg}         
+{fg}    {dim}Answer   {warn}not answered{fg}                                                                                               
+{fg}    {dim}Reminder {fg}10 minutes before                                                                                          
+{fg}                                                                                                                        
+{fg}    {warn}▲ Needs your answer{dim} · asked by Imani Castell{fg}                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  i {dim}answer · {fg}o {dim}links · {fg}v {dim}its mail · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back{fg}                                                        

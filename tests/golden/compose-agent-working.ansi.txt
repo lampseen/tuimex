@@ -1,3 +1,4 @@
+{fg}  {fg b}Mail{fg}   {dim}Calendar{fg}                                                                                                       
 {fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
 {fg}                                                                                                                        
 {fg}    {dim}From     robin@example.com{fg}   {fg b}robin.vale@example.org{fg}   {dim}desk@example.org{fg}                                              
@@ -7,7 +8,6 @@
 {fg}    {dim}Subject  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                               
 {fg}                                                                                                                        
 {fg}    {agent}◇ Writing a reply{dim} · from the 3 messages of the thread{fg}                                                               
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

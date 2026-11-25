@@ -1,0 +1,40 @@
+{fg}  {dim}Mail{fg}   {fg b}Calendar{fg}                                                                                                       
+{fg}  {fg b}New event{fg}                                                                                                             
+{fg}                                                                                                                        
+{acc}▌{fg}   {fg b}Title    Offsite planning{bg bg=acc} {fg}                                                                                          
+{fg}    {dim}Calendar personal local{fg}   {fg b}work local{fg}                                                                                
+{fg}    {dim}Starts   {fg}Thu 26 Nov 2026 14:00                                                                                      
+{fg}    {dim}Ends     {fg}Thu 26 Nov 2026 15:00                                                                                      
+{fg}    {dim}All day  no{fg}                                                                                                         
+{fg}    {dim}Repeats  never{fg}                                                                                                      
+{fg}    {dim}Where    {fg}Room Fjord                                                                                                 
+{fg}    {dim}Guests   {fg}Imani Castell {dim}<imani@example.org>{fg}                                                                          
+{fg}    {dim}         {fg}Lars Lindqvist {dim}<lars@example.org>{fg}                                                                          
+{fg}    {dim}Reminder {fg}10 minutes before                                                                                          
+{fg}                                                                                                                        
+{fg}    {dim}No notes.{fg}                                                                                                           
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}not saved{fg}                                                                                 sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Tab {dim}next field · {fg}Enter {dim}notes · {fg}^s {dim}save · {fg}Esc {dim}close{fg}                                                                    

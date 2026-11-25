@@ -54,6 +54,11 @@ impl std::io::Write for Glass {
     }
 }
 
+/// The loop's side of a calendar nobody sends, with nothing to remind of.
+pub(crate) fn no_calendar() -> crate::diary::Diary {
+    crate::diary::Diary::new(std::sync::mpsc::channel().1, None)
+}
+
 /// A backend that keeps what it was asked, and has nothing to tell.
 #[derive(Default)]
 struct Asked(Vec<Ask>);
@@ -86,7 +91,7 @@ fn typed(bursts: &[&str]) -> (usize, Vec<Ask>, String) {
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut bursts, mut asked) = (Bursts { keys, waiting: Default::default() }, Asked::default());
-        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked).unwrap();
+        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked, &mut no_calendar()).unwrap();
         let lines = app.lines(120, 40);
         let status: String = lines[38].iter().map(|span| span.text.as_str()).collect();
         (frames.borrow().len(), asked.0, status.trim().to_string())
@@ -169,7 +174,7 @@ fn the_preview_s_message_is_read_once_the_cursor_rests_and_not_while_a_key_is_he
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut typist, mut asked) = (Typist { keys, next: None, read: Vec::new() }, Asked::default());
-        event_loop(&mut terminal, &mut typist, &mut app, &mut asked).unwrap();
+        event_loop(&mut terminal, &mut typist, &mut app, &mut asked, &mut no_calendar()).unwrap();
         asked.0
     });
     let mail = tuimex_fixtures::design::inbox();
@@ -207,5 +212,127 @@ fn the_keys_the_table_names_by_word_arrive_as_themselves() {
     assert_eq!(plain(KeyCode::Backspace), Some(Key::Backspace));
     assert_eq!(plain(KeyCode::Up), Some(Key::Up));
     assert_eq!(convert(KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT)), Some(Key::BackTab));
-    assert_eq!(plain(KeyCode::F(1)), None);
+    assert_eq!(plain(KeyCode::F(2)), Some(Key::F(2)));
+    assert_eq!(plain(KeyCode::Insert), None, "a key the table has no name for reaches nothing");
+}
+
+/// A terminal that keeps every byte written to it.
+struct Tape(std::rc::Rc<std::cell::RefCell<Vec<u8>>>);
+
+impl std::io::Write for Tape {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        self.0.borrow_mut().extend_from_slice(bytes);
+        Ok(bytes.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+/// A backend with a clock that stands at one second, and always more to
+/// come, so the loop looks at the clock without a key.
+struct Clock(i64);
+
+impl Backend for Clock {
+    fn ask(&mut self, _: Ask) {}
+
+    fn events(&mut self) -> Vec<tuimex_core::Event> {
+        Vec::new()
+    }
+
+    fn working(&self) -> bool {
+        true
+    }
+
+    fn now(&self) -> Option<tuimex_core::Timestamp> {
+        Some(tuimex_core::Timestamp(self.0))
+    }
+}
+
+/// Nobody types until the loop has waited `quiet` times; then `:q`.
+struct Patient {
+    quiet: usize,
+    keys: std::collections::VecDeque<char>,
+}
+
+impl Input for Patient {
+    fn poll(&mut self, wait: Duration) -> std::io::Result<bool> {
+        if !wait.is_zero() && self.quiet > 0 {
+            self.quiet -= 1;
+            return Ok(false);
+        }
+        Ok(self.quiet == 0 && !self.keys.is_empty())
+    }
+
+    fn read(&mut self) -> std::io::Result<Event> {
+        let key = self.keys.pop_front().ok_or_else(|| std::io::Error::other("no key is coming"))?;
+        Ok(Event::Key(KeyEvent::new(code(key), KeyModifiers::NONE)))
+    }
+}
+
+/// ADR-058: a reminder rings the terminal's bell. The bell is one byte
+/// on the same stream as the frames, so it is written between two of
+/// them and never inside one, once for what fell due.
+#[test]
+fn the_bell_is_written_once_after_the_frame_that_shows_what_fell_due() {
+    use tuimex_core::calendar::{Event as Held, Moment};
+    use tuimex_ui::calendar::{Calendar, Shelf};
+
+    const NOON: i64 = 1_795_435_200;
+    let state = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/test-scratch")
+        .join(format!("term-{}-bell", std::process::id()));
+    let settings = crate::notify::Settings { events: true, lead: 600, via: crate::notify::Via::None };
+    let reminders = crate::notify::Reminders::new(settings, None, state);
+    let (shown, arriving) = std::sync::mpsc::channel();
+    let mut diary = crate::diary::Diary::new(arriving, Some(reminders));
+    let event = Held {
+        uid: "standup@example.com".into(),
+        sequence: 0,
+        instead_of: None,
+        summary: "Stand-up".into(),
+        start: Moment::Utc(NOON + 900),
+        end: None,
+        location: None,
+        description: None,
+        organizer: None,
+        guests: Vec::new(),
+        cancelled: false,
+        links: Vec::new(),
+        repeat: None,
+        excluded: Vec::new(),
+        alarms: Vec::new(),
+        more: Vec::new(),
+    };
+    let shelf = Shelf {
+        account: tuimex_core::AccountId("work".into()),
+        local: true,
+        name: None,
+        read: None,
+        failed: None,
+        events: vec![event],
+    };
+    let calendar = Calendar { shelves: vec![shelf], ..Calendar::empty(tuimex_core::Timestamp(NOON)) };
+    shown.send(crate::calendar::Handed::Calendar { calendar: Box::new(calendar), carried: 0 }).unwrap();
+
+    let tape = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+    let viewport = Viewport::Fixed(ratatui::layout::Rect::new(0, 0, 120, 40));
+    let mut terminal =
+        Terminal::with_options(CrosstermBackend::new(Tape(tape.clone())), TerminalOptions { viewport }).unwrap();
+    let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
+    // The reminder fell due a minute ago, for an event nine minutes off.
+    let mut clock = Clock(NOON + 360);
+    let mut input = Patient { quiet: 4, keys: ":q\r".chars().collect() };
+    event_loop(&mut terminal, &mut input, &mut app, &mut clock, &mut diary).unwrap();
+
+    let written = tape.borrow();
+    let bells: Vec<usize> = (0..written.len()).filter(|&at| written[at] == 0x07).collect();
+    assert_eq!(bells.len(), 1, "one reminder, one bell, however often the clock is looked at after");
+    let before = &written[..bells[0]];
+    let last = |marker: &[u8]| before.windows(marker.len()).rposition(|window| window == marker);
+    let (begun, ended) = (last(b"\x1b[?2026h"), last(b"\x1b[?2026l"));
+    assert!(begun.is_some() && begun < ended, "the bell follows a whole frame: {begun:?} {ended:?}");
+    let frame = String::from_utf8_lossy(&before[begun.unwrap()..]).to_string();
+    assert!(frame.contains("Stand-up"), "and that frame shows what the bell is for");
 }

@@ -1,3 +1,4 @@
+{fg}  {fg b}Mail{fg}   {dim}Calendar{fg}                                                                                                       
 {fg}  {fg b}Re: Contract draft v3 for the Halden account{fg}                                                                          
 {fg}                                                                                                                        
 {acc}▌{fg}   {fg b}From     {dim}robin@example.com{fg}   {fg b}robin.vale@example.org{fg}   {dim}desk@example.org{fg}                                              
@@ -35,6 +36,5 @@
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
-{fg}                                                                                                                        
 {fg}  {dim}draft saved 13:58{fg}                                                                         sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Tab {dim}next field · {fg}Left Right {dim}identity · {fg}Enter {dim}edit · {fg}A {dim}agent · {fg}^s {dim}send · {fg}Esc {dim}close{fg}                                     
+{fg}  Tab {dim}next field · {fg}h l {dim}identity · {fg}Enter {dim}edit · {fg}A {dim}agent · {fg}^s {dim}send · {fg}Esc {dim}close{fg}                                            

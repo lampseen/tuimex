@@ -9,6 +9,8 @@
 // unwrap does; clippy's test allowance does not reach helper functions.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
+mod calendar;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -27,16 +29,23 @@ use tuimex_ui::list::{self, AccountSync, Filter, List, Preview, Row, Sync, Tab};
 use tuimex_ui::mailbox::Mailbox;
 use tuimex_ui::paint::{Theme, paint};
 use tuimex_ui::palette::{Palette, Tier, Tok};
+use tuimex_ui::places::{self, Place};
 use tuimex_ui::say;
-use tuimex_ui::span::{Line, cells, markup};
+use tuimex_ui::span::{Line, cells, fit, markup};
 
 /// The two builds `make golden` writes.
 const DEFAULT: &str = ".";
 const ASCII_16: &str = "ascii-16";
 
-/// Every output this test can draw. `no_output_goes_undrawn` fails when the
-/// design has one that is neither here nor a later milestone's.
-const DRAWN: [&str; 100] = [
+/// Every output of mail this test can draw; the calendar's are listed in
+/// `calendar`. `no_output_goes_undrawn` fails when the design has one that
+/// is in neither.
+const DRAWN: [&str; 105] = [
+    "places-0",
+    "places-1",
+    "places-2",
+    "places-3",
+    "places-4",
     "list-three-accounts",
     "list-three-accounts-80-ascii",
     "account-cycle-0",
@@ -292,8 +301,22 @@ fn usual() -> Sync {
 }
 
 /// The lines of one `list*` output at the size the design gives it, or
-/// `None` for a name this test has no state for.
-fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
+/// `None` for a name this test has no state for. The list screen is given
+/// its state directly, so the bar of places the app would draw over it is
+/// put there here, and the list has the `height` rows that are left.
+fn draw(name: &str, width: usize, rows: usize) -> Option<Vec<Line>> {
+    // The bar alone, as it is in each place and at each width the design
+    // draws it at, in a strip as wide as every strip is.
+    let bar = |here, keys, at| Some(vec![fit(&places::bar(here, keys, at), width)]);
+    match name {
+        "places-0" => return bar(Place::Mail, true, width),
+        "places-1" => return bar(Place::Calendar, true, width),
+        "places-2" => return bar(Place::Mail, false, width),
+        "places-3" => return bar(Place::Mail, true, 24),
+        "places-4" => return bar(Place::Mail, true, 19),
+        _ => {}
+    }
+    let height = rows.saturating_sub(1);
     let (mail, held) = (fx::inbox(), fx::outbox());
     let inbox = list::rows(&mail, &[]);
     let all_tabs = tabs(Some(&inbox), &inbox, Some(&held));
@@ -397,11 +420,12 @@ fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             )
         }
         // What the screen says before there is a list: mail is being
-        // opened, and the index is part rebuilt.
+        // opened, and the index is part rebuilt. No place is open yet, so
+        // there is no bar.
         "loading" => {
             let mut lines = say::loading(Some((1240, 9240)));
-            lines.resize(height, Vec::new());
-            lines
+            lines.resize(rows, Vec::new());
+            return Some(lines);
         }
         "list-wide-recipients" => {
             let i = at(&inbox, "invite");
@@ -424,9 +448,15 @@ fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             let held = List { section: "Outbox", rows: &rows, selected: Some(1), grouped: false, ..base };
             list::screen(&List { preview: Preview::Off, left, ..held }, width, height)
         }
-        _ => return session(name, width, height),
+        _ => return session(name, width, rows),
     };
-    Some(lines)
+    Some(under_bar(Place::Mail, true, width, lines))
+}
+
+/// A screen that was given its state directly, under the bar of places
+/// the app draws over every screen.
+fn under_bar(here: Place, keys: bool, width: usize, lines: Vec<Line>) -> Vec<Line> {
+    [vec![places::bar(here, keys, width)], lines].concat()
 }
 
 fn app(mail: Vec<Listed>) -> App {
@@ -502,9 +532,9 @@ fn strip(app: &mut App, count: usize) -> Vec<Line> {
     // A row has a space where a group's label has its second letter.
     let is_row = |line: &&Line| cells(line) > 0 && text(line).chars().nth(3) == Some(' ');
     let foot = lines.len() - 3;
-    let panel_from = (2..foot).rev().find(|i| cells(&lines[*i]) == 0).expect("a blank row over the foot");
+    let panel_from = (3..foot).rev().find(|i| cells(&lines[*i]) == 0).expect("a blank row over the foot");
     let panel = if panel_from + 1 < foot { &lines[panel_from..foot] } else { &[] };
-    let rows = lines[2..panel_from].iter().filter(is_row).take(count.saturating_sub(panel.len().saturating_sub(1)));
+    let rows = lines[3..panel_from].iter().filter(is_row).take(count.saturating_sub(panel.len().saturating_sub(1)));
     rows.chain(panel).chain(&lines[foot..]).cloned().collect()
 }
 
@@ -540,7 +570,7 @@ fn read(app: &mut App, fake: &mut fx::Fake, key: &str) {
 fn reader_strip(mut app: App, notices: usize, panel: usize) -> Vec<Line> {
     let lines = app.lines(120, 60);
     let blank = |line: &Line| line.iter().all(|s| s.text.trim().is_empty());
-    let fields = (2..lines.len()).find(|i| blank(&lines[*i])).expect("a blank row under the fields");
+    let fields = (3..lines.len()).find(|i| blank(&lines[*i])).expect("a blank row under the fields");
     let foot = lines.len() - 3;
     lines[fields + 1..fields + 1 + notices].iter().chain(&lines[foot - panel..]).cloned().collect()
 }
@@ -558,7 +588,7 @@ fn reading(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
         answer(&mut app, &mut fake, told);
         app
     };
-    let notice = |mut app: App| app.lines(120, 40)[2..2 + height].to_vec();
+    let notice = |mut app: App| app.lines(120, 40)[3..3 + height].to_vec();
     let link_strip = |mut app: App| app.lines(120, 40)[40 - height..].to_vec();
     let asking = "o:agent link 1\r";
     Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
@@ -619,7 +649,7 @@ fn reading(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             assert_eq!(app.pictures().map(|(id, _)| id.key.as_str()), Some("draft-agent"));
             notice(app)
         }
-        _ => return None,
+        _ => return calendar::draw(name, width, height),
     })
 }
 
@@ -649,7 +679,7 @@ fn session(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             let mut app = app(usual_mail());
             press(&mut app, "?");
             app.lines(width, height);
-            press(&mut app, "^d^d");
+            press(&mut app, "^d^d^d");
             app.lines(width, height)
         }
         "help-filtered" => {
@@ -860,11 +890,9 @@ fn writing(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             let signing = Signing::Signed { key: "51F09A2C".into(), no_key: vec!["billing@halden.example.com".into()] };
             let right = list::alerts(&usual());
             let agent = opened.agent.as_ref();
-            summary::screen(
-                &Summary { draft: &draft, agent, thread: &thread, signing: &signing, delay: 10, right: &right },
-                width,
-                height,
-            )
+            let summary =
+                Summary { draft: &draft, agent, thread: &thread, signing: &signing, delay: 10, right: &right };
+            under_bar(Place::Mail, false, width, summary::screen(&summary, width, height - 1))
         }
         "compose-agent-working" => own("", true, &format!("{reply}\r")).lines(width, height),
         "compose-agent-reply" => {
@@ -937,6 +965,11 @@ fn check(build: &str, name: &str) {
 fn both(name: &str) {
     check(DEFAULT, name);
     check(ASCII_16, name);
+}
+
+#[test]
+fn places() {
+    steps("places", 5);
 }
 
 #[test]
@@ -1211,18 +1244,19 @@ fn agent_completion() {
 #[test]
 fn no_output_goes_undrawn() {
     let (mut found, mut wrong) = (Vec::new(), Vec::new());
+    let drawn: Vec<&str> = DRAWN.iter().copied().chain(calendar::drawn()).collect();
     for build in [DEFAULT, ASCII_16] {
         for output in index(build).iter() {
             let name = output.name.as_str();
             match compare(build, name) {
                 Err(why) => wrong.push(why.lines().next().unwrap_or_default().to_string()),
-                Ok(()) => assert!(DRAWN.contains(&name), "{build}/{name}: drawn, and not listed in DRAWN"),
+                Ok(()) => assert!(drawn.contains(&name), "{build}/{name}: drawn, and not listed in DRAWN"),
             }
             found.push(name.to_string());
         }
     }
     assert!(wrong.is_empty(), "{} outputs are not the design's:\n{}", wrong.len(), wrong.join("\n"));
-    for name in DRAWN {
+    for name in drawn {
         assert!(found.iter().any(|f| f == name), "{name} is drawn here and the design no longer has it");
     }
 }

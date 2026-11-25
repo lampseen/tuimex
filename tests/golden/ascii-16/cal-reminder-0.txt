@@ -1,0 +1,6 @@
+  Today - Mon 23 November                                                                                               
+    work       09:30-09:45  Standup                                                                                     
+>   work       15:00-16:00  Halden contract call                                                                        
+                                                                                                                        
+  Mon 23 Nov - 2 of 2                   ^ Halden contract call in 10 min - o for its link - sending in 6s - 1 not sent  
+  Enter open - o links - E edit - d delete - Esc back - ? help                                                          

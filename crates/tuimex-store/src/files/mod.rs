@@ -4,7 +4,7 @@
 //! nothing planted at that path beforehand is ever written through.
 
 use std::fs::{self, DirBuilder, File, OpenOptions};
-use std::io::{self, ErrorKind, Write};
+use std::io::{self, ErrorKind, Read, Write};
 use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt, PermissionsExt};
 use std::path::Path;
 
@@ -82,6 +82,19 @@ pub fn replace_through(tmp: &Path, path: &Path, bytes: &[u8]) -> io::Result<()> 
     file.write_all(bytes)?;
     file.sync_all()?;
     fs::rename(tmp, path)
+}
+
+/// At most `most` bytes of the regular file at `path`, which this module
+/// made: a link or anything else planted there is refused rather than
+/// read, so the file cannot be pointed at another, or at a device that
+/// never ends.
+pub fn read_own(path: &Path, most: u64) -> io::Result<Vec<u8>> {
+    if !fs::symlink_metadata(path)?.file_type().is_file() {
+        return Err(io::Error::new(ErrorKind::InvalidInput, "not a regular file"));
+    }
+    let mut bytes = Vec::new();
+    File::open(path)?.take(most).read_to_end(&mut bytes)?;
+    Ok(bytes)
 }
 
 #[cfg(test)]

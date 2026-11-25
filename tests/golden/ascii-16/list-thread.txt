@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -25,7 +26,6 @@
     Cc       Robin Vale <robin@example.com>, Greta Holm <greta@example.com>, Jonas Becker <jonas@example.com>           
                                                                                                                         
     I cannot make Friday. Could someone collect me on Saturday morning?                                                 
-                                                                                                                        
                                                                                                                         
                                                                                                                         
                                                                                                                         

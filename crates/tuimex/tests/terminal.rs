@@ -96,7 +96,7 @@ fn fixtures_opens_the_list_and_the_quit_command_leaves_the_terminal_as_it_was() 
         "Today",
         ">   work  Imani Castell",
         "Invitation: Q4 roadmap re~         inv   14:05",
-        "Interview loop: backend c~          1f  21 Nov",
+        "Bike rack: still want it?               21 Nov",
         "1 of 24 - 1 message",
         "sending in 6s - 1 not sent",
         "Enter open - e archive - d trash - r reply - ? help",
@@ -167,7 +167,7 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
         "1 of 6 - 1 message",
         ":trash",
         "+ Trashed 1 message - u to undo",
-        "98 keys and commands - lines 1-19 of 62",
+        "144 keys and commands - lines 1-18 of 70",
     ];
     let mut last = 0;
     for words in steps {
@@ -179,6 +179,236 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
     assert!(after_archive.contains("1 of 22 - 1 message"), "the two marked rows left the list: {after_archive:?}");
     let after_help = frames.last().unwrap();
     assert!(!after_help.contains("Help"), "nothing of the help is left after :q: {after_help:?}");
+}
+
+/// ADR-054: the calendar is a place beside mail in the real binary. One
+/// session: `gc` opens it on the calendars `--fixtures` hands over, and the
+/// first row says which place is open by naming both. From Sunday, which
+/// has nothing on it, Alt-l as a terminal sends it (Esc, then the letter)
+/// puts the focus in the list beside the grid on the first event listed,
+/// `j` is the next, Enter opens that event of a later day, and Esc and
+/// Alt-h come back out. Three days on from today is the design's Thursday,
+/// where the same keys select within the day, and `gm` is back in mail
+/// where it was. F2 and F1 then do what `gc` and `gm` did, by each of the
+/// two sequences a terminal may send for them.
+#[test]
+fn a_session_in_the_calendar_moves_by_days_and_returns_to_mail() {
+    let keys = "j,gc,h,\x1bl,j,\r,\x1b,\x1bh,l,l,l,\x1bl,j,\x1bh,gm,\x1bOQ,\x1bOP,j,\x1b[12~,h,\x1b[11~,:q\r";
+    let out = on_a_pty(&scratch_home("calendar"), keys, &["--fixtures"], &[("ON_PTY_STEPS", ",")]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
+    let frames = frames(&screen);
+    let bar = "F1 Mail   F2 Calendar";
+    let listed = "j k move - Enter open - o links - Alt-h grid - ? help";
+    let steps: [&[&str]; 17] = [
+        &[bar, "2 of 24 - thread of 5"],
+        &[bar, "Month   Week   Day", "November 2026", "Mon 23 Nov - 2 events", "Halden contract call"],
+        &["Sun 22 Nov - 0 events", "Nothing on this day.", "t today - c new event - ? help"],
+        &["Mon 23 Nov - 1 of 2", "Nothing on this day.", "|>   work  09:30    Standup", listed],
+        &["Mon 23 Nov - 2 of 2", "|>   work  15:00    Halden contract call", listed],
+        &[bar, "  Halden contract call", "When     Mon 23 Nov 2026, 15:00 to 16:00"],
+        &["Mon 23 Nov - 2 of 2", "|>   work  15:00    Halden contract call", listed],
+        &["Mon 23 Nov - 2 events", "|    work  15:00    Halden contract call", "t today - c new event - ? help"],
+        &["Thu 26 Nov - 4 events - 1 to answer", "Q4 roadm~   needs answer", "c new event - ? help"],
+        &["Thu 26 Nov - 1 of 4 - 1 to answer", "|>   work  09:30    Standup", listed],
+        &["Thu 26 Nov - 2 of 4 - 1 to answer", "|>   work  10:00    Q4 roadm~   needs answer", "i answer - o links"],
+        &["Thu 26 Nov - 4 events - 1 to answer", "|    work  10:00    Q4 roadm~", "c new event - ? help"],
+        &["Inbox 9", "2 of 24 - thread of 5"],
+        &["Month   Week   Day", "Thu 26 Nov - 4 events - 1 to answer"],
+        &["Inbox 9", "2 of 24 - thread of 5"],
+        &["Month   Week   Day", "Wed 25 Nov - 2 events"],
+        &["Inbox 9", "3 of 24"],
+    ];
+    let mut from = 0;
+    for words in steps {
+        let shows = |frame: &String| words.iter().all(|w| frame.contains(w));
+        let at = frames[from..].iter().position(shows);
+        from += at.unwrap_or_else(|| panic!("no frame after {from} shows {words:?}: {frames:#?}")) + 1;
+    }
+}
+
+/// ADR-054, ADR-056: over a real store the calendar kept on disk is on
+/// screen behind `gc` whatever its provider says, and a provider that
+/// cannot be reached is said on the status line with how old that is. The
+/// feed's address is one nothing listens at, so the one fetch is refused
+/// by this machine and nothing leaves it; every step waits for what it
+/// names and for no length of time.
+#[test]
+fn a_calendar_kept_on_disk_is_shown_and_one_that_cannot_be_fetched_says_so() {
+    let home = scratch_home("calendar-kept");
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    store.ensure_folder("work", "INBOX", tuimex_core::Role::Inbox).unwrap();
+    drop(store);
+    // Every day at noon, so that it is on today whenever this runs.
+    let feed = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:kept@example.org\r\n\
+                DTSTART:20200101T120000Z\r\nDTEND:20200101T123000Z\r\nRRULE:FREQ=DAILY\r\nSUMMARY:Kept on disk\r\n\
+                END:VEVENT\r\nEND:VCALENDAR\r\n";
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+    let calendars = tuimex_store::calendar::Calendars::open(&data, &cache).unwrap();
+    calendars.put("work", tuimex_engine::calendar::FEED, "", None, feed).unwrap();
+    calendars.read("work", tuimex_engine::calendar::FEED, None, None, i64::try_from(now).unwrap() - 2 * 3_600).unwrap();
+    drop(calendars);
+    // No notifier: a reminder for the event must reach no desktop.
+    let config = "[notify]\nvia = \"none\"\n\n[[account]]\nname = \"work\"\naddress = \"ada@example.org\"\n\
+                  auth = \"command\"\npassword_cmd = [\"true\"]\nimap = { host = \"127.0.0.1\", port = 1 }\n\
+                  smtp = { host = \"127.0.0.1\", port = 1 }\n\n[[calendar]]\naccount = \"work\"\nkind = \"feed\"\n\
+                  address_cmd = [\"echo\", \"https://127.0.0.1:1/private/feed.ics\"]\n";
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), config).unwrap();
+    let steps = [
+        "wait Inbox",
+        "keys gc",
+        "wait Kept on disk",
+        "wait work's calendar not read - last read 2h ago",
+        // The events held stay beside the failure.
+        "wait Kept on disk",
+        // `:q` is back to mail from the calendar, and out from the list.
+        "keys :q\\r",
+        "wait Nothing here.",
+        "keys :q\\r",
+    ];
+    let script = home.join("steps");
+    fs::write(&script, steps.join("\n") + "\n").unwrap();
+    // Wide enough that the mail account, which has no server either, does
+    // not push the calendar's state off the status line.
+    let env = [("ON_PTY_SCRIPT", script.to_str().unwrap()), ("ON_PTY_SIZE", "40x220"), ("ON_PTY_STEP_TIMEOUT", "20")];
+    let out = on_a_pty(&home, "", &[], &env);
+    let screen = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "every step was so, and :q left: {screen}");
+    assert!(!screen.contains("private"), "ADR-056: nothing of the feed's address is on the screen");
+}
+
+/// A home with one account, `work`, whose servers nothing listens at, so
+/// that nothing leaves this machine and a message sent waits in the
+/// Outbox for as long as the test runs. No notifier: a reminder must
+/// reach no desktop. Returns the home, and where its local events are.
+fn calendar_home(test: &str) -> (PathBuf, PathBuf) {
+    let home = scratch_home(test);
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    store.ensure_folder("work", "INBOX", tuimex_core::Role::Inbox).unwrap();
+    drop(store);
+    let config = "[notify]\nvia = \"none\"\n\n[send]\ndelay = \"10m\"\n\n[[account]]\nname = \"work\"\n\
+                  address = \"ada@example.org\"\nauth = \"command\"\npassword_cmd = [\"true\"]\n\
+                  imap = { host = \"127.0.0.1\", port = 1 }\nsmtp = { host = \"127.0.0.1\", port = 1 }\n";
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), config).unwrap();
+    (home, data.join(".calendars/work"))
+}
+
+/// Runs tuimex in `home` through `steps`, each of which waits for what it
+/// names and for no length of time, and returns what the terminal showed.
+fn calendar_session(home: &Path, steps: &[String]) -> String {
+    let script = home.join("steps");
+    fs::write(&script, steps.join("\n") + "\n").unwrap();
+    let env = [("ON_PTY_SCRIPT", script.to_str().unwrap()), ("ON_PTY_SIZE", "40x220"), ("ON_PTY_STEP_TIMEOUT", "20")];
+    let out = on_a_pty(home, "", &[], &env);
+    let screen = String::from_utf8_lossy(&out.stdout).to_string();
+    assert_eq!(out.status.code(), Some(0), "every step was so, and :q left: {screen}");
+    screen
+}
+
+/// ADR-057, by hand: an invitation that is in mail alone is on the
+/// calendar; `i a` answers it; the row no longer waits, the event is a
+/// file of the account's local calendar, and the reply is in the Outbox;
+/// `u` takes the entry and the reply back.
+#[test]
+fn an_invitation_is_answered_in_the_calendar_its_reply_waits_in_the_outbox_and_u_takes_both_back() {
+    let (home, events) = calendar_home("calendar-answer");
+    // Two days from now, so that `I` reaches it whenever this runs.
+    let day = (chrono::Utc::now() + chrono::Duration::days(2)).format("%Y%m%d").to_string();
+    let invitation = format!(
+        "From: Lars Holm <lars@example.com>\r\nTo: ada@example.org\r\nSubject: Invitation: Planning\r\n\
+         Message-ID: <planning-1@example.com>\r\nDate: Mon, 23 Nov 2026 10:00:00 +0000\r\nMIME-Version: 1.0\r\n\
+         Content-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n\
+         BEGIN:VCALENDAR\r\nVERSION:2.0\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:planning@example.com\r\n\
+         SEQUENCE:0\r\nDTSTART:{day}T100000Z\r\nDTEND:{day}T110000Z\r\nSUMMARY:Planning\r\n\
+         ORGANIZER;CN=Lars Holm:mailto:lars@example.com\r\n\
+         ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:ada@example.org\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    );
+    let (data, cache) = (home.join(".local/share/tuimex"), home.join(".cache/tuimex"));
+    let store = tuimex_store::Store::open(&data, &cache, tuimex_engine::parse).unwrap();
+    let delivery = tuimex_store::maildir::Delivery {
+        key: tuimex_store::maildir::new_key(),
+        uid: Some(1),
+        origin: tuimex_core::Origin::Server,
+        flags: tuimex_core::Flags::default(),
+    };
+    store.deliver("work", "INBOX", &delivery, invitation.as_bytes()).unwrap();
+    drop(store);
+    let (kept, none) = (format!("{}/*.ics", events.display()), format!("test -z \"$(ls {})\"", events.display()));
+    let steps = [
+        "wait Invitation: Planning".to_string(),
+        // The day view lists the days ahead, so the invitation is on it
+        // once the calendar has been read; `I` then selects it.
+        "keys gc3".to_string(),
+        "wait needs answer".to_string(),
+        format!("run test ! -e {}", events.display()),
+        "keys Iia".to_string(),
+        "wait Accepted Planning".to_string(),
+        "wait in work, local".to_string(),
+        "gone needs answer".to_string(),
+        format!("until grep -qs PARTSTAT=ACCEPTED {kept}"),
+        // The reply is mail: the Outbox is the seventh section.
+        "keys gm".to_string(),
+        "wait Archive   Outbox".to_string(),
+        "keys llllll".to_string(),
+        "wait Accepted: Planning".to_string(),
+        "keys hhhhhh".to_string(),
+        "keys gcu".to_string(),
+        "wait Undone".to_string(),
+        "wait needs answer".to_string(),
+        format!("until {none}"),
+        "keys gm".to_string(),
+        "gone Outbox".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &steps);
+}
+
+/// ADR-055, by hand: an event made with the form is a file here, is on
+/// the calendar of a later run, and is deleted and brought back with `u`.
+#[test]
+fn an_event_made_with_the_form_is_there_after_a_restart_and_is_deleted_and_brought_back() {
+    let (home, events) = calendar_home("calendar-form");
+    let (kept, none) = (format!("{}/*.ics", events.display()), format!("test -z \"$(ls {})\"", events.display()));
+    let made = [
+        "wait Nothing here.".to_string(),
+        "keys gcc".to_string(),
+        "wait Title".to_string(),
+        // The title, then `^s` to save.
+        "keys Dentist".to_string(),
+        "keys \\x13".to_string(),
+        "wait Added Dentist to work, local".to_string(),
+        format!("until grep -qs SUMMARY:Dentist {kept}"),
+        "keys gm".to_string(),
+        "wait Nothing here.".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &made);
+    let file = fs::read_dir(&events).unwrap().map(|entry| entry.unwrap().path()).next().expect("an event's file");
+    assert_eq!(fs::metadata(&file).unwrap().permissions().mode() & 0o777, 0o600, "ADR-011: the owner's alone");
+    let text = fs::read_to_string(&file).unwrap();
+    assert!(text.contains("@tuimex\r\n") && text.contains("SUMMARY:Dentist\r\n"), "{text}");
+
+    let again = [
+        "wait Nothing here.".to_string(),
+        // Found on whichever day it was made for; `n` selects the match.
+        "keys gc/Dentist\\r".to_string(),
+        "wait 1 event matches".to_string(),
+        "wait local".to_string(),
+        "keys nd".to_string(),
+        "wait Deleted Dentist".to_string(),
+        format!("until {none}"),
+        "keys u".to_string(),
+        "wait Undone".to_string(),
+        format!("until grep -qs SUMMARY:Dentist {kept}"),
+        "keys gm".to_string(),
+        "wait Nothing here.".to_string(),
+        "keys :q\\r".to_string(),
+    ];
+    calendar_session(&home, &again);
 }
 
 /// PLAN §10 M8: the reader is usable by hand. One session: open a thread's
@@ -193,7 +423,7 @@ fn a_session_in_the_reader_scrolls_lists_files_and_confirms_a_deceptive_link() {
     assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
     let frames = frames(&screen);
     let steps: [&[&str]; 6] = [
-        &["Contract draft v3 for the Halden account", "1 of 3 in the thread", "lines 2-12 of 30"],
+        &["Contract draft v3 for the Halden account", "1 of 3 in the thread", "lines 2-11 of 30"],
         &["Files", " 1  contract-v3.pdf    482 KB   application/pdf", "Enter save - O open - Esc close"],
         &["4 of 24 - thread of 3", "Enter open - zo unfold"],
         &["Links", " 1  bank.example.com.device-check.example.net   https://bank.example.com/co~"],
@@ -400,10 +630,10 @@ fn an_escape_and_a_letter_together_are_alt_and_apart_they_are_esc_then_the_lette
         "keys jjjzo",
         "wait 4 of 26 - 1 message of the thread",
         "keys \\x1bj",
-        "wait lines 1-15 of 37",
+        "wait lines 1-14 of 37",
         "wait j k scroll - Alt-k list - Enter open - ? help",
         "keys j",
-        "wait lines 2-16 of 37",
+        "wait lines 2-15 of 37",
         "keys \\x1b",
         "wait 4 of 26 - 1 message of the thread",
         "keys j",
@@ -435,8 +665,9 @@ fn every_frame_is_one_synchronised_update() {
     assert_eq!(screen.matches(BEGIN_FRAME).count(), screen.matches(END_FRAME).count());
 }
 
-/// PLAN §10 M6: resize is live. The preview needs thirty rows, so it is
-/// absent at 80x24 and present once the terminal has grown.
+/// PLAN §10 M6: resize is live. The preview needs thirty rows under the
+/// bar of places, so it is absent at 80x24 and present once the terminal
+/// has grown.
 #[test]
 fn a_resize_redraws_the_list_at_the_new_size() {
     let out = on_a_pty(&scratch_home("resize"), QUIT, &["--fixtures"], &[("ON_PTY_RESIZE", "40x120")]);
@@ -711,10 +942,7 @@ fn the_body_is_written_in_editor_and_the_interface_comes_back_around_it() {
         back.contains("    Written in the editor.\n\n    Second paragraph.\n"),
         "the body is what the editor left: {back:?}"
     );
-    assert!(
-        back.contains("    To\n") && back.contains("Tab next field - Left Right identity - Enter edit"),
-        "{back:?}"
-    );
+    assert!(back.contains("    To\n") && back.contains("Tab next field - Enter edit - A agent"), "{back:?}");
     assert!(
         frames.iter().any(|f| f.contains("Keep this draft?  y keep - n discard - Esc back")),
         "an edit is a change"

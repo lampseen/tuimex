@@ -1,7 +1,8 @@
 # Testing by hand
 
-What automation cannot reach: Gmail as Google runs it, Proton Bridge, and a
-keyring that is really the system's (PLAN §9). This is the script for those,
+What automation cannot reach: Gmail as Google runs it, Proton Bridge, the
+calendars of both, and a keyring that is really the system's (PLAN §9).
+This is the script for those,
 run before a release against accounts of your own, and recorded in the table
 at the end.
 
@@ -15,8 +16,10 @@ passed, and none should be until the table has a row for it. Where what you
 see differs from what a step says, the step may be what is wrong: write
 down what you saw.
 
-Use accounts you can afford to disturb. Step 5 archives a message and
-step 6 sends one.
+Use accounts you can afford to disturb. Step 5 archives a message,
+step 6 sends one, and steps 7c and 7d answer an invitation, which mails
+its organizer. Step 7c writes to a Google calendar only if you say yes
+where it asks: one event a year ahead, added and removed.
 
 ## 0. Before you start
 
@@ -288,6 +291,94 @@ With no tuimex open on the account:
    **See** it refused: `… is in use by another tuimex: close the tuimex that
    is open, or wait for tuimex sync to end, and rename then`.
 
+## 7c. A Google account's calendar
+
+For a Gmail account that signs in with an app password (step 2). Nothing
+here has been run against Google: reading a calendar's properties was
+tried once by hand (ADR-056's note), and **writing has never been tried by
+anyone** (ADR-062). Record exactly what you see, above all at step 4.
+
+You need an invitation to answer: from another account of yours, invite
+this one to an event a few days ahead, and wait for the mail.
+
+1. Reading. If setup has not asked about the calendar yet: `tuimex setup`,
+   and the number beside `Add a calendar to an account that has none`.
+   **See** `Google lets the app password this account signs in with read
+   its calendar too: nothing more to make.` and `Read <name>'s Google
+   calendar? [y/N]`. Answer `y`.
+   **See** `Google's calendar took the sign-in.` If it says `The calendar
+   could not be read that way: …`, record the reason whole: that is the
+   older address no longer taking an app password, and the secret address
+   it then offers is the other route.
+2. **See** the paragraph that ends `Trying it adds one event named "tuimex
+   write test", a year from today, and removes it again.` and `Let tuimex
+   write to <name>'s calendar? No keeps it read-only. [y/N]`. Answer `n`
+   this first time.
+   **See** `Nothing was written. The calendar is read, and what you do for
+   it is kept locally.` and `Saved <name>'s calendar in …`.
+3. `tuimex sync`.
+   **See**, after the mail, `<name>/calendar (caldav, www.google.com): N
+   changed`. Then `tuimex`, `gc`: **see** your events on their days, and
+   times that agree with Google Calendar's own page. `I`: **see** the
+   cursor go to the invitation's day. Has Gmail already put the invitation
+   in the calendar, or is it there only from the mail? Open it with Enter
+   twice and read the `Calendar` line: note which.
+   `i` then `a`: **see** `Accepted <title>` and `in <name>, local`. `gm`:
+   **see** the reply in the Outbox until the send delay ends. In the
+   organizer's account: **see** the acceptance arrive. In Google
+   Calendar's own page: the event still says you have not answered, which
+   is what `local` means.
+4. The write check. `tuimex setup`, and the number beside `Find out
+   whether a calendar that is only read can be written`. Answer `y`.
+   **See** either `The event was added and removed again: tuimex will
+   write this calendar.` and `Saved in …: <name>'s calendar is written
+   from now on.`, or a sentence that begins `The event could not be
+   added:` or `The event was added and could not be removed`. Record the
+   sentence whole. In Google Calendar's own page, a year from today:
+   **see** no "tuimex write test". If one is there, delete it and record
+   that it was left.
+5. Only if step 4 saved the key: invite the account to a second event,
+   `tuimex`, `gc`, `I`, Enter, `i` then `a`.
+   **See** `in <name>` with no `local`. In Google Calendar's own page:
+   **see** the event as accepted. Then `u` within the send delay: **see**
+   `Undone`, and the event back to unanswered on Google's page.
+6. `grep -r` the app password under `$HOME/tuimex-trial`: **see** no match.
+
+## 7d. A Proton account's calendar
+
+Proton Bridge carries mail and no calendar, so the calendar is read from
+its private address and is never written. Nothing here has been run
+against Proton.
+
+1. In Proton Calendar on the web: Settings, the calendar, *Share via
+   link*, with full view. Copy the address.
+2. `tuimex setup`, and the number beside `Add a calendar to an account
+   that has none`.
+   **See** where the address is found, `Anyone with the address can read
+   the calendar`, and `Add proton's calendar by its private address?
+   [y/N]`. Answer `y`, and paste the address at `The calendar's address
+   (it is not shown as you type):`. **See** nothing echoed.
+   **See** `<host> served a calendar.` and `Saved proton's calendar in …
+   Its address is in the keyring, and in no file.`
+3. `grep -r` a distinctive part of the address under `$HOME/tuimex-trial`:
+   **see** no match. `tuimex doctor`: **see** the calendar named by its
+   host alone.
+4. `tuimex sync`: **see** `proton/calendar (feed, <host>): 1 changed`.
+   `tuimex`, `gc`: **see** the events Proton Calendar shows, at the same
+   times.
+5. From another account, invite the Proton address to an event a few days
+   ahead. When its mail has arrived: `gc`, `I`.
+   **See** the event on its day marked `needs answer`, although Proton's
+   feed does not hold it: it is on the calendar from the mail alone.
+6. Enter, then `i` and `a`.
+   **See** `Accepted <title>` and `in proton, local`. In the organizer's
+   account: **see** the acceptance arrive from the Proton address. Quit
+   and start tuimex again, `gc`: **see** the event still there, marked
+   `local` and answered. In Proton Calendar itself: the event is not
+   there, or is there unanswered. Record which; neither is a failure.
+7. `:export`: **see** `Saved` and a path ending `tuimex-calendar.ics`;
+   import that file in Proton Calendar and **see** the event arrive.
+
 ## 8. What is left behind
 
 1. `tuimex doctor`: **see** under `files` that everything under the four
@@ -308,3 +399,5 @@ happened in place of what the step says.
 | Date | Build (`git rev-parse --short HEAD`) | System | Section | Provider | Result |
 |---|---|---|---|---|---|
 | 2026-11-23 | not recorded | Linux | setup and sync only; not run as this script | Gmail, two accounts; Proton, one | Bryan reported that all three synced with no issue, and that the setup prompts were confusing. Which way each signed in, sending, and every other step: not recorded. |
+| 2026-11-24 | the head of pull request #8 that day; not recorded more exactly | Linux | 7c and 7d, setup and reading only; not run as this script | Google over CalDAV with an app password, two accounts; Proton's private address, one | Bryan reported that the calendar "looks good" with all three read. An event he made for a Google account was kept `local` and did not reach Google: the write check of 7c had not been run. Answering an invitation, reminders, and a comparison with the providers' own calendars: not recorded. |
+| 2026-11-24 | `feat/calendar` at ce20777 or later; not recorded more exactly | Linux | 7c, the write check and one event; not run as this script | Google over CalDAV with an app password, two accounts | The first try said the calendar could not be written and left a "tuimex write test" event behind: Google had filed it under an address of its own, and the delete missed. With that fixed, Bryan ran the write check on both accounts and `write = true` was written for each; an event he made in tuimex appeared in Google Calendar; he deleted it there and `:sync` removed it here. One leftover test event may remain on the second account, on 2027-11-24. |

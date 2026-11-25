@@ -1,3 +1,4 @@
+  Mail   Calendar                                                                                                       
   Help                                                                                                                  
                                                                                                                         
     Everywhere                                                                                                          
@@ -35,6 +36,5 @@
                                                                                                                         
                                                                                                                         
                                                                                                                         
-                                                                                                                        
-  5 of 98 shown                                                                             sending in 6s - 1 not sent  
+  5 of 144 shown                                                                            sending in 6s - 1 not sent  
   /agent                                                                                                                

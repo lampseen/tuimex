@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -34,7 +35,6 @@
 {fg}                                                                                                                        
 {fg}    {fg b}Route status{fg}                                                                                                        
 {fg}                                                                                                                        
-{fg}    {dim}Route             Length   Status               {fg}                                                                    
 {fg}                                                                                                                        
 {fg}  {dim}5 of 24 ·{fg} 1 message                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  Load 8 images from img.fernway.example.net, cdn.example.net?{dim}  {fg}y {dim}yes · {fg}n {dim}no{fg}                                            

@@ -1,0 +1,40 @@
+{default}  {brightblack}F1 Mail{default}   {default b}F2 Calendar{default}                                                                                                 
+{default}  {default b}Staging migration window{default}                                                                        {brightblack}4 of 4 on Thu 26 Nov{default}  
+{default}                                                                                                                        
+{default}    {brightblack}When     {default}Thu 26 Nov 2026, 20:00 to 23:00{brightblack} - in 3 days{default}                                                                
+{default}    {brightblack}Calendar {brightyellow}work{brightblack} - local, only in tuimex{default}                                                                               
+{default}    {brightblack}Who      {default}Lars Lindqvist {brightblack}organizer, {default}you {brightblack}yes{default}                                                                          
+{default}    {brightblack}Answer   {default}accepted                                                                                                   
+{default}                                                                                                                        
+{default}    {yellow}^ Only in tuimex{brightblack} - work's own calendar does not have it - :export writes it out{default}                                     
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back{default}                                                                                          

@@ -1,3 +1,4 @@
+{default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       
 {default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
 {default}                                                                                                                        
 {magenta}>{default}   {default b}From     {brightblack}robin@example.com{default}   {default b}robin.vale@example.org{default}   {brightblack}desk@example.org{default}                                              
@@ -35,6 +36,5 @@
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
-{default}                                                                                                                        
 {default}  {brightblack}draft saved 13:58{default}                                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Tab {brightblack}next field - {default}Left Right {brightblack}identity - {default}Enter {brightblack}edit - {default}A {brightblack}agent - {default}^s {brightblack}send - {default}Esc {brightblack}close{default}                                     
+{default}  Tab {brightblack}next field - {default}h l {brightblack}identity - {default}Enter {brightblack}edit - {default}A {brightblack}agent - {default}^s {brightblack}send - {default}Esc {brightblack}close{default}                                            

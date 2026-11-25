@@ -3,7 +3,7 @@ use std::io::{ErrorKind, Write};
 use std::os::unix::fs::{PermissionsExt, symlink};
 use std::path::PathBuf;
 
-use super::{append, create, place, private_dir, replace};
+use super::{append, create, place, private_dir, read_own, replace};
 
 /// A directory of this test's own under the build directory. Never the
 /// system temporary directory, and never anything the user owns.
@@ -139,4 +139,30 @@ fn replace_survives_what_a_dead_run_left_and_does_not_write_through_a_link() {
     replace(&root.join("f"), b"new").unwrap();
     assert_eq!(fs::read_to_string(root.join("f")).unwrap(), "new");
     assert_eq!(fs::read_to_string(&victim).unwrap(), "untouched");
+}
+
+#[test]
+fn replace_puts_a_file_where_a_link_was_and_leaves_its_target_alone() {
+    let root = scratch("replace-link");
+    private_dir(&root).unwrap();
+    let victim = root.join("victim");
+    fs::write(&victim, "untouched").unwrap();
+    symlink(&victim, root.join("f")).unwrap();
+    replace(&root.join("f"), b"new").unwrap();
+    assert!(fs::symlink_metadata(root.join("f")).unwrap().file_type().is_file());
+    assert_eq!(fs::read_to_string(root.join("f")).unwrap(), "new");
+    assert_eq!(fs::read_to_string(&victim).unwrap(), "untouched");
+}
+
+#[test]
+fn read_own_reads_a_file_up_to_a_bound_and_refuses_a_link_or_a_directory() {
+    let root = scratch("read-own");
+    private_dir(&root).unwrap();
+    replace(&root.join("f"), b"on\n").unwrap();
+    assert_eq!(read_own(&root.join("f"), 64).unwrap(), b"on\n");
+    assert_eq!(read_own(&root.join("f"), 1).unwrap(), b"o");
+    symlink(root.join("f"), root.join("link")).unwrap();
+    assert_eq!(read_own(&root.join("link"), 64).unwrap_err().kind(), ErrorKind::InvalidInput);
+    assert_eq!(read_own(&root, 64).unwrap_err().kind(), ErrorKind::InvalidInput);
+    assert_eq!(read_own(&root.join("absent"), 64).unwrap_err().kind(), ErrorKind::NotFound);
 }

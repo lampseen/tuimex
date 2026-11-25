@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {acc b}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {dim}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}  {dim b}Today{fg}                                                                                                                 
@@ -25,7 +26,6 @@
 {fg}    {dim}Cc       {fg}Robin Vale {dim}<robin@example.com>, {fg}Greta Holm {dim}<greta@example.com>, {fg}Jonas Becker {dim}<jonas@example.com>{fg}           
 {fg}                                                                                                                        
 {fg}    I cannot make Friday. Could someone collect me on Saturday morning?                                                 
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

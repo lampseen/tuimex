@@ -17,12 +17,13 @@ use crossterm::terminal::{
 use crossterm::{execute, queue};
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
-use tuimex_core::{Action, Ask, Body, Event as Told, Folder, Listed, MessageId, Timestamp};
+use tuimex_core::{Action, Ask, Body, Event as Told, Folder, Link, Listed, MessageId, Timestamp};
 use tuimex_ui::app::App;
 use tuimex_ui::keymap::{Key, TIMEOUT_MS};
 use tuimex_ui::paint::{Theme, paint};
 use tuimex_ui::say;
 
+use crate::diary::Diary;
 use crate::pictures::Painter;
 
 /// Whatever carries out what the UI asks for. The UI has shown each ask's
@@ -62,6 +63,23 @@ pub trait Backend {
     fn shown(&mut self, _id: &MessageId) -> Option<(Vec<String>, Body)> {
         None
     }
+    /// The events whose link the agent was asked about since this was
+    /// last called, each as `shown` gives a message. It never waits.
+    fn asked(&mut self) -> Vec<Asked> {
+        Vec::new()
+    }
+}
+
+/// What the agent may be shown of an event, to say what it makes of one
+/// of its links (ADR-031): the ask's serial and the link's number, the
+/// names of the people in the event, its links, and its text.
+#[derive(Debug)]
+pub struct Asked {
+    pub serial: u64,
+    pub n: usize,
+    pub names: Vec<String>,
+    pub links: Vec<Link>,
+    pub text: String,
 }
 
 /// What the store now holds of some messages, for `App::refresh`: `rows`
@@ -138,8 +156,8 @@ impl Opening {
         Ok(())
     }
 
-    pub fn run(mut self, app: &mut App, backend: &mut dyn Backend) -> Result<()> {
-        event_loop(self.terminal()?, &mut Tty, app, backend)
+    pub fn run(mut self, app: &mut App, backend: &mut dyn Backend, diary: &mut Diary) -> Result<()> {
+        event_loop(self.terminal()?, &mut Tty, app, backend, diary)
     }
 }
 
@@ -156,12 +174,14 @@ pub(crate) fn event_loop<W: Write>(
     input: &mut dyn Input,
     app: &mut App,
     backend: &mut dyn Backend,
+    diary: &mut Diary,
 ) -> Result<()> {
     // crossterm starts listening for a change of size when it is first
     // asked for an event. Asked here, before anything is drawn, a resize
     // during the first frame is an event waiting after it and not a signal
     // nobody was listening for.
     input.poll(Duration::ZERO)?;
+    diary.begin(app);
     let mut painter = Painter::default();
     // Debug builds only: lets the panic path be exercised from a test
     // without shipping a crash switch in release binaries.
@@ -182,6 +202,13 @@ pub(crate) fn event_loop<W: Write>(
         }
         if changed {
             frame(terminal, app, backend, &mut painter)?;
+            // After the frame, which was flushed whole: a bell inside one
+            // would be read as part of it (ADR-058).
+            if diary.rang() {
+                let out = terminal.backend_mut();
+                out.write_all(b"\x07")?;
+                out.flush()?;
+            }
         }
         // The first key of a sequence waits only so long for the next.
         if app.waiting() && !input.poll(Duration::from_millis(TIMEOUT_MS))? {
@@ -211,6 +238,7 @@ pub(crate) fn event_loop<W: Write>(
                 && let Some(key) = convert(k)
             {
                 app.key(key);
+                diary.switched(app);
             }
             for ask in app.asks() {
                 // `$EDITOR` has the terminal while it runs, as it was
@@ -246,8 +274,13 @@ pub(crate) fn event_loop<W: Write>(
         }
         // The loop wakes for a working backend ten times a second, and a
         // countdown or an age is drawn again only in the second it changes.
+        // A calendar is sent whole and by itself, on no key and no ask,
+        // so it is looked for on every turn, clock or none.
+        changed |= diary.hand(app);
         if let Some(now) = backend.now() {
             changed |= app.tick(now);
+            changed |= diary.tick(app, now);
+            changed |= diary.rings();
         }
     }
     Ok(())
@@ -306,6 +339,7 @@ fn convert(k: KeyEvent) -> Option<Key> {
         KeyCode::Down => Some(Key::Down),
         KeyCode::Left => Some(Key::Left),
         KeyCode::Right => Some(Key::Right),
+        KeyCode::F(n) => Some(Key::F(n)),
         _ => None,
     }
 }

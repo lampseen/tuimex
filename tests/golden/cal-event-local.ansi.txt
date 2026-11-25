@@ -1,0 +1,40 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {fg b}Staging migration window{fg}                                                                        {dim}4 of 4 on Thu 26 Nov{fg}  
+{fg}                                                                                                                        
+{fg}    {dim}When     {fg}Thu 26 Nov 2026, 20:00 to 23:00{dim} · in 3 days{fg}                                                                
+{fg}    {dim}Calendar {head}work{dim} · local, only in tuimex{fg}                                                                               
+{fg}    {dim}Who      {fg}Lars Lindqvist {dim}organizer, {fg}you {dim}yes{fg}                                                                          
+{fg}    {dim}Answer   {fg}accepted                                                                                                   
+{fg}                                                                                                                        
+{fg}    {warn}▲ Only in tuimex{dim} · work's own calendar does not have it · :export writes it out{fg}                                     
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back{fg}                                                                                          

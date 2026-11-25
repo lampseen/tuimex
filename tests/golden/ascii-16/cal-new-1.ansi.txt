@@ -1,0 +1,17 @@
+{default}  {brightblack}Mail{default}   {default b}Calendar{default}                                                                                                       
+{default}  {default b}New event{default}                                                                                                             
+{default}                                                                                                                        
+{magenta}>{default}   {default b}Title    Offsite planning{default}                                                                                           
+{default}    {brightblack}Calendar personal local{default}   {default b}work local{default}                                                                                
+{default}    {brightblack}Starts   {default}Thu 26 Nov 2026 14:00                                                                                      
+{default}    {brightblack}Ends     {default}Thu 26 Nov 2026 15:00                                                                                      
+{default}    {brightblack}All day  no{default}                                                                                                         
+{default}    {brightblack}Repeats  never{default}                                                                                                      
+{default}    {brightblack}Where    {default}Room Fjord                                                                                                 
+{default}    {brightblack}Guests   {default}Imani Castell {brightblack}<imani@example.org>{default}                                                                          
+{default}    {brightblack}         {default}Lars Lindqvist {brightblack}<lars@example.org>{default}                                                                          
+{default}    {brightblack}Reminder {default}10 minutes before                                                                                          
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}not saved{default}                                                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Save, and mail the invitation to 2 guests?{brightblack}  {default}y {brightblack}save and send, held 10s - {default}n {brightblack}back{default}                                        

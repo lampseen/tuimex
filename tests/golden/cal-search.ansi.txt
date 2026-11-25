@@ -1,0 +1,40 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {dim}Month{fg}   {dim}Week{fg}   {dim}Day{fg}   {acc b}Search{fg} call                                                                                      
+{fg}                                                                                                                        
+{fg}  {dim b}Today · Mon 23 November{fg}                                                                                               
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {dim bg=sel}15:00-16:00{fg bg=sel}  Halden contract {fg bg=sel b u}call{fg bg=sel}                                                                        
+{fg}                                                                                                                        
+{fg}  {dim b}Thu 26 November{fg}                                                                                                       
+{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor {fg b u}call{fg}                                                                      {agent}tentative{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Mon 7 December{fg}                                                                                                        
+{fg}    {head}work{fg}       {dim}all day{fg}      On {fg b u}call{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Tue 8 December{fg}                                                                                                        
+{fg}    {head}work{fg}       {dim}all day{fg}      On {fg b u}call{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Wed 9 December{fg}                                                                                                        
+{fg}    {head}work{fg}       {dim}all day{fg}      On {fg b u}call{fg}                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim b}Thu 10 December{fg}                                                                                                       
+{fg}    {head}work{fg}       {dim}all day{fg}      On {fg b u}call{fg}                                                                                     
+{faint}────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{fg}  {fg b}Halden contract call{fg}                                                                                                  
+{fg}                                                                                                                        
+{fg}    {dim}When     {fg}Mon 23 Nov 2026, 15:00 to 16:00{dim} · today{fg}                                                                    
+{fg}    {dim}Join     {fg}meet.example.org {dim}https://meet.example.org/r/halden{fg}                                                         
+{fg}    {dim}Calendar {head}work{dim} · its own calendar, read 20s ago{fg}                                                                      
+{fg}    {dim}Who      {fg}Priya Raman {dim}organizer, {fg}you {dim}yes, {fg}Dmitri Volkov {dim}yes{fg}                                                          
+{fg}                                                                                                                        
+{fg}    Payment terms and the support clause. Draft v3 is attached to Priya's mail                                          
+{fg}    of this morning.                                                                                                    
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}3 events match "call"{fg}                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}n N {dim}next match · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                                                       

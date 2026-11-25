@@ -590,9 +590,12 @@ fn mail_is_read_with_nothing_fetched_and_its_links_and_files_go_to_the_systems_o
     steps.extend(find(&late));
     // The cursor rests on its row and nothing is typed: the preview asks
     // for the body, shows the whole message, and scrolls to its end.
+    // The file is looked for until it is found whole: a message renamed
+    // between the shell listing the directory and grep opening it is a
+    // file grep cannot find, not a body that is missing.
     steps.extend([
         "wait The first line of a long body.".to_string(),
-        format!("run grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
+        format!("until grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
         "keys \\x1bj".to_string(),
         "wait lines 1-".to_string(),
         "keys G".to_string(),
@@ -606,7 +609,7 @@ fn mail_is_read_with_nothing_fetched_and_its_links_and_files_go_to_the_systems_o
         "wait The first line of a long body.".to_string(),
         // 03:04 UTC, on a wall clock nine hours east of it.
         "wait Mon 23 Nov 2026 12:04".to_string(),
-        format!("run grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
+        format!("until grep -l 'The first line of a long body' {cur}/* | grep -qv H=1"),
         "keys :q\\r".to_string(),
         "wait Enter open".to_string(),
     ]);
@@ -865,5 +868,87 @@ fn with_a_new_name_from_setup_an_account_keeps_its_mail_its_sign_in_and_what_it_
          of reach, reached its Archive afterwards; the {} messages here kept their files; a second sync \
          transferred nothing)",
         before.len()
+    );
+}
+
+/// ADR-057 and ADR-062 with nothing played: an invitation delivered by a
+/// real mail server, for an account whose calendar is a real CalDAV
+/// server's and is written there. `tuimex sync`, then the binary on a
+/// terminal: the invitation is on the calendar, `i a` answers it, and the
+/// test reads the reply back from the organizer's Inbox and the event
+/// back from the calendar's server. The CalDAV server is the one
+/// `crates/tuimex-engine/tests/caldav_server.rs` names; it must know the
+/// mail account by the mail account's password, as a provider would.
+#[test]
+fn an_invitation_is_answered_on_a_terminal_and_the_reply_and_the_event_are_read_back_from_the_servers() {
+    let Some(desk) = Desk::new("calendar-answer") else { return };
+    if !takes_mail("calendar-answer") {
+        return;
+    }
+    let Ok(caldav) = env::var("TUIMEX_CALDAV_SERVER") else {
+        println!("real-server calendar-answer: NOT RUN, no CalDAV server (TUIMEX_CALDAV_SERVER)");
+        return;
+    };
+    let (invited, organizer, run) = (var("TUIMEX_SERVER_USER"), var("TUIMEX_SERVER_USER2"), &desk.run);
+    let calendar = format!("{}/{invited}/answered-{run}/", caldav.trim_end_matches('/'));
+    let rest = format!(
+        "[[calendar]]\naccount = \"work\"\nkind = \"caldav\"\nurl = \"{calendar}\"\nwrite = true\n\n\
+         [send]\ndelay = \"1s\"\n\n[notify]\nvia = \"none\"\n"
+    );
+    desk.config(&[("work", &invited, "TUIMEX_SERVER_PASSWORD", &invited)], &rest);
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let calendars = format!("python3 {} {invited}", manifest.join("tests/calendar_server.py").display());
+    // The calendar is the user's own, made before tuimex ever sees it.
+    let made = Command::new("sh")
+        .arg("-c")
+        .arg(format!("{calendars} make {calendar}"))
+        .env("TUIMEX_SERVER_PASSWORD", var("TUIMEX_SERVER_PASSWORD"))
+        .output()
+        .unwrap();
+    assert!(made.status.success(), "{}", String::from_utf8_lossy(&made.stderr));
+
+    // Two days from now, so that it is within reach of `I` whenever this
+    // runs; the title is this run's alone.
+    let title = format!("cal-{run}");
+    let date = (chrono::Utc::now() + chrono::Duration::days(2)).format("%Y%m%d").to_string();
+    let invitation = format!(
+        "From: Second <{organizer}@example.com>\nTo: {invited}@example.com\nSubject: Invitation {title}\n\
+         Message-ID: <{title}@example.com>\nDate: Mon, 23 Nov 2026 03:04:00 +0000\nMIME-Version: 1.0\n\
+         Content-Type: text/calendar; method=REQUEST; charset=utf-8\n\n\
+         BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Example//EN\nMETHOD:REQUEST\nBEGIN:VEVENT\n\
+         UID:{title}@example.com\nSEQUENCE:0\nDTSTAMP:20261120T090000Z\nDTSTART:{date}T100000Z\n\
+         DTEND:{date}T110000Z\nSUMMARY:{title}\nORGANIZER:mailto:{organizer}@example.com\n\
+         ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:{invited}@example.com\nEND:VEVENT\nEND:VCALENDAR\n"
+    );
+    desk.put(&invited, "INBOX", &invitation);
+    let synced = desk.sync();
+    assert!(synced.contains("work/calendar (caldav, 127.0.0.1:"), "the calendar was read too:\n{synced}");
+
+    let helper = &desk.helper;
+    let steps = [
+        format!("wait Invitation {title}"),
+        // The day view lists the days ahead: the invitation is on it once
+        // the calendar has been read, and `I` selects it.
+        "keys gc3".to_string(),
+        "wait needs answer".to_string(),
+        "keys Iia".to_string(),
+        format!("wait Accepted {title}"),
+        // Written at the provider, and read back from it by another client.
+        format!("run {calendars} holds {calendar} PARTSTAT=ACCEPTED"),
+        format!("run {calendars} holds {calendar} mailto:{invited}@example.com"),
+        format!("run {calendars} holds {calendar} UID:{title}@example.com"),
+        // The reply left after the send delay, for the organizer alone.
+        format!("run {helper} {organizer} calendar INBOX {title} REPLY {invited}@example.com PARTSTAT=ACCEPTED"),
+        format!("run {helper} {organizer} header INBOX {title} 'In-Reply-To: <{title}@example.com>'"),
+        "keys gm".to_string(),
+        format!("wait Invitation {title}"),
+        "keys :q\\r".to_string(),
+    ];
+    let seen = desk.terminal(&steps, "UTC");
+    assert!(!seen.contains("work, local"), "the calendar is written at its provider, and the answer says so");
+    println!(
+        "real-server: ran calendar-answer (the invitation {title} from {organizer} was on the calendar from mail \
+         alone; `i a` put it in {calendar} with PARTSTAT=ACCEPTED for {invited}, and {organizer} was mailed a \
+         text/calendar REPLY from {invited} that threads under the invitation)"
     );
 }

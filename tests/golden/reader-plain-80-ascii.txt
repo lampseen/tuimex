@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                         
   Contract draft v3 for the Halden account                1 of 3 in the thread  
                                                                                 
     From     Priya Raman <priya@example.org>                                    
@@ -18,7 +19,6 @@
     with 45 if the first invoice is issued at signing rather than at delivery.  
                                                                                 
     2. The support clause. They want named contacts on our side. I have put     
-    you and Dmitri down for now; say if that should be someone else.            
                                                                                 
-  lines 1-11 of 30                                  sending in 6s - 1 not sent  
+  lines 1-10 of 30                                  sending in 6s - 1 not sent  
   r reply - e archive - n b next, previous - a files - Esc back                 

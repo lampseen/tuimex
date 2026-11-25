@@ -3,6 +3,7 @@
 
 use std::path::PathBuf;
 
+use crate::calendar::Method;
 use crate::{AccountId, Address, MessageId, Origin};
 
 #[cfg(test)]
@@ -40,6 +41,17 @@ pub struct Draft {
     pub references: Vec<String>,
     /// `Agent` when an agent wrote or changed the body (ADR-016).
     pub origin: Origin,
+    /// An invitation, an answer to one or a cancellation, sent beside the
+    /// text (ADR-057).
+    pub calendar: Option<CalendarPart>,
+}
+
+/// iCalendar text and what it asks of whoever reads it. The text is sent
+/// exactly as given, so it is already CRLF-terminated and folded.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CalendarPart {
+    pub method: Method,
+    pub text: String,
 }
 
 /// What `:agent` hands over in compose (ADR-031). Every text here has been

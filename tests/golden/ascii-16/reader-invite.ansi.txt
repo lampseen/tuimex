@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {default b}Invitation: Q4 roadmap review, Thu 26 Nov 10:00{default}                                                                       
 {default}                                                                                                                        
 {default}    {brightblack}From     {default b}Imani Castell{default} {brightblack}<imani@example.org>{default}                                                                          
@@ -9,6 +10,7 @@
 {default}    {brightblack}When     {default}Thu 26 Nov 2026, 10:00 to 11:30                                                                            
 {default}    {brightblack}Where    {default}Room Fjord, or the call link {brightblue}[1]{default}                                                                           
 {default}    {brightblack}Who      {default}Imani Castell, you and 3 others                                                                            
+{default}    {brightblack}Calendar {brightyellow}work{brightblack} - the account it came to{default}                                                                              
 {default}                                                                                                                        
 {default}    The pre-read is the roadmap document from last week. Please answer by                                               
 {default}    Wednesday so I can book the right room.                                                                             
@@ -34,7 +36,5 @@
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
-{default}                                                                                                                        
-{default}                                                                                                                        
 {default}                                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Answer?{brightblack}  {default}a {brightblack}accept - {default}t {brightblack}tentative - {default}d {brightblack}decline - {default}Esc {brightblack}cancel{default}                                                              
+{default}  Answer?{brightblack}  {default}a {brightblack}accept - {default}t {brightblack}tentative - {default}d {brightblack}decline - {default}p {brightblack}propose a time - {default}x {brightblack}ignore - {default}Esc {brightblack}cancel{default}                                

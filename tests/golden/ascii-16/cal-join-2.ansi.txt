@@ -1,0 +1,11 @@
+{default}  {brightblack b}Fri 27 November{default}                                                                                                       
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Library books due                                                                    {cyan}local{default}  
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                                                             
+{magenta}>{default}   {brightblue}personal{default}   {brightblack}09:00-09:30{default}  {default b}Account review{default}                                                                {yellow}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                                                     
+{default}                                                                                                                        
+{default}  {default b}Links{default}                                                                                                                 
+{magenta}>{default}   {brightblue} 1  {default}bank.example.com.device-check.example.net   {brightblack}bank.example.com{default}   {yellow}^{default} text says bank.example.com                     
+{default}                                                                                                                        
+{default}  {brightblack}opens{default} https://bank.example.com.device-check.example.net/meet                              sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  1-9 {brightblack}open - {default}j k Enter {brightblack}choose - {default}A {brightblack}agent - {default}Esc {brightblack}close{default}                                                                     

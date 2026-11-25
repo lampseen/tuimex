@@ -3,8 +3,8 @@
 # ADR-004 is why these limits exist and have this shape. The numbers are not
 # repeated in prose here; they are the lines below, and a test fails if any
 # document quotes them differently.
-MAX_BINARY_BYTES   := 17825792
-MAX_CODE_LINES     := 18000
+MAX_BINARY_BYTES   := 18874368
+MAX_CODE_LINES     := 28000
 MAX_COMMENT_RATIO  := 30
 MAX_DOC_RATIO      := 75
 DOC_RATIO_FROM     := 2000

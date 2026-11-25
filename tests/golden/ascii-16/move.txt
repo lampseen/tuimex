@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -28,7 +29,6 @@
                                                                                                                         
     Hi Robin,                                                                                                           
                                                                                                                         
-    One more change before you sign: our bank details have changed, and the new                                         
                                                                                                                         
   Folders in work                                                                                                       
 >   Sent           388                                                                                                  

@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                                                                             
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                                                                                 
                                                                                                                                                                                     
   Today                                                                                                        |> Staging database migration window                                 
@@ -39,7 +40,6 @@
                                                                                                                |    target changed the same night, or the first nightly run will    
                                                                                                                |    dump an idle database and report success.                       
                                                                                                                |                                                                    
-                                                                                                               |    What I need from you                                            
                                                                                                                                                                                     
-  lines 15-52 of 59                                                                                                                                     sending in 6s - 1 not sent  
+  lines 15-51 of 59                                                                                                                                     sending in 6s - 1 not sent  
   j k scroll - Alt-h list - Enter open - ? help                                                                                                                                     

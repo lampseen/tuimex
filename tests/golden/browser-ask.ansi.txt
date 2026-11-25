@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}This week: winter routes, a gear swap and one trail closure{fg}                                                           
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Fernway Weekly{fg} {dim}<news@fernway.example.net>{fg}                                                                  
@@ -34,7 +35,6 @@
 {fg}                                                                                                                        
 {fg}    Mill creek is closed for bridge work. Details and the detour {link}[3]{fg}                                                    
 {fg}                                                                                                                        
-{fg}    {dim}You get this because you joined Fernway in 2023. Unsubscribe {link}[4]{dim} or view it{fg}                                         
 {fg}                                                                                                                        
-{fg}  {dim}lines 1-29 of 30{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}lines 1-28 of 30{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  Load 8 images from img.fernway.example.net, cdn.example.net?{dim}  {fg}y {dim}yes · {fg}n {dim}no{fg}                                            

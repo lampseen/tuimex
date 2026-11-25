@@ -70,14 +70,21 @@ what you have typed; `^w` and `^u` delete a word and the line.
 | `:preview auto\|right\|below\|off` | where the preview sits |
 | `:sync [all]` | sync now |
 | `:empty-trash [account]` | delete an account's Trash for good, after a question with the count. `u` does not reach it |
-| `:invite accept\|tentative\|decline` | answer an invitation. Not built: it says so and changes nothing |
+| `:invite accept\|tentative\|decline\|propose\|ignore` | answer the invitation of the message open in the reader, or of the event selected in the calendar. `propose` then asks for the time |
+| `:calendar [month\|week\|day]` | open the calendar; alone, where it was |
+| `:mail` | back to mail, where it was |
+| `:goto <date>` | go to a date in the calendar: `2026-12-05`, `5 dec`, `fri`, `+2w` |
+| `:notify on\|off` | reminders on or off; the choice is remembered |
+| `:event [title]` | the form for a new event on the selected day |
+| `:export [path]` | write every local event to one `.ics` file, in the download directory or where the path says. Never over a file that is there |
 | `:messages` | the last results and errors |
 | `:q` | quit from the list; back elsewhere |
 | `:qa` | quit from anywhere |
 
 **What a command acts on.** The selected row, or every marked row when
 there are marks. A folded thread is taken whole. A command does not take a
-row's number: move the cursor or mark.
+row's number: move the cursor or mark. In the calendar the rows of mail are
+out of sight, so a command that takes them is refused there and says so.
 
 **What it says back.** A result is in the past tense with the next key
 after a dot, `✓ Trashed 3 messages · u to undo`. An error starts with `E` and names
@@ -89,5 +96,5 @@ you mean :archive? Tab to fix`.
 
 ---
 
-[Keys](Keys) · [The agent](The-agent) ·
+[Keys](Keys) · [Calendar](Calendar) · [The agent](The-agent) ·
 [Sections and search](Sections-and-search)

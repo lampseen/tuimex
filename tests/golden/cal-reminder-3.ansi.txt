@@ -1,0 +1,6 @@
+{fg}  {dim b}Today · Mon 23 November{fg}                                                                                               
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  {dim}Standup{fg}                                                                                     
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {dim bg=sel}15:00-16:00{fg bg=sel}  Halden contract call                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}Mon 23 Nov · 2 of 2{fg}                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Reminders on                                                                                                          

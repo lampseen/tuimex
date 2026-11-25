@@ -1,0 +1,1 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Cal{default}                                                                                                      

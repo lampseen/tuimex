@@ -1,3 +1,4 @@
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1                                                     
                                                                                                                         
   Today                                                                                                                 
@@ -34,7 +35,6 @@
                                                                                                                         
     Route status                                                                                                        
                                                                                                                         
-    Route             Length   Status                                                                                   
                                                                                                                         
   5 of 24 - 1 message                                                                       sending in 6s - 1 not sent  
   Load 8 images from img.fernway.example.net, cdn.example.net?  y yes - n no                                            

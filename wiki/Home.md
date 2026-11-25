@@ -19,14 +19,15 @@ assume them.
 | **the sealed copy** | the message as its author styled it, written to a private file and opened in your browser: no script, no form, and nothing loaded from a server unless you said yes to its pictures |
 | **the agent** | a program that reads mail or writes text for you. There are two, and they are kept apart: the command `:agent` hands text to, and an outside agent that calls `tuimex` subcommands under grants you gave |
 | **grant** | what an account lets an outside agent do: `read`, for the folders named, and `draft`. There is no grant to send, move, delete or flag |
+| **local** | said of an event or a calendar that is on this machine and nowhere else: tuimex holds it because there is no provider's calendar it may write |
 | **fixtures** | the design's synthetic mailbox, `tuimex --fixtures`, for trying tuimex with no account and no network |
 
 Four directories, and nothing outside them:
 
 ```
 ~/.config/tuimex/        what you said: config.toml, a pinned certificate, a palette
-~/.local/share/tuimex/   your mail, one Maildir for each account
-~/.cache/tuimex/         what can be worked out again: the index, sealed copies
+~/.local/share/tuimex/   your mail, one Maildir for each account, and your local events
+~/.cache/tuimex/         what can be worked out again: the index, sealed copies, fetched calendars
 ~/.local/state/tuimex/   the log, and the record of every agent call
 ```
 
@@ -42,6 +43,7 @@ Four directories, and nothing outside them:
 - **[Links and the browser copy](Links-and-the-browser-copy)**: what a link is checked for, and the sealed copy.
 - **[Attachments](Attachments)**: saving a file, opening one, pictures.
 - **[Writing and sending](Writing-and-sending)**: compose, identities, the send summary, drafts.
+- **[Calendar](Calendar)**: every account's calendar in one view, answering invitations, events of your own, reminders.
 - **[The agent](The-agent)**: `:agent` inside tuimex, and the subcommands an outside agent may call.
 - **[Sections and search](Sections-and-search)**: the tabs, the query grammar, `/`.
 - **[Keys](Keys)** and **[Commands](Commands)**: everything there is.

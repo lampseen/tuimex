@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                         
 {default}  {default b}Contract draft v3 for the Halden account{default}                {brightblack}1 of 3 in the thread{default}  
 {default}                                                                                
 {default}    {brightblack}From     {default b}Priya Raman{default} {brightblack}<priya@example.org>{default}                                    
@@ -18,7 +19,6 @@
 {default}    with 45 if the first invoice is issued at signing rather than at delivery.  
 {default}                                                                                
 {default}    2. The support clause. They want named contacts on our side. I have put     
-{default}    you and Dmitri down for now; say if that should be someone else.            
 {default}                                                                                
-{default}  {brightblack}lines 1-11 of 30{default}                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}lines 1-10 of 30{default}                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  r {brightblack}reply - {default}e {brightblack}archive - {default}n b {brightblack}next, previous - {default}a {brightblack}files - {default}Esc {brightblack}back{default}                 

@@ -554,3 +554,80 @@ fn a_saved_file_under_the_home_directory_is_said_from_a_tilde_and_any_other_whol
     assert_eq!(homely(Path::new("/home/someone-else/a.pdf"), Some(home)), "/home/someone-else/a.pdf");
     assert_eq!(homely(Path::new("/srv/files/a.pdf"), None), "/srv/files/a.pdf");
 }
+
+/// What opens things for the calendar, under a scratch root, and what it
+/// was handed to open.
+fn outside(test: &str) -> (Outside, Rc<RefCell<Vec<String>>>, PathBuf) {
+    let root = Dirs::from_env().unwrap().cache.join(test);
+    if root.exists() {
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+    let opened = Rc::new(RefCell::new(Vec::new()));
+    let outside = Outside::new(Box::new(Recorded(opened.clone())), root.join("downloads"), &root.join("cache"));
+    (outside, opened, root)
+}
+
+/// An event that joins at its `links`, the first of them its meeting's.
+fn event(links: &[&str], location: &str) -> tuimex_core::calendar::Event {
+    tuimex_core::calendar::Event {
+        uid: "planning@example.com".into(),
+        sequence: 0,
+        instead_of: None,
+        summary: "Planning".into(),
+        start: tuimex_core::calendar::Moment::Utc(1_795_687_200),
+        end: None,
+        location: Some(location.to_string()),
+        description: None,
+        organizer: None,
+        guests: Vec::new(),
+        cancelled: false,
+        links: links.iter().map(|link| (*link).to_string()).collect(),
+        repeat: None,
+        excluded: Vec::new(),
+        alarms: Vec::new(),
+        more: Vec::new(),
+    }
+}
+
+/// ADR-018, ADR-054: an event's link is a link. Whatever the interface
+/// made of it, it is assessed again where it is opened, and a refusal
+/// names the key that asked.
+#[test]
+fn an_event_s_link_is_assessed_again_where_it_opens_and_a_refusal_names_its_key() {
+    let (mut outside, opened, _) = outside("event-link");
+    let meeting = event(&["https://meet.example.com/abc-defg", "file:///etc/passwd"], "Room Fjord");
+    assert_eq!(outside.event_link(1, Some(&meeting), 1), None);
+    assert_eq!(*opened.borrow(), ["https://meet.example.com/abc-defg"]);
+    let refused = |reason: &str| Some(Event::ActionFailed { serial: 2, reason: reason.into(), hint: String::new() });
+    assert_eq!(outside.event_link(2, Some(&meeting), 2), refused("o 2: only web links are opened"));
+    assert_eq!(outside.event_link(2, Some(&meeting), 3), refused("o 3: no such link"));
+    assert_eq!(outside.event_link(2, None, 1), refused("o 1: the event is no longer in the calendar"));
+    assert_eq!(opened.borrow().len(), 1, "one link was asked for and is the one thing opened");
+}
+
+/// ADR-055, ADR-011: `:export` writes one new file, owner-only, and never
+/// over a file that is there.
+#[test]
+fn the_local_events_are_written_to_a_new_file_and_never_over_one() {
+    let (mut outside, opened, root) = outside("export");
+    let text = "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n".to_string();
+    let downloads = root.join("downloads");
+    let saved = |path: &Path| Event::Saved { path: shown(path) };
+    assert_eq!(outside.export(1, Path::new(""), Ok(Some(text.clone()))), saved(&downloads.join("tuimex-calendar.ics")));
+    assert_eq!(std::fs::read_to_string(downloads.join("tuimex-calendar.ics")).unwrap(), text);
+    let mode = std::fs::metadata(downloads.join("tuimex-calendar.ics")).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o600);
+    let again = outside.export(2, Path::new(""), Ok(Some(text.clone())));
+    assert_eq!(again, saved(&downloads.join("tuimex-calendar-2.ics")), "beside the first, not over it");
+
+    assert_eq!(outside.export(3, Path::new("mine.ics"), Ok(Some(text.clone()))), saved(&downloads.join("mine.ics")));
+    let refused = |serial, reason: &str| Event::ActionFailed { serial, reason: reason.into(), hint: String::new() };
+    let taken = outside.export(4, Path::new("mine.ics"), Ok(Some("other".into())));
+    assert_eq!(taken, refused(4, ":export: mine.ics is there already"));
+    assert_eq!(std::fs::read_to_string(downloads.join("mine.ics")).unwrap(), text);
+    let none = outside.export(5, Path::new(""), Ok(None));
+    assert_eq!(none, refused(5, ":export: tuimex holds no local event to write"));
+    let unread = outside.export(6, Path::new(""), Err("the calendar could not be kept: disk".into()));
+    assert_eq!(unread, refused(6, ":export: the calendar could not be kept: disk"));
+    assert!(opened.borrow().is_empty(), "writing a file opens nothing");
+}

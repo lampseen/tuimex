@@ -1,0 +1,17 @@
+{default}  {brightblack}Mail{default}   {default b}Calendar{default}                                                                                                       
+{default}  {default b}New event{default}                                                                                                             
+{default}                                                                                                                        
+{default}    {brightblack}Title    {default b}Offsite planning{default}                                                                                           
+{default}    {brightblack}Calendar personal local{default}   {default b}work local{default}                                                                                
+{default}    {brightblack}Starts   {default}Thu 26 Nov 2026 15:30                                                                                      
+{magenta}>{default}   {default b}Ends     {default}soon{black bg=magenta} {default}                                                                                                      
+{default}    {brightblack}All day  no{default}                                                                                                         
+{default}    {brightblack}Repeats  never{default}                                                                                                      
+{default}    {brightblack}Where    {default}Room Fjord                                                                                                 
+{default}    {brightblack}Guests   {default}Imani Castell {brightblack}<imani@example.org>{default}                                                                          
+{default}    {brightblack}         {default}Lars Lindqvist {brightblack}<lars@example.org>{default}                                                                          
+{default}    {brightblack}Reminder {default}10 minutes before                                                                                          
+{default}                                                                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}not a date or a time{default}                                                                      sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Tab {brightblack}next field - {default}14:30 or fri {brightblack}is enough - {default}Enter {brightblack}notes - {default}^s {brightblack}save - {default}Esc {brightblack}close{default}                                           

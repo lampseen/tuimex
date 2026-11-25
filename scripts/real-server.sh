@@ -23,14 +23,22 @@
 # named tuimex-greenmail and tuimex-dovecot are ever touched, both bound
 # to this machine alone, and a third, tuimex-dovecot-ns: a Dovecot that
 # keeps every folder under `INBOX.`, as Courier and many hosts do, where
-# an Archive and a Trash made at the top are refused (ADR-048). The
-# account and its passwords are made up here.
+# an Archive and a Trash made at the top are refused (ADR-048). A fourth,
+# tuimex-radicale, is a CalDAV server, where an event is written, changed,
+# answered and deleted (ADR-062); it serves plain HTTP, which the engine
+# allows on 127.0.0.1 alone, and it is bound there. The last leg joins the
+# two: an invitation delivered to GreenMail for an account whose calendar
+# is the Radicale one, answered in the binary on a terminal, with the
+# reply read back from GreenMail and the event from Radicale (ADR-057).
+# Radicale knows that account by its mail password, as a provider would.
+# The accounts and their passwords are made up here.
 #
 # Two checkouts on one machine would take each other's containers and
-# ports. REAL_SERVER_TAG is added to both names, and REAL_SERVER_PORTS is
+# ports. REAL_SERVER_TAG is added to every name, and REAL_SERVER_PORTS is
 # the two digits GreenMail's ports begin with (13 by default: 13993, 13465,
-# 13025), Dovecot's being the next (14993) and the namespaced Dovecot's
-# the one after (15993), which is why the two digits can be at most 63.
+# 13025), Dovecot's being the next (14993), the namespaced Dovecot's the
+# one after (15993) and Radicale's the one after that (16232), which is
+# why the two digits can be at most 62.
 set -eu
 
 runtime=${CONTAINER:-podman}
@@ -38,6 +46,7 @@ tag=${REAL_SERVER_TAG:-}
 green=${REAL_SERVER_PORTS:-13}
 dove=$((green + 1))
 spaced=$((green + 2))
+caldav=$((green + 3))
 root=$(cd "$(dirname "$0")/.." && pwd)
 # Under the build directory: never a shared temporary one (ADR-011).
 dir=$root/target/real-server
@@ -47,9 +56,14 @@ dir=$root/target/real-server
 # Dovecot publishes this version for amd64 alone.
 greenmail=docker.io/greenmail/standalone:2.1.15@sha256:309ba544ea482e5d4265d09921cdab07c8dad2cc4481d715c9b8ff5d3f0a149f
 dovecot=docker.io/dovecot/dovecot:2.3.21.1@sha256:547d28f9a893c93a1d2f6dc164880cd7bfa74009106dfa46b36a6a2ee636d921
+# Radicale 3.5.4, the CalDAV server the calendar's writes are proven on.
+radicale_tag=docker.io/tomsquest/docker-radicale:3.5.4.0
+radicale_digest=sha256:ead0f90cb6a691a45cd8ff4971dc0689cd4d5fab85934388f77f2a1a6af5f7b1
+radicale=$radicale_tag@$radicale_digest
 
 remove() {
-    $runtime rm -f "tuimex-greenmail$tag" "tuimex-dovecot$tag" "tuimex-dovecot-ns$tag" >/dev/null 2>&1 || true
+    $runtime rm -f "tuimex-greenmail$tag" "tuimex-dovecot$tag" "tuimex-dovecot-ns$tag" "tuimex-radicale$tag" \
+        >/dev/null 2>&1 || true
 }
 trap remove EXIT
 remove
@@ -180,3 +194,76 @@ grep -qF 'real-server: ran tui-archive (under "INBOX.",' "$log" || {
     exit 1
 }
 echo "real-server: the dovecot-ns leg passed"
+
+# Radicale answers whether an event is written, changed, answered and
+# deleted over CalDAV, each write conditional on the tag last read, and
+# whether a refused sign-in and a redirect are said as such. A leg that
+# cannot start fails: a skip must never read as a pass.
+cat >"$dir/radicale.conf" <<'CONF'
+[server]
+hosts = 0.0.0.0:5232
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+htpasswd_encryption = plain
+[rights]
+type = owner_only
+[storage]
+filesystem_folder = /data/collections
+CONF
+# `spike` is GreenMail's first user, with the password it has there: tuimex
+# signs in to a calendar as the mail account.
+printf 'caldav:throwaway-calendar\nspike:throwaway\n' >"$dir/radicale-users"
+chmod 644 "$dir/radicale.conf" "$dir/radicale-users"
+$runtime run -d --name "tuimex-radicale$tag" -p "127.0.0.1:${caldav}232:5232" \
+    -v "$dir/radicale.conf:/config/config:ro,Z" -v "$dir/radicale-users:/config/users:ro,Z" \
+    "$radicale" >/dev/null
+tries=0
+until curl -s -o /dev/null --max-time 2 "http://127.0.0.1:${caldav}232/"; do
+    tries=$((tries + 1))
+    if [ "$tries" -gt 60 ]; then
+        echo "real-server: nothing answered on port ${caldav}232" >&2
+        exit 1
+    fi
+    sleep 1
+done
+log=$dir/radicale.log
+export TUIMEX_CALDAV_SERVER="http://127.0.0.1:${caldav}232" TUIMEX_CALDAV_USER=caldav
+export TUIMEX_CALDAV_PASSWORD=throwaway-calendar
+(cd "$root" &&
+    cargo test --locked -p tuimex-engine --test caldav_server -- --nocapture --test-threads=1) >"$log" 2>&1 || {
+    cat "$log"
+    echo "real-server: the radicale leg failed" >&2
+    exit 1
+}
+grep -E 'real-server[a-z -]*: |^test result' "$log"
+for ran in 'real-server: ran caldav-write (' 'real-server: ran caldav-redirect ('; do
+    grep -qF "$ran" "$log" || {
+        echo "real-server: the radicale leg did not print \"$ran\"; a test was skipped or renamed" >&2
+        exit 1
+    }
+done
+echo "real-server: the radicale leg passed"
+
+# The calendar leg: GreenMail and Radicale together under the binary. It
+# is the mail servers' variables again, as GreenMail has them, beside
+# Radicale's.
+log=$dir/calendar.log
+export TUIMEX_SERVER_HOST=localhost TUIMEX_SERVER_PORT="${green}993" TUIMEX_SERVER_USER=spike
+export TUIMEX_SERVER_USER2=second TUIMEX_SERVER_USER3=third TUIMEX_SERVER_PASSWORD=throwaway
+export TUIMEX_SERVER_PASSWORD3=its0wn TUIMEX_SERVER_CA="$dir/cert.pem"
+export TUIMEX_SERVER_SMTPS_PORT="${green}465" TUIMEX_SERVER_SMTP_PORT="${green}025"
+unset TUIMEX_SERVER_PREFIX TUIMEX_SERVER_STARTTLS_PORT
+(cd "$root" &&
+    cargo test --locked -p tuimex --test real_server an_invitation_is_answered_on_a_terminal -- --nocapture) \
+    >"$log" 2>&1 || {
+    cat "$log"
+    echo "real-server: the calendar leg failed" >&2
+    exit 1
+}
+grep -E 'real-server[a-z -]*: |^test result' "$log"
+grep -qF 'real-server: ran calendar-answer (' "$log" || {
+    echo "real-server: the calendar leg did not print \"real-server: ran calendar-answer (\"; the test was skipped or renamed" >&2
+    exit 1
+}
+echo "real-server: the calendar leg passed"

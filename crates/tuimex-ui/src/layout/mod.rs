@@ -76,7 +76,8 @@ pub const WORDS_ON_SEL: f64 = 4.5;
 pub const WORDS_BRIGHT: [&str; 2] = ["invite", "replied"];
 
 /// The preview is beside the list from this many columns and below it
-/// otherwise, and hidden in a terminal shorter than `PREVIEW_MIN_HEIGHT`.
+/// otherwise, and hidden when fewer than `PREVIEW_MIN_HEIGHT` rows are left
+/// under the bar of places.
 pub const PREVIEW_BESIDE_FROM: usize = 160;
 pub const PREVIEW_MIN_HEIGHT: usize = 30;
 /// Beside the list it takes this share of the width, in hundredths, within
@@ -90,13 +91,32 @@ pub fn preview_width(width: usize) -> usize {
 }
 
 /// Its rows when it is below the list, the divider included: 45% of the
-/// terminal's.
+/// rows under the bar of places.
 pub fn preview_height(rows: usize) -> usize {
     rows * 45 / 100
 }
 
 /// Body text wraps here however wide the terminal is.
 pub const MEASURE: usize = 76;
+
+/// The calendar. In the month grid a day is `CAL_CELL` cells: the cursor,
+/// two digits and a mark. The week shows seven days from `CAL_WEEK_FROM`
+/// columns and three below that, a row to `CAL_SLOT` minutes from
+/// `CAL_DAY_FROM`, beside an axis of `CAL_AXIS` cells; an event that begins
+/// while another runs is drawn `CAL_STEP` cells in. An event row gives its
+/// hours `CAL_TIME` cells and its words up to `CAL_WORDS`, and under
+/// `CAL_NARROW` cells the narrow form of each.
+pub const CAL_CELL: usize = 4;
+pub const CAL_WEEK_FROM: usize = 120;
+pub const CAL_SLOT: i64 = 30;
+pub const CAL_STEP: usize = 2;
+pub const CAL_DAY_FROM: &str = "08:00";
+pub const CAL_AXIS: usize = 7;
+pub const CAL_TIME: usize = 11;
+pub const CAL_TIME_NARROW: usize = 7;
+pub const CAL_WORDS: usize = 20;
+pub const CAL_WORDS_NARROW: usize = 12;
+pub const CAL_NARROW: usize = 70;
 
 #[cfg(test)]
 mod tests;

@@ -1,8 +1,8 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {dim}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {acc b}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}    {link}personal{fg}   {fg b}to Tomas Ferreira{fg}       Re: Bike rack: still want it?                                   in 6s  {dim} 14:20{fg}    
 {acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {fg bg=sel b}to Imani Castell{fg bg=sel}        Offsite rooms  {err bg=sel}refused by smtp.example.org: 552 me…{fg bg=sel}            {agent bg=sel}1 file{fg bg=sel}  {dim bg=sel} 13:05{fg bg=sel}    
-{fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        

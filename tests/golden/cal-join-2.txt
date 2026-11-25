@@ -1,0 +1,11 @@
+  Fri 27 November                                                                                                       
+    personal   all day      Library books due                                                                    local  
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+▌   personal   09:00-09:30  Account review                                                                needs answer  
+    work       09:30-09:45  Standup                                                                                     
+                                                                                                                        
+  Links                                                                                                                 
+▌    1  bank.example.com.device-check.example.net   bank.example.com   ▲ text says bank.example.com                     
+                                                                                                                        
+  opens https://bank.example.com.device-check.example.net/meet                              sending in 6s · 1 not sent  
+  1-9 open · j k Enter choose · A agent · Esc close                                                                     

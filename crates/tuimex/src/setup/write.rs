@@ -74,6 +74,29 @@ pub fn account(entry: &Entry) -> String {
     text
 }
 
+/// The `[[calendar]]` table of `account`: read over CalDAV at `url`, and
+/// with `write` written there too; or with no address, a feed whose
+/// address is in the keyring.
+pub fn calendar(account: &str, url: Option<&str>, write: bool) -> String {
+    let mut text = format!("[[calendar]]\naccount = {}\n", quoted(account));
+    match url {
+        Some(url) => text += &format!("kind = \"caldav\"\nurl = {}\n", quoted(url)),
+        None => text += "kind = \"feed\"\n",
+    }
+    if write {
+        text += "write = true\n";
+    }
+    text
+}
+
+/// The table that says `account`'s calendar, which is already in the
+/// file, is written at its provider. A key cannot be added to a table
+/// that is not the last without rewriting the file (ADR-043), so it is a
+/// table of its own that adds to that one.
+pub fn written(account: &str) -> String {
+    format!("[[calendar]]\naccount = {}\nwrite = true\n", quoted(account))
+}
+
 /// `existing` with `tables` after it. An error when the result would not
 /// be the same config with the tables added, which is the case for a file
 /// laid out so that nothing can follow it (accounts written as one inline
@@ -90,7 +113,9 @@ pub fn appended(existing: &str, tables: &[String]) -> Result<String> {
     let read = |text: &str| text.parse::<toml::Table>().ok();
     let (Some(before), Some(after)) = (read(existing), read(&text)) else { bail!(by_hand()) };
     let kept = before.iter().all(|(key, value)| match (value, after.get(key)) {
-        (toml::Value::Array(old), Some(toml::Value::Array(new))) if key == "account" => new.starts_with(old),
+        (toml::Value::Array(old), Some(toml::Value::Array(new))) if key == "account" || key == "calendar" => {
+            new.starts_with(old)
+        }
         (old, new) => Some(old) == new,
     });
     if !kept || Config::parse(&text).is_err() {
@@ -104,8 +129,9 @@ fn one_key(line: &str) -> Option<(String, toml::Value)> {
     line.parse::<toml::Table>().ok()?.into_iter().next()
 }
 
-/// `existing` with the account `old` named `new`: its `name` line, and
-/// each `[[section]]` query that has the term `account:<old>`. Only the
+/// `existing` with the account `old` named `new`: its `name` line, its
+/// `[[calendar]]`'s `account` line, and each `[[section]]` query that has
+/// the term `account:<old>`. Only the
 /// value changes on those lines. An error, with nothing to write, when
 /// the result read back is not the same config with exactly that
 /// changed: a file laid out so that the name is not on a line of its own
@@ -124,6 +150,9 @@ pub fn renamed(existing: &str, old: &str, new: &str) -> Result<String> {
         }
         let wanted = match (table.as_str(), one_key(line)) {
             ("[[account]]", Some((key, toml::Value::String(name)))) if key == "name" && name == old => {
+                Some((name, new.to_string()))
+            }
+            ("[[calendar]]", Some((key, toml::Value::String(name)))) if key == "account" && name == old => {
                 Some((name, new.to_string()))
             }
             ("[[section]]", Some((key, toml::Value::String(query)))) if key == "query" && term(&query) != query => {
@@ -162,9 +191,18 @@ pub fn renamed(existing: &str, old: &str, new: &str) -> Result<String> {
             *query = toml::Value::String(now);
         }
     }
+    let mut calendars = tables("calendar", &expected);
+    for name in calendars.iter_mut().filter_map(|calendar| calendar.get_mut("account")) {
+        if name.as_str() == Some(old) {
+            *name = toml::Value::String(new.to_string());
+        }
+    }
     expected.insert("account".to_string(), toml::Value::Array(accounts));
     if !sections.is_empty() {
         expected.insert("section".to_string(), toml::Value::Array(sections));
+    }
+    if !calendars.is_empty() {
+        expected.insert("calendar".to_string(), toml::Value::Array(calendars));
     }
     if expected != after || Config::parse(&text).is_err() {
         bail!(by_hand());

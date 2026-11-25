@@ -1,0 +1,6 @@
+  Today · Mon 23 November                                                                                               
+    work       09:30-09:45  Standup                                                                                     
+▌   work       15:00-16:00  Halden contract call                                                                        
+                                                                                                                        
+  opens https://meet.example.org/r/halden                                                   sending in 6s · 1 not sent  
+  Opening meet.example.org                                                                                              

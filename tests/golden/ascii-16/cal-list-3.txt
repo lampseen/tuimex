@@ -1,0 +1,15 @@
+  F1 Mail   F2 Calendar                                                                                                 
+  Month   Week   Day                                                                                     November 2026  
+                                                                                                                        
+     November 2026                |  Sat 28 November                                                                    
+     Mo  Tu  We  Th  Fr  Sa  Su   |>   personal   all day      Cabin weekend  Ridge saddle hut                          
+                              1   |                                                                                     
+      2.  3.  4.  5.  6.  7   8   |  Sun 29 November                                                                    
+      9. 10. 11. 12. 13. 14  15   |    personal   all day      Cabin weekend  Ridge saddle hut                          
+     16. 17: 18. 19. 20: 21  22   |                                                                                     
+     23: 24: 25: 26# 27#>28. 29.  |  Mon 30 November                                                                    
+     30.                          |    work       09:30-09:45  Standup                                                  
+                                  |                                                                                     
+                                                                                                                        
+  Sat 28 Nov - 1 of 1                                                                       sending in 6s - 1 not sent  
+  j k move - Enter open - Alt-h grid - ? help                                                                           

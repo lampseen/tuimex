@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -33,7 +34,6 @@
 {default}    confirm today, because the board date has moved up.                                                                 
 {default}                                                                                                                        
 {default}    Priya                                                                                                               
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}  {brightblack}lines 1-13 of 13{default}                                                                          sending in 6s{brightblack} - {red}1 not sent{default}  

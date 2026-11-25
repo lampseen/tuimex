@@ -1,0 +1,8 @@
+{default}  {brightblack b}Fri 27 November{default}                                                                                                       
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Library books due                                                                    {cyan}local{default}  
+{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                                                             
+{magenta}>{default}   {brightblue}personal{default}   {brightblack}09:00-09:30{default}  {default b}Account review{default}                                                                {yellow}needs answer{default}  
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  Standup                                                                                     
+{default}                                                                                                                        
+{default}  {brightblack}Fri 27 Nov - 3 of 4 - {yellow}1 to answer{default}                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Enter {brightblack}open - {default}i {brightblack}answer - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Esc {brightblack}back - {default}? {brightblack}help{default}                                               

@@ -1,6 +1,7 @@
 //! What tuimex keeps on disk: the Maildir, the index, the journal, and the
 //! one module that creates files (ADR-011).
 
+pub mod calendar;
 pub mod files;
 pub mod index;
 pub mod journal;
@@ -22,6 +23,8 @@ pub enum Error {
     Name(String),
     #[error("there is no message {key} in {account}")]
     NoMessage { account: String, key: String },
+    #[error("{account} holds no event {key}")]
+    NoEvent { account: String, key: String },
     #[error("{account} already has a message {key}")]
     Exists { account: String, key: String },
     #[error("{}: line {line} is not a journal entry: {reason}", path.display())]

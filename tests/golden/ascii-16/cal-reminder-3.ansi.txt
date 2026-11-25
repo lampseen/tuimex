@@ -1,0 +1,6 @@
+{default}  {brightblack b}Today - Mon 23 November{default}                                                                                               
+{default}    {brightyellow}work{default}       {brightblack}09:30-09:45{default}  {brightblack}Standup{default}                                                                                     
+{magenta}>{default}   {brightyellow}work{default}       {brightblack}15:00-16:00{default}  Halden contract call                                                                        
+{default}                                                                                                                        
+{default}  {brightblack}Mon 23 Nov - 2 of 2{default}                                                                       sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  Reminders on                                                                                                          

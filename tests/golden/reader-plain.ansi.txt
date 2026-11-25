@@ -1,3 +1,4 @@
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Contract draft v3 for the Halden account{fg}                                                        {dim}1 of 3 in the thread{fg}  
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.org>{fg}                                                                            
@@ -35,6 +36,5 @@
 {fg}    Thanks,                                                                                                             
 {fg}    Priya                                                                                                               
 {fg}                                                                                                                        
-{fg}                                                                                                                        
-{fg}  {dim}lines 1-27 of 30{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}lines 1-26 of 30{fg}                                                                          sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  r {dim}reply · {fg}e {dim}archive · {fg}n b {dim}next, previous · {fg}a {dim}files · {fg}Esc {dim}back{fg}                                                         

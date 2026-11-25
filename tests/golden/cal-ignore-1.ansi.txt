@@ -1,0 +1,7 @@
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                                                    {agent}local{fg}  
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim}Fri 27 Nov · 3 events{fg}                                                                     sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {ok}✓{fg} Ignored Account review{dim} · nothing sent · u to undo{fg}                                                                   

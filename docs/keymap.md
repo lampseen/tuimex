@@ -17,6 +17,7 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `u` | undo the last action |
 | `A` | what the agent can do |
 | `^l` | redraw |
+| `gc F2` | the calendar |
 
 ## List
 
@@ -99,13 +100,72 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `a` | accept |
 | `t` | tentative |
 | `d` | decline |
+| `p` | propose another time |
+| `x` | ignore; nothing is sent |
+
+## Calendar (after gc)
+
+| key | does |
+|---|---|
+| `h l` | previous, next day |
+| `j k` | grid: week; else: event |
+| `[ ]` | previous, next page |
+| `Alt-j Alt-l` | month: focus the events |
+| `Alt-k Alt-h` | back to the grid |
+| `J K` | next, previous event |
+| `n N` | next, previous match |
+| `I` | next invite to answer |
+| `t` | today |
+| `gd` | go to a date |
+| `Tab S-Tab` | next, previous view |
+| `1 2 3` | month, week, day |
+| `Enter` | the day; then the event |
+| `/` | find; Enter: every day |
+| `gt gT` | next, previous account |
+| `C` | show, hide calendars |
+| `o` | links; the meeting first |
+| `i` | answer an invitation |
+| `c` | new event here |
+| `E` | edit the event |
+| `d` | delete the event |
+| `gn` | reminders on, off |
+| `gm F1` | back to mail |
+
+## Event
+
+| key | does |
+|---|---|
+| `j k ^d ^u gg G` | scroll |
+| `zo zc` | unfold, fold More |
+| `v` | the mail it came in |
+| `o i E d J K I` | as in the calendar |
+
+## Calendars (after C)
+
+| key | does |
+|---|---|
+| `j k` | choose |
+| `Space` | show or hide |
+| `Esc` | close |
+
+## Event form
+
+| key | does |
+|---|---|
+| `Tab S-Tab` | next, previous field |
+| `h l` | choose, where offered |
+| `Left Right` | as h and l |
+| `Enter` | edit notes in $EDITOR |
+| `^s` | save; guests get mail |
+| `Esc` | close; keep or discard |
 
 ## Compose
 
 | key | does |
 |---|---|
 | `Tab S-Tab` | next, previous field |
-| `Left Right` | identity, on From |
+| `h l` | identity, on From |
+| `Left Right` | as h and l |
 | `Enter` | edit body in $EDITOR |
 | `^a` | attach a file |
 | `^s` | send summary |

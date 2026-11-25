@@ -1,0 +1,15 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {acc b}Month{fg}   {dim}Week{fg}   {dim}Day{fg}                                                                                     {fg b}December 2026{fg}  
+{fg}                                                                                                                        
+{fg}     {fg b}December 2026{fg}                {faint}│{fg}  {dim b}Sat 5 December{fg}                                                                     
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}    {link}personal{fg}   {dim}10:00-13:00{fg}  Gear swap  {dim}Fernway hall{fg}                           {agent}local{fg}  
+{fg}          1{dim}∙{fg}  2{dim}∙{fg}  3{dim}:{fg}  4{dim}∙{acc bg=sel}▌{fg bg=sel} 5{dim bg=sel}∙{fg} {dim} 6{fg}   {faint}│{fg}                                                                                     
+{fg}      7{dim}:{fg}  8{dim}:{fg}  9{dim}:{fg} 10{dim}:{fg} 11{dim}:{fg} 12{dim}∙{fg} 13{dim}∙{fg}  {faint}│{fg}  {dim b}Mon 7 December{fg}                                                                     
+{fg}     14{dim}∙{fg} 15{dim}∙{fg} 16{dim}∙{fg} 17{dim}∙{fg} 18{dim}∙{fg} {dim}19{fg}  {dim}20{fg}   {faint}│{fg}    {head}work{fg}       {dim}all day{fg}      On call                                                  
+{fg}     21{dim}∙{fg} 22{dim}∙{fg} 23{dim}∙{fg} 24{dim}∙{fg} 25{dim}∙{fg} {dim}26{fg}  {dim}27{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}     28{dim}∙{fg} 29{dim}∙{fg} 30{dim}∙{fg} 31{dim}∙{fg}              {faint}│{fg}                                                                                     
+{fg}                                  {faint}│{fg}  {dim b}Tue 8 December{fg}                                                                     
+{fg}     {dim}January 2027{fg}                 {faint}│{fg}    {head}work{fg}       {dim}all day{fg}      On call                                                  
+{fg}                                                                                                                        
+{fg}  {dim}Sat 5 Dec · 1 event{fg}                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}? {dim}help{fg}                                                          

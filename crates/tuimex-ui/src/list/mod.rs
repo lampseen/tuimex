@@ -425,8 +425,9 @@ pub enum Place {
     Right,
 }
 
-/// The design's `previewPlace`. A terminal too short has no preview, and
-/// one too narrow for the list's sender column beside it has it below.
+/// The design's `previewPlace`, for the `height` rows under the bar of
+/// places. Too few of them and there is no preview, and a terminal too
+/// narrow for the list's sender column beside it has it below.
 pub fn place(preview: Preview, width: usize, height: usize) -> Place {
     let fits_beside = width >= layout::preview_width(width) + 1 + INDENT + columns(0, &[]).from + 8 + MARGIN;
     match preview {

@@ -11,7 +11,7 @@ use crate::paint::Theme;
 use crate::palette::{Palette, Tier};
 use crate::span::Line;
 
-fn over(mail: Vec<Listed>) -> App {
+pub(super) fn over(mail: Vec<Listed>) -> App {
     let mailbox = Mailbox {
         now: fx::NOW,
         sections: fx::sections(),
@@ -22,16 +22,17 @@ fn over(mail: Vec<Listed>) -> App {
     };
     let mut app = App::new(Theme { palette: Palette::new(Tier::True), glyphs: Glyphs::Unicode }, mailbox);
     app.set_up(fx::identities(), true);
+    app.set_calendar(crate::calendar::tests::design());
     app
 }
 
-fn app() -> App {
+pub(super) fn app() -> App {
     over(fx::inbox().into_iter().chain(fx::outbox()).collect())
 }
 
 /// Types `keys`: a return is Enter, a tab Tab, an escape Esc, a delete
 /// Backspace, `^x` is the chord and `⌥x` is Alt with `x`.
-fn press(app: &mut App, keys: &str) {
+pub(super) fn press(app: &mut App, keys: &str) {
     let mut chars = keys.chars();
     while let Some(c) = chars.next() {
         app.key(match c {
@@ -55,7 +56,7 @@ fn told(app: &mut App, fake: &mut fx::Fake) {
 /// The app with the message `key` open in the reader and its body there,
 /// after `keys`. What opening asked for has been taken; what `keys` asked
 /// for has not.
-fn reading(key: &str, keys: &str) -> App {
+pub(super) fn reading(key: &str, keys: &str) -> App {
     let (mut app, mut fake) = (app(), fx::Fake::default());
     let mail = fx::inbox();
     let row = crate::list::rows(&mail, &[]).iter().position(|row| row.msg.envelope.id.key == key).unwrap();
@@ -65,19 +66,36 @@ fn reading(key: &str, keys: &str) -> App {
     app
 }
 
-fn after(keys: &str) -> App {
+pub(super) fn after(keys: &str) -> App {
     let mut app = app();
     press(&mut app, keys);
     app
 }
 
-fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
-    let lines = app.lines(width, height);
+fn texts(lines: &[Line]) -> Vec<String> {
     lines.iter().map(|line| line.iter().map(|s| s.text.as_str()).collect::<String>().trim_end().to_string()).collect()
 }
 
+/// The `height` lines under the bar of places, which `bar` reads: a test of
+/// a screen counts its rows from the screen's own first.
+pub(super) fn under(app: &mut App, width: usize, height: usize) -> Vec<Line> {
+    app.lines(width, height + 1).split_off(1)
+}
+
+pub(super) fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> {
+    texts(&under(app, width, height))
+}
+
+/// The bar of places over the screen, and what of it is drawn as the place
+/// in view.
+pub(super) fn bar(app: &mut App) -> (String, String) {
+    let lines = app.lines(120, 41);
+    let in_view = lines[0].iter().filter(|span| span.fg == crate::palette::Tok::Fg && span.bold);
+    (texts(&lines[..1]).remove(0), in_view.map(|span| span.text.as_str()).collect())
+}
+
 /// The status line's left and the command line, at 120 by 40.
-fn foot(app: &mut App) -> (String, String) {
+pub(super) fn foot(app: &mut App) -> (String, String) {
     let rows = screen(app, 120, 40);
     let left = rows[38].split("   ").next().unwrap().trim().to_string();
     (left, rows[39].trim().to_string())
@@ -168,7 +186,7 @@ fn every_key_of_the_table_does_something() {
         ("command.cancel", _) => ":",
         ("confirm.yes" | "confirm.no" | "confirm.other", _) => ":empty-trash work\r",
         // A new message opens on To: five fields on is From, four the body.
-        ("compose.identity", _) => "c\t\t\t\t\t",
+        ("compose.identity" | "compose.identity-arrows", _) => "c\t\t\t\t\t",
         ("compose.editor", _) => "c\t\t\t\t",
         (id, _) if id.starts_with("compose.") => "c",
         // The first Halden message is longer than the screen and is one
@@ -188,6 +206,26 @@ fn every_key_of_the_table_does_something() {
         ("agent.tidy", _) => "c\t\t\t\tA",
         ("agent.link", _) => "jjjj\roA",
         ("agent.reply", _) => "jjA",
+        // Today has two events, the first with a link; `I` finds the
+        // invitation on Thursday, and a search for "call" two events.
+        ("calendar.match", "N") => "gc/call\rn",
+        ("calendar.match", _) => "gc/call\r",
+        ("calendar.today", _) => "gcl",
+        ("calendar.focus-grid", _) => "gc⌥l",
+        ("calendar.view-number", "1") => "gc2",
+        ("calendar.answer", _) => "gcI\r",
+        ("calendar.links" | "calendar.edit" | "calendar.delete", _) => "gc\r",
+        (id, _) if id.starts_with("calendar.") => "gc",
+        // One field on from the title is Calendar, which is chosen from.
+        ("event-form.choice" | "event-form.choice-arrows", _) => "gcc\t",
+        (id, _) if id.starts_with("event-form.") => "gcc",
+        // The roadmap review has fields under More; every event fits whole
+        // at this size, so a key that scrolls says so.
+        ("event.fold", "zo") => "gclll\rj\r",
+        ("event.fold", _) => "gclll\rj\rzo",
+        (id, _) if id.starts_with("event.") => "gc\r\r",
+        ("calendars.choose", "k") => "gcCj",
+        (id, _) if id.starts_with("calendars.") => "gcC",
         (id, _) if id.starts_with("reader.") => "jjj\rbb",
         _ => "jj",
     };
@@ -521,18 +559,6 @@ fn a_confirm_takes_y_or_enter_and_any_other_key_cancels_and_is_dropped() {
     assert_eq!(said(":empty-trash nobody\r"), "E :empty-trash: no account \"nobody\" · Tab completes");
 }
 
-/// The answers to an invitation are not built. Each says so, in the
-/// grammar of an error, and changes nothing.
-#[test]
-fn what_is_not_built_yet_says_so() {
-    let invited = "E :invite: not built yet · arrives with invitations (M10)";
-    for keys in ["ia", "it", "id", ":invite accept\r"] {
-        let mut app = reading("invite", keys);
-        assert_eq!(foot(&mut app).1, invited, "{keys}");
-        assert!(app.asks().is_empty());
-    }
-}
-
 #[test]
 fn messages_lists_what_was_said_newest_first_and_esc_closes_it() {
     let mut app = after("e:nope\rjs:messages\r");
@@ -603,7 +629,7 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     let mut app = after("?");
     let rows = screen(&mut app, 120, 40);
     assert_eq!((rows[0].as_str(), rows[39].as_str()), ("  Help", "  type to filter · ^d ^u scroll · Esc back"));
-    assert_eq!(rows[38].split("   ").next(), Some("  98 keys and commands · lines 1-35 of 62"));
+    assert_eq!(rows[38].split("   ").next(), Some("  144 keys and commands · lines 1-35 of 70"));
     // Scrolled to the end, then filtered to less than a page: the page
     // is shown from its top, and says no lines.
     press(&mut app, "^d^d^dagent");
@@ -615,18 +641,18 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     assert_eq!(shown[3..6], agent, "a section whose heading matches is shown whole");
     assert_eq!(shown[8..10], ["Commands", ":agent reply|tidy|link   reply, tidy or link: hand text to the agent"]);
     assert!(rows[14..37].iter().all(|row| row.is_empty()), "what does not match is not drawn: {rows:#?}");
-    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 98 shown"), "  /agent"));
+    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 144 shown"), "  /agent"));
     press(&mut app, "\x7f\x7f\x7f\x7f\x7fQq\x7f");
     assert!(!app.quit, "q is typed, not obeyed");
     let rows = screen(&mut app, 120, 40);
     assert_eq!(
         (rows[38].split("   ").next(), rows[39].as_str()),
-        (Some("  2 of 98 shown"), "  /Q"),
+        (Some("  2 of 144 shown"), "  /Q"),
         "whatever the case"
     );
     press(&mut app, "zzz");
     let rows = screen(&mut app, 120, 40);
-    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 98 shown"), "{rows:#?}");
+    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 144 shown"), "{rows:#?}");
     press(&mut app, "\x1b");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
 }
@@ -1140,6 +1166,11 @@ fn a_picture_is_reported_only_while_the_reader_s_own_frame_shows_its_placeholder
     assert!(shade(&mut app));
     let (id, placed) = app.pictures().expect("a message is open");
     assert_eq!((id.key.as_str(), placed.len()), ("photos", 1));
+    // The row it gives is counted from the top of the screen, which the
+    // bar of places is on.
+    let shaded = |line: &Line| line.iter().any(|span| span.text.contains("░░░░"));
+    let first = app.lines(120, 40).iter().position(shaded);
+    assert_eq!(app.pictures().map(|(_, placed)| placed[0].row), first);
     for (covered_by, back) in [("?", "\x1b"), ("r", "\x1b"), ("a", "\x1b")] {
         press(&mut app, covered_by);
         let drawn = shade(&mut app);
@@ -1290,7 +1321,7 @@ fn a_frame_from_the_rows_near_the_cursor_and_what_is_kept_is_the_frame_from_them
         }
         let (width, height) = (120, [40, 24, 12][step % 3]);
         let top = app.top;
-        let near = app.lines(width, height);
+        let near = app.lines_under(width, height);
         let (near_top, kept) = (std::mem::replace(&mut app.top, top), app.threads.take());
         let right = app.alerts();
         let all = app.list_lines(width, height, usize::MAX, right);
@@ -1372,7 +1403,7 @@ fn a_filter_typed_a_key_at_a_time_shows_and_finds_what_asking_every_row_afresh_d
 
             let (width, height) = (120, [40, 24, 12][step % 3]);
             let top = app.top;
-            let near = app.lines(width, height);
+            let near = app.lines_under(width, height);
             let near_top = std::mem::replace(&mut app.top, top);
             let right = app.alerts();
             let all = app.list_lines(width, height, usize::MAX, right);
@@ -1666,7 +1697,7 @@ fn account_column_of(
     width: usize,
     colours: &[crate::palette::Tok],
 ) -> Vec<(String, crate::palette::Tok)> {
-    let lines = app.lines(width, 40);
+    let lines = under(app, width, 40);
     let named = |line: &&Line| line.len() > 5 && fx::TRIO.iter().any(|name| name.contains(line[4].text.as_str()));
     let is_row = |line: &&Line| named(line) && line[4].text.len() >= 4 && colours.contains(&line[4].fg);
     lines[2..38].iter().filter(is_row).map(|line| (line[4].text.clone(), line[4].fg)).collect()
@@ -1763,7 +1794,7 @@ fn the_preview_and_the_status_line_are_of_the_selected_row_s_account() {
     assert_eq!(rows[20], "  Payroll corrections for November", "the preview is that row's message");
     press(&mut app, "gtgtgt");
     assert_eq!(foot(&mut app).0, "proton only · 1 of 6 · 1 message");
-    let status = &app.lines(120, 40)[38];
+    let status = &under(&mut app, 120, 40)[38];
     assert_eq!((status[1].text.as_str(), status[1].fg), ("proton", crate::palette::Tok::Ok), "in the account's colour");
     assert_eq!(screen(&mut app, 120, 40)[20], "  Payroll corrections for November", "and its first row is previewed");
 }
@@ -1787,7 +1818,7 @@ fn three_accounts_with_a_loaded_palette_take_the_order_its_colours_give() {
     let took = [("gmail-home".to_string(), Tok::Ok), ("gmail-work".into(), Tok::Link), ("proton".into(), Tok::Head)];
     assert_eq!(names(&mut app), took);
     press(&mut app, "gt");
-    let status = &app.lines(120, 40)[38];
+    let status = &under(&mut app, 120, 40)[38];
     assert_eq!((status[1].text.as_str(), status[1].fg), ("gmail-home", Tok::Ok), "and the status line follows");
 }
 
@@ -1811,7 +1842,7 @@ fn words_with_no_colour_that_would_show_are_told_apart_by_brightness() {
     use crate::palette::tests::{CYAN_AS_DIM, GREEN_AS_TEXT};
     let mut app = three_loaded(&[CYAN_AS_DIM, GREEN_AS_TEXT]);
     press(&mut app, "p");
-    let lines = app.lines(140, 40);
+    let lines = under(&mut app, 140, 40);
     let words = |subject: &str| -> Vec<(String, Tok)> {
         let line = lines.iter().find(|line| line.iter().any(|s| s.text.contains(subject))).unwrap();
         let from = line.iter().position(|s| s.text.contains(subject)).unwrap();
@@ -1828,7 +1859,7 @@ fn words_with_no_colour_that_would_show_are_told_apart_by_brightness() {
 
     let mut cyan = three_loaded(&[]);
     press(&mut cyan, "p");
-    let line = &cyan.lines(140, 40)[3];
+    let line = &under(&mut cyan, 140, 40)[3];
     assert!(line.iter().any(|s| s.text == "invite" && s.fg == Tok::Agent), "with an accent to spare they wear it");
 }
 

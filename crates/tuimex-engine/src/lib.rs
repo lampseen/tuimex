@@ -6,7 +6,9 @@ mod account;
 mod act;
 pub mod agent;
 mod backoff;
+pub mod calendar;
 mod imap;
+pub mod invitation;
 pub mod oauth;
 mod outbox;
 pub mod pin;
@@ -16,6 +18,7 @@ mod secret;
 mod smtp;
 mod store;
 pub mod sync;
+pub mod zone;
 
 use tuimex_core::{Event, Head, RemoteError, Security, Timestamp};
 use tuimex_store::Parsed;

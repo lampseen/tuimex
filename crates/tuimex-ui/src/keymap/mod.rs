@@ -17,6 +17,8 @@ pub enum Key {
     Down,
     Left,
     Right,
+    /// A function key, by its number.
+    F(u8),
 }
 
 /// How long the first key of `gg` or `zo` waits for the second.
@@ -56,6 +58,7 @@ pub const KEYMAP: &[Table] = &[
             b("global.undo", "u", "undo the last action", "undo"),
             b("global.agent", "A", "what the agent can do", "agent"),
             b("global.redraw", "^l", "redraw", ""),
+            b("global.calendar", "gc F2", "the calendar", "calendar"),
         ],
     },
     Table {
@@ -145,6 +148,70 @@ pub const KEYMAP: &[Table] = &[
             b("invite.accept", "a", "accept", "accept"),
             b("invite.tentative", "t", "tentative", "tentative"),
             b("invite.decline", "d", "decline", "decline"),
+            b("invite.propose", "p", "propose another time", "propose a time"),
+            b("invite.ignore", "x", "ignore; nothing is sent", "ignore"),
+        ],
+    },
+    // In the calendar this table is searched before `global`, so h, l, Tab
+    // and the digits move days and views there and sections only in mail.
+    Table {
+        mode: "calendar",
+        title: "Calendar (after gc)",
+        keys: &[
+            b("calendar.day", "h l", "previous, next day", ""),
+            b("calendar.move", "j k", "grid: week; else: event", "move"),
+            b("calendar.period", "[ ]", "previous, next page", ""),
+            b("calendar.focus-list", "Alt-j Alt-l", "month: focus the events", ""),
+            b("calendar.focus-grid", "Alt-k Alt-h", "back to the grid", "grid"),
+            b("calendar.event", "J K", "next, previous event", "next event"),
+            b("calendar.match", "n N", "next, previous match", "next match"),
+            b("calendar.waiting", "I", "next invite to answer", "next to answer"),
+            b("calendar.today", "t", "today", "today"),
+            b("calendar.goto", "gd", "go to a date", "go to"),
+            b("calendar.view-cycle", "Tab S-Tab", "next, previous view", ""),
+            b("calendar.view-number", "1 2 3", "month, week, day", ""),
+            b("calendar.open", "Enter", "the day; then the event", "open"),
+            b("calendar.find", "/", "find; Enter: every day", "find"),
+            b("calendar.account", "gt gT", "next, previous account", ""),
+            b("calendar.calendars", "C", "show, hide calendars", "calendars"),
+            b("calendar.links", "o", "links; the meeting first", "links"),
+            b("calendar.answer", "i", "answer an invitation", "answer"),
+            b("calendar.new", "c", "new event here", "new event"),
+            b("calendar.edit", "E", "edit the event", "edit"),
+            b("calendar.delete", "d", "delete the event", "delete"),
+            b("calendar.reminders", "gn", "reminders on, off", ""),
+            b("calendar.mail", "gm F1", "back to mail", "mail"),
+        ],
+    },
+    Table {
+        mode: "event",
+        title: "Event",
+        keys: &[
+            b("event.scroll", "j k ^d ^u gg G", "scroll", ""),
+            b("event.fold", "zo zc", "unfold, fold More", "more"),
+            b("event.mail", "v", "the mail it came in", "its mail"),
+            b("event.actions", "o i E d J K I", "as in the calendar", ""),
+        ],
+    },
+    Table {
+        mode: "calendars",
+        title: "Calendars (after C)",
+        keys: &[
+            b("calendars.choose", "j k", "choose", "choose"),
+            b("calendars.toggle", "Space", "show or hide", "show or hide"),
+            b("calendars.close", "Esc", "close", "close"),
+        ],
+    },
+    Table {
+        mode: "event-form",
+        title: "Event form",
+        keys: &[
+            b("event-form.field", "Tab S-Tab", "next, previous field", ""),
+            b("event-form.choice", "h l", "choose, where offered", "choose"),
+            b("event-form.choice-arrows", "Left Right", "as h and l", ""),
+            b("event-form.notes", "Enter", "edit notes in $EDITOR", "notes"),
+            b("event-form.save", "^s", "save; guests get mail", "save"),
+            b("event-form.close", "Esc", "close; keep or discard", "close"),
         ],
     },
     Table {
@@ -152,7 +219,8 @@ pub const KEYMAP: &[Table] = &[
         title: "Compose",
         keys: &[
             b("compose.field", "Tab S-Tab", "next, previous field", ""),
-            b("compose.identity", "Left Right", "identity, on From", "identity"),
+            b("compose.identity", "h l", "identity, on From", "identity"),
+            b("compose.identity-arrows", "Left Right", "as h and l", ""),
             b("compose.editor", "Enter", "edit body in $EDITOR", "edit"),
             b("compose.attach", "^a", "attach a file", "attach"),
             b("compose.summary", "^s", "send summary", "send"),
@@ -187,9 +255,12 @@ pub const KEYMAP: &[Table] = &[
 /// it is not a key to look up.
 const ANY_OTHER: &str = "confirm.other";
 
-/// The presses one name of the table stands for: `gg` is two and `^d` is
-/// one. `1-9` is a range, which `find` matches itself.
+/// The presses one name of the table stands for: `gg` is two and `^d` and
+/// `F2` are one. `1-9` is a range, which `find` matches itself.
 pub(crate) fn presses(name: &str) -> Vec<Key> {
+    if let Some(n) = name.strip_prefix('F').and_then(|n| n.parse().ok()) {
+        return vec![Key::F(n)];
+    }
     match name {
         "Space" => vec![Key::Char(' ')],
         "Enter" => vec![Key::Enter],

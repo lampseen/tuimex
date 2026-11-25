@@ -12,8 +12,10 @@ use std::process::ExitCode;
 use anyhow::Result;
 use ratatui_image::picker::{Picker, ProtocolType};
 use tuimex_core::Role;
+use tuimex_engine::calendar;
 use tuimex_engine::oauth::{Endpoints, Tokens};
 use tuimex_engine::{Keyring, pin};
+use tuimex_store::calendar::{Calendars, Fetched};
 
 use crate::config::{self, Config};
 use crate::net::{self, Auth, Net};
@@ -118,6 +120,19 @@ impl Known {
         known.sort_by_key(|(value, _)| std::cmp::Reverse(value.len()));
         Known(known)
     }
+
+    /// With the hosts of calendars too, numbered after the servers'.
+    fn with_hosts(mut self, hosts: &[String]) -> Self {
+        let mut n = self.0.iter().filter(|(_, stands)| stands.starts_with("host-")).count();
+        for host in hosts {
+            if !self.0.iter().any(|(held, _)| held.eq_ignore_ascii_case(host)) {
+                n += 1;
+                self.0.push((host.clone(), format!("host-{n}")));
+            }
+        }
+        self.0.sort_by_key(|(value, _)| std::cmp::Reverse(value.len()));
+        self
+    }
 }
 
 /// The length of a fingerprint as `pin::fingerprint` writes one.
@@ -208,9 +223,18 @@ impl Doctor<'_> {
             (true, n) => report.ok(&format!("it reads, and has {n} account{}", if n == 1 { "" } else { "s" })),
         }
         let mut keyring_needed = false;
+        let read = if config.as_ref().is_none_or(|config| config.calendars.is_empty()) {
+            Ok(Vec::new())
+        } else {
+            self.calendars_read()
+        };
+        let mut hosts = Vec::new();
         for account in accounts {
             report.head(&format!("account {} ({})", account.name, account.address));
             keyring_needed |= self.account(&mut report, account);
+            if let Some(calendar) = config.as_ref().and_then(|config| config.calendar(&account.name)) {
+                keyring_needed |= self.calendar(&mut report, account, calendar, &read, &mut hosts);
+            }
         }
         report.head("this machine");
         self.keyring(&mut report, keyring_needed);
@@ -222,7 +246,73 @@ impl Doctor<'_> {
             0 => "\nnothing is wrong".to_string(),
             n => format!("\n{n} thing{} wrong", if n == 1 { " is" } else { "s are" }),
         });
-        (wrong == 0, Known::new(accounts, &named, (self.env)("HOME").as_deref()))
+        (wrong == 0, Known::new(accounts, &named, (self.env)("HOME").as_deref()).with_hosts(&hosts))
+    }
+
+    /// When each calendar was last read, from the store `tuimex sync` and
+    /// the calendar thread keep. None there is none read yet; it is not
+    /// made here.
+    fn calendars_read(&self) -> Result<Vec<Fetched>, String> {
+        if !self.dirs.cache.join("calendar.sqlite").exists() {
+            return Ok(Vec::new());
+        }
+        let store = Calendars::open(&self.dirs.data, &self.dirs.cache).map_err(|e| e.to_string())?;
+        store.fetched().map_err(|e| e.to_string())
+    }
+
+    /// The account's calendar: its kind and host, whether what signs it
+    /// in or names it can be found, and when it was last read. Its server
+    /// is not asked: a feed is read whole or not at all, and `tuimex
+    /// sync` does that. Returns whether its secret is the keyring's.
+    fn calendar(
+        &self,
+        report: &mut Report,
+        account: &config::Account,
+        calendar: &config::Calendar,
+        read: &Result<Vec<Fetched>, String>,
+        hosts: &mut Vec<String>,
+    ) -> bool {
+        let name = &account.name;
+        let (key, needs_keyring) = match &calendar.url {
+            Some(url) => {
+                let host = tuimex_engine::calendar::host(url).unwrap_or(url);
+                hosts.push(host.to_string());
+                match tuimex_engine::resolve(name, account.password_cmd.as_deref(), self.keyring) {
+                    Ok(_) => report.ok(&format!("its calendar is read over CalDAV from {host}, with its password")),
+                    Err(error) => report.wrong(&format!("its calendar, over CalDAV from {host}: {error}")),
+                }
+                (url.as_str(), account.password_cmd.is_none())
+            }
+            None => {
+                let by_command = calendar.address_cmd.is_some();
+                match calendar::feed_address(name, calendar.address_cmd.as_deref(), self.keyring) {
+                    Ok(address) => match calendar::host(address.expose()) {
+                        Some(host) => {
+                            hosts.push(host.to_string());
+                            let from = if by_command { "its `address_cmd` printed" } else { "the keyring holds" };
+                            report.ok(&format!("its calendar is a feed from {host}, whose address {from}"));
+                        }
+                        None => report.wrong(
+                            "its calendar is a feed whose address is not one tuimex fetches: it begins https:// \
+                             and names no user; `tuimex setup` asks for it again",
+                        ),
+                    },
+                    Err(error) => report.wrong(&format!("its calendar is a feed: {error}")),
+                }
+                (calendar::FEED, !by_command)
+            }
+        };
+        match read {
+            Err(error) => report.wrong(&format!("the calendar store could not be read: {error}")),
+            Ok(read) => match read.iter().find(|f| f.account == *name && f.calendar == key) {
+                Some(f) => {
+                    let at = chrono::DateTime::from_timestamp(f.read_at, 0).unwrap_or_default();
+                    report.ok(&format!("its calendar was last read {}", at.format("%Y-%m-%d %H:%M UTC")));
+                }
+                None => report.note("its calendar has not been read yet; `tuimex sync` reads it"),
+            },
+        }
+        needs_keyring
     }
 
     /// One account, as far as it gets. Returns whether it signs in with

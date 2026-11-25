@@ -1,0 +1,40 @@
+  F1 Mail   F2 Calendar                                                                                                 
+  Month   Week   Day                                                                              Mon 23 November 2026  
+                                                                                                                        
+  Today - Mon 23 November                                                                                               
+    work       09:30-09:45  Standup                                                                                     
+    work       15:00-16:00  Halden contract call                                                                        
+                                                                                                                        
+  Tomorrow - Tue 24 November                                                                                            
+    work       09:30-09:45  Standup                                                                                     
+    personal   11:00-11:45  Dentist  Kirkegata 12                                                                       
+                                                                                                                        
+  Wed 25 November                                                                                                       
+    work       09:30-09:45  Standup                                                                                     
+    work       13:00-13:30  1:1 with Imani                                                                              
+                                                                                                                        
+  Thu 26 November                                                                                                       
+    work       09:30-09:45  Standup                                                                                     
+    work       10:00-11:30  Q4 roadmap review                                                             needs answer  
+    work       11:00-12:00  Vendor call                                                                      tentative  
+    work       20:00-23:00  Staging migration window                                                             local  
+                                                                                                                        
+  Fri 27 November                                                                                                       
+    personal   all day      Library books due                                                                    local  
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+    personal   09:00-09:30  Account review                                                                needs answer  
+    work       09:30-09:45  Standup                                                                                     
+                                                                                                                        
+  Sat 28 November                                                                                                       
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+                                                                                                                        
+  Sun 29 November                                                                                                       
+    personal   all day      Cabin weekend  Ridge saddle hut                                                             
+                                                                                                                        
+  Mon 30 November                                                                                                       
+    work       09:30-09:45  Standup                                                                                     
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                            sending in 6s - 1 not sent  
+  /call                                                                                                                 

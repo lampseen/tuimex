@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {magenta b}Inbox{default} {default b}9{default}   {brightblack}Unread{default}   {brightblack}Flagged{default} {yellow}3{default}   {brightblack}Drafts{default}   {brightblack}Sent{default}   {brightblack}Archive{default}   {brightblack}Outbox{default} {red}1{default}                                                     
 {default}                                                                                                                        
 {default}  {brightblack b}Today{default}                                                                                                                 
@@ -25,7 +26,6 @@
 {default}    {brightblack}Cc       {default}Robin Vale {brightblack}<robin@example.com>, {default}Greta Holm {brightblack}<greta@example.com>, {default}Jonas Becker {brightblack}<jonas@example.com>{default}           
 {default}                                                                                                                        
 {default}    I cannot make Friday. Could someone collect me on Saturday morning?                                                 
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        

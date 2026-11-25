@@ -1,0 +1,15 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {acc b}Month{fg}   {dim}Week{fg}   {dim}Day{fg}                                                                                     {fg b}November 2026{fg}  
+{fg}                                                                                                                        
+{fg}     {fg b}November 2026{fg}                {faint}│{fg}  {dim b}Thu 26 November{fg}                                                                    
+{fg}     {dim}Mo{fg}  {dim}Tu{fg}  {dim}We{fg}  {dim}Th{fg}  {dim}Fr{fg}  {dim}Sa{fg}  {dim}Su{fg}   {faint}│{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                  
+{fg}                             {dim} 1{fg}   {faint}│{fg}    {head}work{fg}       {dim}10:00-11:30{fg}  {fg b}Q4 roadmap review{fg}                          {warn}needs answer{fg}  
+{fg}      2{dim}∙{fg}  3{dim}∙{fg}  4{dim}∙{fg}  5{dim}∙{fg}  6{dim}∙{fg} {dim} 7{fg}  {dim} 8{fg}   {faint}│{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor call                                   {agent}tentative{fg}  
+{fg}      9{dim}∙{fg} 10{dim}∙{fg} 11{dim}∙{fg} 12{dim}∙{fg} 13{dim}∙{fg} {dim}14{fg}  {dim}15{fg}   {faint}│{fg}    {head}work{fg}       {dim}20:00-23:00{fg}  Staging migration window                          {agent}local{fg}  
+{fg}     16{dim}∙{fg} 17{dim}:{fg} 18{dim}∙{fg} 19{dim}∙{fg} 20{dim}:{fg} {dim}21{fg}  {dim}22{fg}   {faint}│{fg}                                                                                     
+{fg}     {acc b}23{dim}:{fg} 24{dim}:{fg} 25{dim}:{fg} 26{warn}⋮{dim bg=sel}▌{fg bg=sel}27{warn bg=sel}⋮{fg} 28{dim}∙{fg} 29{dim}∙{fg}  {faint}│{fg}  {dim b}Fri 27 November{fg}                                                                    
+{fg}     30{dim}∙{fg}                          {faint}│{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {dim bg=sel}all day{fg bg=sel}      Library books due                                 {agent bg=sel}local{fg bg=sel}  
+{fg}                                  {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                          
+{fg}                                                                                                                        
+{fg}  {dim}Fri 27 Nov · 1 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  j k {dim}move · {fg}Enter {dim}open · {fg}Alt-h {dim}grid · {fg}? {dim}help{fg}                                                                           

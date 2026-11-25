@@ -1,3 +1,4 @@
+{default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
 {default}    {default b}Everywhere{default}                                                                                                          
@@ -35,6 +36,5 @@
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
-{default}                                                                                                                        
-{default}  {brightblack}5 of 98 shown{default}                                                                             sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}5 of 144 shown{default}                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  /agent{black bg=magenta} {default}                                                                                                               

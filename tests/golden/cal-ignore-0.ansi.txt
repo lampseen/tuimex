@@ -1,0 +1,8 @@
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                                                    {agent}local{fg}  
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{acc bg=sel}▌{fg bg=sel}   {link bg=sel}personal{fg bg=sel}   {dim bg=sel}09:00-09:30{fg bg=sel}  {fg bg=sel b}Account review{fg bg=sel}                                                                {warn bg=sel}needs answer{fg bg=sel}  
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{fg}                                                                                                                        
+{fg}  {dim}Fri 27 Nov · 3 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Answer?{dim}  {fg}a {dim}accept · {fg}t {dim}tentative · {fg}d {dim}decline · {fg}p {dim}propose a time · {fg}x {dim}ignore · {fg}Esc {dim}cancel{fg}                                

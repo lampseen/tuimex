@@ -1,3 +1,4 @@
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                                                           
 {default}                                                                                                                        
 {default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                                                                  
@@ -27,7 +28,6 @@
 {default}                                                                                                                        
 {default}    {brightblack}| We cleared forty pairs of skis last year and nobody went home with what{default}                                           
 {default}    {brightblack}| they brought. (Marta, swap organiser){default}                                                                             
-{default}                                                                                                                        
 {default}                                                                                                                        
 {default}  {default b}Links{default}                                                                                                                 
 {magenta}>{default}   {brightblue} 1  {default}fernway.example.net           {brightblack}Route notes and maps{default}   {brightblack}tracking removed{default}                                           

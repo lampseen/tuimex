@@ -1,0 +1,15 @@
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
+{fg}  {dim}Month{fg}   {dim}Week{fg}   {acc b}Day{fg}                                                                              {fg b}Thu 26 November 2026{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Thu 26 November{fg}                                                                                                       
+{fg}    {head}work{fg}       {dim}09:30-09:45{fg}  Standup                                                                                     
+{acc bg=sel}▌{fg bg=sel}   {head bg=sel}work{fg bg=sel}       {dim bg=sel}10:00-11:30{fg bg=sel}  {fg bg=sel b}Q4 roadmap review{fg bg=sel}                                                             {warn bg=sel}needs answer{fg bg=sel}  
+{fg}    {head}work{fg}       {dim}11:00-12:00{fg}  Vendor call                                                                      {agent}tentative{fg}  
+{fg}    {head}work{fg}       {dim}20:00-23:00{fg}  Staging migration window                                                             {agent}local{fg}  
+{fg}                                                                                                                        
+{fg}  {dim b}Fri 27 November{fg}                                                                                                       
+{fg}    {link}personal{fg}   {dim}all day{fg}      Library books due                                                                    {agent}local{fg}  
+{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                                                             
+{fg}                                                                                                                        
+{fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                               

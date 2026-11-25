@@ -7,18 +7,23 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, anyhow, bail};
 use tuimex_core::Event;
+use tuimex_engine::calendar::{self, Configured, Outcome, Source, Wire};
 use tuimex_engine::oauth::{Endpoints, Tokens};
 use tuimex_engine::sync::Policy;
-use tuimex_engine::{Account, ImapAccount, StoreHandle, SystemKeyring};
+use tuimex_engine::{Account, ImapAccount, Keyring, StoreHandle, SystemKeyring};
 use tuimex_store::Store;
+use tuimex_store::calendar::Calendars;
 
 use crate::config::{self, Config};
 use crate::net::{self, Auth};
 use crate::paths::Dirs;
 
+/// How long a calendar's server has to answer one request.
+pub const PATIENCE: Duration = Duration::from_secs(60);
+
 /// A number and its unit, such as `30d` or `10MB`, as a count of the
 /// unit `units` gives a size for. `key` is the config's whole name for it.
-fn amount(key: &str, text: &str, units: &[(&str, u64)]) -> Result<u64> {
+pub(crate) fn amount(key: &str, text: &str, units: &[(&str, u64)]) -> Result<u64> {
     let digits = text.trim_end_matches(|c: char| !c.is_ascii_digit());
     let unit = units.iter().find(|(name, _)| name.eq_ignore_ascii_case(text[digits.len()..].trim()));
     let known = units.iter().map(|(name, _)| *name).collect::<Vec<_>>().join(", ");
@@ -80,6 +85,71 @@ pub(crate) fn account(
     Ok((Account { name: name.clone(), roles, policy: policy.clone(), identities, send_delay }, reach))
 }
 
+/// The `[[calendar]]` tables as the engine takes them, of `only` or of
+/// every account. CalDAV signs in as the account's IMAP user does.
+pub fn calendars(config: &Config, only: Option<&str>) -> Result<Vec<Configured>> {
+    let mut configured = Vec::new();
+    // A table with no `kind` only adds to the one that has it.
+    let tables = config.calendars.iter().filter(|c| c.kind.is_some());
+    for calendar in tables.filter(|c| only.is_none_or(|o| o == c.account)) {
+        // `Config::parse` has refused a calendar of no account.
+        let Some(account) = config.account(&calendar.account) else { continue };
+        let source = match &calendar.url {
+            Some(url) => {
+                let (imap, _) = net::servers(account)?;
+                Source::CalDav { url: url.clone(), user: imap.user, password_cmd: account.password_cmd.clone() }
+            }
+            None => Source::Feed { address_cmd: calendar.address_cmd.clone() },
+        };
+        configured.push(Configured { account: account.name.clone(), source });
+    }
+    Ok(configured)
+}
+
+/// `work/calendar (feed, calendar.example.net)`: whose, which kind, and
+/// the host, which is all of a feed's address that is ever shown.
+fn calendar_name(outcome: &Outcome) -> String {
+    let host = outcome.host.as_deref().map_or(String::new(), |host| format!(", {host}"));
+    format!("{}/calendar ({}{host})", outcome.account, outcome.kind)
+}
+
+/// A line for each calendar, as the mail's are: what changed, or after
+/// `E sync: ` why it could not be read. Whether any could not.
+pub(crate) fn calendar_lines(outcomes: &[Outcome]) -> (Vec<String>, bool) {
+    let mut failed = false;
+    let lines = outcomes.iter().map(|outcome| {
+        let name = calendar_name(outcome);
+        match &outcome.read {
+            Ok(fetch) if fetch.changed + fetch.removed == 0 => format!("{name}: nothing new"),
+            Ok(fetch) if fetch.removed == 0 => format!("{name}: {} changed", fetch.changed),
+            Ok(fetch) => format!("{name}: {} changed, {} removed", fetch.changed, fetch.removed),
+            Err(error) => {
+                failed = true;
+                format!("E sync: {name}: {error}")
+            }
+        }
+    });
+    (lines.collect(), failed)
+}
+
+/// One pass over the calendars `only` names, or all, said as lines. No
+/// calendar is no line, and no store opened.
+pub(crate) fn calendar_pass(
+    config: &Config,
+    only: Option<&str>,
+    wire: &dyn Wire,
+    keyring: &dyn Keyring,
+    dirs: &Dirs,
+    now: i64,
+) -> Result<(Vec<String>, bool)> {
+    let calendars = calendars(config, only)?;
+    if calendars.is_empty() {
+        return Ok((Vec::new(), false));
+    }
+    let store = Calendars::open(&dirs.data, &dirs.cache).context("opening the calendar store")?;
+    Ok(calendar_lines(&calendar::pass(wire, &store, keyring, &calendars, now)))
+}
+
 pub fn run(config: Option<&Path>, only: Option<&str>) -> Result<ExitCode> {
     let dirs = Dirs::from_env()?;
     let config = Config::load(&config::path(config, &dirs.config))?;
@@ -110,6 +180,13 @@ pub fn run(config: Option<&Path>, only: Option<&str>) -> Result<ExitCode> {
             failed = true;
         }
     }
+    let wire = calendar::Https::new(PATIENCE);
+    let (lines, calendar_failed) =
+        calendar_pass(&config, only, &wire, &SystemKeyring, &dirs, chrono::Utc::now().timestamp())?;
+    for line in lines {
+        if line.starts_with("E sync: ") { eprintln!("{line}") } else { println!("{line}") }
+    }
+    failed |= calendar_failed;
     Ok(if failed { ExitCode::FAILURE } else { ExitCode::SUCCESS })
 }
 

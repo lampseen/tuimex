@@ -1,0 +1,1 @@
+{default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       

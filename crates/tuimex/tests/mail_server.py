@@ -8,6 +8,7 @@ client adding a message, or looking at what a folder holds.
     mail_server.py USER absent FOLDER
     mail_server.py USER put FOLDER FILE
     mail_server.py USER header FOLDER SUBJECT TEXT
+    mail_server.py USER calendar FOLDER SUBJECT METHOD FROM TEXT
 
 The server is the one TUIMEX_SERVER_HOST, _PORT, _PASSWORD and _CA name, as
 `crates/tuimex-engine/tests/spike.rs` lists them; the user TUIMEX_SERVER_USER3
@@ -15,9 +16,13 @@ names signs in with TUIMEX_SERVER_PASSWORD3. `holds` waits until FOLDER is there
 COUNT messages with SUBJECT that are not marked deleted, and fails when it
 never does. `put` appends the message in FILE as it is. `header` waits until
 a message with SUBJECT in FOLDER has TEXT among its headers. `absent` deletes
-FOLDER if it is there, where `delete` fails when it is not.
+FOLDER if it is there, where `delete` fails when it is not. `calendar` waits
+until a message with SUBJECT in FOLDER is from the address FROM and carries a
+`text/calendar` part whose type says `method=METHOD` and whose text, decoded
+and unfolded, holds TEXT.
 """
 
+import email
 import imaplib
 import os
 import ssl
@@ -90,6 +95,32 @@ elif verb == "header":
             break
         if time.monotonic() > deadline:
             sys.exit(f"mail_server: no {subject!r} in {folder} has {text!r} in its headers: {heads}")
+        time.sleep(0.2)
+elif verb == "calendar":
+    subject, method, sender, text = sys.argv[4:8]
+
+    def carries(message):
+        if sender not in message.get("From", ""):
+            return False
+        for part in message.walk():
+            if part.get_content_type() != "text/calendar" or (part.get_param("method") or "").upper() != method:
+                continue
+            said = part.get_payload(decode=True).decode(errors="replace")
+            if text in said.replace("\r\n ", "").replace("\r\n\t", ""):
+                return True
+        return False
+
+    deadline = time.monotonic() + 30
+    while True:
+        found = []
+        if server.select(box, readonly=True)[0] == "OK":
+            found = ok(server.search(None, "UNDELETED", "SUBJECT", f'"{subject}"'))[0].split()
+        whole = [email.message_from_bytes(ok(server.fetch(number, "(BODY.PEEK[])"))[0][1]) for number in found]
+        if any(carries(message) for message in whole):
+            break
+        if time.monotonic() > deadline:
+            kinds = [[part.get_content_type() for part in message.walk()] for message in whole]
+            sys.exit(f"mail_server: no {subject!r} in {folder} from {sender} carries {method} with {text!r}: {kinds}")
         time.sleep(0.2)
 else:
     sys.exit(f"mail_server: no such verb: {verb}")

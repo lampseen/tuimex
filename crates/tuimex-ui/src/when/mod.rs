@@ -31,13 +31,14 @@ fn wall(t: Timestamp) -> i64 {
 /// The design's `LAYOUT.groups`.
 pub const GROUPS: [&str; 4] = ["Today", "Yesterday", "Past 7 days", "Earlier"];
 
-const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+pub(crate) const MONTHS: [&str; 12] =
+    ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 fn day(t: Timestamp) -> i64 {
     wall(t).div_euclid(86_400)
 }
 
-const DAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+pub(crate) const DAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /// The year, the month from 1, and the day of it, for a count of days
 /// since 1970: Howard Hinnant's `civil_from_days`.

@@ -11,6 +11,7 @@ use tuimex_core::{
 };
 
 use super::{App, Mode};
+use crate::calendar::Invited;
 use crate::editor::Editor;
 use crate::glyphs::{AGENT, DOT, NOTICE};
 use crate::keymap::{self, Found, Key};
@@ -39,6 +40,68 @@ enum Advice {
     Failed(String),
 }
 
+/// What the agent was asked of a link (ADR-031): the serial of the ask and
+/// what has come back for it, and what the agent saw placeholders for.
+#[derive(Debug, Default)]
+pub(super) struct Advised {
+    advice: Option<(u64, Advice)>,
+    replaced: Option<String>,
+}
+
+impl Advised {
+    pub(super) fn asking(serial: u64) -> Advised {
+        Advised { advice: Some((serial, Advice::Asking)), replaced: None }
+    }
+
+    /// Takes what came back for the ask, and hands back anything else.
+    pub(super) fn told(&mut self, event: Event) -> Option<Event> {
+        let asked = self.advice.as_ref().map(|(serial, _)| *serial);
+        match event {
+            Event::AgentAsked { serial, replaced } if asked == Some(serial) => self.replaced = Some(replaced),
+            Event::AgentAdvice { serial, advice, why } if asked == Some(serial) => {
+                self.advice = Some((serial, Advice::Given { advice, why }));
+            }
+            Event::ActionFailed { serial, reason, .. } if asked == Some(serial) => {
+                self.advice = Some((serial, Advice::Failed(reason)));
+            }
+            other => return Some(other),
+        }
+        None
+    }
+
+    /// The rows under the list of links: that the agent is being asked,
+    /// what it advises, or why it could not.
+    pub(super) fn lines(&self) -> Vec<Line> {
+        let told = |line: Line| [vec![gap(4)], line].concat();
+        match &self.advice {
+            Some((_, Advice::Asking)) => {
+                let why = format!(" {DOT} it reads the address and the message, and opens nothing");
+                vec![vec![], told(vec![run(format!("{AGENT} Asking the agent"), Tok::Agent), run(why, Tok::Dim)])]
+            }
+            Some((_, Advice::Given { advice, why })) => vec![
+                vec![],
+                told(vec![
+                    run(format!("{AGENT} Agent advises {advice}"), Tok::Agent),
+                    run(format!(" {DOT} {why}"), Tok::Dim),
+                ]),
+                told(vec![run("Advice only. The agent did not open the link.", Tok::Dim)]),
+            ],
+            Some((_, Advice::Failed(reason))) => {
+                let nothing = run(format!(" {DOT} nothing changed"), Tok::Dim);
+                vec![vec![], told(vec![run(format!("E :agent link: {reason}"), Tok::Err), nothing])]
+            }
+            None => Vec::new(),
+        }
+    }
+
+    /// The right of the status line while the list is open: what the
+    /// agent was not shown.
+    pub(super) fn right(&self) -> Option<Line> {
+        let what = self.replaced.as_ref()?;
+        Some(vec![run("agent saw placeholders for", Tok::Dim), run(format!(" {what}"), Tok::Fg)])
+    }
+}
+
 #[derive(Debug)]
 struct Open {
     id: MessageId,
@@ -46,10 +109,7 @@ struct Open {
     thread: Vec<MessageId>,
     top: usize,
     panel: Panel,
-    /// The serial of an `AgentLink` ask, and what has come back for it.
-    advice: Option<(u64, Advice)>,
-    /// What the agent saw placeholders for.
-    replaced: Option<String>,
+    advised: Advised,
 }
 
 /// What the reader holds: the message open, and everything read so far.
@@ -68,6 +128,10 @@ pub(super) struct Reading {
     /// not come, and those that could not be read.
     fetching: Vec<MessageId>,
     failed: Vec<MessageId>,
+    /// The event each invitation's mail carries, where whoever read the
+    /// message could read its calendar part whole: what an answer from
+    /// the reader is given to.
+    invited: HashMap<MessageId, Invited>,
     /// How far the body could scroll when last drawn.
     last_top: usize,
     /// Where the pictures of the last frame are.
@@ -100,7 +164,7 @@ impl Reading {
 /// something is, and always the host it really goes to.
 /// One that deceives offers the agent's reading of it as a third key,
 /// when `agent` says there is one to ask and it has not been asked.
-fn question(look: &Look, agent: bool) -> say::Question {
+pub(super) fn question(look: &Look, agent: bool) -> say::Question {
     match &look.warning {
         Some(warning) => {
             let mut said = warning.clone();
@@ -158,6 +222,32 @@ impl App {
         self.reading.id().map(|id| (id, self.reading.pictures.as_slice()))
     }
 
+    /// The event the invitation in the message `id` is for, with the zones
+    /// its calendar part defines, from whoever read the message; `None`
+    /// when it has none or it could not be read. Without it the reader's
+    /// card shows the invitation and cannot answer it.
+    pub fn set_invited(&mut self, id: MessageId, invited: Option<Invited>) {
+        // Bounded as the bodies are: past that many, only those whose
+        // bodies are kept stay. It may come before its body or after.
+        let reading = &mut self.reading;
+        reading.invited.remove(&id);
+        if reading.invited.len() >= KEPT {
+            reading.invited.retain(|read, _| reading.bodies.contains_key(read));
+        }
+        reading.invited.extend(invited.map(|invited| (id, invited)));
+    }
+
+    pub(super) fn invited(&self, id: &MessageId) -> Option<&Invited> {
+        self.reading.invited.get(id)
+    }
+
+    /// Hands on something asked for outside the mailbox and the calendars,
+    /// and remembers its serial, so that a refusal of it is said.
+    pub(super) fn outside(&mut self, action: Action) {
+        let serial = self.ask(action, Vec::new());
+        self.reading.asked.push(serial);
+    }
+
     pub(super) fn read_body(&self) -> Option<(&MessageId, &Body)> {
         let id = self.reading.id()?;
         self.reading.bodies.get(id).map(|body| (id, body))
@@ -175,7 +265,7 @@ impl App {
     /// marking it read. `thread` is kept when `n` or `b` moved within one.
     /// A draft is compose's to open, so `n` and `b` walk past the drafts
     /// that answer a thread.
-    fn read(&mut self, id: MessageId, thread_kept: Option<Vec<MessageId>>) {
+    pub(super) fn read(&mut self, id: MessageId, thread_kept: Option<Vec<MessageId>>) {
         let members = thread_kept.unwrap_or_else(|| {
             let account: Vec<Envelope> = self
                 .mailbox
@@ -198,8 +288,7 @@ impl App {
         if self.message(&id).is_some_and(|m| !std::mem::replace(&mut m.envelope.flags.seen, true)) {
             self.ask(Action::Seen(true), vec![id.clone()]);
         }
-        self.reading.open =
-            Some(Open { id, thread: members, top: 0, panel: Panel::None, advice: None, replaced: None });
+        self.reading.open = Some(Open { id, thread: members, top: 0, panel: Panel::None, advised: Advised::default() });
     }
 
     /// The message a key pressed now is about: the one open in the
@@ -320,7 +409,7 @@ impl App {
         let keys = |ids: &[&str]| list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>());
         let (mut panel, left, hint) = match (&open.panel, body) {
             (Panel::Links(at), Some(body)) => {
-                let url = body.links.get(*at).map(|link| reader::look(link, body).url);
+                let url = body.links.get(*at).map(|link| reader::look(link, &body.trackers).url);
                 let (entries, at) = window(reader::links(body), *at);
                 let opens = vec![run("opens", Tok::Dim), run(format!(" {}", url.unwrap_or_default()), Tok::Fg)];
                 let hint = keys(&["links.number", "links.choose", "global.agent", "links.close"]);
@@ -335,35 +424,9 @@ impl App {
             (Panel::Invite, _) => (Vec::new(), None, Some(say::answer().line(width))),
             _ => (Vec::new(), None, None),
         };
-        let told = |line: Line| [vec![gap(4)], line].concat();
-        match &open.advice {
-            Some((_, Advice::Asking)) => {
-                let why = format!(" {DOT} it reads the address and the message, and opens nothing");
-                panel.extend([
-                    vec![],
-                    told(vec![run(format!("{AGENT} Asking the agent"), Tok::Agent), run(why, Tok::Dim)]),
-                ]);
-            }
-            Some((_, Advice::Given { advice, why })) => panel.extend([
-                vec![],
-                told(vec![
-                    run(format!("{AGENT} Agent advises {advice}"), Tok::Agent),
-                    run(format!(" {DOT} {why}"), Tok::Dim),
-                ]),
-                told(vec![run("Advice only. The agent did not open the link.", Tok::Dim)]),
-            ]),
-            Some((_, Advice::Failed(reason))) => {
-                let nothing = run(format!(" {DOT} nothing changed"), Tok::Dim);
-                panel.extend([vec![], told(vec![run(format!("E :agent link: {reason}"), Tok::Err), nothing])]);
-            }
-            None => {}
-        }
-        let replaced = open
-            .replaced
-            .as_ref()
-            .map(|what| vec![run("agent saw placeholders for", Tok::Dim), run(format!(" {what}"), Tok::Fg)]);
+        panel.extend(open.advised.lines());
         let right = match open.panel {
-            Panel::Links(_) => replaced.unwrap_or_default(),
+            Panel::Links(_) => open.advised.right().unwrap_or_default(),
             _ => self.alerts(),
         };
         let place = open.thread.iter().position(|id| *id == open.id).map_or(1, |at| at + 1);
@@ -374,6 +437,7 @@ impl App {
                 body,
                 check: self.reading.checks.get(&open.id),
                 me: &self.mailbox.me,
+                account: self.colour_of(&msg.envelope.id.account),
                 place: (place, open.thread.len()),
                 top: open.top,
                 panel: if agent.is_some() {
@@ -383,7 +447,7 @@ impl App {
                 } else {
                     menu
                 },
-                left: agent.or(left),
+                left: agent.or_else(|| self.prompt_left()).or(left),
                 right,
                 command: command.or(hint),
             },
@@ -422,7 +486,7 @@ impl App {
 
     fn set_panel(&mut self, panel: Panel, when: bool) {
         if let Some(open) = self.reading.open.as_mut().filter(|_| when) {
-            (open.panel, open.advice, open.replaced) = (panel, None, None);
+            (open.panel, open.advised) = (panel, Advised::default());
         }
     }
 
@@ -499,15 +563,16 @@ impl App {
             "attachments.choose" => open.panel = Panel::Files(step(files)),
             "attachments.save" => self.save(at + 1, ""),
             "attachments.open" => self.open_file(at + 1),
-            "invite.accept" | "invite.tentative" | "invite.decline" => {
+            "invite.accept" | "invite.tentative" | "invite.decline" | "invite.propose" | "invite.ignore" => {
                 open.panel = Panel::None;
-                self.say(say::not_built(":invite", "invitations (M10)"));
+                self.answer_run(keymap::hint("reader.invite").0, id, true);
             }
             "global.command" => self.mode = Mode::Command(Editor::default()),
             "global.help" => self.mode = Mode::Help(String::new(), 0),
             "global.undo" => self.undo(),
             "global.agent" => self.agent_menu(),
             "global.redraw" => self.redraw = true,
+            "global.calendar" => self.calendar_open(None),
             _ => {}
         }
     }
@@ -525,7 +590,7 @@ impl App {
     fn link_numbered(&mut self, command: &str, n: usize) -> Option<(Link, Look)> {
         let found = self.read_body().and_then(|(_, body)| {
             let link = body.links.iter().find(|link| link.n == n)?;
-            Some((link.clone(), reader::look(link, body)))
+            Some((link.clone(), reader::look(link, &body.trackers)))
         });
         match found {
             Some((_, look)) if look.blocked => {
@@ -573,7 +638,7 @@ impl App {
         let serial = self.ask(Action::AgentLink(n), vec![id]);
         self.set_panel(Panel::Links(n - 1), true);
         if let Some(open) = &mut self.reading.open {
-            open.advice = Some((serial, Advice::Asking));
+            open.advised = Advised::asking(serial);
         }
         self.mode = Mode::Confirm(question(&look, false), Action::OpenLink(n));
     }
@@ -582,7 +647,11 @@ impl App {
     /// the message open that can be asked about, with its real host.
     pub(super) fn link_choices(&self) -> Vec<(String, Line)> {
         let Some((_, body)) = self.read_body() else { return Vec::new() };
-        let looks = body.links.iter().map(|link| (link.n, reader::look(link, body))).filter(|(_, look)| !look.blocked);
+        let looks = body
+            .links
+            .iter()
+            .map(|link| (link.n, reader::look(link, &body.trackers)))
+            .filter(|(_, look)| !look.blocked);
         looks
             .map(|(n, look)| (n.to_string(), vec![run(format!("{n:<4}"), Tok::Link), run(look.host, Tok::Fg)]))
             .collect()
@@ -616,6 +685,7 @@ impl App {
         let offered = |id: &str| question.keys.iter().any(|(key, _)| key == keymap::hint(id).0);
         match (id, action) {
             ("global.agent", Action::OpenLink(n)) if offered(id) => self.agent_link(n),
+            ("global.agent", Action::OpenEventLink(_, n)) if offered(id) => self.event_link_asked(n),
             // `n` declines the pictures and not the copy; Esc leaves both.
             ("confirm.no", Action::Browser { remote: true }) if i == 0 => {
                 self.reader_confirmed(Action::Browser { remote: false })
@@ -652,8 +722,9 @@ impl App {
         let name =
             |index: &usize| self.files().into_iter().find(|a| a.index == *index).map_or_else(String::new, |a| a.name);
         let host = |n: &usize| {
-            let link =
-                self.read_body().and_then(|(_, b)| b.links.iter().find(|l| l.n == *n).map(|l| reader::look(l, b)));
+            let link = self
+                .read_body()
+                .and_then(|(_, b)| b.links.iter().find(|l| l.n == *n).map(|l| reader::look(l, &b.trackers)));
             link.map_or_else(String::new, |look| look.host)
         };
         let loads = || {
@@ -683,7 +754,7 @@ impl App {
     pub(super) fn reader_answered(&mut self) {
         let over = |open: &&mut Open| !matches!(open.panel, Panel::Invite);
         if let Some(open) = self.reading.open.as_mut().filter(over) {
-            (open.panel, open.advice, open.replaced) = (Panel::None, None, None);
+            (open.panel, open.advised) = (Panel::None, Advised::default());
         }
     }
 
@@ -714,13 +785,19 @@ impl App {
                     self.mode = Mode::Confirm(say::ask(format!("Unsubscribe at {host}?")), Action::Unsubscribe);
                 }
             },
-            _ => self.say(say::not_built(&format!(":{name}"), "invitations (M10)")),
+            _ => self.answer_command(rest, true),
         }
     }
 
     /// What came back for the reader: a body, a verdict, advice, a result.
     pub(super) fn reader_told(&mut self, event: Event) {
-        let advised = |open: &&mut Open, serial: u64| open.advice.as_ref().is_some_and(|(asked, _)| *asked == serial);
+        let event = match self.reading.open.as_mut() {
+            Some(open) => match open.advised.told(event) {
+                Some(other) => other,
+                None => return,
+            },
+            None => event,
+        };
         match event {
             Event::BodyReady { id, body } => {
                 // The preview reads every row rested on: what is kept is
@@ -755,26 +832,11 @@ impl App {
             }
             Event::ActionDone { summary } => self.say(say::ok(summary)),
             Event::Saved { path } => self.say(say::saved(path)),
-            Event::AgentAsked { serial, replaced } => {
-                if let Some(open) = self.reading.open.as_mut().filter(|open| advised(open, serial)) {
-                    open.replaced = Some(replaced);
-                }
-            }
-            Event::AgentAdvice { serial, advice, why } => {
-                if let Some(open) = self.reading.open.as_mut().filter(|open| advised(open, serial)) {
-                    open.advice = Some((serial, Advice::Given { advice, why }));
-                }
-            }
             // Something asked for outside the mailbox did not happen. The
             // reason names its command, as every error does.
-            Event::ActionFailed { serial, reason, hint } => {
-                let asked = self.reading.asked.contains(&serial);
-                match self.reading.open.as_mut().filter(|open| advised(open, serial)) {
-                    Some(open) => open.advice = Some((serial, Advice::Failed(reason))),
-                    None if !asked => {}
-                    None if hint.is_empty() => self.say(say::err(reason)),
-                    None => self.say(say::err(reason).key(hint)),
-                }
+            Event::ActionFailed { serial, reason, hint } if self.reading.asked.contains(&serial) => {
+                let said = say::err(reason);
+                self.say(if hint.is_empty() { said } else { said.key(hint) });
             }
             _ => {}
         }
