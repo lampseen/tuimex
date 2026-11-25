@@ -14,6 +14,7 @@ use crate::calendar::change::{Item, Patch};
 use crate::calendar::form::{self, Form, Saved, Target};
 use crate::calendar::parts::Scene;
 use crate::editor::Editor;
+use crate::glyphs::DOT;
 use crate::keymap::{self, Found, Key};
 use crate::palette::Tok;
 use crate::say::{self, Question};
@@ -38,6 +39,9 @@ pub(in crate::app) struct State {
     asking: Option<Asking>,
     /// The accounts whose own calendar tuimex can write over CalDAV.
     writable: Vec<AccountId>,
+    /// The accounts whose own calendar is read over CalDAV and has had no
+    /// write tried on it.
+    pub(super) unwritten: Vec<AccountId>,
 }
 
 impl State {
@@ -51,6 +55,14 @@ impl App {
     /// offers beside each account's local one.
     pub fn set_writable_calendars(&mut self, accounts: Vec<AccountId>) {
         self.cal.form.writable = accounts;
+    }
+
+    /// The accounts whose own calendar is read over CalDAV and not
+    /// written. What is kept local for one of them says that `tuimex
+    /// setup` can find out whether it need be; of a feed, which nothing
+    /// can write, that is never said.
+    pub fn set_unwritten_calendars(&mut self, accounts: Vec<AccountId>) {
+        self.cal.form.unwritten = accounts;
     }
 
     pub(in crate::app) fn form_is_open(&self) -> bool {
@@ -228,7 +240,10 @@ impl App {
         if let Some(picked) = saved(self.day()).or_else(|| saved(starts)) {
             (self.cal.cursor, self.cal.picked) = (Some(picked.day), Some(picked));
         }
-        self.say(say::ok(said).key("u to undo"));
+        self.say(match self.could_write(&to).filter(|_| replaces.is_none()) {
+            Some(setup) => say::ok(said).then(format!("{setup} {DOT} u to undo")),
+            None => say::ok(said).key("u to undo"),
+        });
     }
 
     /// A key the form's table does not name: an answer to the question

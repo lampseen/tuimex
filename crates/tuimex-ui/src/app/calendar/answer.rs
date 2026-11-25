@@ -66,6 +66,14 @@ impl App {
         if local { format!("{}, local", at.account.0) } else { at.account.0.clone() }
     }
 
+    /// What the result says after where something was kept, when that is
+    /// local only because nobody has tried writing the account's own
+    /// calendar: the design's `canWrite`.
+    pub(super) fn could_write(&self, at: &Target) -> Option<&'static str> {
+        let untried = self.cal.form.unwritten.contains(&at.account);
+        untried.then_some("tuimex setup can try writing to its calendar")
+    }
+
     /// The selected event, as an invitation to answer.
     fn asked_of_event(&self, name: &'static str) -> Result<Asked, say::Said> {
         let Some(entry) = self.picked_entry() else { return Err(say::err(format!("{name}: no event is selected"))) };
@@ -229,7 +237,9 @@ impl App {
                 };
                 // The organizer may not know an address they did not ask.
                 let from = if answering.uninvited { format!(" as {}", answering.me.email) } else { String::new() };
-                say::ok(format!("{how} {what}")).then(format!("in {}{from} {DOT} u to undo", self.kept_in(&asked.at)))
+                let setup = self.could_write(&asked.at).map_or_else(String::new, |setup| format!("{setup} {DOT} "));
+                let kept = self.kept_in(&asked.at);
+                say::ok(format!("{how} {what}")).then(format!("in {kept}{from} {DOT} {setup}u to undo"))
             }
             Record::Proposed { .. } => {
                 let start = proposed.unwrap_or(asked.start);

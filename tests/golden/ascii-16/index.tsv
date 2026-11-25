@@ -134,6 +134,8 @@ cal-join-4	strip	120	8	ascii	16
 cal-new-0	strip	120	16	ascii	16
 cal-new-1	strip	120	16	ascii	16
 cal-new-2	strip	120	9	ascii	16
+cal-local-0	strip	120	9	ascii	16
+cal-local-1	strip	120	8	ascii	16
 cal-delete-0	strip	120	7	ascii	16
 cal-delete-1	strip	120	8	ascii	16
 cal-repeating-0	strip	120	8	ascii	16

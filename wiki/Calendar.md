@@ -159,6 +159,18 @@ own apps. tuimex keeps an event locally when there is no provider's
 calendar it may write: an account with no `[[calendar]]`, one read from a
 feed, and a CalDAV calendar whose `write` is not `true`.
 
+**An event made for a Google account goes to Google only after the write
+check.** A CalDAV calendar starts out read and not written, so the form
+offers that account's local calendar alone, and a new event or an answer
+is kept on this machine. The result line then says so and what would
+change it: `Added Dentist to google, local · tuimex setup can try writing
+to its calendar`. Run `tuimex setup`, choose *Find out whether a calendar
+that is only read can be written*, and say yes: once that has worked the
+form offers the account's own calendar, and what you make there is
+written at Google. What was already kept locally stays local;
+`:export` writes it out for importing by hand. For a feed the line says
+nothing of setup, because nothing can write a feed.
+
 An answer kept locally and the provider's own copy of the same event are
 drawn as one event: the provider's copy is the event, and your answer is
 shown on it until the provider's copy has an answer of its own.

@@ -896,11 +896,16 @@ const SAY = {
 
   // The calendar (ADR-054). An answer says which account's calendar took
   // it, and `local` when that is tuimex's own copy (ADR-055, ADR-057).
-  answered: (how, what, where) => `{ok|${G.ok}} ${how} ${what}${then(`in ${where} ${G.dot} u to undo`)}`,
+  // `more` is `canWrite`, where it applies.
+  answered: (how, what, where, more) => `{ok|${G.ok}} ${how} ${what}${then(`in ${where} ${G.dot} ${more ? `${more} ${G.dot} ` : ''}u to undo`)}`,
   proposed: (when, who) => `{ok|${G.ok}} Proposed ${when} to ${who}${then('u to undo')}`,
   ignored: (what) => `{ok|${G.ok}} Ignored ${what}${then(`nothing sent ${G.dot} u to undo`)}`,
   unanswered: (what) => `{ok|${G.ok}} Undone${then(`${what} is not answered`)}`,
-  added: (what, where) => `{ok|${G.ok}} Added ${what} to ${where}${then('u to undo')}`,
+  added: (what, where, more) => `{ok|${G.ok}} Added ${what} to ${where}${then(`${more ? `${more} ${G.dot} ` : ''}u to undo`)}`,
+  // Said when something is kept local for an account whose own calendar is
+  // read over CalDAV and has never had a write tried on it: setup tries
+  // one (ADR-062). A feed can never be written, so it is not said of one.
+  canWrite: 'tuimex setup can try writing to its calendar',
   deleted: (what) => `{ok|${G.ok}} Deleted ${what}${then('u to undo')}`,
   restored: (what) => `{ok|${G.ok}} Undone${then(`${what} is back`)}`,
   joining: (host) => `Opening ${host}`,
@@ -2857,6 +2862,12 @@ function build(mode = {}) {
       rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 13) },
     { key: 'y', caption: 'Added', note: 'The event is tuimex\'s own, and says so.',
       rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
+  ]);
+  flow('cal-local', 'Kept local, where setup could change that', [
+    { key: '^s', caption: 'Added', note: 'The account\'s own calendar is read over CalDAV and no write has been tried on it, so the event is kept here, and the line says what would find out whether it need be.',
+      rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local', SAY.canWrite)) }) },
+    { key: 'i a', caption: 'Accepted', note: 'The same of an answer. Of a calendar read from a feed it is not said: nothing can write a feed.',
+      rows: calendarStrip(thu, { selected: 'roadmap', changed: { roadmap: { answer: 'accepted' } }, command: said(SAY.answered('Accepted', road, 'work, local', SAY.canWrite)) }) },
   ]);
   flow('cal-delete', 'Deleting, and undoing it', [
     { key: 'd', caption: 'Deleted', note: 'No question first: u reverses it (ADR-015).',

@@ -266,9 +266,12 @@ fn a_calendar_table_that_is_wrong_says_which_key_and_never_quotes_a_feed_s_addre
 #[test]
 fn a_caldav_calendar_is_written_only_where_a_table_says_so_and_a_feed_never() {
     let caldav = format!("{TWO}[[calendar]]\naccount = \"work\"\nkind = \"caldav\"\nurl = \"{CALDAV}\"\n");
-    assert!(!Config::parse(&caldav).unwrap().writes("work"), "left out, it is read and never written");
+    let read = Config::parse(&caldav).unwrap();
+    assert!(!read.writes("work"), "left out, it is read and never written");
+    assert!(read.unwritten("work") && !read.unwritten("personal"), "and is one a write could be tried on");
     let said = Config::parse(&format!("{caldav}write = true\n")).unwrap();
     assert!(said.writes("work") && !said.writes("personal"));
+    assert!(!said.unwritten("work"), "which one already written is not");
 
     // What setup appends when the write was proven after the table was
     // written: it only ever adds to the end of the file (ADR-043).

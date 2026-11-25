@@ -145,6 +145,8 @@ cal-join-4	strip	120	8	unicode	truecolor
 cal-new-0	strip	120	16	unicode	truecolor
 cal-new-1	strip	120	16	unicode	truecolor
 cal-new-2	strip	120	9	unicode	truecolor
+cal-local-0	strip	120	9	unicode	truecolor
+cal-local-1	strip	120	8	unicode	truecolor
 cal-delete-0	strip	120	7	unicode	truecolor
 cal-delete-1	strip	120	8	unicode	truecolor
 cal-repeating-0	strip	120	8	unicode	truecolor

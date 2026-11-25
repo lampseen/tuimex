@@ -278,6 +278,12 @@ impl Config {
         said.next_back().unwrap_or(false)
     }
 
+    /// Whether the account's calendar is one setup could find out how to
+    /// write: read over CalDAV, and not written. A feed never is.
+    pub fn unwritten(&self, name: &str) -> bool {
+        self.calendar(name).is_some_and(|calendar| calendar.url.is_some()) && !self.writes(name)
+    }
+
     pub fn account(&self, name: &str) -> Option<&Account> {
         self.accounts.iter().find(|account| account.name == name)
     }

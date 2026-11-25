@@ -192,6 +192,13 @@ pub fn writable(config: &Config) -> Vec<String> {
     named.filter(|name| config.writes(name)).collect()
 }
 
+/// The accounts whose calendar is read over CalDAV and not written: for
+/// these, and for no feed, `tuimex setup` can find out whether it can be.
+pub fn unwritten(config: &Config) -> Vec<String> {
+    let named = config.accounts.iter().map(|account| account.name.clone());
+    named.filter(|name| config.unwritten(name)).collect()
+}
+
 /// The reader for the calendars the config names. With none there is
 /// still one: an account with no calendar has its local one, and the
 /// invitations in its mail. `offset` is the machine's seconds east of
