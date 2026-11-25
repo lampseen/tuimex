@@ -901,6 +901,10 @@ fn an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_t
     assert!(said.contains("Accepted Planning") && said.contains("in work, local"), "{said}");
     let accepted = s.until("the calendar read after the answer", |screen| !shows("needs answer")(screen));
     assert!(shows("you yes")(&accepted) && shows("local, only in tuimex")(&accepted), "{accepted:#?}");
+    // The screen is changed when the key is pressed and the file is
+    // written by the worker after it, so the file is waited for.
+    let root = s.root.clone();
+    s.until("the answer in the calendar's file", |_| kept(&root).len() == 1);
     let files = kept(&s.root);
     assert!(files.len() == 1 && files[0].contains("PARTSTAT=ACCEPTED"), "{files:?}");
     // The reply is mail like any other while it waits: a row of the
@@ -915,6 +919,7 @@ fn an_invitation_in_mail_is_answered_in_the_calendar_and_u_takes_the_reply_and_t
     s.press("gcu");
     assert!(s.screen().pop().unwrap().contains("Undone"), "{:?}", s.screen().pop());
     s.until("the invitation waiting again", shows("needs answer"));
+    s.until("the calendar's file gone", |_| kept(&root).is_empty());
     assert!(kept(&s.root).is_empty(), "the event is in no calendar");
     s.press("gm");
     let back = s.until("the Outbox without the reply", |screen| !shows("Outbox")(screen));

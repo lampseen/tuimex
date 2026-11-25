@@ -2069,6 +2069,19 @@ it is, "the connection failed" from a calendar whose password was just
 changed should be read as possibly a refused sign-in, and
 `wiki/Calendar.md` says so.
 
+*2026-11-24, the first write to Google.* It was refused by tuimex, not
+by Google. Google took the `PUT` with 201, named no tag, and filed the
+event under an address made from its UID; the address tuimex had asked
+for answered 404, so the write check's delete missed, setup said the
+calendar could not be written, and the test event stayed. A write that
+is given no tag now asks the calendar for the events of the days the
+event begins on, and keeps the event under the address and tag the
+calendar shows for its UID, if that address is under the calendar.
+With that, the write check passed on two Google accounts by hand, an
+event made here was seen in Google Calendar, and one deleted there went
+from here at the next read. The address is still never made from a UID
+by tuimex: it is the server's, read back and checked.
+
 ## ADR-063 — The code budget is 28,000 lines
 
 `MAX_CODE_LINES` goes from 26,000 to 28,000. The other three budgets
