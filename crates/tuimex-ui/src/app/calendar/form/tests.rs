@@ -10,6 +10,8 @@ use crate::keymap::Key;
 /// The hint on a field that is typed into, and on one that is chosen from.
 const HINT: &str = "Tab next field · Enter notes · ^s save · Esc close";
 const CHOOSING: &str = "Tab next field · h l choose · Enter notes · ^s save · Esc close";
+/// And on Starts and Ends, where what is typed is merged with what is held.
+const DATING: &str = "Tab next field · 14:30 or fri is enough · Enter notes · ^s save · Esc close";
 
 fn form(app: &App) -> &Form {
     app.cal.form.form.as_ref().expect("the form is open")
@@ -108,7 +110,7 @@ fn h_and_l_choose_on_a_field_that_is_chosen_from_and_are_letters_where_text_is_t
     // Starts is typed into: the letters are words of a date that names none.
     press(&mut app, "\thl");
     assert_eq!(form(&app).starts_words.as_deref(), Some("hl"));
-    assert_eq!(foot(&mut app).1, HINT, "and the hint names no key that would type");
+    assert_eq!(foot(&mut app).1, DATING, "and the hint names no key that would type");
     press(&mut app, "^u\t\tl");
     assert_eq!(screen(&mut app, 120, 40)[6], "▌   All day  yes");
     press(&mut app, "\tlll");
@@ -173,7 +175,7 @@ fn the_status_line_says_what_a_date_was_taken_to_mean_and_words_that_name_none_a
     press(&mut app, "teatime^s");
     assert_eq!(
         foot(&mut app),
-        (String::new(), "E ^s: Ends: not a date: \"teatime\" · 2026-12-05, 5 dec, fri, +2w".into())
+        ("not a date or a time".into(), "E ^s: Ends: not a date: \"teatime\" · 2026-12-05, 5 dec, fri, +2w".into())
     );
     assert!(app.form_is_open(), "and the form stays");
 }

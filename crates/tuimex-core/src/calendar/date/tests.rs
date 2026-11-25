@@ -68,3 +68,19 @@ fn a_time_after_the_day_is_kept_and_a_time_alone_is_on_the_day_looked_at() {
         assert_eq!(parse(wrong, thu, thu), None, "{wrong}");
     }
 }
+
+#[test]
+fn a_time_is_read_by_the_twelve_hour_clock_too_and_alone_without_its_colon() {
+    let thu = day(2026, 11, 26);
+    assert_eq!(parse("fri 2pm", thu, thu), Some(Named { day: thu + 1, minute: Some(14 * 60) }));
+    assert_eq!(parse("2:30PM", thu, thu), Some(Named { day: thu, minute: Some(870) }));
+    for (words, minute) in [("12am", 0), ("12pm", 720), ("9am", 540), ("11:59pm", 1439), ("9", 540), ("0", 0)] {
+        assert_eq!(time(words), Some(minute), "{words}");
+    }
+    assert_eq!((time("930"), time("1430"), time(" 14:30 ")), (Some(570), Some(870), Some(870)));
+    for wrong in ["13pm", "0am", "24", "960", "2460", "14300", "pm", "2 pm", "fri", "fri 2pm", ""] {
+        assert_eq!(time(wrong), None, "{wrong}");
+    }
+    assert_eq!(parse("5 dec 2027", thu, thu).map(|n| n.minute), Some(None), "after a date, digits are its year");
+    assert_eq!(parse("9", thu, thu), None, "and where a day is asked for an hour alone is none");
+}

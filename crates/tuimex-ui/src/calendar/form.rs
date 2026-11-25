@@ -270,14 +270,29 @@ impl Form {
         }
     }
 
-    /// What the words typed into Starts or Ends name, as a wall time: the
-    /// field's own time when they give none. A time alone is on the day the
-    /// event starts. `None` when they name no date.
+    /// What the words typed into Starts or Ends make of the field, as a
+    /// wall time: they are merged with what it held. A time alone keeps
+    /// the field's date and a date alone its time; a step (`+1w`) is from
+    /// the field's own day; no words at all leave it as it was. `None`
+    /// when the words name neither.
     pub fn meaning(&self, field: Field) -> Option<i64> {
         let words = self.words(field)?;
-        let named = date::parse(words, self.today, self.starts.div_euclid(DAY))?;
         let own = if field == Field::Starts { self.starts } else { self.ends };
+        if words.trim().is_empty() {
+            return Some(own);
+        }
+        if let Some(minute) = date::time(words) {
+            return Some(own.div_euclid(DAY) * DAY + minute * 60);
+        }
+        let named = date::parse(words, self.today, own.div_euclid(DAY))?;
         Some(named.day * DAY + named.minute.map_or(own.rem_euclid(DAY), |minute| minute * 60))
+    }
+
+    /// Whether a field's words give a time of day. On an event that lasts
+    /// all day that is the reader saying it does not.
+    fn timed(&self, field: Field) -> bool {
+        let named = |words: &String| date::parse(words, self.today, self.today).and_then(|named| named.minute);
+        self.words(field).is_some_and(|words| date::time(words).or(named(words)).is_some())
     }
 
     /// The date a field's words name becomes its date, and moving the
@@ -286,6 +301,7 @@ impl Form {
     pub fn settle(&mut self) {
         for field in [Field::Starts, Field::Ends] {
             let Some(wall) = self.meaning(field) else { continue };
+            self.all_day &= !self.timed(field);
             if field == Field::Starts {
                 (self.ends, self.starts, self.starts_words) = (self.ends + wall - self.starts, wall, None);
             } else {
@@ -483,8 +499,10 @@ impl Form {
             _ => return vec![run("not saved", Tok::Dim)],
         };
         let wall = if self.words(self.focus).is_some() { self.meaning(self.focus) } else { Some(own) };
-        let said = |wall: i64| vec![run(word, Tok::Dim), run(format!(" {}", written(wall, self.all_day)), Tok::Fg)];
-        wall.map_or_else(Line::new, said)
+        // A time typed into an event that lasts all day will end that.
+        let all_day = self.all_day && !self.timed(self.focus);
+        let said = |wall: i64| vec![run(word, Tok::Dim), run(format!(" {}", written(wall, all_day)), Tok::Fg)];
+        wall.map_or_else(|| vec![run("not a date or a time", Tok::Dim)], said)
     }
 }
 
@@ -542,9 +560,11 @@ pub fn screen(o: &Scene, form: &Form, asked: Option<Line>, width: usize, height:
     let left = o.left.clone().unwrap_or_else(|| form.left());
     // The keys that choose are letters in a field that is typed into, so
     // they are named only where they choose.
-    let choice = (!form.focus.typed()).then_some("event-form.choice");
-    let ids = choice.into_iter().chain(["event-form.notes", "event-form.save", "event-form.close"]);
-    let keys: Vec<_> = [("Tab", "next field")].into_iter().chain(ids.map(keymap::hint)).collect();
+    let choice = (!form.focus.typed()).then(|| keymap::hint("event-form.choice"));
+    // What is typed into a date is merged with what it held.
+    let dated = matches!(form.focus, Field::Starts | Field::Ends).then_some(("14:30 or fri", "is enough"));
+    let ids = ["event-form.notes", "event-form.save", "event-form.close"].map(keymap::hint);
+    let keys: Vec<_> = [("Tab", "next field")].into_iter().chain(choice).chain(dated).chain(ids).collect();
     let idle = || hint(&keys);
     let command = asked.or_else(|| o.command.clone()).unwrap_or_else(idle);
     let foot = [o.panel.clone(), vec![Line::new(), status_row(width, &left, &o.right), command]].concat();

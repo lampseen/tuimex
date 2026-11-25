@@ -126,7 +126,14 @@ day; `E` opens it on the selected event.
 | `Esc` | close; with changes, it asks whether to keep them |
 
 Dates are typed as words, and the status line says what they were taken
-to mean before anything is saved. **Calendar** offers each account's
+to mean before anything is saved. In **Starts** and **Ends** you type only
+what changes: a time alone (`14:30`, `1430`, `2pm`, `9`) keeps the date, a
+date alone (`fri`, `5 dec`, `+1w`) keeps the time, and both change both.
+While you type the field shows what you typed, and it is written whole
+again when you leave it. Moving the start moves the end as far, so the
+event stays as long as it was. Left empty, the field keeps what it held. A
+time typed into an event that lasts all day turns All day off. An end
+before the start is refused when you save, and says so. **Calendar** offers each account's
 local calendar, and the account's own where tuimex writes it. **Guests**
 are addresses, by comma or by line. An event with guests asks before it
 is saved, naming how many will be mailed the invitation; only `y` saves

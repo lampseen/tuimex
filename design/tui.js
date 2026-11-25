@@ -915,6 +915,11 @@ const SAY = {
   matching: (n, query) => `{dim|${n} ${n === 1 ? 'event matches' : 'events match'} "${query}"}`,
   proposes: (when) => `{dim|proposes} ${when}`,
   goesTo: (day) => `{dim|goes to} ${day}`,
+  // The form, on Starts and on Ends: what the words typed will make the
+  // field, and the hint that it need not all be typed.
+  whenIs: (which, when) => `{dim|${which}} ${when}`,
+  notWhen: '{dim|not a date or a time}',
+  enough: ['14:30 or fri', 'is enough'],
   remindersOff: `Reminders off${then('gn turns them on')}`,
   remindersOn: 'Reminders on',
   freeDay: 'Nothing on this day.',
@@ -2218,18 +2223,25 @@ function eventScreen(o) {
 // them `h` and `l` choose as Left and Right do. In a field that is typed
 // into they are letters, so the hint names them only on these.
 const CHOSEN = ['Calendar', 'All day', 'Repeats', 'Reminder'];
+// The two that hold a date and a time. What is typed into one is merged
+// with what it held: a time alone keeps the date, a date alone keeps the
+// time, and the hint says that either is enough.
+const DATED = ['Starts', 'Ends'];
 
 // The form for a new event or a change to one, built as compose is: a field
 // to a row, the focused one with the cursor and a bold label, and the notes
 // below as the body. o: { ev, focused, typing, left, command }
 function eventFormScreen(width, height, o) {
   const { ev } = o;
+  // What is being typed into a date stands in for it until the field is
+  // left, when the whole date is written again.
+  const typedIn = (label, held) => ((o.words || {})[label] != null ? o.words[label] : held);
   const calendars = CALENDARS.filter((c) => c.source === 'local').flatMap((c) => [run(`${c.account} local`, c.account === ev.account ? 'fg' : 'dim', { b: c.account === ev.account }), gap(3)]);
   const fields = [
     ['Title', [run(ev.title, 'fg', { b: true })]],
     ['Calendar', calendars],
-    ['Starts', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.start}`)]],
-    ['Ends', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.end}`)]],
+    ['Starts', [run(typedIn('Starts', `${dayShort(ev.n)} ${civil(ev.n).year} ${ev.start}`))]],
+    ['Ends', [run(typedIn('Ends', `${dayShort(ev.n)} ${civil(ev.n).year} ${ev.end}`))]],
     ['All day', [run('no', 'dim')]],
     ['Repeats', [run(ev.repeats || 'never', ev.repeats ? 'fg' : 'dim')]],
     ['Where', ev.where ? [run(ev.where)] : []],
@@ -2243,7 +2255,7 @@ function eventFormScreen(width, height, o) {
   const head = [heading([run(o.heading, 'fg', { b: true })]), [], ...fields, []].map((row) => fit(row, width));
   const body = indent(ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin)) : [[run('No notes.', 'dim')]]);
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|not saved}', calendarAlerts()),
-    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), 'event-form.notes', 'event-form.save', 'event-form.close'));
+    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), ...(DATED.includes(o.focused) ? [SAY.enough] : []), 'event-form.notes', 'event-form.save', 'event-form.close'));
 }
 
 // The calendars, each one a row to show or hide.
@@ -2862,6 +2874,17 @@ function build(mode = {}) {
       rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 13) },
     { key: 'y', caption: 'Added', note: 'The event is tuimex\'s own, and says so.',
       rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
+  ]);
+  const later = { ...offsite, start: '15:30', end: '16:30' };
+  flow('cal-when', 'Changing only the time', [
+    { key: 'Tab Tab', caption: 'On Starts', note: 'The field holds a date and a time, and the hint says a time or a date is enough.',
+      rows: cut(form({ focused: 'Starts', left: SAY.whenIs('starts', 'Thu 26 Nov 2026 14:00') }), 13) },
+    { key: '15:30', caption: 'A time typed', note: 'A time alone keeps the date and a date alone keeps the time. The status line says what the field will hold.',
+      rows: cut(form({ focused: 'Starts', words: { Starts: '15:30' }, left: SAY.whenIs('starts', 'Thu 26 Nov 2026 15:30') }), 13) },
+    { key: 'Tab', caption: 'Both moved', note: 'Leaving the field writes it whole again, and the end moves with the start, so the event is as long as it was.',
+      rows: cut(form({ ev: later, focused: 'Ends', left: SAY.whenIs('ends', 'Thu 26 Nov 2026 16:30') }), 13) },
+    { key: 'soon', caption: 'Words that name nothing', note: 'The status line says so. Left empty, the field keeps what it held.',
+      rows: cut(form({ ev: later, focused: 'Ends', words: { Ends: 'soon' }, left: SAY.notWhen }), 13) },
   ]);
   flow('cal-local', 'Kept local, where setup could change that', [
     { key: '^s', caption: 'Added', note: 'The account\'s own calendar is read over CalDAV and no write has been tried on it, so the event is kept here, and the line says what would find out whether it need be.',
