@@ -234,7 +234,7 @@ const KEYMAP = {
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
     'forms: `h` and `l` choose wherever Left and Right do, on a field that takes no typed text. In a field that is typed into they are letters.',
-    'calendar: in the month Alt-l or Alt-j focuses the list of events beside the grid and Alt-h or Alt-k returns, as they do for the preview in mail. Focused, the list moves as the day view does.',
+    'calendar: in the month Alt-l or Alt-j focuses the list of events beside the grid and Alt-h or Alt-k returns, as they do for the preview in mail. Focused, the list always has an event selected: `j` and `k` step through every event it lists, `h` and `l` go to the day before or after that has one, and the grid\'s cursor follows.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -317,7 +317,7 @@ const KEYMAP = {
     // the digits move days and views here and sections only in mail.
     { mode: 'calendar', title: 'Calendar (after gc)', keys: [
       { id: 'calendar.day', keys: 'h l', does: 'previous, next day' },
-      { id: 'calendar.move', keys: 'j k', does: 'grid: week; else: event' },
+      { id: 'calendar.move', keys: 'j k', does: 'grid: week; else: event', hint: 'move' },
       { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
       { id: 'calendar.focus-list', keys: 'Alt-j Alt-l', does: 'month: focus the events' },
       { id: 'calendar.focus-grid', keys: 'Alt-k Alt-h', does: 'back to the grid', hint: 'grid' },
@@ -941,6 +941,7 @@ const SAY = {
   onlyInTuimex: (account) => `{warn|${G.notice} Only in tuimex}${then(`${account}'s own calendar does not have it ${G.dot} :export writes it out`)}`,
   waiting: (n) => `{warn|${n} to answer}`,
   noEvent: (key) => `{err|E ${key}: no event is selected}`,
+  noneListed: (key) => `{err|E ${key}: the list shows no event}`,
   noEventLink: `{err|E o: this event has no link}`,
   notInvited: `{err|E i: nobody asked for an answer to this event}`,
   notADate: (typed) => `{err|E gd: not a date: "${typed}"}${then('2026-12-05, 5 dec, fri, +2w')}`,
@@ -1911,16 +1912,16 @@ function dayStatus(n, o = {}) {
 }
 
 // A hint names one key for a thing, and the bar of places names the keys
-// that change place, so no hint does. With the month's list focused, the way
-// back is to the grid, by the Alt key that points at it: the list is beside
-// the grid at every width.
+// that change place, so no hint does. With the month's list focused the
+// hint is what moves there, what opens, and the way back to the grid by the
+// Alt key that points at it: the list is beside the grid at every width.
 function calendarHint(ev, focused) {
-  const grid = ['Alt-h', BINDING['calendar.focus-grid'].hint];
-  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', ...(focused ? [grid] : []), 'global.help');
+  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', 'global.help');
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
   if (ev.link) extra.push('calendar.links');
-  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', focused ? grid : 'global.back', 'global.help');
+  if (focused) return hint('calendar.move', 'calendar.open', ...extra, ['Alt-h', BINDING['calendar.focus-grid'].hint], 'global.help');
+  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', 'global.back', 'global.help');
 }
 
 // ------------------------------------------------------------ calendar: rows
@@ -2005,13 +2006,15 @@ function eventRow(ev, width, o = {}) {
 
 // Days from `from` on, each under its label, in exactly `room` rows. A day
 // with nothing on it is passed over, except the first, which says so. It
-// never ends on a label with no row under it. A selected event further down
-// its day than the rows reach is the last row, and the rows above it follow.
+// never ends on a label with no row under it. The days go on as far as the
+// selected event's, however far that is: one further down than the rows
+// reach is the last row, and the rows above it follow.
 function agendaRows(from, room, width, o = {}) {
   const lines = [];
   const labels = new Set();
   let at = 0;
-  for (let n = from; lines.length < room && n < from + 92; n++) {
+  const through = o.selected ? o.selected.n : from;
+  for (let n = from; (lines.length < room || n <= through) && n < Math.max(from + 92, through + 1); n++) {
     const events = eventsOn(n, o);
     if (!events.length && (n !== from || o.only != null)) continue;
     if (lines.length) lines.push([]);
@@ -2037,8 +2040,12 @@ function agendaRows(from, room, width, o = {}) {
 // o: { width, height, cursor, narrowed, hidden, changed, panel, left, right,
 //      command }, and for the day and the week, selected: { id, n }. The
 // month takes `focus: 'list'` too: the focus is then in the list of events
-// beside the grid, which selects one as the day view does, and the grid's
-// cursor is dim, as the list's is in mail while the preview has the focus.
+// beside the grid, which always has one selected, and the grid's cursor is
+// dim, as the list's is in mail while the preview has the focus. That
+// cursor is on the selected event's day. The list begins on the cursor's
+// day until the focus is in it; then it stays where it began while `j` and
+// `k` step through it, so `from` is its first day when that is not the
+// cursor's.
 function monthScreen(o) {
   const { width } = o;
   const height = o.height - 1;
@@ -2049,7 +2056,7 @@ function monthScreen(o) {
   const months = monthsColumn(room, { ...o, unfocused: focused });
   const leftWidth = LAYOUT.indent + 7 * C.cell + LAYOUT.margin;
   const paneWidth = width - leftWidth - 1;
-  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, shown);
+  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(focused && o.from != null ? o.from : o.cursor, room, paneWidth, shown);
   const content = Array.from({ length: room }, (_, y) => [...fit([gap(LAYOUT.indent), ...(months[y] || [])], leftWidth), run(G.bar, 'faint'), ...fit(pane[y] || [], paneWidth)]);
   const at = civil(o.cursor);
   const ev = shown.selected && occurrence(shown.selected.id, shown.selected.n, o);
@@ -2843,10 +2850,16 @@ function build(mode = {}) {
     hidden: ['personal/local'], panel: panel('Calendars', calendarEntries(['personal/local']), 1), left: '', command: hint('calendars.choose', 'calendars.toggle', 'calendars.close'),
   }));
 
-  // The focus in the list beside the grid, on the first event of the day.
+  // The focus in the list beside the grid. It lands on an event whenever
+  // the list shows one: the first of the cursor's day, or from a day with
+  // nothing on it, as Sunday the 22nd is, the first listed after.
   const listed = (size, more) => month(size, { focus: 'list', selected: { id: 'standup', n: thu }, ...more });
-  screen('cal-month-list-focus', 'Calendar, month, the list focused', 'after Alt-l: the cursor is on the first event of the day and the grid\'s cursor dims; the status line says which of the day\'s events it is and the hint is that event\'s, with the key that returns to the grid', listed(LAYOUT.default));
-  screen('cal-month-wide-list-focus', 'Calendar, month at 180 columns, the list focused', 'the list is beside the grid at every width, so it is Alt-l that focuses it and Alt-h that returns', listed(wide), wide);
+  const sun = TODAY - 1;
+  const fromEmpty = (size) => listed(size, { cursor: TODAY, from: sun, selected: { id: 'standup', n: TODAY } });
+  screen('cal-month-list-focus', 'Calendar, month, the list focused', 'after Alt-l on a day with nothing on it: the list stays as it was, the first event it lists is selected, and the grid\'s cursor dims and goes to that event\'s day; the status line says which of the day\'s events it is and the hint is what moves, what opens and the key that returns to the grid', fromEmpty(LAYOUT.default));
+  alsoSmall('cal-month-list-focus', 'Calendar, month, the list focused', fromEmpty(small));
+  const across = { cursor: fri, from: thu, selected: { id: 'library', n: fri } };
+  screen('cal-month-wide-list-focus', 'Calendar, month at 180 columns, the list focused', 'after Alt-l and j four times: the selection has gone on into the next day, the list is where it began, and the grid\'s cursor has followed; the list is beside the grid at every width, so it is Alt-l that focuses it and Alt-h that returns', listed(wide, across), wide);
 
   const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
   screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock, on a faint grid of days and hours; an event is a block behind an edge in its account\'s colour for as long as it lasts, two at once share a column, the cursor\'s day is the column that is brighter, and the time it is now is a line across today', week(LAYOUT.default));
@@ -2893,14 +2906,24 @@ function build(mode = {}) {
   // A day with more on it than the list has rows for.
   const busy = [['12:30', '13:15', 'Lunch with Greta'], ['15:00', '15:30', 'Call the plumber'], ['17:30', '18:30', 'Climbing'], ['18:45', '19:30', 'Dinner']]
     .map(([start, end, title], i) => ({ id: `busy-${i}`, account: 'personal', day: '2026-11-26', start, end, title }));
+  const sat = fri + 1;
+  const newYear = dayNumber('2027-01-02');
   flow('cal-list', 'The month\'s list, focused', [
-    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 12) },
-    { key: 'j', caption: 'The next event', note: 'The list moves as the day view does: j and k step through events, across days, Enter opens the one selected, and o, i, E and d act on it.',
+    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. The grid\'s cursor dims. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 12) },
+    { key: 'j', caption: 'The next event', note: 'j and k step through every event the list shows. Enter opens the one selected, and o, i, E and d act on it.',
       rows: cut(listed(LAYOUT.default, { selected: roadmap }), 12) },
-    { key: 'l', caption: 'The next day', note: 'h and l move by a day here too. The grid\'s cursor goes with them and the first event of that day is selected.',
-      rows: cut(listed(LAYOUT.default, { cursor: fri, selected: { id: 'library', n: fri } }), 12) },
-    { key: '', caption: 'More than fits', note: 'On a day with more events than there are rows, the list scrolls to keep the selected one in sight.',
+    { key: 'j j j', caption: 'Into the next day', note: 'Past the last event of a day is the first of the next that has one. The list stays where it began and the grid\'s cursor follows the selection. k goes back the same way, and from the first event listed to the one before it, which the list then begins on.',
+      rows: cut(listed(LAYOUT.default, across), 12) },
+    { key: 'l', caption: 'The next day', note: 'h and l move by a day here too, to the nearest that has an event, and select its first. The list begins on that day.',
+      rows: cut(listed(LAYOUT.default, { cursor: sat, selected: { id: 'cabin', n: sat } }), 12) },
+    { key: 'Alt-l', caption: 'From a day with nothing on it', note: 'The focus still lands on an event: the first the list shows after that day. The grid\'s cursor goes to its day.',
+      rows: cut(fromEmpty(LAYOUT.default), 12) },
+    { key: '', caption: 'More than fits', note: 'When the selection is further down than there are rows, the list scrolls to keep it in sight.',
       rows: monthScreen({ width: W, height: 14, cursor: thu, focus: 'list', selected: { id: 'migration', n: thu }, added: busy }) },
+    { key: 'Alt-h', caption: 'Back in the grid', note: 'On the day of the event that was selected. The list begins on the cursor\'s day again.',
+      rows: cut(month(LAYOUT.default, { cursor: fri }), 12) },
+    { key: 'Alt-l', caption: 'Nothing to select', note: 'Where the list shows no event the focus stays in the grid, and the line says why.',
+      rows: cut(month(LAYOUT.default, { cursor: newYear, command: said(SAY.noneListed('Alt-l')) }), 12) },
   ]);
 
   const road = 'Q4 roadmap review';

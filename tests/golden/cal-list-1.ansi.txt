@@ -12,4 +12,4 @@
 {fg}                                  {faint}│{fg}    {link}personal{fg}   {dim}all day{fg}      Cabin weekend  {dim}Ridge saddle hut{fg}                          
 {fg}                                                                                                                        
 {fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Alt-h {dim}grid · {fg}? {dim}help{fg}                                             
+{fg}  j k {dim}move · {fg}Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}Alt-h {dim}grid · {fg}? {dim}help{fg}                                                      

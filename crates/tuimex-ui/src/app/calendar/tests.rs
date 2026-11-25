@@ -98,7 +98,7 @@ fn the_bar_of_places_marks_the_place_in_view_and_names_its_keys_only_where_they_
 }
 
 /// The month's hint while its list has the focus, on an event with a link.
-const LISTED: &str = "Enter open · o links · E edit · d delete · Alt-h grid · ? help";
+const LISTED: &str = "j k move · Enter open · o links · Alt-h grid · ? help";
 
 /// The colour of the cursor in the month's grid, which is left of the bar.
 fn grid_cursor(app: &mut App) -> Tok {
@@ -107,6 +107,11 @@ fn grid_cursor(app: &mut App) -> Tok {
         line[..bar].iter().find(|span| span.text == "▌").map(|span| span.fg)
     };
     app.lines(120, 40).iter().find_map(cursor).expect("the grid has a cursor")
+}
+
+/// What the list beside the grid shows on row `y` of the screen.
+fn listed(app: &mut App, y: usize) -> String {
+    screen(app, 120, 40)[y].split('│').nth(1).unwrap_or_default().to_string()
 }
 
 /// As the preview takes the focus in mail: by either Alt key that goes
@@ -136,66 +141,210 @@ fn alt_l_focuses_the_month_s_list_of_events_and_alt_h_or_esc_returns_to_the_grid
     assert_eq!(foot(&mut app).0, "Thu 3 Dec · 2 events", "j is a week in the grid again");
 }
 
-/// Bryan's rule that every key stays consistent: with the focus in the
-/// month's list, each key is what it is in the day view.
+/// Bryan, 2026-11-24: "still not able to nav to the list on the right to
+/// nav events". A focus that selects nothing is seen only in the hint, so
+/// from a day with nothing on it the first event listed is selected.
 #[test]
-fn the_month_s_list_focused_moves_and_acts_as_the_day_view_does() {
-    let mut app = after("gclll⌥lj");
-    let answering = "Enter open · i answer · o links · E edit · d delete · Alt-h grid · ? help";
-    assert_eq!(foot(&mut app), ("Thu 26 Nov · 2 of 4 · 1 to answer".to_string(), answering.to_string()));
-    press(&mut app, "jjj");
-    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer", "j goes on across days");
-    let rows = screen(&mut app, 120, 40);
-    assert!(rows[8].contains("▌27"), "and the grid's cursor follows: {}", rows[8]);
-    assert_eq!(rows[2].split('│').nth(1), Some("  Fri 27 November"), "as does the day the list begins on");
+fn the_focus_lands_on_the_first_event_listed_when_the_cursor_s_day_has_none() {
+    // Sunday the 22nd has nothing on it; Monday's standup is listed next.
+    let mut app = after("gch");
+    assert_eq!(foot(&mut app).0, "Sun 22 Nov · 0 events");
+    let before: Vec<String> = (2..12).map(|y| listed(&mut app, y)).collect();
+    press(&mut app, "⌥l");
+    assert_eq!(foot(&mut app), ("Mon 23 Nov · 1 of 2".to_string(), LISTED.to_string()));
+    let after_focus: Vec<String> = (2..12).map(|y| listed(&mut app, y).replace('▌', " ")).collect();
+    assert_eq!(after_focus, before, "the list is as it was, but for the cursor in it");
+    assert_eq!(listed(&mut app, 2), "  Sun 22 November");
+    assert_eq!(listed(&mut app, 3).trim(), "Nothing on this day.");
+    assert!(listed(&mut app, 6).starts_with("▌   work       09:30-09:45  Standup"), "{}", listed(&mut app, 6));
+    let filled = |app: &mut App| app.lines(120, 41)[7].iter().filter(|s| s.bg == Some(Tok::Sel)).count();
+    assert!(filled(&mut app) > 1, "the selected row is filled, as a selected row is in the day view");
+    assert!(screen(&mut app, 120, 40)[8].contains("▌23"), "the grid's cursor has gone to the event's day");
+    assert_eq!(grid_cursor(&mut app), Tok::Dim, "and is dim");
+    // Alt-j is the same key, and Enter opens what was landed on.
+    let mut app = after("gch⌥j\r");
+    assert!(screen(&mut app, 120, 40)[0].starts_with("  Standup"));
+    press(&mut app, "\x1b");
+    assert_eq!(foot(&mut app).1, LISTED, "and Esc from the event is the list again");
+}
+
+#[test]
+fn j_and_k_step_through_every_event_the_list_shows_and_the_grid_s_cursor_follows() {
+    let mut app = after("gch⌥l");
+    let mut seen = vec![foot(&mut app).0];
+    for _ in 0..6 {
+        press(&mut app, "j");
+        seen.push(foot(&mut app).0);
+        assert_eq!(listed(&mut app, 2), "  Sun 22 November", "the list stays where it began");
+    }
+    let days = [
+        "Mon 23 Nov · 1 of 2",
+        "Mon 23 Nov · 2 of 2",
+        "Tue 24 Nov · 1 of 2",
+        "Tue 24 Nov · 2 of 2",
+        "Wed 25 Nov · 1 of 2",
+        "Wed 25 Nov · 2 of 2",
+        "Thu 26 Nov · 1 of 4 · 1 to answer",
+    ];
+    assert_eq!(seen, days);
+    assert!(screen(&mut app, 120, 40)[8].contains("▌26"), "the grid's cursor is on the selected event's day");
+    assert_eq!(grid_cursor(&mut app), Tok::Dim);
+    press(&mut app, "kk");
+    assert_eq!(foot(&mut app).0, "Wed 25 Nov · 1 of 2", "k goes back the same way");
+    assert!(screen(&mut app, 120, 40)[8].contains("▌25"));
+    // J and K are the same steps, and Alt-h leaves the grid's cursor on the
+    // day of the event that was selected.
+    press(&mut app, "JJKJ");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 1 of 4 · 1 to answer");
+    press(&mut app, "⌥h");
+    assert_eq!(foot(&mut app), ("Thu 26 Nov · 4 events · 1 to answer".to_string(), MONTH.to_string()));
+    assert_eq!(listed(&mut app, 2), "  Thu 26 November", "the grid's list begins on the cursor's day");
+    let mut app = after("gch⌥ljj\x1b");
+    assert_eq!(foot(&mut app).0, "Tue 24 Nov · 2 events", "Esc returns to the grid on that day too");
+    assert_eq!(grid_cursor(&mut app), Tok::Acc);
+}
+
+/// Decided where the brief left it open: `k` on the first event listed
+/// goes to the one before it, on whatever earlier day, and the list then
+/// begins on that day.
+#[test]
+fn k_at_the_top_of_the_list_goes_to_the_event_before_and_the_list_begins_on_its_day() {
+    let mut app = after("gclll⌥l");
+    assert_eq!(listed(&mut app, 2), "  Thu 26 November");
     press(&mut app, "k");
-    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 4 of 4 · 1 to answer");
+    assert_eq!(foot(&mut app).0, "Wed 25 Nov · 2 of 2");
+    assert_eq!(listed(&mut app, 2), "  Wed 25 November");
+    assert!(listed(&mut app, 4).starts_with("▌   work       13:00-13:30  1:1 with Imani"), "{}", listed(&mut app, 4));
+    press(&mut app, "jj");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer");
+    assert_eq!(listed(&mut app, 2), "  Wed 25 November", "and stays there as j goes forward again");
+}
+
+#[test]
+fn the_list_scrolls_to_keep_the_selection_in_sight_and_the_month_changes_when_it_must() {
+    // Seven rows for the list: Thursday's label and four events, a blank
+    // row and Friday's label fill them.
+    let mut app = after("gclll⌥l");
+    let pane = |app: &mut App| -> Vec<String> {
+        let rows = screen(app, 120, 12);
+        rows[2..9].iter().map(|row| row.split('│').nth(1).unwrap_or_default().to_string()).collect()
+    };
+    for (steps, title) in [(3, "Staging migration window"), (1, "Library books due"), (2, "Account review")] {
+        press(&mut app, &"j".repeat(steps));
+        let rows = pane(&mut app);
+        let at: Vec<usize> = (0..rows.len()).filter(|y| rows[*y].starts_with('▌')).collect();
+        assert_eq!(at.len(), 1, "one row is selected: {rows:#?}");
+        assert!(rows[at[0]].contains(title), "{rows:#?}");
+    }
+    assert!(pane(&mut app)[6].starts_with('▌'), "past the last row, the selection is the last row");
+    assert_eq!(pane(&mut app)[0].trim_start().split("  ").next(), Some("work"), "and the rows above it follow");
+    // On as far as there are events: out of November, and the grid goes
+    // to the month the selection is in.
+    let mut app = after("gcgd30 nov\r⌥l");
+    assert_eq!(foot(&mut app).0, "Mon 30 Nov · 1 of 1");
+    assert!(screen(&mut app, 120, 40)[0].ends_with("November 2026"));
+    press(&mut app, "j");
+    assert_eq!(foot(&mut app).0, "Tue 1 Dec · 1 of 1");
+    let rows = screen(&mut app, 120, 40);
+    assert!(rows[0].ends_with("December 2026"), "{}", rows[0]);
+    assert!(rows[2].starts_with("     December 2026"), "{}", rows[2]);
+    assert_eq!(listed(&mut app, 2), "  Mon 30 November", "the list is where it began");
+    press(&mut app, &"j".repeat(60));
+    assert_eq!(foot(&mut app).0, "Thu 31 Dec · 1 of 1", "to the last event there is, and no further");
+    assert_eq!(foot(&mut app).1, LISTED);
+}
+
+/// `h` and `l` keep the one exception ADR-054 began with: they are days.
+/// A day with nothing on it has nothing to select, so each goes to the
+/// nearest day its way that has an event.
+#[test]
+fn h_and_l_in_the_list_are_the_day_before_and_after_that_has_an_event() {
+    let mut app = after("gclll⌥ljj");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 3 of 4 · 1 to answer");
     press(&mut app, "l");
-    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer", "l is still a day, and selects its first event");
+    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer", "the next day's first event");
+    assert_eq!(listed(&mut app, 2), "  Fri 27 November", "which the list begins on");
     press(&mut app, "h");
     assert_eq!(foot(&mut app).0, "Thu 26 Nov · 1 of 4 · 1 to answer");
-    press(&mut app, "JJK");
-    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer", "J and K step as j and k do");
+    // Sunday 6 December has nothing on it.
+    let mut app = after("gcgd5 dec\r⌥l");
+    assert_eq!(foot(&mut app).0, "Sat 5 Dec · 1 of 1");
+    press(&mut app, "l");
+    assert_eq!(foot(&mut app).0, "Mon 7 Dec · 1 of 2", "l passes over a day with nothing on it");
+    assert_eq!(listed(&mut app, 2), "  Mon 7 December");
+    press(&mut app, "h");
+    assert_eq!(foot(&mut app).0, "Sat 5 Dec · 1 of 1", "and h does not stop on it and come back");
+    // t, and [ and ], go to a day as they do in the grid, and select there.
+    press(&mut app, "t");
+    assert_eq!(foot(&mut app), ("Mon 23 Nov · 1 of 2".to_string(), LISTED.to_string()));
+    press(&mut app, "h");
+    assert_eq!(foot(&mut app).0, "Fri 20 Nov · 1 of 2", "over the weekend");
     press(&mut app, "I");
-    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 3 of 4 · 1 to answer", "I selects the next that waits");
-    press(&mut app, "th");
-    let empty = "Enter open · J K next event · t today · c new event · Alt-h grid · ? help";
-    assert_eq!(foot(&mut app), ("Sun 22 Nov · 0 events".to_string(), empty.to_string()), "a day with nothing on it");
-    press(&mut app, "j");
-    assert_eq!(foot(&mut app).0, "Mon 23 Nov · 1 of 2", "and j from it is the next event there is");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer", "I selects the next that waits");
+    assert_eq!(listed(&mut app, 2), "  Thu 26 November", "and the list begins on its day");
+    // A month on is Saturday 26 December, and 6 December is a Sunday.
+    press(&mut app, "]");
+    assert_eq!(foot(&mut app).0, "Mon 28 Dec · 1 of 1", "] to a day with nothing on it selects the first after it");
+    press(&mut app, "gd6 dec\r");
+    assert_eq!(foot(&mut app).0, "Mon 7 Dec · 1 of 2", "as gd does");
+    assert!(foot(&mut app).1.ends_with("Alt-h grid · ? help"), "and the focus is still the list's");
+}
 
-    // Enter opens the selected event, and Esc is back in the list on it.
+#[test]
+fn enter_opens_the_selected_event_and_o_i_e_and_d_act_on_it() {
+    let answering = "j k move · Enter open · i answer · o links · Alt-h grid · ? help";
     let mut app = after("gclll⌥lj\r");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Q4 roadmap review"));
     press(&mut app, "\x1b");
     assert_eq!(foot(&mut app), ("Thu 26 Nov · 2 of 4 · 1 to answer".to_string(), answering.to_string()));
-    // o, i, E and d are the selected event's.
     assert_eq!(foot(&mut after("gclll⌥lo")).0, "opens https://meet.example.org/r/standup");
     assert!(foot(&mut after("gclll⌥lji")).1.starts_with("Answer?"));
     assert_eq!(screen(&mut after("gclll⌥ljjjE"), 120, 40)[0], "  Staging migration window");
+    // What is deleted leaves the selection to the next event listed, and
+    // `u` puts both back.
     let mut app = after("gclll⌥ljjjd");
     assert_eq!(foot(&mut app).1, "✓ Deleted Staging migration window · u to undo");
-    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 3 events · 1 to answer");
+    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer");
+    press(&mut app, "u");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 4 of 4 · 1 to answer");
+    // The same when its calendar is hidden under it.
+    let mut app = after("gcgd5 dec\r⌥l");
+    press(&mut app, "Cj \x1b");
+    assert_eq!(foot(&mut app).0, "Mon 7 Dec · 1 of 2", "the gear swap is local, and hidden");
+}
+
+#[test]
+fn where_the_list_shows_no_event_the_focus_stays_in_the_grid_and_the_key_says_so() {
+    // Nothing is on any day after the last standup of the year.
+    for (key, name) in [("⌥l", "Alt-l"), ("⌥j", "Alt-j")] {
+        let mut app = after(&format!("gcgd2027-01-02\r{key}"));
+        assert_eq!(foot(&mut app), ("Sat 2 Jan · 0 events".to_string(), format!("E {name}: the list shows no event")));
+        assert_eq!(grid_cursor(&mut app), Tok::Acc, "the focus is the grid's");
+        press(&mut app, "k");
+        assert_eq!(foot(&mut app), ("Sat 26 Dec · 0 events".to_string(), MONTH.to_string()), "k is a week there");
+    }
+    let mut app = after("");
+    app.set_calendar(Calendar::empty(fx::NOW));
+    press(&mut app, "gc");
+    assert_eq!(foot(&mut app).1, "? help", "with no calendar the bar is what names the way back");
+    press(&mut app, "⌥l");
+    assert_eq!(foot(&mut app).1, "E Alt-l: the list shows no event");
+    // From the last event l has no day to go to: the cursor moves on, as
+    // it would in the grid, and the grid has the focus.
+    let mut app = after("gcgd31 dec\r⌥ll");
+    assert_eq!(foot(&mut app), ("Fri 1 Jan · 0 events".to_string(), MONTH.to_string()));
 }
 
 #[test]
 fn the_focus_is_in_the_grid_after_another_view_and_only_the_month_has_a_list_to_focus() {
     let mut app = after("gclll⌥l21");
     assert_eq!(foot(&mut app).1, MONTH, "the week and back");
-    let mut app = after("gch⌥l\r");
-    assert_eq!(screen(&mut app, 120, 40)[2], "  Sun 22 November", "Enter with nothing selected is the day");
-    press(&mut app, "\x1b");
-    assert_eq!(foot(&mut app).1, MONTH, "and Esc from there is the grid");
     for view in ["2", "3"] {
         let mut app = after(&format!("gclll{view}"));
         let was = screen(&mut app, 120, 40);
         press(&mut app, "⌥l⌥h");
         assert_eq!(screen(&mut app, 120, 40), was, "nothing lies beside view {view}");
     }
-    let mut app = after("");
-    app.set_calendar(Calendar::empty(fx::NOW));
-    press(&mut app, "gc⌥l");
-    assert_eq!(foot(&mut app).1, "? help", "with no calendar there is no list");
     // A search shown over the focused list gives it back as it was.
     let mut app = after("gclll⌥lj/call\r");
     assert!(screen(&mut app, 120, 40)[0].contains("Search call"));

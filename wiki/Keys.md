@@ -77,7 +77,7 @@ means the same here, except `h` and `l`.
 |---|---|
 | `h` `l` | previous, next day |
 | `j` `k` | in the month's grid, a week down or up; elsewhere the next, previous event |
-| `Alt-l` `Alt-h` | in the month, focus the list of events beside the grid; back to the grid. `Alt-j` and `Alt-k` do the same |
+| `Alt-l` `Alt-h` | in the month, focus the list of events beside the grid, on the first event it shows from the selected day on; back to the grid. `Alt-j` and `Alt-k` do the same. In the list `j` `k` step through every event it shows, `h` `l` go to the day before or after that has one, and `Enter` opens the selected event |
 | `[` `]` | previous, next page: a month, a week or a day |
 | `J` `K` | next, previous event; in the month, the next day that has one |
 | `I` | the next invitation that waits for an answer |

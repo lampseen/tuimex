@@ -122,7 +122,11 @@ cal-zoom-3	strip	120	15	ascii	16
 cal-list-0	strip	120	15	ascii	16
 cal-list-1	strip	120	15	ascii	16
 cal-list-2	strip	120	15	ascii	16
-cal-list-3	strip	120	14	ascii	16
+cal-list-3	strip	120	15	ascii	16
+cal-list-4	strip	120	15	ascii	16
+cal-list-5	strip	120	14	ascii	16
+cal-list-6	strip	120	15	ascii	16
+cal-list-7	strip	120	15	ascii	16
 cal-answer-0	strip	120	8	ascii	16
 cal-answer-1	strip	120	8	ascii	16
 cal-answer-2	strip	120	8	ascii	16

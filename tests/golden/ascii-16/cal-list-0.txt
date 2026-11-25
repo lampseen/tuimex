@@ -12,4 +12,4 @@
                                   |    personal   all day      Cabin weekend  Ridge saddle hut                          
                                                                                                                         
   Thu 26 Nov - 1 of 4 - 1 to answer                                                         sending in 6s - 1 not sent  
-  Enter open - o links - E edit - d delete - Alt-h grid - ? help                                                        
+  j k move - Enter open - o links - Alt-h grid - ? help                                                                 

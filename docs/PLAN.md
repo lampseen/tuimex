@@ -565,8 +565,8 @@ draft or discard.
 
 **Calendar**, after `gc` or `F2` (ADR-054), as the design delivered it: `h l`
 previous, next day · `j k` a week in the month's grid, else an event ·
-`Alt-l Alt-h` (or `Alt-j Alt-k`) into the month's list of events and back
-to its grid · `[ ]` page · `J K` next, previous event · `n N` match · `I` next invitation to
+`Alt-l Alt-h` (or `Alt-j Alt-k`) into the month's list of events, where
+one is always selected, and back to its grid · `[ ]` page · `J K` next, previous event · `n N` match · `I` next invitation to
 answer · `t` today · `gd` go to a date · `Tab S-Tab` and `1 2 3` the view
 · `Enter` deeper, `Esc` back · `/` find · `gt gT` account · `C` calendars
 (then `j k`, `Space`) · `o` links · `i` answer (then `a t d p x`) · `c`

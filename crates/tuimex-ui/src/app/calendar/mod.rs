@@ -81,6 +81,10 @@ pub(super) struct Place {
     /// Whether the focus is in the month's list of events and not in its
     /// grid. It is in the grid whenever another view has been shown.
     focus: bool,
+    /// The day the month's list begins on while it has the focus, when
+    /// that is not the cursor's: where the cursor was when the focus came,
+    /// or the day of an earlier event `k` has reached since.
+    listed_from: Option<i64>,
     /// The views Enter went deeper from, which Esc returns to.
     back: Vec<View>,
     /// The one account the calendar is narrowed to.
@@ -117,6 +121,7 @@ impl Place {
             cursor: None,
             picked: None,
             focus: false,
+            listed_from: None,
             back: Vec::new(),
             account: None,
             panel: Panel::None,
@@ -257,6 +262,50 @@ impl App {
         self.cal.picked = kept.or(on_day.into_iter().next());
     }
 
+    /// Whether the focus is in the month's list and the list is what is
+    /// shown.
+    fn in_list(&self) -> bool {
+        self.cal.focus && self.cal.view == View::Month && !self.cal.searching
+    }
+
+    /// The day the month's list begins on.
+    fn listed_from(&self) -> i64 {
+        let day = self.day();
+        self.cal.listed_from.filter(|_| self.cal.focus).map_or(day, |from| from.min(day))
+    }
+
+    /// With the focus in the month's list an event is selected whenever
+    /// the list shows one, so that the focus is seen to be there: the one
+    /// already chosen while it is listed, otherwise the first from where
+    /// that was, which is the first listed when nothing was chosen. The
+    /// grid's cursor goes to its day. With no event to select the focus is
+    /// the grid's again, and this says so.
+    fn land(&mut self) -> bool {
+        let day = self.day();
+        let listed = self.listed(day, day + AHEAD);
+        let was = self.cal.picked.take();
+        let at = |picked: &Picked| (picked.day, picked.start);
+        let next = was.as_ref().and_then(|was| {
+            listed.iter().find(|other| *other == was).or(listed.iter().find(|other| at(other) >= at(was)))
+        });
+        self.cal.picked = next.or(listed.first()).cloned();
+        self.cal.focus = self.cal.picked.is_some();
+        if let Some(picked) = &self.cal.picked {
+            self.cal.cursor = Some(picked.day);
+        }
+        self.cal.focus
+    }
+
+    /// `h` with the focus in the list: the nearest day before that has an
+    /// event. The day before the cursor's may have none, and the first
+    /// event after an empty day is the one just left.
+    fn day_before(&mut self) {
+        let cursor = self.day();
+        if let Some(day) = self.listed(cursor - AHEAD, cursor).last().map(|last| last.day) {
+            self.go(day);
+        }
+    }
+
     /// The events from `from` up to `to`, in the order the days draw them:
     /// of the account the calendar is narrowed to, and in a search only
     /// what it found.
@@ -274,11 +323,15 @@ impl App {
     }
 
     /// Moves the cursor to `day`. A view that had an event selected selects
-    /// the first of that day.
+    /// the first of that day, and the month's list, which begins on that
+    /// day again, the first it shows when the day has none.
     fn go(&mut self, day: i64) {
         let had = self.cal.picked.is_some();
-        self.cal.cursor = Some(day);
+        (self.cal.cursor, self.cal.listed_from) = (Some(day), None);
         self.cal.picked = if had { self.listed(day, day + 1).into_iter().next() } else { None };
+        if self.in_list() && self.cal.picked.is_none() {
+            self.land();
+        }
     }
 
     /// The window of days a step looks through.
@@ -311,6 +364,9 @@ impl App {
             (None, false) => all.iter().rev().find(|picked| picked.day < cursor),
         };
         if let Some(next) = next.cloned() {
+            // The month's list stays where it began, but for an event
+            // before its first day.
+            self.cal.listed_from = Some(self.listed_from().min(next.day));
             (self.cal.cursor, self.cal.picked) = (Some(next.day), Some(next));
         }
     }
@@ -329,7 +385,9 @@ impl App {
             None => waiting.iter().find(|w| w.day > cursor || (!month && w.day == cursor)).or(waiting.first()),
         };
         match next.cloned() {
-            Some(next) => (self.cal.cursor, self.cal.picked) = (Some(next.day), Some(next)),
+            Some(next) => {
+                (self.cal.cursor, self.cal.picked, self.cal.listed_from) = (Some(next.day), Some(next), None);
+            }
             None => self.say(say::err("I: no invitation waits for an answer")),
         }
     }
@@ -495,13 +553,16 @@ impl App {
     pub(super) fn place_run(&mut self, id: &str, i: usize) {
         let (cursor, first) = (self.day(), i == 0);
         match (id, self.cal.view) {
+            ("calendar.day", _) if first && self.in_list() => self.day_before(),
             ("calendar.day", _) => self.go(if first { cursor - 1 } else { cursor + 1 }),
             ("calendar.move", View::Month) if self.on_month() => self.go(if first { cursor + 7 } else { cursor - 7 }),
-            // Either key of each, as in mail; with no calendar there is no
-            // list to focus.
-            ("calendar.focus-list", _) if self.on_month() && !self.cal.model.shelves.is_empty() => {
-                self.cal.focus = true;
-                self.pick_on_day();
+            // Either key of each, as in mail. The list is left as it is
+            // shown, and an event of it is selected.
+            ("calendar.focus-list", _) if self.on_month() => {
+                (self.cal.focus, self.cal.listed_from) = (true, Some(cursor));
+                if !self.land() {
+                    self.say(say::err(format!("{}: the list shows no event", key_name(id, i))));
+                }
             }
             ("calendar.focus-list", _) => {}
             ("calendar.focus-grid", _) => self.cal.focus = false,
@@ -712,6 +773,11 @@ impl App {
         if self.event_is_open() && self.picked_entry().is_none() {
             self.event_close();
         }
+        // In the month's list the next event it shows takes the place of
+        // one that has gone.
+        if self.in_list() && self.picked_entry().is_none() {
+            self.land();
+        }
         let fits = (height / 3).max(3);
         let (command, menu) = self.command_row(width, fits.min(13).saturating_sub(2).max(1));
         let accounts: Vec<AccountId> = self.accounts().into_iter().map(|name| AccountId(name.to_string())).collect();
@@ -724,6 +790,7 @@ impl App {
             cursor: self.day(),
             picked: place.picked.as_ref().filter(|_| !self.on_month()),
             focus: place.focus,
+            listed_from: self.listed_from(),
             accounts: &accounts,
             colours: &colours,
             words: self.theme.palette.words(&colours).1,

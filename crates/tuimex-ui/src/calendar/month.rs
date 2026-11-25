@@ -1,7 +1,8 @@
 //! The month view: the design's `monthRows`, `monthsColumn` and
 //! `monthScreen`. The cursor's month and as many of the months after it as
 //! fit whole, and beside them the cursor's day and the days that follow.
-//! The focus is in the grid or, with `Scene::focus`, in that list.
+//! The focus is in the grid or, with `Scene::focus`, in that list, which
+//! then begins on `Scene::listed_from`.
 
 use tuimex_core::calendar::{civil_from_days, days_from_civil, days_in_month, weekday_of};
 
@@ -116,7 +117,7 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
             vec![gap(MARGIN), run("No calendar yet.", Tok::Fg)],
             vec![gap(MARGIN), run("`tuimex setup` asks each account for the address of its calendar.", Tok::Dim)],
         ],
-        false => parts::agenda(o, o.cursor, room, pane_width, o.picked.filter(|_| o.focus)),
+        false => parts::agenda(o, o.listed_from, room, pane_width, o.picked.filter(|_| o.focus)),
     };
     let blank = Line::new();
     let content = (0..room).map(|y| {

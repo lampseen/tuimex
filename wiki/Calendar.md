@@ -47,7 +47,7 @@ the time as written and the zone's name, and is not placed on the clock.
 |---|---|
 | `h` `l` | previous, next day |
 | `j` `k` | in the month's grid, a week down or up; elsewhere the next, previous event |
-| `Alt-l` `Alt-h` | in the month, focus the list of events; back to the grid |
+| `Alt-l` `Alt-h` | in the month, focus the list of events, on the first it shows; back to the grid |
 | `[` `]` | previous, next page: a month, a week or a day |
 | `J` `K` | next, previous event, across days |
 | `t` `gd` | today; go to a date, typed as `2026-12-05`, `5 dec`, `fri` or `+2w` |
@@ -58,14 +58,28 @@ the time as written and the zone's name, and is not placed on the clock.
 
 **The month's list.** The month opens with the cursor in its grid, where
 it selects a day and no event. `Alt-l` moves the focus to the list beside
-it, as it moves to the preview in mail: the day's first event is selected,
-the grid's cursor dims, and from there every key is what it is in the day
-view. `j` and `k` step through events, across days, with the grid's cursor
-following; `h` and `l` still move by a day; `Enter` opens the selected
-event, and `o`, `i`, `E` and `d` act on it. A day with more events than
-there are rows scrolls to keep the selected one in sight. `Alt-h` or `Esc`
-returns to the grid. `Alt-j` and `Alt-k` do what `Alt-l` and `Alt-h` do;
-the hint names `Alt-h` because the list is beside the grid at every width.
+it, as it moves to the preview in mail. The list stays as it was and one
+event in it is selected: the first of the selected day, or, when that day
+has nothing on it, the first event listed after it. The selected row is
+filled and carries the cursor, the grid's cursor dims and goes to that
+event's day, and the hint names what works there.
+
+| key, in the list | does |
+|---|---|
+| `j` `k` | the next, previous event the list shows, into the days after and before; the list scrolls to keep it in sight |
+| `h` `l` | the day before, after that has an event, and its first event |
+| `Enter` | open the selected event |
+| `o` `i` `E` `d` | its links; answer it; edit it; delete it |
+| `Alt-h` or `Esc` | back to the grid, on the day of the event that was selected |
+
+`j` goes on as far as there are events, and the grid shows the month the
+selected event is in. `k` on the first event listed goes to the one
+before it, and the list then begins on that day. `t`, `gd`, `[` and `]`
+go to a day as they do in the grid and select the first event from it on.
+Where the list shows no event at all, `Alt-l` leaves the focus in the grid
+and says `the list shows no event`. `Alt-j` and `Alt-k` do what `Alt-l`
+and `Alt-h` do; the hint names `Alt-h` because the list is beside the grid
+at every width.
 
 A key that mail uses means the same here, with one exception: `h` and
 `l` move by a day here and by a section in mail. A command that acts on

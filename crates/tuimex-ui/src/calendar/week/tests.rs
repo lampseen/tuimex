@@ -50,6 +50,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId], picked: Option<&
         cursor: fx::THU,
         picked,
         focus: false,
+        listed_from: fx::THU,
         accounts,
         colours: &[Tok::Link],
         words: Tok::Agent,

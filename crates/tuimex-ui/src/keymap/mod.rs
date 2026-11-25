@@ -159,7 +159,7 @@ pub const KEYMAP: &[Table] = &[
         title: "Calendar (after gc)",
         keys: &[
             b("calendar.day", "h l", "previous, next day", ""),
-            b("calendar.move", "j k", "grid: week; else: event", ""),
+            b("calendar.move", "j k", "grid: week; else: event", "move"),
             b("calendar.period", "[ ]", "previous, next page", ""),
             b("calendar.focus-list", "Alt-j Alt-l", "month: focus the events", ""),
             b("calendar.focus-grid", "Alt-k Alt-h", "back to the grid", "grid"),

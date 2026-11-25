@@ -74,6 +74,9 @@ pub struct Scene<'a> {
     /// Whether the focus is in the month's list of events and not in its
     /// grid: the list then selects an event, as the day view does.
     pub focus: bool,
+    /// The day the month's list begins on: the cursor's, or with the focus
+    /// in the list the day it began on when the focus came to it.
+    pub listed_from: i64,
     /// The accounts, in the config's order, and the colour of each.
     pub accounts: &'a [AccountId],
     pub colours: &'a [Tok],
@@ -239,23 +242,23 @@ pub fn day_status(o: &Scene, day: i64) -> Line {
 
 /// The idle command line: a few keys for the selected event, or for the
 /// day when none is. A hint names one key for a thing, and the bar of
-/// places names the keys that change place, so no hint does. With
-/// `listed`, the focus is in the month's list and the way out is back to
-/// the grid, by the Alt key that points at it: the list is beside the grid
-/// at every width.
+/// places names the keys that change place, so no hint does. With `listed`
+/// the focus is in the month's list: the hint is what moves there, what
+/// opens, and the way back to the grid by the Alt key that points at it,
+/// the list being beside the grid at every width.
 pub fn hint(entry: Option<&Entry>, listed: bool) -> Line {
-    let mut keys = vec![keymap::hint("calendar.open")];
-    let grid = ("Alt-h", keymap::hint("calendar.focus-grid").1);
+    let mut keys = Vec::new();
     match entry {
-        None => {
-            keys.extend(["calendar.event", "calendar.today", "calendar.new"].map(keymap::hint));
-            keys.extend(listed.then_some(grid));
-        }
+        None => keys.extend(["calendar.open", "calendar.event", "calendar.today", "calendar.new"].map(keymap::hint)),
         Some(entry) => {
+            keys.extend(listed.then(|| keymap::hint("calendar.move")));
+            keys.push(keymap::hint("calendar.open"));
             keys.extend(entry.waiting().then(|| keymap::hint("calendar.answer")));
             keys.extend((!links_of(entry.event).is_empty()).then(|| keymap::hint("calendar.links")));
-            keys.extend(["calendar.edit", "calendar.delete"].map(keymap::hint));
-            keys.push(if listed { grid } else { keymap::hint("global.back") });
+            match listed {
+                true => keys.push(("Alt-h", keymap::hint("calendar.focus-grid").1)),
+                false => keys.extend(["calendar.edit", "calendar.delete", "global.back"].map(keymap::hint)),
+            }
         }
     }
     keys.push(keymap::hint("global.help"));
@@ -357,16 +360,19 @@ pub fn event_row(o: &Scene, entry: &Entry, width: usize, look: Look) -> Line {
 /// `width` cells. A day with nothing on it is passed over, except the
 /// first, which says so; a search passes over that one too. It never ends
 /// on a label with no row under it. `selected` is the event drawn with the
-/// cursor: one further down its day than the rows reach is the last row,
-/// and the rows above it follow.
+/// cursor, and the days go on as far as its day, however far that is: one
+/// further down than the rows reach is the last row, and the rows above it
+/// follow.
 pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<&Picked>) -> Vec<Line> {
-    let days = o.days(from, from + AHEAD);
+    let through = selected.map_or(from, |picked| picked.day);
+    let to = (from + AHEAD).max(through + 1);
+    let days = o.days(from, to);
     let today = o.calendar.today();
     // Each line, with whether it is a label.
     let mut lines: Vec<(Line, bool)> = Vec::new();
     let mut at = None;
-    for day in from..from + AHEAD {
-        if lines.len() >= room {
+    for day in from..to {
+        if lines.len() >= room && day > through {
             break;
         }
         let entries = days.on(day);

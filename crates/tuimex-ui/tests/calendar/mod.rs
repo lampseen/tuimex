@@ -22,15 +22,20 @@ use tuimex_ui::span::Line;
 use super::{DEFAULT, both, check, press, usual_mail};
 
 /// The outputs drawn here; `drawn` adds those of the other files.
-const DRAWN: [&str; 15] = [
+const DRAWN: [&str; 20] = [
     "cal-month",
     "cal-month-80-ascii",
     "cal-month-list-focus",
+    "cal-month-list-focus-80-ascii",
     "cal-month-wide-list-focus",
     "cal-list-0",
     "cal-list-1",
     "cal-list-2",
     "cal-list-3",
+    "cal-list-4",
+    "cal-list-5",
+    "cal-list-6",
+    "cal-list-7",
     "cal-month-account",
     "cal-empty",
     "cal-unread",
@@ -49,6 +54,10 @@ pub fn drawn() -> Vec<&'static str> {
 const TO_THURSDAY: &str = "gclll";
 /// And from its grid into the list beside it, by Alt and `l`.
 const LISTED: &str = "gclll⌥l";
+/// On through Thursday's four events to the first of Friday's.
+const ACROSS: &str = "gclll⌥ljjjj";
+/// Into the list from Sunday the 22nd, which has nothing on it.
+const FROM_EMPTY: &str = "gch⌥l";
 
 /// The design's `CALENDARS` and `EVENTS`, read when its `read` says.
 fn calendar() -> Calendar {
@@ -88,11 +97,14 @@ fn cut(lines: Vec<Line>, n: usize) -> Vec<Line> {
 pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
     Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
         "cal-month" => typed(TO_THURSDAY).lines(width, height),
-        "cal-month-list-focus" | "cal-month-wide-list-focus" => typed(LISTED).lines(width, height),
+        "cal-month-list-focus" => typed(FROM_EMPTY).lines(width, height),
+        "cal-month-wide-list-focus" => typed(ACROSS).lines(width, height),
         "cal-list-0" => cut(typed(LISTED).lines(120, 40), 12),
         "cal-list-1" => cut(typed(&format!("{LISTED}j")).lines(120, 40), 12),
-        "cal-list-2" => cut(typed(&format!("{LISTED}l")).lines(120, 40), 12),
-        "cal-list-3" => {
+        "cal-list-2" => cut(typed(ACROSS).lines(120, 40), 12),
+        "cal-list-3" => cut(typed(&format!("{ACROSS}l")).lines(120, 40), 12),
+        "cal-list-4" => cut(typed(FROM_EMPTY).lines(120, 40), 12),
+        "cal-list-5" => {
             // The design's `busy` Thursday, on a screen with eight rows for
             // it, and down to the last of its eight events.
             let mut calendar = calendar();
@@ -100,6 +112,9 @@ pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
             own.events.extend(fx::busy());
             over(calendar, &format!("{LISTED}jjjjjjj")).lines(120, 14)
         }
+        "cal-list-6" => cut(typed(&format!("{ACROSS}⌥h")).lines(120, 40), 12),
+        // No day after the last standup of the year has anything on it.
+        "cal-list-7" => cut(typed("gcgd2027-01-02\r⌥l").lines(120, 40), 12),
         "cal-month-account" => typed("gclllgt").lines(width, height),
         "cal-empty" => over(Calendar::empty(fx::NOW), "gc").lines(width, height),
         "cal-unread" => {
@@ -156,6 +171,7 @@ fn cal_month_steps() {
 #[test]
 fn cal_month_list() {
     both("cal-month-list-focus");
+    check(DEFAULT, "cal-month-list-focus-80-ascii");
     both("cal-month-wide-list-focus");
-    (0..4).for_each(|step| both(&format!("cal-list-{step}")));
+    (0..8).for_each(|step| both(&format!("cal-list-{step}")));
 }

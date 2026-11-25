@@ -44,6 +44,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId], cursor: i64) -> 
         cursor,
         picked: None,
         focus: false,
+        listed_from: cursor,
         accounts,
         colours: &[Tok::Link, Tok::Head],
         words: Tok::Agent,

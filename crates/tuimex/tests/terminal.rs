@@ -183,25 +183,34 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
 
 /// ADR-054: the calendar is a place beside mail in the real binary. One
 /// session: `gc` opens it on the calendars `--fixtures` hands over, and the
-/// first row says which place is open by naming both. Three days on is the
-/// design's Thursday, and `gm` is back in mail where it was.
-/// On the way, Alt-l puts the focus in the list beside the month's grid, `j`
-/// steps to the next event there and Alt-h returns. F2 and F1 then do what
-/// `gc` and `gm` did, by each of the two sequences a terminal may send for
-/// them.
+/// first row says which place is open by naming both. From Sunday, which
+/// has nothing on it, Alt-l as a terminal sends it (Esc, then the letter)
+/// puts the focus in the list beside the grid on the first event listed,
+/// `j` is the next, Enter opens that event of a later day, and Esc and
+/// Alt-h come back out. Three days on from today is the design's Thursday,
+/// where the same keys select within the day, and `gm` is back in mail
+/// where it was. F2 and F1 then do what `gc` and `gm` did, by each of the
+/// two sequences a terminal may send for them.
 #[test]
 fn a_session_in_the_calendar_moves_by_days_and_returns_to_mail() {
-    let keys = "j,gc,l,l,l,\x1bl,j,\x1bh,gm,\x1bOQ,\x1bOP,j,\x1b[12~,h,\x1b[11~,:q\r";
+    let keys = "j,gc,h,\x1bl,j,\r,\x1b,\x1bh,l,l,l,\x1bl,j,\x1bh,gm,\x1bOQ,\x1bOP,j,\x1b[12~,h,\x1b[11~,:q\r";
     let out = on_a_pty(&scratch_home("calendar"), keys, &["--fixtures"], &[("ON_PTY_STEPS", ",")]);
     let screen = String::from_utf8(out.stdout).unwrap();
     assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
     let frames = frames(&screen);
     let bar = "tuimex   F1 Mail   F2 Calendar";
-    let steps: [&[&str]; 11] = [
+    let listed = "j k move - Enter open - o links - Alt-h grid - ? help";
+    let steps: [&[&str]; 17] = [
         &[bar, "2 of 24 - thread of 5"],
         &[bar, "Month   Week   Day", "November 2026", "Mon 23 Nov - 2 events", "Halden contract call"],
+        &["Sun 22 Nov - 0 events", "Nothing on this day.", "t today - c new event - ? help"],
+        &["Mon 23 Nov - 1 of 2", "Nothing on this day.", "|>   work  09:30    Standup", listed],
+        &["Mon 23 Nov - 2 of 2", "|>   work  15:00    Halden contract call", listed],
+        &[bar, "  Halden contract call", "When     Mon 23 Nov 2026, 15:00 to 16:00"],
+        &["Mon 23 Nov - 2 of 2", "|>   work  15:00    Halden contract call", listed],
+        &["Mon 23 Nov - 2 events", "|    work  15:00    Halden contract call", "t today - c new event - ? help"],
         &["Thu 26 Nov - 4 events - 1 to answer", "Q4 roadm~   needs answer", "c new event - ? help"],
-        &["Thu 26 Nov - 1 of 4 - 1 to answer", "|>   work  09:30    Standup", "d delete - Alt-h grid - ? help"],
+        &["Thu 26 Nov - 1 of 4 - 1 to answer", "|>   work  09:30    Standup", listed],
         &["Thu 26 Nov - 2 of 4 - 1 to answer", "|>   work  10:00    Q4 roadm~   needs answer", "i answer - o links"],
         &["Thu 26 Nov - 4 events - 1 to answer", "|    work  10:00    Q4 roadm~", "c new event - ? help"],
         &["Inbox 9", "2 of 24 - thread of 5"],

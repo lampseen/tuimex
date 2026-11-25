@@ -12,4 +12,4 @@
 {default}                                  {brightblack}|{default}    {brightblue}personal{default}   {brightblack}all day{default}      Cabin weekend  {brightblack}Ridge saddle hut{default}                          
 {default}                                                                                                                        
 {default}  {brightblack}Thu 26 Nov - 1 of 4 - {yellow}1 to answer{default}                                                         sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Enter {brightblack}open - {default}o {brightblack}links - {default}E {brightblack}edit - {default}d {brightblack}delete - {default}Alt-h {brightblack}grid - {default}? {brightblack}help{default}                                                        
+{default}  j k {brightblack}move - {default}Enter {brightblack}open - {default}o {brightblack}links - {default}Alt-h {brightblack}grid - {default}? {brightblack}help{default}                                                                 
