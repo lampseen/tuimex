@@ -186,6 +186,11 @@ fn query(from: &str, to: &str) -> String {
     )
 }
 
+/// The same question, asking for each event whole.
+fn query_whole(from: &str, to: &str) -> String {
+    query(from, to).replace("<D:prop><D:getetag/></D:prop>", "<D:prop><D:getetag/><C:calendar-data/></D:prop>")
+}
+
 fn multiget(hrefs: &[String]) -> String {
     let mut body = String::from(
         r#"<?xml version="1.0" encoding="utf-8"?>
@@ -436,8 +441,43 @@ pub fn put_new(
         return Err(CalendarError::Exists);
     }
     let got = ok(got)?;
+    if got.etag.is_none() {
+        // A server may file what it took under an address of its own and
+        // name no tag for it, as Google does. Then only the calendar can
+        // say where the event is, and a later change or delete needs both.
+        if let Some(filed) = filed(wire, url, sign_in, text)? {
+            store.put(account, url, &filed.href, filed.etag.as_deref(), filed.calendar.as_deref().unwrap_or(text))?;
+            return Ok(filed.href);
+        }
+    }
     store.put(account, url, &href, got.etag.as_deref(), text)?;
     Ok(href)
+}
+
+/// Where the calendar at `url` holds the event `text` was just written
+/// as: the one event with its UID among those of the days it begins on,
+/// at an address under the calendar. `None` where the calendar shows no
+/// such event.
+fn filed(wire: &dyn Wire, url: &str, sign_in: (&str, &Secret), text: &str) -> Result<Option<DavItem>, CalendarError> {
+    let written = tuimex_content::calendar(text);
+    let Some(event) = written.events.first() else { return Ok(None) };
+    // A day either side of the wall time covers every zone it could be in.
+    let day = event.start.wall().div_euclid(86_400);
+    let body = query_whole(&stamp(day - 1), &stamp(day + 2));
+    let sent = Sent {
+        method: "REPORT",
+        url,
+        depth: Some(1),
+        body: Some(Body::xml(&body)),
+        only_if: None,
+        sign_in: Some(sign_in),
+    };
+    let listed = multistatus(&ok(wire.send(&sent)?)?.body).map_err(|e| CalendarError::Answer(e.to_string()))?;
+    let same = |item: &DavItem| {
+        let held = item.calendar.as_deref().map(tuimex_content::calendar);
+        held.is_some_and(|held| held.events.iter().any(|e| e.uid == event.uid))
+    };
+    Ok(listed.into_iter().find(|item| !item.gone && under(url, &item.href).is_some() && same(item)))
 }
 
 /// Writes `text` over the event at `href` of the calendar at `url`, only

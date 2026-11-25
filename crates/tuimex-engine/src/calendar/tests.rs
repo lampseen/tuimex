@@ -592,6 +592,55 @@ fn a_new_event_is_put_only_where_nothing_is_and_kept_with_the_tag_the_server_gav
     assert_eq!(holds(&store), [(href, Some("\"e1\"".to_string()), LUNCH.to_string())], "and nothing is kept");
 }
 
+/// Google takes a new event with 201, names no tag, and files it under
+/// an address made from its UID: the address asked for answers 404.
+#[test]
+fn an_event_the_server_filed_under_its_own_address_is_kept_under_that_address() {
+    let store = store("put-new-filed");
+    let filed = "/calendar/dav/robin%40example.org/events/lunch%40example.org.ics";
+    let script = Script::new(vec![
+        (201, String::new()),
+        events(&[(A, "\"1\"", "Standup"), (filed, "\"g1\"", "lunch")]),
+        (204, String::new()),
+    ]);
+    let href = put_new_as_robin(&script, &store, LUNCH, "k1").unwrap();
+    assert_eq!(href, filed, "the address is the server's");
+    assert_eq!(script.methods(), ["PUT", "REPORT"]);
+    let asked = script.asked.borrow()[1].clone();
+    assert_eq!((asked.1.as_str(), asked.2, asked.4), (URL, Some(1), true));
+    assert!(
+        asked.3.contains(r#"start="20261125T000000Z" end="20261128T000000Z""#),
+        "the days it begins on: {}",
+        asked.3
+    );
+    assert!(asked.3.contains("<C:calendar-data/>"), "{}", asked.3);
+    let held = holds(&store);
+    assert_eq!(held.len(), 1, "and no other event of those days is kept: {held:?}");
+    assert_eq!((held[0].0.as_str(), held[0].1.as_deref()), (filed, Some("\"g1\"")));
+
+    // So a delete goes to where the event is, on the tag it has there.
+    delete_as_robin(&script, &store, &href).unwrap();
+    assert_eq!(script.asked.borrow()[2].1, format!("https://dav.example.org{filed}"));
+    assert_eq!(script.said.borrow()[2].0.as_deref(), Some("If-Match: \"g1\""));
+    assert!(holds(&store).is_empty());
+}
+
+/// A server that names no tag and shows no such event, or shows it only
+/// outside the calendar, leaves the event kept where it was asked for.
+#[test]
+fn an_event_the_calendar_does_not_show_back_is_kept_where_it_was_put() {
+    for (name, shown) in [
+        ("put-new-unshown", events(&[(A, "\"1\"", "Standup")])),
+        ("put-new-elsewhere", events(&[("/calendar/dav/sam%40example.org/events/x.ics", "\"9\"", "lunch")])),
+    ] {
+        let store = store(name);
+        let script = Script::new(vec![(201, String::new()), shown]);
+        let href = put_new_as_robin(&script, &store, LUNCH, "k1").unwrap();
+        assert_eq!(href, "/calendar/dav/robin%40example.org/events/k1.ics", "{name}");
+        assert_eq!(holds(&store), [(href, None, LUNCH.to_string())], "{name}");
+    }
+}
+
 #[test]
 fn a_new_event_s_name_is_tuimex_s_own_and_never_leaves_the_calendar() {
     let store = store("put-new-names");
@@ -646,7 +695,9 @@ fn a_change_is_put_only_over_the_tag_last_read_and_a_412_leaves_the_store_as_it_
 #[test]
 fn a_write_with_no_tag_held_is_refused_before_anything_is_sent_until_a_fetch_reads_it_again() {
     let store = store("no-tag");
-    let href = put_new_as_robin(&Script::answering(vec![got(201, None)]), &store, LUNCH, "k2").unwrap();
+    // The server named no tag, and asked where the event is, showed none.
+    let taken = Script::new(vec![(201, String::new()), events(&[])]);
+    let href = put_new_as_robin(&taken, &store, LUNCH, "k2").unwrap();
     assert_eq!(holds(&store), [(href.clone(), None, LUNCH.to_string())], "what was written is kept, with no tag");
 
     let script = Script::new(Vec::new());
