@@ -1,4 +1,4 @@
-  tuimex   Mail   Calendar                                                                                              
+  Mail   Calendar                                                                                                       
   New event                                                                                                             
                                                                                                                         
 ▌   Title    Offsite planning                                                                                           

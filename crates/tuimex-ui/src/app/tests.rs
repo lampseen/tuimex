@@ -90,7 +90,7 @@ pub(super) fn screen(app: &mut App, width: usize, height: usize) -> Vec<String> 
 /// in view.
 pub(super) fn bar(app: &mut App) -> (String, String) {
     let lines = app.lines(120, 41);
-    let in_view = lines[0].iter().filter(|span| span.fg == crate::palette::Tok::Acc && span.bold);
+    let in_view = lines[0].iter().filter(|span| span.fg == crate::palette::Tok::Fg && span.bold);
     (texts(&lines[..1]).remove(0), in_view.map(|span| span.text.as_str()).collect())
 }
 

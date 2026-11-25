@@ -201,12 +201,11 @@ const LAYOUT = {
   // the hour it starts, and the words keep room for the longest one alone,
   // so `needs answer` is never the thing that is cut.
   calendar: { cell: 4, weekFrom: 120, slot: 30, step: 2, dayFrom: '08:00', axis: 7, time: 11, timeNarrow: 7, words: 20, wordsNarrow: 12, narrow: 70 },
-  // The bar of places, the first row of every screen: the program's name,
-  // then each place by the function key that goes to it, `gap` cells
-  // apart. `key` names the binding whose last key that is, and `short` is
+  // The bar of places, the first row of every screen: each place by the
+  // function key that goes to it, `gap` cells apart. `key` names the binding whose last key that is, and `short` is
   // what the place not in view is called when the row is too narrow for
   // its name.
-  places: { program: 'tuimex', gap: 3, list: [
+  places: { gap: 3, list: [
     { place: 'mail', key: 'calendar.mail', name: 'Mail', short: 'Mail' },
     { place: 'calendar', key: 'global.calendar', name: 'Calendar', short: 'Cal' },
   ] },
@@ -1382,23 +1381,23 @@ function grouped(rows, draw) {
 
 // ------------------------------------------------------------------- chrome
 
-// The bar of places: the program's name, then each place by the key that
-// goes to it. The place in view is drawn as the active tab is, in the accent
-// and bold, so it is told without colour too; of the other, the key is the
-// colour a hint's key is and the name is dim. `keys` is false on a screen
+// The bar of places: each place by the key that goes to it. The bar is
+// quiet so that the tabs under it are the only accent and the two rows read
+// apart: the place in view is bold in the ordinary foreground, so it is told
+// without colour too, and the other is dim, key and name alike. `keys` is false on a screen
 // where letters are typed (compose, the send summary, the event form, help):
 // the function keys do nothing there, so the bar says where you are and
 // names no key. Too narrow for all of it, the place not in view takes its
 // short name, and narrower still is its key alone.
 function placesRow(width, place, keys = true) {
   const P = LAYOUT.places;
-  const row = (form) => heading([run(P.program, 'dim'), ...P.list.flatMap((item) => {
+  const row = (form) => heading(P.list.flatMap((item, at) => {
     const key = keys ? BINDING[item.key].keys.split(' ').pop() : '';
     const on = item.place === place;
     const name = on ? item.name : { name: item.name, short: item.short, key: '' }[form];
     const said = [key, name].filter(Boolean).join(' ');
-    return [gap(P.gap), ...(on ? [run(said, 'acc', { b: true })] : [run(key), run(said.slice(key.length), 'dim')])];
-  })]);
+    return [...(at ? [gap(P.gap)] : []), run(said, on ? 'fg' : 'dim', { b: on })];
+  }));
   const forms = keys ? ['name', 'short', 'key'] : ['name', 'short'];
   const fits = forms.map(row).find((made) => cells(made) + LAYOUT.margin <= width);
   return fit(fits || row(forms[forms.length - 1]), width);
@@ -2713,13 +2712,13 @@ function build(mode = {}) {
 
   // ---- the bar of places
   flow('places', 'The bar of places', [
-    { key: '', caption: 'In mail', note: 'The first row of every screen: the program, then each place by the key that goes to it. The one in view is the accent and bold, as the active tab is.',
+    { key: '', caption: 'In mail', note: 'The first row of every screen: each place by the key that goes to it. The one in view is bold and the other dim; the accent is left to the tabs below.',
       rows: [placesRow(W, 'mail')] },
     { key: 'F2', caption: 'In the calendar', note: 'The same row. F1 returns.', rows: [placesRow(W, 'calendar')] },
     { key: 'c', caption: 'Where letters are typed', note: 'In compose, the send summary, the event form and help the function keys do nothing, so the bar names no key there.',
       rows: [placesRow(W, 'mail', false)] },
-    { key: '', caption: 'Under 34 columns', note: 'The place not in view takes its short name.', rows: [placesRow(33, 'mail')] },
-    { key: '', caption: 'Under 29 columns', note: 'Then it is its key alone. The place in view keeps its name.', rows: [placesRow(28, 'mail')] },
+    { key: '', caption: 'Under 25 columns', note: 'The place not in view takes its short name.', rows: [placesRow(24, 'mail')] },
+    { key: '', caption: 'Under 20 columns', note: 'Then it is its key alone. The place in view keeps its name.', rows: [placesRow(19, 'mail')] },
   ]);
 
   // ---- command line states

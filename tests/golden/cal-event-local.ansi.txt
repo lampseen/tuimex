@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Staging migration window{fg}                                                                        {dim}4 of 4 on Thu 26 Nov{fg}  
 {fg}                                                                                                                        
 {fg}    {dim}When     {fg}Thu 26 Nov 2026, 20:00 to 23:00{dim} · in 3 days{fg}                                                                

@@ -312,8 +312,8 @@ fn draw(name: &str, width: usize, rows: usize) -> Option<Vec<Line>> {
         "places-0" => return bar(Place::Mail, true, width),
         "places-1" => return bar(Place::Calendar, true, width),
         "places-2" => return bar(Place::Mail, false, width),
-        "places-3" => return bar(Place::Mail, true, 33),
-        "places-4" => return bar(Place::Mail, true, 28),
+        "places-3" => return bar(Place::Mail, true, 24),
+        "places-4" => return bar(Place::Mail, true, 19),
         _ => {}
     }
     let height = rows.saturating_sub(1);

@@ -1,1 +1,1 @@
-{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
+{default}  {brightblack}F1 Mail{default}   {default b}F2 Calendar{default}                                                                                                 

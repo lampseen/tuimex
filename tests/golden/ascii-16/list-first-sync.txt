@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Inbox 8   Unread   Flagged 2   Drafts   Sent   Archive                                                                
                                                                                                                         
   Today                                                                                                                 

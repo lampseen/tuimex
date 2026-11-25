@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {dim}Mail{fg}   {acc b}Calendar{fg}                                                                                              
+{fg}  {dim}Mail{fg}   {fg b}Calendar{fg}                                                                                                       
 {fg}  {fg b}New event{fg}                                                                                                             
 {fg}                                                                                                                        
 {fg}    {dim}Title    {fg b}Offsite planning{fg}                                                                                           

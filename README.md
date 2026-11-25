@@ -8,7 +8,7 @@ tuimex
 ```
 
 ```
-  tuimex   F1 Mail   F2 Calendar
+  F1 Mail   F2 Calendar
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1
 
   Today

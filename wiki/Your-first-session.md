@@ -12,7 +12,7 @@ outside the terminal.
 ## The screen
 
 ```
-  tuimex   F1 Mail   F2 Calendar
+  F1 Mail   F2 Calendar
   Inbox 9   Unread   Flagged 3   Drafts   Sent   Archive   Outbox 1
 
   Today
@@ -24,7 +24,7 @@ outside the terminal.
 
 The first row is on every screen. It names the two places tuimex has,
 mail and the [calendar](Calendar), each by the key that goes to it, and
-the one you are in is the one in the accent colour and bold. In a draft,
+the one you are in is bold while the other is dim. In a draft,
 the event form and help, where a function key does nothing, it names the
 places without their keys.
 

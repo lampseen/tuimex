@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {dim}Inbox{fg} {fg b}9{fg}   {dim}Unread{fg}   {dim}Flagged{fg} {warn}3{fg}   {dim}Drafts{fg}   {dim}Sent{fg}   {dim}Archive{fg}   {acc b}Outbox{fg} {err}1{fg}                                                     
 {fg}                                                                                                                        
 {fg}    {link}personal{fg}   {fg b}to Tomas Ferreira{fg}       Re: Bike rack: still want it?                                   in 6s  {dim} 14:20{fg}    

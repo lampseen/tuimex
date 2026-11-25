@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}This week: winter routes, a gear swap and one trail closure{fg}                                                           
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Fernway Weekly{fg} {dim}<news@fernway.example.net>{fg}                                                                  

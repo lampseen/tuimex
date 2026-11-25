@@ -1,4 +1,4 @@
-{default}  {brightblack}tuimex{default}   F1{brightblack} Mail{default}   {magenta b}F2 Calendar{default}                                                                                        
+{default}  {brightblack}F1 Mail{default}   {default b}F2 Calendar{default}                                                                                                 
 {default}  {brightblack}Month{default}   {magenta b}Week{default}   {brightblack}Day{default}                                                                            {default b}23 to 29 November 2026{default}  
 {default}                                                                                                                        
 {default}          {magenta b}Mon 23{default}         {brightblack}Tue 24{default}         {brightblack}Wed 25{default}        {brightblack}>{default b}Thu 26{default}         {brightblack}Fri 27{default}         {brightblack}Sat 28{default}         {brightblack}Sun 29{default}              

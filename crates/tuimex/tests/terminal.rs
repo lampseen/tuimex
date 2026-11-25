@@ -198,7 +198,7 @@ fn a_session_in_the_calendar_moves_by_days_and_returns_to_mail() {
     let screen = String::from_utf8(out.stdout).unwrap();
     assert_eq!(out.status.code(), Some(0), ":q leaves from the list; the terminal showed {screen:?}");
     let frames = frames(&screen);
-    let bar = "tuimex   F1 Mail   F2 Calendar";
+    let bar = "F1 Mail   F2 Calendar";
     let listed = "j k move - Enter open - o links - Alt-h grid - ? help";
     let steps: [&[&str]; 17] = [
         &[bar, "2 of 24 - thread of 5"],

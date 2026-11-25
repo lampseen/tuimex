@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Photos from Saturday{fg}                                                                                                  
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Greta Holm{fg} {dim}<greta@example.com>{fg}                                                                             

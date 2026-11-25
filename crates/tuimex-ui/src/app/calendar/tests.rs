@@ -78,12 +78,12 @@ fn f2_opens_the_calendar_and_f1_returns_to_mail_wherever_gc_and_gm_do() {
 /// are typed, which is where they do nothing, it names none.
 #[test]
 fn the_bar_of_places_marks_the_place_in_view_and_names_its_keys_only_where_they_are_read() {
-    let keyed = "  tuimex   F1 Mail   F2 Calendar".to_string();
+    let keyed = "  F1 Mail   F2 Calendar".to_string();
     let read = [("", "F1 Mail"), ("\r", "F1 Mail"), ("gc", "F2 Calendar"), ("gc2", "F2 Calendar")];
     for (keys, in_view) in read.into_iter().chain([("gc3", "F2 Calendar"), ("gclll\r\r", "F2 Calendar")]) {
         assert_eq!(bar(&mut after(keys)), (keyed.clone(), in_view.to_string()), "after {keys:?}");
     }
-    let bare = "  tuimex   Mail   Calendar".to_string();
+    let bare = "  Mail   Calendar".to_string();
     for (keys, in_view) in
         [("c", "Mail"), ("c\t\t\t\t^s", "Mail"), ("?", "Mail"), ("gcc", "Calendar"), ("gc?", "Calendar")]
     {

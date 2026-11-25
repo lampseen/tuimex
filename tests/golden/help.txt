@@ -1,4 +1,4 @@
-  tuimex   Mail   Calendar                                                                                              
+  Mail   Calendar                                                                                                       
   Help                                                                                                                  
                                                                                                                         
     Everywhere                           List                                 Reader                                    

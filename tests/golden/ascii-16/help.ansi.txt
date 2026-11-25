@@ -1,4 +1,4 @@
-{default}  {brightblack}tuimex{default}   {magenta b}Mail{default}   {brightblack}Calendar{default}                                                                                              
+{default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
 {default}    {default b}Everywhere{default}                           {default b}List{default}                                 {default b}Reader{default}                                    

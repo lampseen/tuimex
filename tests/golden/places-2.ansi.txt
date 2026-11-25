@@ -1,1 +1,1 @@
-{fg}  {dim}tuimex{fg}   {acc b}Mail{fg}   {dim}Calendar{fg}                                                                                              
+{fg}  {fg b}Mail{fg}   {dim}Calendar{fg}                                                                                                       

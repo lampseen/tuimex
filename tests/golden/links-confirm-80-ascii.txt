@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                
+  F1 Mail   F2 Calendar                                                         
   Action needed: confirm your new device                                        
                                                                                 
     From     Example Bank <security@examplebank.example.net>                    

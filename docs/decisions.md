@@ -1686,6 +1686,12 @@ replace what items 1, 3 and 4 say of the hint and of the list.
      calendar's hints lose `gm F1 mail`, which read as one odd key, and
      the empty calendar's hint is `? help` alone. Help still lists `gc F2`
      and `gm F1`.
+
+   *2026-11-24, later.* The program's name left the bar, and the place
+   in view is bold in the ordinary foreground, not the accent, with the
+   other dim, so the tabs under it are the only accent. Bryan: "clean up
+   this top part a little. It's a bit crowded and tuimex is kinda lost in
+   the header. Not sure it needs to be there at all."
 9. **The month's list always has an event selected while it has the
    focus.** Bryan: "still not able to nav to the list on the right to nav
    events". Alt-l did arrive and `j` did step, in a terminal as in the

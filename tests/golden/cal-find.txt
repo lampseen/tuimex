@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Month   Week   Day                                                                              Mon 23 November 2026  
                                                                                                                         
   Today · Mon 23 November                                                                                               

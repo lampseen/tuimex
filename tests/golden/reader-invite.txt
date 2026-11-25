@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Invitation: Q4 roadmap review, Thu 26 Nov 10:00                                                                       
                                                                                                                         
     From     Imani Castell <imani@example.org>                                                                          

@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   F1{dim} Mail{fg}   {acc b}F2 Calendar{fg}                                                                                        
+{fg}  {dim}F1 Mail{fg}   {fg b}F2 Calendar{fg}                                                                                                 
 {fg}  {dim}Month{fg}   {acc b}Week{fg}   {dim}Day{fg}                                                                            {fg b}23 to 29 November 2026{fg}  
 {fg}                                                                                                                        
 {fg}          {acc b}Mon 23{fg}         {dim}Tue 24{fg}         {dim}Wed 25{fg}        {dim bg=sel}▌{fg bg=sel b}Thu 26{fg bg=sel}        {fg} {dim}Fri 27{fg}         {dim}Sat 28{fg}         {dim}Sun 29{fg}              

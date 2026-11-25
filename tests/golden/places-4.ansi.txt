@@ -1,1 +1,1 @@
-{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2                                                                                                 
+{fg}  {fg b}F1 Mail{fg}   {dim}F2{fg}                                                                                                          

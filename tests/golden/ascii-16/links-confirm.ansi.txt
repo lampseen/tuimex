@@ -1,4 +1,4 @@
-{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                                                        
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                                                                 
 {default}  {default b}Action needed: confirm your new device{default}                                                                                
 {default}                                                                                                                        
 {default}    {brightblack}From     {default b}Example Bank{default} {brightblack}<security@examplebank.example.net>{default}                                                            

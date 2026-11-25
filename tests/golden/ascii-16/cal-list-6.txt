@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Month   Week   Day                                                                                     November 2026  
                                                                                                                         
      November 2026                |  Fri 27 November                                                                    

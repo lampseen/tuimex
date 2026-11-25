@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {dim}Mail{fg}   {acc b}Calendar{fg}                                                                                              
+{fg}  {dim}Mail{fg}   {fg b}Calendar{fg}                                                                                                       
 {fg}  {fg b}Help{fg}                                                                                                                  
 {fg}                                                                                                                        
 {fg}    {fg b}Everywhere{fg}                          {fg b}Calendar (after gc){fg}                    {fg b}Event{fg}                                    

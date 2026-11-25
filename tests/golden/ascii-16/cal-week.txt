@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Month   Week   Day                                                                            23 to 29 November 2026  
                                                                                                                         
           Mon 23         Tue 24         Wed 25        >Thu 26         Fri 27         Sat 28         Sun 29              

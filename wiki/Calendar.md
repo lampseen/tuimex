@@ -8,8 +8,8 @@ key each, wherever `gc` and `gm` are read: not while you are typing into
 the event form, a message, the command line or a prompt.
 
 The first row of every screen says which of the two you are in:
-`tuimex   F1 Mail   F2 Calendar`, with the place that is open in the
-accent colour and bold. In the event form, a draft and help it names the
+`F1 Mail   F2 Calendar`, with the place that is open in bold and the
+other dim. In the event form, a draft and help it names the
 places without their keys, because the keys do nothing there. In a
 terminal too narrow for the whole row the place you are not in is cut
 short, and narrower still it is its key alone.

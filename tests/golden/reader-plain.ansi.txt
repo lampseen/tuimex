@@ -1,4 +1,4 @@
-{fg}  {dim}tuimex{fg}   {acc b}F1 Mail{fg}   F2{dim} Calendar{fg}                                                                                        
+{fg}  {fg b}F1 Mail{fg}   {dim}F2 Calendar{fg}                                                                                                 
 {fg}  {fg b}Contract draft v3 for the Halden account{fg}                                                        {dim}1 of 3 in the thread{fg}  
 {fg}                                                                                                                        
 {fg}    {dim}From     {fg b}Priya Raman{fg} {dim}<priya@example.org>{fg}                                                                            

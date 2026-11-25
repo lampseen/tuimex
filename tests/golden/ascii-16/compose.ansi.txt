@@ -1,4 +1,4 @@
-{default}  {brightblack}tuimex{default}   {magenta b}Mail{default}   {brightblack}Calendar{default}                                                                                              
+{default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       
 {default}  {default b}Re: Contract draft v3 for the Halden account{default}                                                                          
 {default}                                                                                                                        
 {magenta}>{default}   {default b}From     {brightblack}robin@example.com{default}   {default b}robin.vale@example.org{default}   {brightblack}desk@example.org{default}                                              

@@ -1,6 +1,6 @@
 //! The bar of places: the design's `placesRow` and `LAYOUT.places`. The
-//! first row of every screen names the program and its places, each by the
-//! function key that goes to it, and marks the one in view (ADR-054).
+//! first row of every screen names the places, each by the function key
+//! that goes to it, and marks the one in view (ADR-054).
 
 use crate::keymap;
 use crate::layout::MARGIN;
@@ -8,8 +8,7 @@ use crate::list::heading;
 use crate::palette::Tok;
 use crate::span::{Line, cells, fit, gap, run};
 
-pub const PROGRAM: &str = "tuimex";
-/// The cells between the program's name and a place, and between places.
+/// The cells between places.
 pub const GAP: usize = 3;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -52,8 +51,8 @@ enum Form {
 }
 
 fn row(here: Place, keys: bool, form: Form) -> Line {
-    let mut line = vec![run(PROGRAM, Tok::Dim)];
-    for named in &PLACES {
+    let mut line = Vec::new();
+    for (at, named) in PLACES.iter().enumerate() {
         let key = keymap::hint(named.key).0.rsplit(' ').next().filter(|_| keys).unwrap_or("");
         let on = named.place == here;
         let name = match form {
@@ -63,12 +62,16 @@ fn row(here: Place, keys: bool, form: Form) -> Line {
             Form::Key => "",
         };
         let apart = if key.is_empty() || name.is_empty() { "" } else { " " };
-        line.push(gap(GAP));
-        // The place in view is drawn as the active tab is; of the other,
-        // the key is the colour a hint's key is and the name is dim.
+        if at > 0 {
+            line.push(gap(GAP));
+        }
+        // The bar is quiet so that the tabs under it are the only accent:
+        // the place in view is bold in the ordinary foreground, which tells
+        // it without colour, and the other is dim.
+        let said = format!("{key}{apart}{name}");
         match on {
-            true => line.push(run(format!("{key}{apart}{name}"), Tok::Acc).bold()),
-            false => line.extend([run(key, Tok::Fg), run(format!("{apart}{name}"), Tok::Dim)]),
+            true => line.push(run(said, Tok::Fg).bold()),
+            false => line.push(run(said, Tok::Dim)),
         }
     }
     line.retain(|span| !span.text.is_empty());

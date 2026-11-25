@@ -1,4 +1,4 @@
-  tuimex   F1 Mail   F2 Calendar                                                                                        
+  F1 Mail   F2 Calendar                                                                                                 
   Month   Week   Day                                                                                      January 2027  
                                                                                                                         
      January 2027                 |  Sat 2 January                                                                      

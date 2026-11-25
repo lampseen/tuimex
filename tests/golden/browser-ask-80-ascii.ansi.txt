@@ -1,4 +1,4 @@
-{default}  {brightblack}tuimex{default}   {magenta b}F1 Mail{default}   F2{brightblack} Calendar{default}                                                
+{default}  {default b}F1 Mail{default}   {brightblack}F2 Calendar{default}                                                         
 {default}  {default b}This week: winter routes, a gear swap and one trail closure{default}                   
 {default}                                                                                
 {default}    {brightblack}From     {default b}Fernway Weekly{default} {brightblack}<news@fernway.example.net>{default}                          
