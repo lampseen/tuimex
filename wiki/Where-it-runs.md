@@ -78,9 +78,9 @@ and "should" is the honest word for most of them.
 
 | | what has been run |
 |---|---|
-| **a CalDAV server in a container** | `make real-server`: Radicale, with an event written, changed, answered and deleted through the engine. A further leg answers an invitation in the interface on a terminal and reads the event back from Radicale; it was written on 2026-11-24 and had not been run when this page was last changed |
-| **Google**, over CalDAV with an app password | one request for a calendar's properties was answered by hand on 2026-11-24. A whole fetch has not been run, and nothing has ever been written |
-| **Proton** and any other feed | read from the private address. Tested against stand-ins; never fetched from Proton or Google |
+| **a CalDAV server in a container** | `make real-server`: Radicale, with an event written, changed, answered and deleted through the engine. A further leg answers an invitation in the interface on a terminal and reads the event back from Radicale and the reply from the mail server; it passed on 2026-11-24 and runs in the CI job `real-server` |
+| **Google**, over CalDAV with an app password | two accounts' calendars, one of them on a Google-hosted domain, were set up and read by hand on 2026-11-24, and their owner said the calendar looked right; it was not compared event by event. Nothing has ever been written there: an event made for one of them was kept `local`, as it is until setup's write check has been run |
+| **Proton** and any other feed | read from the private address. One Proton calendar was set up and read by hand on 2026-11-24, with the same caveat. No feed from Google has been read |
 
 The by-hand script for real providers is
 [`docs/testing.md`](https://github.com/lampseen/tuimex/blob/main/docs/testing.md),

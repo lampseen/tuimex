@@ -398,3 +398,4 @@ happened in place of what the step says.
 | Date | Build (`git rev-parse --short HEAD`) | System | Section | Provider | Result |
 |---|---|---|---|---|---|
 | 2026-11-23 | not recorded | Linux | setup and sync only; not run as this script | Gmail, two accounts; Proton, one | Bryan reported that all three synced with no issue, and that the setup prompts were confusing. Which way each signed in, sending, and every other step: not recorded. |
+| 2026-11-24 | the head of pull request #8 that day; not recorded more exactly | Linux | 7c and 7d, setup and reading only; not run as this script | Google over CalDAV with an app password, two accounts; Proton's private address, one | Bryan reported that the calendar "looks good" with all three read. An event he made for a Google account was kept `local` and did not reach Google: the write check of 7c had not been run. Answering an invitation, reminders, and a comparison with the providers' own calendars: not recorded. |
