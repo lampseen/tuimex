@@ -1,6 +1,6 @@
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
-{default}                                                                              x                {brightblack}ignore; nothing is sent{default}  
+{default}    ^d ^u       {brightblack}scroll{default}                                                        x                {brightblack}ignore; nothing is sent{default}  
 {default}                                                                                                                        
 {default}    {default b}Commands{default}                                                                                                            
 {default}    :archive                                          {brightblack}archive what is selected{default}                                          
@@ -36,5 +36,5 @@
 {default}    :q                                                {brightblack}quit from the list; back elsewhere{default}                                
 {default}    :qa                                               {brightblack}quit{default}                                                              
 {default}                                                                                                                        
-{default}  {brightblack}140 keys and commands - lines 36-70 of 70{default}                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}142 keys and commands - lines 36-70 of 70{default}                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

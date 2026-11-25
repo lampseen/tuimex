@@ -20,12 +20,13 @@
 {fg}    Esc        {dim}cancel{fg}                   c          {dim}new event here{fg}                                                       
 {fg}                                        E          {dim}edit the event{fg}            {fg b}Event form{fg}                                 
 {fg}    {fg b}Confirm{fg}                             d          {dim}delete the event{fg}          Tab S-Tab       {dim}next, previous field{fg}       
-{fg}    y Enter    {dim}yes{fg}                      gn         {dim}reminders on, off{fg}         Left Right      {dim}choose, where offered{fg}      
-{fg}    n Esc      {dim}no{fg}                       gm F1      {dim}back to mail{fg}              Enter           {dim}edit notes in $EDITOR{fg}      
-{fg}    any other  {dim}cancels; key dropped{fg}                                          ^s              {dim}save; guests get mail{fg}      
-{fg}                                                                             Esc             {dim}close; keep or discard{fg}     
-{fg}    {fg b}Help (after ?){fg}                                                                                                      
-{fg}    ^d ^u      {dim}scroll{fg}                                                        {fg b}Links (after o){fg}                            
+{fg}    y Enter    {dim}yes{fg}                      gn         {dim}reminders on, off{fg}         h l             {dim}choose, where offered{fg}      
+{fg}    n Esc      {dim}no{fg}                       gm F1      {dim}back to mail{fg}              Left Right      {dim}as h and l{fg}                 
+{fg}    any other  {dim}cancels; key dropped{fg}                                          Enter           {dim}edit notes in $EDITOR{fg}      
+{fg}                                                                             ^s              {dim}save; guests get mail{fg}      
+{fg}    {fg b}Help (after ?){fg}                                                           Esc             {dim}close; keep or discard{fg}     
+{fg}    ^d ^u      {dim}scroll{fg}                                                                                                   
+{fg}                                                                             {fg b}Links (after o){fg}                            
 {fg}                                                                             1-9             {dim}open that link{fg}             
 {fg}                                                                             j k Enter       {dim}choose, then open{fg}          
 {fg}                                                                             Esc             {dim}close{fg}                      
@@ -34,7 +35,6 @@
 {fg}    :archive                                          {dim}archive what is selected{fg}                                          
 {fg}    :trash                                            {dim}move what is selected to Trash{fg}                                    
 {fg}    :flag                                             {dim}flag or unflag what is selected{fg}                                   
-{fg}    :read                                             {dim}mark what is selected read{fg}                                        
 {fg}                                                                                                                        
-{fg}  {dim}140 keys and commands · lines 1-35 of 63{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}142 keys and commands · lines 1-35 of 64{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

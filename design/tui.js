@@ -215,13 +215,14 @@ const KEYMAP = {
     'list: `gt` and `gT` step to the next and previous account, then all again. `/` then Enter searches all mail.',
     '`A` opens the agent\'s menu wherever there is something for it to do; `a` is attachments and nothing else.',
     'reader: `i` answers an invitation (then `a`, `t` or `d`). The proposal had only `:invite`.',
-    'compose: Left and Right choose the identity while From is focused. The proposal did not say.',
+    'compose: `h` and `l`, or Left and Right, choose the identity while From is focused. The proposal did not say.',
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
     'the calendar is a place and not a section: `gc` or F2 opens it and `gm` or F1 returns, each side keeping where it was (ADR-054).',
     'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
+    'forms: `h` and `l` choose wherever Left and Right do, on a field that takes no typed text. In a field that is typed into they are letters.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -338,14 +339,16 @@ const KEYMAP = {
     ] },
     { mode: 'event-form', title: 'Event form', keys: [
       { id: 'event-form.field', keys: 'Tab S-Tab', does: 'next, previous field' },
-      { id: 'event-form.choice', keys: 'Left Right', does: 'choose, where offered', hint: 'choose' },
+      { id: 'event-form.choice', keys: 'h l', does: 'choose, where offered', hint: 'choose' },
+      { id: 'event-form.choice-arrows', keys: 'Left Right', does: 'as h and l' },
       { id: 'event-form.notes', keys: 'Enter', does: 'edit notes in $EDITOR', hint: 'notes' },
       { id: 'event-form.save', keys: '^s', does: 'save; guests get mail', hint: 'save' },
       { id: 'event-form.close', keys: 'Esc', does: 'close; keep or discard', hint: 'close' },
     ] },
     { mode: 'compose', title: 'Compose', keys: [
       { id: 'compose.field', keys: 'Tab S-Tab', does: 'next, previous field' },
-      { id: 'compose.identity', keys: 'Left Right', does: 'identity, on From', hint: 'identity' },
+      { id: 'compose.identity', keys: 'h l', does: 'identity, on From', hint: 'identity' },
+      { id: 'compose.identity-arrows', keys: 'Left Right', does: 'as h and l' },
       { id: 'compose.editor', keys: 'Enter', does: 'edit body in $EDITOR', hint: 'edit' },
       { id: 'compose.attach', keys: '^a', does: 'attach a file', hint: 'attach' },
       { id: 'compose.summary', keys: '^s', does: 'send summary', hint: 'send' },
@@ -1753,16 +1756,17 @@ function composeScreen(width, height, o = {}) {
   const identities = ACCOUNTS.flatMap((a) => a.identities.map((identity) => identity.replace(/^.*<|>$/g, '')));
   const from = identities.flatMap((identity) => [identity === address(draft.from) ? run(identity, 'fg', { b: true }) : run(identity, 'dim'), gap(3)]);
   const notice = o.draft ? o.notice : SAY.agentDraft('23 Nov 13:52');
+  const focused = o.draft ? o.focused : 'From';
   const head = [
     heading([run(draft.subject, 'fg', { b: true })]),
     [],
-    ...draftFields(draft, { focused: o.draft ? o.focused : 'From', from, person: (who) => m(person(who)) }),
+    ...draftFields(draft, { focused, from, person: (who) => m(person(who)) }),
     [],
     ...(notice ? indent([m(notice), []]) : []),
   ].map((row) => fit(row, width));
   const body = draftBody(o.body || draft.body, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin));
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|draft saved 13:58}', o.right),
-    o.command || hint(['Tab', 'next field'], 'compose.identity', 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'));
+    o.command || hint(['Tab', 'next field'], ...(focused === 'From' ? ['compose.identity'] : []), 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'));
 }
 
 // The end of compose, enough for one step of a flow: the subject field, the
@@ -2189,6 +2193,11 @@ function eventScreen(o) {
   return frame(width, height, head, body, o.panel, statusRow(width, o.left || '', o.right != null ? o.right : calendarAlerts(o)), o.command || eventHint(ev));
 }
 
+// The fields of the form that are chosen from and not typed into. On one of
+// them `h` and `l` choose as Left and Right do. In a field that is typed
+// into they are letters, so the hint names them only on these.
+const CHOSEN = ['Calendar', 'All day', 'Repeats', 'Reminder'];
+
 // The form for a new event or a change to one, built as compose is: a field
 // to a row, the focused one with the cursor and a bold label, and the notes
 // below as the body. o: { ev, focused, typing, left, command }
@@ -2213,7 +2222,7 @@ function eventFormScreen(width, height, o) {
   const head = [heading([run(o.heading, 'fg', { b: true })]), [], ...fields, []].map((row) => fit(row, width));
   const body = indent(ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin)) : [[run('No notes.', 'dim')]]);
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|not saved}', calendarAlerts()),
-    o.command || hint(['Tab', 'next field'], 'event-form.choice', 'event-form.notes', 'event-form.save', 'event-form.close'));
+    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), 'event-form.notes', 'event-form.save', 'event-form.close'));
 }
 
 // The calendars, each one a row to show or hide.
@@ -2758,6 +2767,7 @@ function build(mode = {}) {
   const offsite = { id: 'offsite', account: 'work', n: thu, day: '2026-11-26', start: '14:00', end: '15:00', title: 'Offsite planning', where: 'Room Fjord', invited: ['imani', 'lars'], local: true };
   const form = (more) => eventFormScreen(W, H, { ev: offsite, heading: 'New event', focused: 'Title', typing: true, ...more });
   screen('cal-edit', 'Event form', 'after c or E: a field to a row as in compose; a date is typed as words and the status line says what it was taken to mean', form());
+  screen('cal-edit-choice', 'Event form, a field that is chosen from', 'after Tab: Calendar takes no typed text, so h and l choose as Left and Right do and the hint says so', form({ focused: 'Calendar', typing: false }));
 
   screen('help-calendar', 'Help, in the calendar', '? in the calendar leads with the calendar\'s keys; typing filters every key and command as it does in mail', helpScreen(W, H, '', 0, 'calendar'));
 

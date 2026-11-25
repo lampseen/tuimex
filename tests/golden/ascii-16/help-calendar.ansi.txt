@@ -20,12 +20,13 @@
 {default}    Esc        {brightblack}cancel{default}                   c          {brightblack}new event here{default}                                                       
 {default}                                        E          {brightblack}edit the event{default}            {default b}Event form{default}                                 
 {default}    {default b}Confirm{default}                             d          {brightblack}delete the event{default}          Tab S-Tab       {brightblack}next, previous field{default}       
-{default}    y Enter    {brightblack}yes{default}                      gn         {brightblack}reminders on, off{default}         Left Right      {brightblack}choose, where offered{default}      
-{default}    n Esc      {brightblack}no{default}                       gm F1      {brightblack}back to mail{default}              Enter           {brightblack}edit notes in $EDITOR{default}      
-{default}    any other  {brightblack}cancels; key dropped{default}                                          ^s              {brightblack}save; guests get mail{default}      
-{default}                                                                             Esc             {brightblack}close; keep or discard{default}     
-{default}    {default b}Help (after ?){default}                                                                                                      
-{default}    ^d ^u      {brightblack}scroll{default}                                                        {default b}Links (after o){default}                            
+{default}    y Enter    {brightblack}yes{default}                      gn         {brightblack}reminders on, off{default}         h l             {brightblack}choose, where offered{default}      
+{default}    n Esc      {brightblack}no{default}                       gm F1      {brightblack}back to mail{default}              Left Right      {brightblack}as h and l{default}                 
+{default}    any other  {brightblack}cancels; key dropped{default}                                          Enter           {brightblack}edit notes in $EDITOR{default}      
+{default}                                                                             ^s              {brightblack}save; guests get mail{default}      
+{default}    {default b}Help (after ?){default}                                                           Esc             {brightblack}close; keep or discard{default}     
+{default}    ^d ^u      {brightblack}scroll{default}                                                                                                   
+{default}                                                                             {default b}Links (after o){default}                            
 {default}                                                                             1-9             {brightblack}open that link{default}             
 {default}                                                                             j k Enter       {brightblack}choose, then open{default}          
 {default}                                                                             Esc             {brightblack}close{default}                      
@@ -34,7 +35,6 @@
 {default}    :archive                                          {brightblack}archive what is selected{default}                                          
 {default}    :trash                                            {brightblack}move what is selected to Trash{default}                                    
 {default}    :flag                                             {brightblack}flag or unflag what is selected{default}                                   
-{default}    :read                                             {brightblack}mark what is selected read{default}                                        
 {default}                                                                                                                        
-{default}  {brightblack}140 keys and commands - lines 1-35 of 63{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}142 keys and commands - lines 1-35 of 64{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

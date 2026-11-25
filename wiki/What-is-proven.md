@@ -109,6 +109,7 @@ table at the end of this page says where each stands.
 | what is true | what proves it |
 |---|---|
 | The form opens on the selected day, takes dates as words and says what they mean, refuses what cannot be saved with the reason, and asks before guests are mailed | `c_opens_a_new_event_at_nine_on_the_cursor_s_day_in_the_first_account`, `the_status_line_says_what_a_date_was_taken_to_mean_and_words_that_name_none_are_refused`, `each_refusal_on_save_says_why`, `guests_are_asked_about_first_and_only_y_saves` |
+| In the form `h` and `l` choose on Calendar, All day, Repeats and Reminder as `Left` and `Right` do, and are letters in a field that is typed into; the hint names them only where they choose | `h_and_l_choose_on_a_field_that_is_chosen_from_and_are_letters_where_text_is_typed`, `tab_moves_through_the_fields_and_left_and_right_choose`, `cal_edit` |
 | A new event is kept under a UID made here, as a local file or at a written provider under a name tuimex made, and `u` removes it | `a_new_event_is_kept_under_a_uid_made_here_locally_or_at_the_provider_and_u_removes_it` |
 | An event is changed in place and moved between calendars, and `u` puts each back with the text it had | `an_event_is_changed_in_place_and_moved_to_another_calendar_and_u_puts_each_back` |
 | One day of a repeating event is stood in for or left out, and the event stays; deleted whole, everything of it goes; `u` brings each back | `one_day_of_a_repeating_event_is_stood_in_for_or_left_out_and_the_event_stays`, `d_on_a_repeating_event_asks_and_this_one_leaves_the_other_days` |
@@ -209,7 +210,7 @@ program raise one.
 | what is true | what proves it |
 |---|---|
 | `c`, `r`, `R` and `f` open compose from the list and the reader, new or quoting the message as mutt does, with the headers that keep a reply in its thread; on a saved draft they go on writing it | `compose_opens_from_the_keys_and_the_commands_alike`, `a_reply_from_the_reader_quotes_what_the_reader_shows`, `a_reply_quotes_the_message_under_who_wrote_it_and_when`, `a_reply_carries_the_headers_that_keep_it_in_its_thread`, `a_forward_is_the_message_between_two_markers_and_answers_nothing` |
-| The identity is chosen on From, and the draft is filed and sent under that identity's account | `left_and_right_choose_the_identity_and_the_account_follows_it` |
+| The identity is chosen on From, by `h` and `l` or the arrows, and the draft is filed and sent under that identity's account; in a field that is typed into `h` and `l` are letters, and the hint names them only on From | `left_and_right_choose_the_identity_and_the_account_follows_it`, `tab_and_shift_tab_walk_the_fields_and_enter_moves_on_until_the_body` |
 | `Enter` on the body opens `$EDITOR` on an owner-only file under the cache, and the interface comes back around it | `the_body_is_written_in_editor_and_the_interface_comes_back_around_it`, `the_body_goes_through_the_editor_in_an_owner_only_file_that_is_then_removed` |
 | `^a` attaches a file, completing its path | `ctrl_a_attaches_a_file_with_the_path_completed`, `a_path_completes_to_the_files_it_could_name` |
 | An address that does not parse stops the summary and is named | `an_address_that_does_not_parse_stops_the_summary_and_is_named` |

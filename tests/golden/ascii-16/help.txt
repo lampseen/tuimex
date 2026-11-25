@@ -26,15 +26,15 @@
                                          zo           unfold a thread         Esc              close                    
     Compose                              zc           fold a thread                                                     
     Tab S-Tab   next, previous field                                          Agent (after A)                           
-    Left Right  identity, on From                                             r                write a reply            
-    Enter       edit body in $EDITOR                                          t                tidy, in compose         
-    ^a          attach a file                                                 l                review a link, in links  
-    ^s          send summary                                                                                            
-    ^d          save the draft                                                Invitation (after i)                      
-    Esc         close; keep or discard                                        a                accept                   
-                                                                              t                tentative                
-    Help (after ?)                                                            d                decline                  
-    ^d ^u       scroll                                                        p                propose another time     
+    h l         identity, on From                                             r                write a reply            
+    Left Right  as h and l                                                    t                tidy, in compose         
+    Enter       edit body in $EDITOR                                          l                review a link, in links  
+    ^a          attach a file                                                                                           
+    ^s          send summary                                                  Invitation (after i)                      
+    ^d          save the draft                                                a                accept                   
+    Esc         close; keep or discard                                        t                tentative                
+                                                                              d                decline                  
+    Help (after ?)                                                            p                propose another time     
                                                                                                                         
-  140 keys and commands - lines 1-35 of 70                                                  sending in 6s - 1 not sent  
+  142 keys and commands - lines 1-35 of 70                                                  sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

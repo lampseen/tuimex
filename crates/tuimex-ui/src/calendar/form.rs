@@ -301,7 +301,8 @@ impl Form {
         self.focus = FIELDS[(at + if forward { 1 } else { FIELDS.len() - 1 }) % FIELDS.len()];
     }
 
-    /// Left and Right. Whether the focused field offers a choice.
+    /// `h` and `l`, or Left and Right. Whether the focused field offers a
+    /// choice.
     pub fn choose(&mut self, forward: bool) -> bool {
         let step = |at: &mut usize, n: usize| *at = (*at + if forward { 1 } else { n.max(1) - 1 }) % n.max(1);
         match self.focus {
@@ -539,8 +540,12 @@ pub fn screen(o: &Scene, form: &Form, asked: Option<Line>, width: usize, height:
         body = vec![vec![gap(INDENT), run("No notes.", Tok::Dim)]];
     }
     let left = o.left.clone().unwrap_or_else(|| form.left());
-    let keys = ["event-form.choice", "event-form.notes", "event-form.save", "event-form.close"].map(keymap::hint);
-    let idle = || hint(&[&[("Tab", "next field")], &keys[..]].concat());
+    // The keys that choose are letters in a field that is typed into, so
+    // they are named only where they choose.
+    let choice = (!form.focus.typed()).then_some("event-form.choice");
+    let ids = choice.into_iter().chain(["event-form.notes", "event-form.save", "event-form.close"]);
+    let keys: Vec<_> = [("Tab", "next field")].into_iter().chain(ids.map(keymap::hint)).collect();
+    let idle = || hint(&keys);
     let command = asked.or_else(|| o.command.clone()).unwrap_or_else(idle);
     let foot = [o.panel.clone(), vec![Line::new(), status_row(width, &left, &o.right), command]].concat();
     frame(head, body, foot, height)

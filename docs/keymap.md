@@ -151,7 +151,8 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `Tab S-Tab` | next, previous field |
-| `Left Right` | choose, where offered |
+| `h l` | choose, where offered |
+| `Left Right` | as h and l |
 | `Enter` | edit notes in $EDITOR |
 | `^s` | save; guests get mail |
 | `Esc` | close; keep or discard |
@@ -161,7 +162,8 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `Tab S-Tab` | next, previous field |
-| `Left Right` | identity, on From |
+| `h l` | identity, on From |
+| `Left Right` | as h and l |
 | `Enter` | edit body in $EDITOR |
 | `^a` | attach a file |
 | `^s` | send summary |

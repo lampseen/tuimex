@@ -101,7 +101,10 @@ fn tab_and_shift_tab_walk_the_fields_and_enter_moves_on_until_the_body() {
     assert!(app.asks().is_empty());
     press(&mut app, "\r");
     assert_eq!(asked(&app.asks()), ["Edit"], "and there it opens the editor");
-    assert_eq!(said(&mut app), "Tab next field · Left Right identity · Enter edit · A agent · ^s send · Esc close");
+    assert_eq!(said(&mut app), "Tab next field · Enter edit · A agent · ^s send · Esc close");
+    app.key(Key::Tab);
+    let choosing = "Tab next field · h l identity · Enter edit · A agent · ^s send · Esc close";
+    assert_eq!(said(&mut app), choosing, "the keys that choose are named on From, where they are not letters");
 }
 
 /// "Send from several accounts": the identity is chosen on From, and the
@@ -119,6 +122,15 @@ fn left_and_right_choose_the_identity_and_the_account_follows_it() {
     assert_eq!(chosen("→→"), ("personal".into(), "robin@example.com".into()), "and round");
     // Off From the arrows choose nothing.
     assert_eq!(chosen("\t←"), ("work".into(), "robin.vale@example.org".into()));
+    // `h` and `l` are the arrows on From, which takes no typed text.
+    assert_eq!(chosen("h"), ("personal".into(), "robin@example.com".into()));
+    assert_eq!(chosen("l"), ("work".into(), "desk@example.org".into()));
+    assert_eq!(chosen("ll"), ("personal".into(), "robin@example.com".into()));
+    // In a field that is typed into they are letters, and choose nothing.
+    let mut app = after("chl@example.com\t\thl@example.net\t\t\t^d");
+    let draft = written(&app.asks());
+    assert_eq!((draft.to[0].email.as_str(), draft.from.email.as_str()), ("hl@example.com", "robin.vale@example.org"));
+    assert_eq!(draft.bcc[0].email, "hl@example.net");
 
     // A draft saved under one account and then moved to another leaves the
     // first: the old copy is discarded, by its own id.

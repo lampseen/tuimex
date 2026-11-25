@@ -108,7 +108,7 @@ day; `E` opens it on the selected event.
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | choose, on Calendar, All day, Repeats and Reminder |
+| `h` `l` | choose, on Calendar, All day, Repeats and Reminder; `Left` `Right` do the same. In the other fields they are letters |
 | `Enter` | write the notes in your editor |
 | `^s` | save |
 | `Esc` | close; with changes, it asks whether to keep them |

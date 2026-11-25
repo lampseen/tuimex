@@ -20,12 +20,13 @@
     Esc        cancel                   c          new event here                                                       
                                         E          edit the event            Event form                                 
     Confirm                             d          delete the event          Tab S-Tab       next, previous field       
-    y Enter    yes                      gn         reminders on, off         Left Right      choose, where offered      
-    n Esc      no                       gm F1      back to mail              Enter           edit notes in $EDITOR      
-    any other  cancels; key dropped                                          ^s              save; guests get mail      
-                                                                             Esc             close; keep or discard     
-    Help (after ?)                                                                                                      
-    ^d ^u      scroll                                                        Links (after o)                            
+    y Enter    yes                      gn         reminders on, off         h l             choose, where offered      
+    n Esc      no                       gm F1      back to mail              Left Right      as h and l                 
+    any other  cancels; key dropped                                          Enter           edit notes in $EDITOR      
+                                                                             ^s              save; guests get mail      
+    Help (after ?)                                                           Esc             close; keep or discard     
+    ^d ^u      scroll                                                                                                   
+                                                                             Links (after o)                            
                                                                              1-9             open that link             
                                                                              j k Enter       choose, then open          
                                                                              Esc             close                      
@@ -34,7 +35,6 @@
     :archive                                          archive what is selected                                          
     :trash                                            move what is selected to Trash                                    
     :flag                                             flag or unflag what is selected                                   
-    :read                                             mark what is selected read                                        
                                                                                                                         
-  140 keys and commands - lines 1-35 of 63                                                  sending in 6s - 1 not sent  
+  142 keys and commands - lines 1-35 of 64                                                  sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

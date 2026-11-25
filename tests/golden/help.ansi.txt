@@ -26,15 +26,15 @@
 {fg}                                         zo           {dim}unfold a thread{fg}         Esc              {dim}close{fg}                    
 {fg}    {fg b}Compose{fg}                              zc           {dim}fold a thread{fg}                                                     
 {fg}    Tab S-Tab   {dim}next, previous field{fg}                                          {fg b}Agent (after A){fg}                           
-{fg}    Left Right  {dim}identity, on From{fg}                                             r                {dim}write a reply{fg}            
-{fg}    Enter       {dim}edit body in $EDITOR{fg}                                          t                {dim}tidy, in compose{fg}         
-{fg}    ^a          {dim}attach a file{fg}                                                 l                {dim}review a link, in links{fg}  
-{fg}    ^s          {dim}send summary{fg}                                                                                            
-{fg}    ^d          {dim}save the draft{fg}                                                {fg b}Invitation (after i){fg}                      
-{fg}    Esc         {dim}close; keep or discard{fg}                                        a                {dim}accept{fg}                   
-{fg}                                                                              t                {dim}tentative{fg}                
-{fg}    {fg b}Help (after ?){fg}                                                            d                {dim}decline{fg}                  
-{fg}    ^d ^u       {dim}scroll{fg}                                                        p                {dim}propose another time{fg}     
+{fg}    h l         {dim}identity, on From{fg}                                             r                {dim}write a reply{fg}            
+{fg}    Left Right  {dim}as h and l{fg}                                                    t                {dim}tidy, in compose{fg}         
+{fg}    Enter       {dim}edit body in $EDITOR{fg}                                          l                {dim}review a link, in links{fg}  
+{fg}    ^a          {dim}attach a file{fg}                                                                                           
+{fg}    ^s          {dim}send summary{fg}                                                  {fg b}Invitation (after i){fg}                      
+{fg}    ^d          {dim}save the draft{fg}                                                a                {dim}accept{fg}                   
+{fg}    Esc         {dim}close; keep or discard{fg}                                        t                {dim}tentative{fg}                
+{fg}                                                                              d                {dim}decline{fg}                  
+{fg}    {fg b}Help (after ?){fg}                                                            p                {dim}propose another time{fg}     
 {fg}                                                                                                                        
-{fg}  {dim}140 keys and commands · lines 1-35 of 70{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}142 keys and commands · lines 1-35 of 70{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

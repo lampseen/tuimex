@@ -36,5 +36,5 @@
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}                                                                                                                        
-{fg}  {dim}5 of 140 shown{fg}                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}5 of 142 shown{fg}                                                                            sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  /agent{bg bg=acc} {fg}                                                                                                               

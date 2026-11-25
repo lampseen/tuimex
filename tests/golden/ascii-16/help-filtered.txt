@@ -36,5 +36,5 @@
                                                                                                                         
                                                                                                                         
                                                                                                                         
-  5 of 140 shown                                                                            sending in 6s - 1 not sent  
+  5 of 142 shown                                                                            sending in 6s - 1 not sent  
   /agent                                                                                                                

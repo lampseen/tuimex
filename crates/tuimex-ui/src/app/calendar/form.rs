@@ -57,6 +57,12 @@ impl App {
         self.cal.form.form.is_some()
     }
 
+    /// Whether the binding `id` is a letter to type where the form's focus
+    /// is: `h` and `l` choose only on a field nothing is typed into.
+    pub(super) fn form_types(&self, id: &str) -> bool {
+        id == "event-form.choice" && self.cal.form.form.as_ref().is_some_and(|form| form.focus.typed())
+    }
+
     /// Every calendar an event can be saved to, by account in the config's
     /// order: the account's own where tuimex can write it, then its local
     /// one.
@@ -130,7 +136,7 @@ impl App {
         let Some(mut form) = self.cal.form.form.take() else { return };
         match id {
             "event-form.field" => form.step(i == 0),
-            "event-form.choice" => {
+            "event-form.choice" | "event-form.choice-arrows" => {
                 if !form.choose(i == 1) {
                     self.say(say::err(format!(
                         "{}: {} has nothing to choose from",

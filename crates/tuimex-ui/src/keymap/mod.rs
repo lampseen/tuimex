@@ -205,7 +205,8 @@ pub const KEYMAP: &[Table] = &[
         title: "Event form",
         keys: &[
             b("event-form.field", "Tab S-Tab", "next, previous field", ""),
-            b("event-form.choice", "Left Right", "choose, where offered", "choose"),
+            b("event-form.choice", "h l", "choose, where offered", "choose"),
+            b("event-form.choice-arrows", "Left Right", "as h and l", ""),
             b("event-form.notes", "Enter", "edit notes in $EDITOR", "notes"),
             b("event-form.save", "^s", "save; guests get mail", "save"),
             b("event-form.close", "Esc", "close; keep or discard", "close"),
@@ -216,7 +217,8 @@ pub const KEYMAP: &[Table] = &[
         title: "Compose",
         keys: &[
             b("compose.field", "Tab S-Tab", "next, previous field", ""),
-            b("compose.identity", "Left Right", "identity, on From", "identity"),
+            b("compose.identity", "h l", "identity, on From", "identity"),
+            b("compose.identity-arrows", "Left Right", "as h and l", ""),
             b("compose.editor", "Enter", "edit body in $EDITOR", "edit"),
             b("compose.attach", "^a", "attach a file", "attach"),
             b("compose.summary", "^s", "send summary", "send"),

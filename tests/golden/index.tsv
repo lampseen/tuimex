@@ -117,6 +117,7 @@ cal-event-more	screen	120	40	unicode	truecolor
 cal-event-answer	screen	120	40	unicode	truecolor
 cal-event-local	screen	120	40	unicode	truecolor
 cal-edit	screen	120	40	unicode	truecolor
+cal-edit-choice	screen	120	40	unicode	truecolor
 help-calendar	screen	120	40	unicode	truecolor
 cal-zoom-0	strip	120	14	unicode	truecolor
 cal-zoom-1	strip	120	14	unicode	truecolor

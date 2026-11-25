@@ -106,6 +106,7 @@ cal-event-more	screen	120	40	ascii	16
 cal-event-answer	screen	120	40	ascii	16
 cal-event-local	screen	120	40	ascii	16
 cal-edit	screen	120	40	ascii	16
+cal-edit-choice	screen	120	40	ascii	16
 help-calendar	screen	120	40	ascii	16
 cal-zoom-0	strip	120	14	ascii	16
 cal-zoom-1	strip	120	14	ascii	16

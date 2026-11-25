@@ -420,6 +420,7 @@ impl App {
         self.pending.push(key);
         match keymap::find(self.calendar_modes(), &self.pending) {
             Found::Prefix => return,
+            Found::Bound(binding, _) if self.form_types(binding.id) => self.form_typed(key),
             Found::Bound(binding, i) => {
                 self.pending.clear();
                 self.calendar_run(binding.id, i);

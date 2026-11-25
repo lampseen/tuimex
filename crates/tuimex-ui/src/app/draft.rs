@@ -264,6 +264,8 @@ impl App {
         let at = FIELDS.iter().position(|f| *f == c.focus).unwrap_or(0);
         let people = self.identities.len().max(1);
         let bound = match keymap::find(&["compose"], &[key]) {
+            // `h` and `l` are letters in a field that is typed into.
+            Found::Bound(binding, _) if binding.id == "compose.identity" && c.typed().is_some() => None,
             Found::Bound(binding, i) => Some((binding.id, i)),
             _ => None,
         };
@@ -271,10 +273,10 @@ impl App {
             Some(("compose.field", i)) => {
                 c.focus = FIELDS[(at + if i == 0 { 1 } else { FIELDS.len() - 1 }) % FIELDS.len()]
             }
-            Some(("compose.identity", i)) if c.focus == Field::From => {
+            Some(("compose.identity" | "compose.identity-arrows", i)) if c.focus == Field::From => {
                 (c.identity, c.dirty) = ((c.identity + if i == 0 { people - 1 } else { 1 }) % people, true);
             }
-            Some(("compose.identity", _)) => {}
+            Some(("compose.identity" | "compose.identity-arrows", _)) => {}
             Some(("compose.editor", _)) if c.focus == Field::Body => {
                 self.ask(Action::Edit(c.body.clone()), Vec::new());
             }

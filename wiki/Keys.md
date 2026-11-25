@@ -61,7 +61,7 @@ The list's action keys work here too.
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | who it is from, on From |
+| `h` `l` | who it is from, on From; `Left` `Right` do the same |
 | `Enter` | write the text in your editor |
 | `^a` `^s` `^d` | attach a file, the send summary, save the draft |
 
@@ -101,7 +101,7 @@ event came in. In the form:
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | choose, where a field offers choices |
+| `h` `l` | choose, where a field offers choices; `Left` `Right` do the same. In a field you type into they are letters |
 | `Enter` | write the notes in your editor |
 | `^s` | save; guests are mailed after a question |
 | `Esc` | close; with changes, keep or discard |

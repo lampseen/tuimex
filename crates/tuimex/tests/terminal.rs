@@ -167,7 +167,7 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
         "1 of 6 - 1 message",
         ":trash",
         "+ Trashed 1 message - u to undo",
-        "140 keys and commands - lines 1-19 of 70",
+        "142 keys and commands - lines 1-19 of 70",
     ];
     let mut last = 0;
     for words in steps {
@@ -925,10 +925,7 @@ fn the_body_is_written_in_editor_and_the_interface_comes_back_around_it() {
         back.contains("    Written in the editor.\n\n    Second paragraph.\n"),
         "the body is what the editor left: {back:?}"
     );
-    assert!(
-        back.contains("    To\n") && back.contains("Tab next field - Left Right identity - Enter edit"),
-        "{back:?}"
-    );
+    assert!(back.contains("    To\n") && back.contains("Tab next field - Enter edit - A agent"), "{back:?}");
     assert!(
         frames.iter().any(|f| f.contains("Keep this draft?  y keep - n discard - Esc back")),
         "an edit is a change"
