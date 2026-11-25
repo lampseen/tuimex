@@ -36,5 +36,5 @@
                                                                               d                decline                  
     Help (after ?)                                                            p                propose another time     
                                                                                                                         
-  142 keys and commands · lines 1-35 of 70                                                  sending in 6s · 1 not sent  
+  144 keys and commands · lines 1-35 of 70                                                  sending in 6s · 1 not sent  
   type to filter · ^d ^u scroll · Esc back                                                                              

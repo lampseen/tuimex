@@ -1,6 +1,7 @@
 //! The month view: the design's `monthRows`, `monthsColumn` and
 //! `monthScreen`. The cursor's month and as many of the months after it as
 //! fit whole, and beside them the cursor's day and the days that follow.
+//! The focus is in the grid or, with `Scene::focus`, in that list.
 
 use tuimex_core::calendar::{civil_from_days, days_from_civil, days_in_month, weekday_of};
 
@@ -59,8 +60,11 @@ fn month_rows(o: &Scene, days: &Days, year: i64, month: i64, current: bool) -> V
             (false, false) => run(format!("{dom:>2}"), Tok::Fg),
             (false, true) => run(format!("{dom:>2}"), Tok::Dim),
         };
+        // The cursor is the accent where the focus is and dim where it is
+        // not, as the list's is in mail while the preview has the focus.
+        let cursor = run(CURSOR, if o.focus { Tok::Dim } else { Tok::Acc });
         match day == o.cursor {
-            true => fill(vec![run(CURSOR, Tok::Acc), number, mark], Tok::Sel),
+            true => fill(vec![cursor, number, mark], Tok::Sel),
             false => vec![gap(1), number, mark],
         }
     };
@@ -112,7 +116,7 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
             vec![gap(MARGIN), run("No calendar yet.", Tok::Fg)],
             vec![gap(MARGIN), run("`tuimex setup` asks each account for the address of its calendar.", Tok::Dim)],
         ],
-        false => parts::agenda(o, o.cursor, room, pane_width, None),
+        false => parts::agenda(o, o.cursor, room, pane_width, o.picked.filter(|_| o.focus)),
     };
     let blank = Line::new();
     let content = (0..room).map(|y| {
@@ -126,7 +130,7 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let title = format!("{} {year}", MONTH_NAMES[(month - 1) as usize]);
     let (left, idle) = match none {
         true => (Line::new(), list::hint(&[keymap::hint("calendar.mail"), keymap::hint("global.help")])),
-        false => (parts::day_status(o, o.cursor), parts::hint(None)),
+        false => (parts::day_status(o, o.cursor), parts::hint(o.entry().filter(|_| o.focus).as_ref(), o.focus)),
     };
     parts::frame(o, width, &title, content.collect(), left, idle)
 }

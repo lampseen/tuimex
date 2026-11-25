@@ -36,5 +36,5 @@
 {fg}    :q                                                {dim}quit from the list; back elsewhere{fg}                                
 {fg}    :qa                                               {dim}quit{fg}                                                              
 {fg}                                                                                                                        
-{fg}  {dim}142 keys and commands · lines 36-70 of 70{fg}                                                 sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}144 keys and commands · lines 36-70 of 70{fg}                                                 sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

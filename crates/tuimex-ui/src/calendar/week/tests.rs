@@ -49,6 +49,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId], picked: Option<&
         view: View::Week,
         cursor: fx::THU,
         picked,
+        focus: false,
         accounts,
         colours: &[Tok::Link],
         words: Tok::Agent,

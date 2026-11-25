@@ -75,9 +75,12 @@ pub(super) struct Place {
     pub view: View,
     /// The day the cursor is on; today until it has been moved.
     cursor: Option<i64>,
-    /// The selected event, which the day and the week draw and the month
-    /// does not.
+    /// The selected event, which the day and the week draw, and the month
+    /// while its list has the focus.
     pub picked: Option<Picked>,
+    /// Whether the focus is in the month's list of events and not in its
+    /// grid. It is in the grid whenever another view has been shown.
+    focus: bool,
     /// The views Enter went deeper from, which Esc returns to.
     back: Vec<View>,
     /// The one account the calendar is narrowed to.
@@ -113,6 +116,7 @@ impl Place {
             view: View::Month,
             cursor: None,
             picked: None,
+            focus: false,
             back: Vec::new(),
             account: None,
             panel: Panel::None,
@@ -226,7 +230,7 @@ impl App {
         self.cal.open = true;
         if let Some(view) = view {
             self.end_search();
-            self.cal.view = view;
+            (self.cal.view, self.cal.focus) = (view, false);
             self.cal.back.clear();
             self.event_close();
         }
@@ -237,9 +241,20 @@ impl App {
         (self.cal.open, self.cal.panel) = (false, Panel::None);
     }
 
-    /// Whether the month is what is drawn: it selects a day and no event.
+    /// Whether the cursor is in the month's grid, which selects a day and
+    /// no event. With the focus in the list beside it the month selects an
+    /// event, and every key moves as it does in the day view.
     fn on_month(&self) -> bool {
-        self.cal.view == View::Month && !self.cal.searching && !self.event_is_open()
+        self.cal.view == View::Month && !self.cal.focus && !self.cal.searching && !self.event_is_open()
+    }
+
+    /// Selects an event of the cursor's day: the one already chosen there,
+    /// as `I` chooses one from the month, and otherwise its first, when
+    /// the day has one.
+    fn pick_on_day(&mut self) {
+        let on_day = self.listed(self.day(), self.day() + 1);
+        let kept = self.cal.picked.take().filter(|picked| on_day.contains(picked));
+        self.cal.picked = kept.or(on_day.into_iter().next());
     }
 
     /// The events from `from` up to `to`, in the order the days draw them:
@@ -392,6 +407,8 @@ impl App {
         } else if self.event_close() {
         } else if self.cal.searching {
             self.end_search();
+        } else if self.cal.focus {
+            self.cal.focus = false;
         } else if let Some(view) = self.cal.back.pop() {
             self.cal.view = view;
         }
@@ -480,6 +497,14 @@ impl App {
         match (id, self.cal.view) {
             ("calendar.day", _) => self.go(if first { cursor - 1 } else { cursor + 1 }),
             ("calendar.move", View::Month) if self.on_month() => self.go(if first { cursor + 7 } else { cursor - 7 }),
+            // Either key of each, as in mail; with no calendar there is no
+            // list to focus.
+            ("calendar.focus-list", _) if self.on_month() && !self.cal.model.shelves.is_empty() => {
+                self.cal.focus = true;
+                self.pick_on_day();
+            }
+            ("calendar.focus-list", _) => {}
+            ("calendar.focus-grid", _) => self.cal.focus = false,
             ("calendar.move" | "calendar.event", _) => self.step(first),
             ("calendar.match", _) if self.cal.searching => self.step(first),
             ("calendar.match", _) => {
@@ -499,7 +524,7 @@ impl App {
                     (_, true) => at + 1,
                     (_, false) => at + View::ALL.len() - 1,
                 };
-                self.cal.view = View::ALL[to % View::ALL.len()];
+                (self.cal.view, self.cal.focus) = (View::ALL[to % View::ALL.len()], false);
                 self.cal.back.clear();
             }
             ("calendar.open", _) if self.picked_entry().is_some() => self.event_open(),
@@ -508,13 +533,9 @@ impl App {
                 // the first event, when the day has one.
                 if view != View::Day {
                     self.cal.back.push(view);
-                    self.cal.view = View::Day;
+                    (self.cal.view, self.cal.focus) = (View::Day, false);
                 }
-                // An event already chosen on that day, as `I` chooses one
-                // from the month, stays chosen.
-                let on_day = self.listed(cursor, cursor + 1);
-                let kept = self.cal.picked.take().filter(|picked| on_day.contains(picked));
-                self.cal.picked = kept.or(on_day.into_iter().next());
+                self.pick_on_day();
             }
             ("calendar.find", _) => {
                 // One thing is looked for at a time: a search being shown
@@ -702,6 +723,7 @@ impl App {
             view: place.view,
             cursor: self.day(),
             picked: place.picked.as_ref().filter(|_| !self.on_month()),
+            focus: place.focus,
             accounts: &accounts,
             colours: &colours,
             words: self.theme.palette.words(&colours).1,

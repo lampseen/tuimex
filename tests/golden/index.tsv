@@ -104,6 +104,8 @@ cal-month-account	screen	120	40	unicode	truecolor
 cal-empty	screen	120	40	unicode	truecolor
 cal-unread	screen	120	40	unicode	truecolor
 cal-calendars	screen	120	40	unicode	truecolor
+cal-month-list-focus	screen	120	40	unicode	truecolor
+cal-month-wide-list-focus	screen	180	45	unicode	truecolor
 cal-week	screen	120	40	unicode	truecolor
 cal-week-80-ascii	screen	80	24	ascii	16
 cal-day	screen	120	40	unicode	truecolor
@@ -123,6 +125,10 @@ cal-zoom-0	strip	120	14	unicode	truecolor
 cal-zoom-1	strip	120	14	unicode	truecolor
 cal-zoom-2	strip	120	14	unicode	truecolor
 cal-zoom-3	strip	120	14	unicode	truecolor
+cal-list-0	strip	120	14	unicode	truecolor
+cal-list-1	strip	120	14	unicode	truecolor
+cal-list-2	strip	120	14	unicode	truecolor
+cal-list-3	strip	120	13	unicode	truecolor
 cal-answer-0	strip	120	8	unicode	truecolor
 cal-answer-1	strip	120	8	unicode	truecolor
 cal-answer-2	strip	120	8	unicode	truecolor

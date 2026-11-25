@@ -71,6 +71,9 @@ pub struct Scene<'a> {
     pub cursor: i64,
     /// The selected event, in the views that select one.
     pub picked: Option<&'a Picked>,
+    /// Whether the focus is in the month's list of events and not in its
+    /// grid: the list then selects an event, as the day view does.
+    pub focus: bool,
     /// The accounts, in the config's order, and the colour of each.
     pub accounts: &'a [AccountId],
     pub colours: &'a [Tok],
@@ -235,19 +238,26 @@ pub fn day_status(o: &Scene, day: i64) -> Line {
 }
 
 /// The idle command line: a few keys for the selected event, or for the
-/// day when none is.
-pub fn hint(entry: Option<&Entry>) -> Line {
-    let mut ids = vec!["calendar.open"];
-    match entry {
-        None => ids.extend(["calendar.event", "calendar.today", "calendar.new", "calendar.mail"]),
-        Some(entry) => {
-            ids.extend(entry.waiting().then_some("calendar.answer"));
-            ids.extend((!links_of(entry.event).is_empty()).then_some("calendar.links"));
-            ids.extend(["calendar.edit", "calendar.delete", "global.back"]);
+/// day when none is. With `listed`, the focus is in the month's list and
+/// the way out is back to the grid, by the Alt key that points at it: the
+/// list is beside the grid at every width.
+pub fn hint(entry: Option<&Entry>, listed: bool) -> Line {
+    let mut keys = vec![keymap::hint("calendar.open")];
+    let out = match entry {
+        None => {
+            keys.extend(["calendar.event", "calendar.today", "calendar.new"].map(keymap::hint));
+            "calendar.mail"
         }
-    }
-    ids.push("global.help");
-    list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>())
+        Some(entry) => {
+            keys.extend(entry.waiting().then(|| keymap::hint("calendar.answer")));
+            keys.extend((!links_of(entry.event).is_empty()).then(|| keymap::hint("calendar.links")));
+            keys.extend(["calendar.edit", "calendar.delete"].map(keymap::hint));
+            "global.back"
+        }
+    };
+    keys.push(if listed { ("Alt-h", keymap::hint("calendar.focus-grid").1) } else { keymap::hint(out) });
+    keys.push(keymap::hint("global.help"));
+    list::hint(&keys)
 }
 
 /// What is not normal about an event, most useful first, each with a
@@ -345,12 +355,14 @@ pub fn event_row(o: &Scene, entry: &Entry, width: usize, look: Look) -> Line {
 /// `width` cells. A day with nothing on it is passed over, except the
 /// first, which says so; a search passes over that one too. It never ends
 /// on a label with no row under it. `selected` is the event drawn with the
-/// cursor.
+/// cursor: one further down its day than the rows reach is the last row,
+/// and the rows above it follow.
 pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<&Picked>) -> Vec<Line> {
     let days = o.days(from, from + AHEAD);
     let today = o.calendar.today();
     // Each line, with whether it is a label.
     let mut lines: Vec<(Line, bool)> = Vec::new();
+    let mut at = None;
     for day in from..from + AHEAD {
         if lines.len() >= room {
             break;
@@ -371,9 +383,13 @@ pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<
                 selected: selected.is_some_and(|picked| entry.is(picked)),
                 faint: o.needle.is_some_and(|needle| !entry.matches(needle)),
             };
+            if look.selected {
+                at = Some(lines.len());
+            }
             lines.push((event_row(o, entry, width, look), false));
         }
     }
+    lines.drain(..at.map_or(0, |at| (at + 1).saturating_sub(room)));
     lines.truncate(room);
     while lines.last().is_some_and(|(line, label)| *label || cells(line) == 0) {
         lines.pop();

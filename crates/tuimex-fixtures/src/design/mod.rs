@@ -17,7 +17,7 @@ mod compose;
 mod session;
 
 pub use self::bodies::{addresses, body, check};
-pub use self::calendar::{DEC_5, FRI, Kept, THU, calendars};
+pub use self::calendar::{DEC_5, FRI, Kept, THU, busy, calendars};
 pub use self::compose::{AGENT_TIDIED, AGENT_WROTE, YOURS, agent_draft, drafts, identities, own_reply};
 pub use self::session::{Fake, draft, folders, folders_of, sections};
 

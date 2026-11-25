@@ -36,5 +36,5 @@
 {default}                                                                              d                {brightblack}decline{default}                  
 {default}    {default b}Help (after ?){default}                                                            p                {brightblack}propose another time{default}     
 {default}                                                                                                                        
-{default}  {brightblack}142 keys and commands - lines 1-35 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}144 keys and commands - lines 1-35 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              

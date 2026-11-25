@@ -75,7 +75,8 @@ and `l`.
 | key | does |
 |---|---|
 | `h` `l` | previous, next day |
-| `j` `k` | in the month, a week down or up; elsewhere the next, previous event |
+| `j` `k` | in the month's grid, a week down or up; elsewhere the next, previous event |
+| `Alt-l` `Alt-h` | in the month, focus the list of events beside the grid; back to the grid. `Alt-j` and `Alt-k` do the same |
 | `[` `]` | previous, next page: a month, a week or a day |
 | `J` `K` | next, previous event; in the month, the next day that has one |
 | `I` | the next invitation that waits for an answer |

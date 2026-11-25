@@ -3,7 +3,7 @@ use tuimex_core::{AccountId, Timestamp};
 use tuimex_fixtures::design as fx;
 
 use super::parts::{self, Look, Scene, View};
-use super::{Calendar, Proposed, Shelf, month};
+use super::{Calendar, Entry, Picked, Proposed, Shelf, month};
 use crate::list::Preview;
 use crate::palette::Tok;
 use crate::span::{Line, run};
@@ -43,6 +43,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId], cursor: i64) -> 
         view: View::Month,
         cursor,
         picked: None,
+        focus: false,
         accounts,
         colours: &[Tok::Link, Tok::Head],
         words: Tok::Agent,
@@ -261,6 +262,37 @@ fn a_list_of_days_names_the_nearest_passes_over_the_empty_and_ends_on_no_label()
     let (standup, call) = (&lines[1], &lines[2]);
     assert!(standup.iter().all(|span| span.text.trim().is_empty() || span.fg == Tok::Faint), "no match is faint");
     assert!(call.iter().any(|span| span.text == "call" && span.underline), "a match is underlined where it matches");
+}
+
+/// The design's `cal-list-3`: a day of eight events in fewer rows.
+#[test]
+fn a_selected_event_further_down_its_day_than_the_rows_reach_is_the_last_row() {
+    let (mut calendar, accounts) = (design(), both());
+    let own = calendar.shelves.iter_mut().find(|shelf| shelf.account.0 == "personal" && !shelf.local).unwrap();
+    own.events.extend(fx::busy());
+    let o = scene(&calendar, &accounts, fx::THU);
+    let days = calendar.days(fx::THU, fx::THU + 1, None);
+    let picked: Vec<Picked> = days.on(fx::THU).iter().map(Entry::pick).collect();
+    assert_eq!(picked.len(), 8);
+    let rows =
+        |at: usize| -> Vec<String> { parts::agenda(&o, fx::THU, 6, 85, Some(&picked[at])).iter().map(text).collect() };
+    let first = rows(0);
+    assert_eq!(first[0], "  Thu 26 November");
+    assert!(first[1].starts_with('▌') && first[1].contains("Standup"), "{}", first[1]);
+    assert!(first[5].contains("Call the plumber"), "what is under the fifth stays out of sight: {}", first[5]);
+    assert_eq!(
+        rows(4),
+        first.iter().map(|row| row.replace('▌', " ")).zip(rows(4)).map(|(_, row)| row).collect::<Vec<_>>()
+    );
+    assert!(rows(4)[5].starts_with('▌'), "the fifth event is the last row that needs no scrolling");
+    let sixth = rows(5);
+    assert!(sixth[0].contains("Standup"), "one row on, the label has gone: {}", sixth[0]);
+    assert!(sixth[5].starts_with('▌') && sixth[5].contains("Climbing"), "{}", sixth[5]);
+    let last = rows(7);
+    assert!(last[0].contains("Vendor call"), "{}", last[0]);
+    assert!(last[5].starts_with('▌') && last[5].contains("Staging migration window"), "{}", last[5]);
+    assert_eq!(parts::agenda(&o, fx::THU, 6, 85, None).iter().map(text).collect::<Vec<_>>()[0], first[0]);
+    assert!(parts::agenda(&o, fx::THU, 0, 85, Some(&picked[7])).is_empty(), "and no rows are no rows");
 }
 
 #[test]

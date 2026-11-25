@@ -223,6 +223,7 @@ const KEYMAP = {
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
     'forms: `h` and `l` choose wherever Left and Right do, on a field that takes no typed text. In a field that is typed into they are letters.',
+    'calendar: in the month Alt-l or Alt-j focuses the list of events beside the grid and Alt-h or Alt-k returns, as they do for the preview in mail. Focused, the list moves as the day view does.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -305,8 +306,10 @@ const KEYMAP = {
     // the digits move days and views here and sections only in mail.
     { mode: 'calendar', title: 'Calendar (after gc)', keys: [
       { id: 'calendar.day', keys: 'h l', does: 'previous, next day' },
-      { id: 'calendar.move', keys: 'j k', does: 'month: week; else: event' },
+      { id: 'calendar.move', keys: 'j k', does: 'grid: week; else: event' },
       { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
+      { id: 'calendar.focus-list', keys: 'Alt-j Alt-l', does: 'month: focus the events' },
+      { id: 'calendar.focus-grid', keys: 'Alt-k Alt-h', does: 'back to the grid', hint: 'grid' },
       { id: 'calendar.event', keys: 'J K', does: 'next, previous event', hint: 'next event' },
       { id: 'calendar.match', keys: 'n N', does: 'next, previous match', hint: 'next match' },
       { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
@@ -1861,12 +1864,15 @@ function dayStatus(n, o = {}) {
   return `{dim|${dayShort(n)} ${G.dot} ${count}}${waiting ? `{dim| ${G.dot} }${SAY.waiting(waiting)}` : ''}`;
 }
 
-function calendarHint(ev) {
-  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', 'calendar.mail', 'global.help');
+// With the month's list focused, the way back is to the grid, by the Alt key
+// that points at it: the list is beside the grid at every width.
+function calendarHint(ev, focused) {
+  const grid = ['Alt-h', BINDING['calendar.focus-grid'].hint];
+  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', focused ? grid : 'calendar.mail', 'global.help');
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
   if (ev.link) extra.push('calendar.links');
-  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', 'global.back', 'global.help');
+  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', focused ? grid : 'global.back', 'global.help');
 }
 
 // ------------------------------------------------------------ calendar: rows
@@ -1951,10 +1957,12 @@ function eventRow(ev, width, o = {}) {
 
 // Days from `from` on, each under its label, in exactly `room` rows. A day
 // with nothing on it is passed over, except the first, which says so. It
-// never ends on a label with no row under it.
+// never ends on a label with no row under it. A selected event further down
+// its day than the rows reach is the last row, and the rows above it follow.
 function agendaRows(from, room, width, o = {}) {
   const lines = [];
   const labels = new Set();
+  let at = 0;
   for (let n = from; lines.length < room && n < from + 92; n++) {
     const events = eventsOn(n, o);
     if (!events.length && (n !== from || o.only != null)) continue;
@@ -1965,10 +1973,12 @@ function agendaRows(from, room, width, o = {}) {
     if (!events.length) lines.push([gap(LAYOUT.indent), run(SAY.freeDay, 'dim')]);
     for (const ev of events) {
       const selected = !!o.selected && o.selected.id === ev.id && o.selected.n === n;
+      if (selected) at = lines.length;
       lines.push(eventRow(ev, width, { ...o, selected, faint: o.needle != null && !`${ev.title} ${ev.where || ''}`.toLowerCase().includes(o.needle) }));
     }
   }
-  const out = lines.slice(0, room);
+  const top = Math.max(0, at + 1 - room);
+  const out = lines.slice(top, top + room);
   while (out.length && (!cells(out[out.length - 1]) || labels.has(out[out.length - 1]))) out.pop();
   while (out.length < room) out.push([]);
   return out.map((row) => fit(row, width));
@@ -1977,19 +1987,25 @@ function agendaRows(from, room, width, o = {}) {
 // ---------------------------------------------------------- calendar: views
 
 // o: { width, height, cursor, narrowed, hidden, changed, panel, left, right,
-//      command }, and for the day and the week, selected: { id, n }.
+//      command }, and for the day and the week, selected: { id, n }. The
+// month takes `focus: 'list'` too: the focus is then in the list of events
+// beside the grid, which selects one as the day view does, and the grid's
+// cursor is dim, as the list's is in mail while the preview has the focus.
 function monthScreen(o) {
   const { width, height } = o;
+  const focused = o.focus === 'list';
+  const shown = { ...o, selected: focused ? o.selected : null };
   const tail = settle(o.panel || [], width);
   const room = height - 2 - 3 - tail.length;
-  const months = monthsColumn(room, o);
+  const months = monthsColumn(room, { ...o, unfocused: focused });
   const leftWidth = LAYOUT.indent + 7 * C.cell + LAYOUT.margin;
   const paneWidth = width - leftWidth - 1;
-  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, o);
+  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, shown);
   const content = Array.from({ length: room }, (_, y) => [...fit([gap(LAYOUT.indent), ...(months[y] || [])], leftWidth), run(G.bar, 'faint'), ...fit(pane[y] || [], paneWidth)]);
   const at = civil(o.cursor);
+  const ev = shown.selected && occurrence(shown.selected.id, shown.selected.n, o);
   return [calendarTabs(width, 'month', `${MONTH_NAMES[at.month - 1]} ${at.year}`), [], ...content, ...tail, [],
-    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(null)];
+    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, shown)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(focused ? ev : null, focused)];
 }
 
 // The day view is the list of mail again: events from the cursor's day on,
@@ -2736,6 +2752,11 @@ function build(mode = {}) {
     hidden: ['personal/local'], panel: panel('Calendars', calendarEntries(['personal/local']), 1), left: '', command: hint('calendars.choose', 'calendars.toggle', 'calendars.close'),
   }));
 
+  // The focus in the list beside the grid, on the first event of the day.
+  const listed = (size, more) => month(size, { focus: 'list', selected: { id: 'standup', n: thu }, ...more });
+  screen('cal-month-list-focus', 'Calendar, month, the list focused', 'after Alt-l: the cursor is on the first event of the day and the grid\'s cursor dims; the status line says which of the day\'s events it is and the hint is that event\'s, with the key that returns to the grid', listed(LAYOUT.default));
+  screen('cal-month-wide-list-focus', 'Calendar, month at 180 columns, the list focused', 'the list is beside the grid at every width, so it is Alt-l that focuses it and Alt-h that returns', listed(wide), wide);
+
   const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
   screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
   alsoSmall('cal-week', 'Calendar, week', week(small));
@@ -2776,6 +2797,19 @@ function build(mode = {}) {
     { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 11) },
     { key: 'Enter', caption: 'Event', note: 'J and K step to the events on either side without going back, as they do from a message.', rows: cut(event(LAYOUT.default), 11) },
     { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 11) },
+  ]);
+
+  // A day with more on it than the list has rows for.
+  const busy = [['12:30', '13:15', 'Lunch with Greta'], ['15:00', '15:30', 'Call the plumber'], ['17:30', '18:30', 'Climbing'], ['18:45', '19:30', 'Dinner']]
+    .map(([start, end, title], i) => ({ id: `busy-${i}`, account: 'personal', day: '2026-11-26', start, end, title }));
+  flow('cal-list', 'The month\'s list, focused', [
+    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 11) },
+    { key: 'j', caption: 'The next event', note: 'The list moves as the day view does: j and k step through events, across days, Enter opens the one selected, and o, i, E and d act on it.',
+      rows: cut(listed(LAYOUT.default, { selected: roadmap }), 11) },
+    { key: 'l', caption: 'The next day', note: 'h and l move by a day here too. The grid\'s cursor goes with them and the first event of that day is selected.',
+      rows: cut(listed(LAYOUT.default, { cursor: fri, selected: { id: 'library', n: fri } }), 11) },
+    { key: '', caption: 'More than fits', note: 'On a day with more events than there are rows, the list scrolls to keep the selected one in sight.',
+      rows: monthScreen({ width: W, height: 13, cursor: thu, focus: 'list', selected: { id: 'migration', n: thu }, added: busy }) },
   ]);
 
   const road = 'Q4 roadmap review';

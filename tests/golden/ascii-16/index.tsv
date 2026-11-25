@@ -96,6 +96,8 @@ cal-month-account	screen	120	40	ascii	16
 cal-empty	screen	120	40	ascii	16
 cal-unread	screen	120	40	ascii	16
 cal-calendars	screen	120	40	ascii	16
+cal-month-list-focus	screen	120	40	ascii	16
+cal-month-wide-list-focus	screen	180	45	ascii	16
 cal-week	screen	120	40	ascii	16
 cal-day	screen	120	40	ascii	16
 cal-day-wide	screen	180	45	ascii	16
@@ -112,6 +114,10 @@ cal-zoom-0	strip	120	14	ascii	16
 cal-zoom-1	strip	120	14	ascii	16
 cal-zoom-2	strip	120	14	ascii	16
 cal-zoom-3	strip	120	14	ascii	16
+cal-list-0	strip	120	14	ascii	16
+cal-list-1	strip	120	14	ascii	16
+cal-list-2	strip	120	14	ascii	16
+cal-list-3	strip	120	13	ascii	16
 cal-answer-0	strip	120	8	ascii	16
 cal-answer-1	strip	120	8	ascii	16
 cal-answer-2	strip	120	8	ascii	16

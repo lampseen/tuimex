@@ -108,8 +108,10 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `h l` | previous, next day |
-| `j k` | month: week; else: event |
+| `j k` | grid: week; else: event |
 | `[ ]` | previous, next page |
+| `Alt-j Alt-l` | month: focus the events |
+| `Alt-k Alt-h` | back to the grid |
 | `J K` | next, previous event |
 | `n N` | next, previous match |
 | `I` | next invite to answer |

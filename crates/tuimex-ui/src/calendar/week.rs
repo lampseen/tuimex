@@ -277,5 +277,5 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     }
     content.extend(grid);
     let content = content.iter().map(|row| fit(row, width)).collect();
-    parts::frame(o, width, &title, content, parts::day_status(o, o.cursor), parts::hint(o.entry().as_ref()))
+    parts::frame(o, width, &title, content, parts::day_status(o, o.cursor), parts::hint(o.entry().as_ref(), false))
 }
