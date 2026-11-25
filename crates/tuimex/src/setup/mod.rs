@@ -743,13 +743,17 @@ impl Setup<'_> {
     /// was; any other outcome is said, and leaves the calendar read-only.
     fn try_write(&mut self, name: &str, url: &str, sign_in: (&str, &Secret)) -> Result<bool> {
         self.say(
-            "\nSo far tuimex only reads this calendar: an answer you give or an event you make is kept in a local \
-             calendar on this machine, and the provider's own apps do not see it. Whether tuimex can write to the \
-             calendar itself has to be tried once. Trying it adds one event named \"tuimex write test\", a year \
-             from today, and removes it again.",
+            "\nOne more step, if what you do here should reach the calendar itself. So far tuimex only reads this \
+             calendar: an event you make or an invitation you accept is kept in a local calendar on this machine, \
+             and the provider's own apps never show it. Whether tuimex can write to the calendar has to be tried \
+             once. Trying it adds one event named \"tuimex write test\", a year from today, and removes it again.",
         );
-        if !yes(self.prompt, &format!("Try writing to {name}'s calendar now?"), false)? {
-            self.say("Nothing was written. The calendar is read, and what you do for it is kept locally.");
+        if !yes(self.prompt, &format!("Let tuimex write to {name}'s calendar? No keeps it read-only."), false)? {
+            self.say(
+                "Nothing was written. The calendar is read, and what you do for it is kept locally. To change \
+                 that, run tuimex setup again and choose \"Find out whether a calendar that is only read can be \
+                 written\".",
+            );
             return Ok(false);
         }
         let tried = self.write_test(name, url, sign_in);

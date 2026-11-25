@@ -141,7 +141,7 @@ these words, and asks:
 ```
 Trying it adds one event named "tuimex write test", a year from today,
 and removes it again.
-Try writing to gmail's calendar now? [y/N]
+Let tuimex write to gmail's calendar? No keeps it read-only. [y/N]
 ```
 
 When both the adding and the removing worked, the calendar's table gets

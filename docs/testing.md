@@ -311,8 +311,9 @@ this one to an event a few days ahead, and wait for the mail.
    older address no longer taking an app password, and the secret address
    it then offers is the other route.
 2. **See** the paragraph that ends `Trying it adds one event named "tuimex
-   write test", a year from today, and removes it again.` and `Try writing
-   to <name>'s calendar now? [y/N]`. Answer `n` this first time.
+   write test", a year from today, and removes it again.` and `Let tuimex
+   write to <name>'s calendar? No keeps it read-only. [y/N]`. Answer `n`
+   this first time.
    **See** `Nothing was written. The calendar is read, and what you do for
    it is kept locally.` and `Saved <name>'s calendar in …`.
 3. `tuimex sync`.

@@ -848,7 +848,7 @@ fn a_calendar_is_written_once_setup_has_put_an_event_there_and_removed_it_again(
     let shown = script.shown();
     let (told, asked) = (
         shown.find("adds one event named \"tuimex write test\", a year from today, and removes"),
-        shown.find("Try writing to gmail's calendar now? [y/N]"),
+        shown.find("Let tuimex write to gmail's calendar? No keeps it read-only. [y/N]"),
     );
     assert!(told.is_some() && told < asked, "what it will do is said before it is asked: {shown}");
     assert!(shown.contains("The event was added and removed again: tuimex will write this calendar."), "{shown}");
