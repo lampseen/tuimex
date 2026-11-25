@@ -37,4 +37,4 @@
                                                                                                                         
                                                                                                                         
   not saved                                                                                 sending in 6s · 1 not sent  
-  Tab next field · Left Right choose · Enter notes · ^s save · Esc close                                                
+  Tab next field · Enter notes · ^s save · Esc close                                                                    

@@ -1,40 +1,40 @@
 {fg}  {dim}Month{fg}   {acc b}Week{fg}   {dim}Day{fg}                                                                            {fg b}23 to 29 November 2026{fg}  
 {fg}                                                                                                                        
-{fg}          {acc b}Mon 23{fg}         {dim}Tue 24{fg}         {dim}Wed 25{fg}         {fg b}Thu 26{fg}         {dim}Fri 27{fg}         {dim}Sat 28{fg}         {dim}Sun 29{fg}              
-{fg}  {dim}all day{fg}                                                            {link}│{fg}Library book… {link}│{fg}Cabin weekend {link}│{fg}Cabin weekend       
-{fg}                                                                     {link}│{fg}Cabin weekend                                     
-{fg}                                                                                                                        
-{fg}  {dim}08:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}09:00{fg}                                                              {link}│{fg b}Account revi…{fg}                                     
-{fg}         {head}│{dim}Standup{fg}       {head}│{fg}Standup       {head}│{fg}Standup       {head}│{fg}Standup       {head}│{fg}Standup                                           
-{fg}  {dim}10:00{fg}                                               {acc bg=sel}▌{fg bg=sel b}Q4 roadmap r…{fg bg=sel} {fg}                                                   
-{fg}                                                      {acc bg=sel}▌{dim bg=sel}10:00-11:30{fg bg=sel}   {fg}                                                   
-{fg}  {dim}11:00{fg}                 {link}│{fg}Dentist                      {acc bg=sel}▌{fg} {head}│{fg}Vendor call                                                    
-{fg}                        {link}│{dim}11:00-11:45{fg}                    {head}│{dim}11:00-12:00{fg}                                                    
-{fg}  {dim}12:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}13:00{fg}                                {head}│{fg}1:1 with Ima…                                                                   
-{fg}                                                                                                                        
-{fg}  {acc b}14:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}15:00{fg}  {head}│{fg}Halden contr…                                                                                                 
-{fg}         {head}│{dim}15:00-16:00{fg}                                                                                                   
-{fg}  {dim}16:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}17:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}18:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}19:00{fg}                                                                                                                 
-{fg}                                                                                                                        
-{fg}  {dim}20:00{fg}                                               {head}│{fg}Staging migr…                                                    
-{fg}                                                      {head}│{dim}20:00-23:00{fg}                                                      
-{fg}  {dim}21:00{fg}                                               {head}│{dim}local{fg}                                                            
-{fg}                                                      {head}│{fg}                                                                 
-{fg}  {dim}22:00{fg}                                               {head}│{fg}                                                                 
-{fg}                                                      {head}│{fg}                                                                 
-{fg}  {dim}23:00{fg}                                                                                                                 
+{fg}          {acc b}Mon 23{fg}         {dim}Tue 24{fg}         {dim}Wed 25{fg}        {dim bg=sel}▌{fg bg=sel b}Thu 26{fg bg=sel}        {fg} {dim}Fri 27{fg}         {dim}Sat 28{fg}         {dim}Sun 29{fg}              
+{fg}  {dim}all day{faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {link}┃{fg}Library book… {link}┃{fg}Cabin weekend {link}┃{fg}Cabin weekend       
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {link}┃{fg}Cabin weekend {faint}│{fg}              {faint}│{fg}                    
+{fg}         {faint}─────────────────────────────────────────────────────────────────────────────────────────────────────────{fg}      
+{fg}  {dim}08:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}09:00{fg}  {faint}│··············│··············│··············{dim}│··············{link}┃{fg b}Account revi…{fg} {faint}│··············│··············{fg}      
+{fg}         {head}┃{fg}Standup       {head}┃{fg}Standup       {head}┃{fg}Standup       {head}┃{fg}Standup       {head}┃{fg}Standup       {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}10:00{fg}  {faint}│··············│··············│··············{acc bg=sel}▌{fg bg=sel b}Q4 roadmap r…{fg bg=sel} {faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {acc bg=sel}▌{dim bg=sel}10:00-11:30{fg bg=sel}   {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}11:00{fg}  {faint}│··············{link}┃{fg}Dentist       {faint}│··············{acc bg=sel}▌{fg} {head}┃{fg}Vendor call {faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {link}┃{dim}11:00-11:45{fg}   {faint}│{fg}              {dim}│{fg} {head}┃{dim}11:00-12:00{fg} {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}12:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}13:00{fg}  {faint}│··············│··············{head}┃{fg}1:1 with Ima… {dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {acc b}14:00{fg}  {faint}│{acc}──────────────{faint}│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}15:00{fg}  {head}┃{fg}Halden contr… {faint}│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {head}┃{dim}15:00-16:00{fg}   {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}16:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}17:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}18:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}19:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {dim}│{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}20:00{fg}  {faint}│··············│··············│··············{head}┃{fg}Staging migr… {faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {head}┃{dim}20:00-23:00{fg}   {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}21:00{fg}  {faint}│··············│··············│··············{head}┃{dim}local{fg}         {faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {head}┃{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}22:00{fg}  {faint}│··············│··············│··············{head}┃{fg}              {faint}│··············│··············│··············{fg}      
+{fg}         {faint}│{fg}              {faint}│{fg}              {faint}│{fg}              {head}┃{fg}              {faint}│{fg}              {faint}│{fg}              {faint}│{fg}                    
+{fg}  {dim}23:00{fg}  {faint}│··············│··············│··············{dim}│··············{faint}│··············│··············│··············{fg}      
 {fg}                                                                                                                        
 {fg}  {dim}Thu 26 Nov · 2 of 4 · {warn}1 to answer{fg}                                                         sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  Enter {dim}open · {fg}i {dim}answer · {fg}o {dim}links · {fg}E {dim}edit · {fg}d {dim}delete · {fg}Esc {dim}back · {fg}? {dim}help{fg}                                               

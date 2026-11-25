@@ -573,11 +573,9 @@ fn a_search_finds_a_word_of_a_body_in_every_account_and_folder() {
     assert!(row("Cabin weekend").contains("home   Grace Hopper"), "{}", row("Cabin weekend"));
     assert!(row("Cabin weekend").contains("Cabin weekend  The body of message 3."), "the words around the match");
     assert!(row("Standup notes").contains("work   Grace Hopper"));
-    // The folder is asked for beside a body's words, not beside a time:
-    // the messages have a fixed date, and how a row writes its date
-    // depends on how long ago that is.
-    let archived =
-        found.iter().filter(|row| row.contains("The body of message") && row.contains("  Archive  ")).count();
+    // The folder's name is in the row's words, before a date that is a time
+    // of day only on the day the mail is dated.
+    let archived = found.iter().filter(|row| row.contains("Hopper") && row.contains(" Archive  ")).count();
     assert_eq!(archived, 1, "the one that was archived says where it is: {found:#?}");
 
     s.press("\x1b/zebra\r");

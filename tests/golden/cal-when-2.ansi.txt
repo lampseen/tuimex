@@ -1,0 +1,16 @@
+{fg}  {fg b}New event{fg}                                                                                                             
+{fg}                                                                                                                        
+{fg}    {dim}Title    {fg b}Offsite planning{fg}                                                                                           
+{fg}    {dim}Calendar personal local{fg}   {fg b}work local{fg}                                                                                
+{fg}    {dim}Starts   {fg}Thu 26 Nov 2026 15:30                                                                                      
+{acc}▌{fg}   {fg b}Ends     {fg}Thu 26 Nov 2026 16:30{bg bg=acc} {fg}                                                                                     
+{fg}    {dim}All day  no{fg}                                                                                                         
+{fg}    {dim}Repeats  never{fg}                                                                                                      
+{fg}    {dim}Where    {fg}Room Fjord                                                                                                 
+{fg}    {dim}Guests   {fg}Imani Castell {dim}<imani@example.org>{fg}                                                                          
+{fg}    {dim}         {fg}Lars Lindqvist {dim}<lars@example.org>{fg}                                                                          
+{fg}    {dim}Reminder {fg}10 minutes before                                                                                          
+{fg}                                                                                                                        
+{fg}                                                                                                                        
+{fg}  {dim}ends{fg} Thu 26 Nov 2026 16:30                                                                sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  Tab {dim}next field · {fg}14:30 or fri {dim}is enough · {fg}Enter {dim}notes · {fg}^s {dim}save · {fg}Esc {dim}close{fg}                                           

@@ -92,7 +92,11 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
         }
         None => {
             let day = o.picked.map_or(o.cursor, |picked| picked.day);
-            (format!("{} {year}", parts::day_long(o.cursor)), parts::day_status(o, day), parts::hint(entry.as_ref()))
+            (
+                format!("{} {year}", parts::day_long(o.cursor)),
+                parts::day_status(o, day),
+                parts::hint(entry.as_ref(), false),
+            )
         }
     };
     parts::frame(o, width, &title, content, left, idle)

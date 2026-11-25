@@ -28,6 +28,8 @@ pub const DRAWN: &[&str] = &[
     "cal-join-3",
     "cal-join-4",
     "cal-new-2",
+    "cal-local-0",
+    "cal-local-1",
     "cal-delete-0",
     "cal-delete-1",
     "cal-repeating-0",
@@ -65,10 +67,19 @@ fn writing(keys: &str) -> App {
     app
 }
 
+/// Work's own calendar is read over CalDAV and no write has been tried on
+/// it, which is what the design's `cal-local` is drawn over.
+fn untried(keys: &str) -> App {
+    let mut app = typed("");
+    app.set_unwritten_calendars(vec![AccountId("work".to_string())]);
+    press(&mut app, keys);
+    app
+}
+
 /// The design's `offsite`, typed into the form opened on Thursday's day:
 /// Right on Calendar goes from the first account's to work's.
-fn offsite() -> App {
-    let mut app = typed(&format!("{THU}cOffsite planning\t"));
+fn offsite(mut app: App) -> App {
+    press(&mut app, &format!("{THU}cOffsite planning\t"));
     app.key(Key::Right);
     let guests = "Imani Castell <imani@example.org>, Lars Lindqvist <lars@example.org>";
     press(&mut app, &format!("\t14:00\t\t\t\tRoom Fjord\t{guests}^sy"));
@@ -106,7 +117,9 @@ pub fn draw(name: &str, _width: usize, _height: usize) -> Option<Vec<Line>> {
         "cal-join-2" => (day(&format!("{FRI}jjo")), 3),
         "cal-join-3" => (day(&format!("{FRI}jjo\r")), 0),
         "cal-join-4" => (day(&format!("{FRI}jjo\rn")), 0),
-        "cal-new-2" => (offsite(), 0),
+        "cal-new-2" => (offsite(typed("")), 0),
+        "cal-local-0" => (offsite(untried("")), 0),
+        "cal-local-1" => (untried(&format!("{THU}jia")), 0),
         "cal-delete-0" => (day(&format!("{THU}jjd")), 0),
         "cal-delete-1" => (day(&format!("{THU}jjdu")), 0),
         "cal-repeating-0" => (day(&format!("{THU}d")), 0),
@@ -140,6 +153,7 @@ fn cal_join() {
 #[test]
 fn cal_new() {
     both("cal-new-2");
+    steps("cal-local", 2);
 }
 
 #[test]

@@ -37,4 +37,4 @@
                                   │                                                                                     
                                                                                                                         
                                                                                             sending in 6s · 1 not sent  
-  gm mail · ? help                                                                                                      
+  gm F1 mail · ? help                                                                                                   

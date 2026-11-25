@@ -103,6 +103,7 @@ const GLYPHS = {
   shade:     { unicode: '░', ascii: ':', means: 'the cells an inline image occupies' },
   few:       { unicode: '∙', ascii: '.', means: 'a day with one event; two is a colon in both tiers' },
   many:      { unicode: '⋮', ascii: '#', means: 'a day with three events or more' },
+  block:     { unicode: '┃', ascii: '#', means: 'the edge of an event in the week, down every row it lasts' },
 };
 
 const G = Object.fromEntries(Object.entries(GLYPHS).map(([name, g]) => [name, g.unicode]));
@@ -215,13 +216,15 @@ const KEYMAP = {
     'list: `gt` and `gT` step to the next and previous account, then all again. `/` then Enter searches all mail.',
     '`A` opens the agent\'s menu wherever there is something for it to do; `a` is attachments and nothing else.',
     'reader: `i` answers an invitation (then `a`, `t` or `d`). The proposal had only `:invite`.',
-    'compose: Left and Right choose the identity while From is focused. The proposal did not say.',
+    'compose: `h` and `l`, or Left and Right, choose the identity while From is focused. The proposal did not say.',
     'the list has no key for sync; `:sync` does it. `r` stays reply.',
     'nothing leaves the machine on `A` alone: it opens a menu, and the pick sends (ADR-031).',
-    'the calendar is a place and not a section: `gc` opens it and `gm` returns, each side keeping where it was (ADR-054).',
+    'the calendar is a place and not a section: `gc` or F2 opens it and `gm` or F1 returns, each side keeping where it was (ADR-054).',
     'calendar: `d` deletes, as it trashes in mail, so no key removes in one place and does something else in the other. The views have no letters: Tab and S-Tab step through them and 1, 2 and 3 pick one, as the digits pick a section in mail.',
     'calendar: a key mail already uses does the same thing here or nothing. `/` finds and `n` `N` step through matches; `J` `K` step through events as they step through the list from the reader; `o` lists links, the meeting\'s first, and Enter opens one; `i` answers; `zo` `zc` unfold and fold; `gt` `gT` step through accounts; `c` makes a new one of what the place holds. `e` is archive and `m` is read, so neither is bound: `E` edits.',
     'calendar: the one exception is the pair Bryan chose on 2026-11-24: `h` and `l` move by a day, where in mail they move by a section. Tab and the digits keep moving along the row of tabs in both.',
+    'forms: `h` and `l` choose wherever Left and Right do, on a field that takes no typed text. In a field that is typed into they are letters.',
+    'calendar: in the month Alt-l or Alt-j focuses the list of events beside the grid and Alt-h or Alt-k returns, as they do for the preview in mail. Focused, the list moves as the day view does.',
     'invitation: `p` proposes another time and `x` ignores, beside the three answers (ADR-057).',
   ],
   modes: [
@@ -235,7 +238,7 @@ const KEYMAP = {
       { id: 'global.undo', keys: 'u', does: 'undo the last action', hint: 'undo' },
       { id: 'global.agent', keys: 'A', does: 'what the agent can do', hint: 'agent' },
       { id: 'global.redraw', keys: '^l', does: 'redraw' },
-      { id: 'global.calendar', keys: 'gc', does: 'the calendar', hint: 'calendar' },
+      { id: 'global.calendar', keys: 'gc F2', does: 'the calendar', hint: 'calendar' },
     ] },
     { mode: 'list', title: 'List', keys: [
       { id: 'list.move', keys: 'j k', does: 'down, up' },
@@ -304,8 +307,10 @@ const KEYMAP = {
     // the digits move days and views here and sections only in mail.
     { mode: 'calendar', title: 'Calendar (after gc)', keys: [
       { id: 'calendar.day', keys: 'h l', does: 'previous, next day' },
-      { id: 'calendar.move', keys: 'j k', does: 'month: week; else: event' },
+      { id: 'calendar.move', keys: 'j k', does: 'grid: week; else: event' },
       { id: 'calendar.period', keys: '[ ]', does: 'previous, next page' },
+      { id: 'calendar.focus-list', keys: 'Alt-j Alt-l', does: 'month: focus the events' },
+      { id: 'calendar.focus-grid', keys: 'Alt-k Alt-h', does: 'back to the grid', hint: 'grid' },
       { id: 'calendar.event', keys: 'J K', does: 'next, previous event', hint: 'next event' },
       { id: 'calendar.match', keys: 'n N', does: 'next, previous match', hint: 'next match' },
       { id: 'calendar.waiting', keys: 'I', does: 'next invite to answer', hint: 'next to answer' },
@@ -323,7 +328,7 @@ const KEYMAP = {
       { id: 'calendar.edit', keys: 'E', does: 'edit the event', hint: 'edit' },
       { id: 'calendar.delete', keys: 'd', does: 'delete the event', hint: 'delete' },
       { id: 'calendar.reminders', keys: 'gn', does: 'reminders on, off' },
-      { id: 'calendar.mail', keys: 'gm', does: 'back to mail', hint: 'mail' },
+      { id: 'calendar.mail', keys: 'gm F1', does: 'back to mail', hint: 'mail' },
     ] },
     { mode: 'event', title: 'Event', keys: [
       { id: 'event.scroll', keys: 'j k ^d ^u gg G', does: 'scroll' },
@@ -338,14 +343,16 @@ const KEYMAP = {
     ] },
     { mode: 'event-form', title: 'Event form', keys: [
       { id: 'event-form.field', keys: 'Tab S-Tab', does: 'next, previous field' },
-      { id: 'event-form.choice', keys: 'Left Right', does: 'choose, where offered', hint: 'choose' },
+      { id: 'event-form.choice', keys: 'h l', does: 'choose, where offered', hint: 'choose' },
+      { id: 'event-form.choice-arrows', keys: 'Left Right', does: 'as h and l' },
       { id: 'event-form.notes', keys: 'Enter', does: 'edit notes in $EDITOR', hint: 'notes' },
       { id: 'event-form.save', keys: '^s', does: 'save; guests get mail', hint: 'save' },
       { id: 'event-form.close', keys: 'Esc', does: 'close; keep or discard', hint: 'close' },
     ] },
     { mode: 'compose', title: 'Compose', keys: [
       { id: 'compose.field', keys: 'Tab S-Tab', does: 'next, previous field' },
-      { id: 'compose.identity', keys: 'Left Right', does: 'identity, on From', hint: 'identity' },
+      { id: 'compose.identity', keys: 'h l', does: 'identity, on From', hint: 'identity' },
+      { id: 'compose.identity-arrows', keys: 'Left Right', does: 'as h and l' },
       { id: 'compose.editor', keys: 'Enter', does: 'edit body in $EDITOR', hint: 'edit' },
       { id: 'compose.attach', keys: '^a', does: 'attach a file', hint: 'attach' },
       { id: 'compose.summary', keys: '^s', does: 'send summary', hint: 'send' },
@@ -890,11 +897,16 @@ const SAY = {
 
   // The calendar (ADR-054). An answer says which account's calendar took
   // it, and `local` when that is tuimex's own copy (ADR-055, ADR-057).
-  answered: (how, what, where) => `{ok|${G.ok}} ${how} ${what}${then(`in ${where} ${G.dot} u to undo`)}`,
+  // `more` is `canWrite`, where it applies.
+  answered: (how, what, where, more) => `{ok|${G.ok}} ${how} ${what}${then(`in ${where} ${G.dot} ${more ? `${more} ${G.dot} ` : ''}u to undo`)}`,
   proposed: (when, who) => `{ok|${G.ok}} Proposed ${when} to ${who}${then('u to undo')}`,
   ignored: (what) => `{ok|${G.ok}} Ignored ${what}${then(`nothing sent ${G.dot} u to undo`)}`,
   unanswered: (what) => `{ok|${G.ok}} Undone${then(`${what} is not answered`)}`,
-  added: (what, where) => `{ok|${G.ok}} Added ${what} to ${where}${then('u to undo')}`,
+  added: (what, where, more) => `{ok|${G.ok}} Added ${what} to ${where}${then(`${more ? `${more} ${G.dot} ` : ''}u to undo`)}`,
+  // Said when something is kept local for an account whose own calendar is
+  // read over CalDAV and has never had a write tried on it: setup tries
+  // one (ADR-062). A feed can never be written, so it is not said of one.
+  canWrite: 'tuimex setup can try writing to its calendar',
   deleted: (what) => `{ok|${G.ok}} Deleted ${what}${then('u to undo')}`,
   restored: (what) => `{ok|${G.ok}} Undone${then(`${what} is back`)}`,
   joining: (host) => `Opening ${host}`,
@@ -904,6 +916,11 @@ const SAY = {
   matching: (n, query) => `{dim|${n} ${n === 1 ? 'event matches' : 'events match'} "${query}"}`,
   proposes: (when) => `{dim|proposes} ${when}`,
   goesTo: (day) => `{dim|goes to} ${day}`,
+  // The form, on Starts and on Ends: what the words typed will make the
+  // field, and the hint that it need not all be typed.
+  whenIs: (which, when) => `{dim|${which}} ${when}`,
+  notWhen: '{dim|not a date or a time}',
+  enough: ['14:30 or fri', 'is enough'],
   remindersOff: `Reminders off${then('gn turns them on')}`,
   remindersOn: 'Reminders on',
   freeDay: 'Nothing on this day.',
@@ -1753,16 +1770,17 @@ function composeScreen(width, height, o = {}) {
   const identities = ACCOUNTS.flatMap((a) => a.identities.map((identity) => identity.replace(/^.*<|>$/g, '')));
   const from = identities.flatMap((identity) => [identity === address(draft.from) ? run(identity, 'fg', { b: true }) : run(identity, 'dim'), gap(3)]);
   const notice = o.draft ? o.notice : SAY.agentDraft('23 Nov 13:52');
+  const focused = o.draft ? o.focused : 'From';
   const head = [
     heading([run(draft.subject, 'fg', { b: true })]),
     [],
-    ...draftFields(draft, { focused: o.draft ? o.focused : 'From', from, person: (who) => m(person(who)) }),
+    ...draftFields(draft, { focused, from, person: (who) => m(person(who)) }),
     [],
     ...(notice ? indent([m(notice), []]) : []),
   ].map((row) => fit(row, width));
   const body = draftBody(o.body || draft.body, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin));
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|draft saved 13:58}', o.right),
-    o.command || hint(['Tab', 'next field'], 'compose.identity', 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'));
+    o.command || hint(['Tab', 'next field'], ...(focused === 'From' ? ['compose.identity'] : []), 'compose.editor', 'global.agent', 'compose.summary', 'compose.close'));
 }
 
 // The end of compose, enough for one step of a flow: the subject field, the
@@ -1857,12 +1875,15 @@ function dayStatus(n, o = {}) {
   return `{dim|${dayShort(n)} ${G.dot} ${count}}${waiting ? `{dim| ${G.dot} }${SAY.waiting(waiting)}` : ''}`;
 }
 
-function calendarHint(ev) {
-  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', 'calendar.mail', 'global.help');
+// With the month's list focused, the way back is to the grid, by the Alt key
+// that points at it: the list is beside the grid at every width.
+function calendarHint(ev, focused) {
+  const grid = ['Alt-h', BINDING['calendar.focus-grid'].hint];
+  if (!ev) return hint('calendar.open', 'calendar.event', 'calendar.today', 'calendar.new', focused ? grid : 'calendar.mail', 'global.help');
   const extra = [];
   if (isWaiting(ev)) extra.push('calendar.answer');
   if (ev.link) extra.push('calendar.links');
-  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', 'global.back', 'global.help');
+  return hint('calendar.open', ...extra, 'calendar.edit', 'calendar.delete', focused ? grid : 'global.back', 'global.help');
 }
 
 // ------------------------------------------------------------ calendar: rows
@@ -1947,10 +1968,12 @@ function eventRow(ev, width, o = {}) {
 
 // Days from `from` on, each under its label, in exactly `room` rows. A day
 // with nothing on it is passed over, except the first, which says so. It
-// never ends on a label with no row under it.
+// never ends on a label with no row under it. A selected event further down
+// its day than the rows reach is the last row, and the rows above it follow.
 function agendaRows(from, room, width, o = {}) {
   const lines = [];
   const labels = new Set();
+  let at = 0;
   for (let n = from; lines.length < room && n < from + 92; n++) {
     const events = eventsOn(n, o);
     if (!events.length && (n !== from || o.only != null)) continue;
@@ -1961,10 +1984,12 @@ function agendaRows(from, room, width, o = {}) {
     if (!events.length) lines.push([gap(LAYOUT.indent), run(SAY.freeDay, 'dim')]);
     for (const ev of events) {
       const selected = !!o.selected && o.selected.id === ev.id && o.selected.n === n;
+      if (selected) at = lines.length;
       lines.push(eventRow(ev, width, { ...o, selected, faint: o.needle != null && !`${ev.title} ${ev.where || ''}`.toLowerCase().includes(o.needle) }));
     }
   }
-  const out = lines.slice(0, room);
+  const top = Math.max(0, at + 1 - room);
+  const out = lines.slice(top, top + room);
   while (out.length && (!cells(out[out.length - 1]) || labels.has(out[out.length - 1]))) out.pop();
   while (out.length < room) out.push([]);
   return out.map((row) => fit(row, width));
@@ -1973,19 +1998,25 @@ function agendaRows(from, room, width, o = {}) {
 // ---------------------------------------------------------- calendar: views
 
 // o: { width, height, cursor, narrowed, hidden, changed, panel, left, right,
-//      command }, and for the day and the week, selected: { id, n }.
+//      command }, and for the day and the week, selected: { id, n }. The
+// month takes `focus: 'list'` too: the focus is then in the list of events
+// beside the grid, which selects one as the day view does, and the grid's
+// cursor is dim, as the list's is in mail while the preview has the focus.
 function monthScreen(o) {
   const { width, height } = o;
+  const focused = o.focus === 'list';
+  const shown = { ...o, selected: focused ? o.selected : null };
   const tail = settle(o.panel || [], width);
   const room = height - 2 - 3 - tail.length;
-  const months = monthsColumn(room, o);
+  const months = monthsColumn(room, { ...o, unfocused: focused });
   const leftWidth = LAYOUT.indent + 7 * C.cell + LAYOUT.margin;
   const paneWidth = width - leftWidth - 1;
-  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, o);
+  const pane = o.empty ? [[], ...o.empty.map((line, i) => [gap(LAYOUT.margin), run(line, i ? 'dim' : 'fg')])] : agendaRows(o.cursor, room, paneWidth, shown);
   const content = Array.from({ length: room }, (_, y) => [...fit([gap(LAYOUT.indent), ...(months[y] || [])], leftWidth), run(G.bar, 'faint'), ...fit(pane[y] || [], paneWidth)]);
   const at = civil(o.cursor);
+  const ev = shown.selected && occurrence(shown.selected.id, shown.selected.n, o);
   return [calendarTabs(width, 'month', `${MONTH_NAMES[at.month - 1]} ${at.year}`), [], ...content, ...tail, [],
-    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(null)];
+    statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, shown)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(focused ? ev : null, focused)];
 }
 
 // The day view is the list of mail again: events from the cursor's day on,
@@ -2015,13 +2046,24 @@ function dayScreen(o) {
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.selected ? o.selected.n : o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
 
-// Days as columns against the clock. An event is a bar in its account's
-// colour down the rows it lasts, its title beside the first and its hours
-// beside the second. One that begins while another runs is drawn `step`
-// cells in, over the other's rows, so both titles stay whole and the
-// first one's bar still shows how long it lasts; two that begin together
-// halve the column. The hour it is now is in the accent. Nothing is filled
-// but the selected event.
+// Days as columns against the clock, on a grid in the faintest tone: a rule
+// down the left of each day and a dotted line across at each hour, so a
+// cell is traced to its day and its hour and nothing on the grid is louder
+// than an event. The cursor's day is the column whose header is filled and
+// whose rules are a step brighter, all the way down. Today's header is the
+// accent, as in the month, and the half hour it is now is a line in the
+// accent across today's column.
+//
+// An event is a block: a heavy edge in its account's colour down every row
+// it lasts, its title beside the first in the text's own colour, its hours
+// beside the second, and no grid behind it. The week does not dim what has
+// ended; the line of the present says what is past. One that begins while
+// another runs is drawn `step` cells in, over the other's rows, so both
+// titles stay whole and the first one's edge still shows how long it
+// lasts; two that begin together halve the column, each behind its own
+// edge. What lasts all day is a block too, over a rule that parts it from
+// the hours. Nothing is filled but the cursor's header and the selected
+// event.
 function weekScreen(o) {
   const { width, height } = o;
   const count = width >= C.weekFrom ? 7 : 3;
@@ -2031,26 +2073,35 @@ function weekScreen(o) {
   const tail = settle(o.panel || [], width);
   const room = height - 2 - 3 - tail.length;
   const isSelected = (ev) => !!o.selected && o.selected.id === ev.id && o.selected.n === ev.n;
+  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
+  // The grid of a day: a step brighter in the cursor's column.
+  const tone = (n) => (n === o.cursor ? 'dim' : 'faint');
+  const empty = (n, across) => [run(G.bar, tone(n)), ...(across || [gap(colWidth - 1)])];
 
   // Row `y` of an event's block, `w` cells wide.
   const block = (ev, y, w) => {
     const selected = isSelected(ev);
-    const lead = selected ? run(G.cursor, 'acc') : run(G.bar, accountColour(ev.account));
+    const lead = selected ? run(G.cursor, 'acc') : run(G.block, accountColour(ev.account));
     const words = eventWords(ev)[0];
-    const text = y === 0 ? [run(ev.title, ended(ev) ? 'dim' : 'fg', { b: isWaiting(ev) })]
+    const text = y === 0 ? [run(ev.title, 'fg', { b: isWaiting(ev) })]
       : y === 1 && !ev.allDay ? [run(`${ev.start}-${ev.end}`, 'dim')]
       : y === 2 && words ? [run(words[0], words[1] || 'dim')] : [];
     const row = [lead, ...fit(text, w - 2), gap(1)];
     return selected ? fill(row, 'sel') : row;
   };
 
+  // The cursor is on a day until an event is selected, and is then dim
+  // here, as a pane's is while another has the focus.
   const head = [gap(LAYOUT.margin + C.axis), ...days.flatMap((n) => {
     const d = civil(n);
-    return fit([gap(1), run(`${DAYS[d.dow]} ${d.dom}`, n === TODAY ? 'acc' : n === o.cursor ? 'fg' : 'dim', { b: n === TODAY || n === o.cursor })], colWidth);
+    const on = n === o.cursor;
+    const label = fit([on ? run(G.cursor, ev ? 'dim' : 'acc') : gap(1), run(`${DAYS[d.dow]} ${d.dom}`, n === TODAY ? 'acc' : on ? 'fg' : 'dim', { b: n === TODAY || on })], colWidth);
+    return on ? fill(label, 'sel') : label;
   })];
   const allDay = days.map((n) => eventsOn(n, o).filter((ev) => ev.allDay));
   const allRows = Array.from({ length: Math.max(...allDay.map((list) => list.length)) }, (_, y) =>
-    [gap(LAYOUT.margin), ...fit(y ? [] : [run('all day', 'dim')], C.axis), ...allDay.flatMap((list) => (list[y] ? block(list[y], 0, colWidth) : [gap(colWidth)]))]);
+    [gap(LAYOUT.margin), ...fit(y ? [] : [run('all day', 'dim')], C.axis), ...allDay.flatMap((list, i) => (list[y] ? block(list[y], 0, colWidth) : empty(days[i])))]);
+  const parting = [gap(LAYOUT.margin + C.axis), run(G.rule.repeat(count * colWidth), 'faint')];
 
   // Each day's timed events, with the lane an overlap puts them in.
   const timed = days.map((n) => {
@@ -2069,18 +2120,21 @@ function weekScreen(o) {
   });
 
   const slots = room - 1 - allRows.length - (allRows.length ? 1 : 0);
-  const picked = o.selected && timed.flatMap((day) => day.list).find(isSelected);
+  const picked = ev && timed.flatMap((day) => day.list).find(isSelected);
   let from = minutes(C.dayFrom);
   if (picked && picked.to > from + slots * C.slot) from = Math.ceil(picked.to / 60) * 60 - slots * C.slot;
   if (picked && picked.from < from) from = Math.floor(picked.from / 60) * 60;
   from = Math.max(0, Math.min(from, 24 * 60 - slots * C.slot));
 
   const now = days.includes(TODAY) ? Math.floor(minutes(CLOCK) / 60) * 60 : -1;
+  const present = Math.floor(minutes(CLOCK) / C.slot) * C.slot;
+  const across = (glyph, fg) => [run(glyph.repeat(colWidth - 1), fg)];
   const grid = Array.from({ length: slots }, (_, s) => {
     const at = from + s * C.slot;
     const clock = at % 60 ? [] : [run(`${String(at / 60).padStart(2, '0')}:00`, at === now ? 'acc' : 'dim', { b: at === now })];
-    const columns = timed.flatMap((day) => {
-      let cell = [gap(colWidth)];
+    const columns = timed.flatMap((day, i) => {
+      const n = days[i];
+      let cell = empty(n, n === TODAY && at === present ? across(G.rule, 'acc') : at % 60 ? null : across(G.dot, tone(n)));
       for (const ev of day.list) {
         if (at < ev.from || at >= ev.to) continue;
         const x = !ev.shares ? 0 : ev.abreast ? ev.lane * Math.floor(colWidth / day.lanes) : ev.lane * C.step;
@@ -2097,8 +2151,7 @@ function weekScreen(o) {
   const a = civil(days[0]);
   const b = civil(days[count - 1]);
   const title = a.month === b.month ? `${a.dom} to ${b.dom} ${MONTH_NAMES[b.month - 1]} ${b.year}` : `${a.dom} ${MONTHS[a.month - 1]} to ${b.dom} ${MONTHS[b.month - 1]} ${b.year}`;
-  const ev = o.selected && occurrence(o.selected.id, o.selected.n, o);
-  const content = [head, ...allRows, ...(allRows.length ? [[]] : []), ...grid].map((row) => fit(row, width));
+  const content = [head, ...allRows, ...(allRows.length ? [parting] : []), ...grid].map((row) => fit(row, width));
   return [calendarTabs(width, 'week', title), [], ...content, ...tail, [],
     statusRow(width, only(o) + (o.left != null ? o.left : dayStatus(o.cursor, o)), o.right != null ? o.right : calendarAlerts(o)), o.command || calendarHint(ev)];
 }
@@ -2189,17 +2242,29 @@ function eventScreen(o) {
   return frame(width, height, head, body, o.panel, statusRow(width, o.left || '', o.right != null ? o.right : calendarAlerts(o)), o.command || eventHint(ev));
 }
 
+// The fields of the form that are chosen from and not typed into. On one of
+// them `h` and `l` choose as Left and Right do. In a field that is typed
+// into they are letters, so the hint names them only on these.
+const CHOSEN = ['Calendar', 'All day', 'Repeats', 'Reminder'];
+// The two that hold a date and a time. What is typed into one is merged
+// with what it held: a time alone keeps the date, a date alone keeps the
+// time, and the hint says that either is enough.
+const DATED = ['Starts', 'Ends'];
+
 // The form for a new event or a change to one, built as compose is: a field
 // to a row, the focused one with the cursor and a bold label, and the notes
 // below as the body. o: { ev, focused, typing, left, command }
 function eventFormScreen(width, height, o) {
   const { ev } = o;
+  // What is being typed into a date stands in for it until the field is
+  // left, when the whole date is written again.
+  const typedIn = (label, held) => ((o.words || {})[label] != null ? o.words[label] : held);
   const calendars = CALENDARS.filter((c) => c.source === 'local').flatMap((c) => [run(`${c.account} local`, c.account === ev.account ? 'fg' : 'dim', { b: c.account === ev.account }), gap(3)]);
   const fields = [
     ['Title', [run(ev.title, 'fg', { b: true })]],
     ['Calendar', calendars],
-    ['Starts', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.start}`)]],
-    ['Ends', [run(`${dayShort(ev.n)} ${civil(ev.n).year} ${ev.end}`)]],
+    ['Starts', [run(typedIn('Starts', `${dayShort(ev.n)} ${civil(ev.n).year} ${ev.start}`))]],
+    ['Ends', [run(typedIn('Ends', `${dayShort(ev.n)} ${civil(ev.n).year} ${ev.end}`))]],
     ['All day', [run('no', 'dim')]],
     ['Repeats', [run(ev.repeats || 'never', ev.repeats ? 'fg' : 'dim')]],
     ['Where', ev.where ? [run(ev.where)] : []],
@@ -2213,7 +2278,7 @@ function eventFormScreen(width, height, o) {
   const head = [heading([run(o.heading, 'fg', { b: true })]), [], ...fields, []].map((row) => fit(row, width));
   const body = indent(ev.notes ? bodyRows({ body: ev.notes }, Math.min(LAYOUT.measure, width - LAYOUT.indent - LAYOUT.margin)) : [[run('No notes.', 'dim')]]);
   return frame(width, height, head, body, null, statusRow(width, o.left != null ? o.left : '{dim|not saved}', calendarAlerts()),
-    o.command || hint(['Tab', 'next field'], 'event-form.choice', 'event-form.notes', 'event-form.save', 'event-form.close'));
+    o.command || hint(['Tab', 'next field'], ...(CHOSEN.includes(o.focused) ? ['event-form.choice'] : []), ...(DATED.includes(o.focused) ? [SAY.enough] : []), 'event-form.notes', 'event-form.save', 'event-form.close'));
 }
 
 // The calendars, each one a row to show or hide.
@@ -2727,8 +2792,13 @@ function build(mode = {}) {
     hidden: ['personal/local'], panel: panel('Calendars', calendarEntries(['personal/local']), 1), left: '', command: hint('calendars.choose', 'calendars.toggle', 'calendars.close'),
   }));
 
+  // The focus in the list beside the grid, on the first event of the day.
+  const listed = (size, more) => month(size, { focus: 'list', selected: { id: 'standup', n: thu }, ...more });
+  screen('cal-month-list-focus', 'Calendar, month, the list focused', 'after Alt-l: the cursor is on the first event of the day and the grid\'s cursor dims; the status line says which of the day\'s events it is and the hint is that event\'s, with the key that returns to the grid', listed(LAYOUT.default));
+  screen('cal-month-wide-list-focus', 'Calendar, month at 180 columns, the list focused', 'the list is beside the grid at every width, so it is Alt-l that focuses it and Alt-h that returns', listed(wide), wide);
+
   const week = (size, more) => weekScreen({ ...size, cursor: thu, selected: roadmap, ...more });
-  screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock; an event is a bar in its account\'s colour for as long as it lasts, two at once share a column, and the hour it is now is in the accent', week(LAYOUT.default));
+  screen('cal-week', 'Calendar, week', 'after 2, or Tab: seven days against the clock, on a faint grid of days and hours; an event is a block behind an edge in its account\'s colour for as long as it lasts, two at once share a column, the cursor\'s day is the column that is brighter, and the time it is now is a line across today', week(LAYOUT.default));
   alsoSmall('cal-week', 'Calendar, week', week(small));
 
   const day = (size, more) => dayScreen({ ...size, cursor: thu, selected: roadmap, ...more });
@@ -2758,6 +2828,7 @@ function build(mode = {}) {
   const offsite = { id: 'offsite', account: 'work', n: thu, day: '2026-11-26', start: '14:00', end: '15:00', title: 'Offsite planning', where: 'Room Fjord', invited: ['imani', 'lars'], local: true };
   const form = (more) => eventFormScreen(W, H, { ev: offsite, heading: 'New event', focused: 'Title', typing: true, ...more });
   screen('cal-edit', 'Event form', 'after c or E: a field to a row as in compose; a date is typed as words and the status line says what it was taken to mean', form());
+  screen('cal-edit-choice', 'Event form, a field that is chosen from', 'after Tab: Calendar takes no typed text, so h and l choose as Left and Right do and the hint says so', form({ focused: 'Calendar', typing: false }));
 
   screen('help-calendar', 'Help, in the calendar', '? in the calendar leads with the calendar\'s keys; typing filters every key and command as it does in mail', helpScreen(W, H, '', 0, 'calendar'));
 
@@ -2766,6 +2837,19 @@ function build(mode = {}) {
     { key: 'Enter', caption: 'Day', note: 'The cursor moves to the first event of the day. j and k step through events, across days.', rows: cut(day(LAYOUT.default), 11) },
     { key: 'Enter', caption: 'Event', note: 'J and K step to the events on either side without going back, as they do from a message.', rows: cut(event(LAYOUT.default), 11) },
     { key: 'Esc', caption: 'Day again', note: 'Esc undoes one Enter. gm returns to mail from anywhere.', rows: cut(day(LAYOUT.default), 11) },
+  ]);
+
+  // A day with more on it than the list has rows for.
+  const busy = [['12:30', '13:15', 'Lunch with Greta'], ['15:00', '15:30', 'Call the plumber'], ['17:30', '18:30', 'Climbing'], ['18:45', '19:30', 'Dinner']]
+    .map(([start, end, title], i) => ({ id: `busy-${i}`, account: 'personal', day: '2026-11-26', start, end, title }));
+  flow('cal-list', 'The month\'s list, focused', [
+    { key: 'Alt-l', caption: 'Focused', note: 'From the grid, to the first event of the cursor\'s day. Alt-h or Esc returns.', rows: cut(listed(LAYOUT.default), 11) },
+    { key: 'j', caption: 'The next event', note: 'The list moves as the day view does: j and k step through events, across days, Enter opens the one selected, and o, i, E and d act on it.',
+      rows: cut(listed(LAYOUT.default, { selected: roadmap }), 11) },
+    { key: 'l', caption: 'The next day', note: 'h and l move by a day here too. The grid\'s cursor goes with them and the first event of that day is selected.',
+      rows: cut(listed(LAYOUT.default, { cursor: fri, selected: { id: 'library', n: fri } }), 11) },
+    { key: '', caption: 'More than fits', note: 'On a day with more events than there are rows, the list scrolls to keep the selected one in sight.',
+      rows: monthScreen({ width: W, height: 13, cursor: thu, focus: 'list', selected: { id: 'migration', n: thu }, added: busy }) },
   ]);
 
   const road = 'Q4 roadmap review';
@@ -2813,6 +2897,23 @@ function build(mode = {}) {
       rows: cut(form({ typing: false, command: said(SAY.inviteAsk(2, '10s')) }), 13) },
     { key: 'y', caption: 'Added', note: 'The event is tuimex\'s own, and says so.',
       rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local')) }) },
+  ]);
+  const later = { ...offsite, start: '15:30', end: '16:30' };
+  flow('cal-when', 'Changing only the time', [
+    { key: 'Tab Tab', caption: 'On Starts', note: 'The field holds a date and a time, and the hint says a time or a date is enough.',
+      rows: cut(form({ focused: 'Starts', left: SAY.whenIs('starts', 'Thu 26 Nov 2026 14:00') }), 13) },
+    { key: '15:30', caption: 'A time typed', note: 'A time alone keeps the date and a date alone keeps the time. The status line says what the field will hold.',
+      rows: cut(form({ focused: 'Starts', words: { Starts: '15:30' }, left: SAY.whenIs('starts', 'Thu 26 Nov 2026 15:30') }), 13) },
+    { key: 'Tab', caption: 'Both moved', note: 'Leaving the field writes it whole again, and the end moves with the start, so the event is as long as it was.',
+      rows: cut(form({ ev: later, focused: 'Ends', left: SAY.whenIs('ends', 'Thu 26 Nov 2026 16:30') }), 13) },
+    { key: 'soon', caption: 'Words that name nothing', note: 'The status line says so. Left empty, the field keeps what it held.',
+      rows: cut(form({ ev: later, focused: 'Ends', words: { Ends: 'soon' }, left: SAY.notWhen }), 13) },
+  ]);
+  flow('cal-local', 'Kept local, where setup could change that', [
+    { key: '^s', caption: 'Added', note: 'The account\'s own calendar is read over CalDAV and no write has been tried on it, so the event is kept here, and the line says what would find out whether it need be.',
+      rows: calendarStrip(thu, { selected: 'offsite', added: [offsite], command: said(SAY.added('Offsite planning', 'work, local', SAY.canWrite)) }) },
+    { key: 'i a', caption: 'Accepted', note: 'The same of an answer. Of a calendar read from a feed it is not said: nothing can write a feed.',
+      rows: calendarStrip(thu, { selected: 'roadmap', changed: { roadmap: { answer: 'accepted' } }, command: said(SAY.answered('Accepted', road, 'work, local', SAY.canWrite)) }) },
   ]);
   flow('cal-delete', 'Deleting, and undoing it', [
     { key: 'd', caption: 'Deleted', note: 'No question first: u reverses it (ADR-015).',

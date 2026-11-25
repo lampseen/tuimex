@@ -339,6 +339,7 @@ fn convert(k: KeyEvent) -> Option<Key> {
         KeyCode::Down => Some(Key::Down),
         KeyCode::Left => Some(Key::Left),
         KeyCode::Right => Some(Key::Right),
+        KeyCode::F(n) => Some(Key::F(n)),
         _ => None,
     }
 }

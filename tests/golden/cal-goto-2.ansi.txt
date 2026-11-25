@@ -11,4 +11,4 @@
 {fg}     {dim}January 2027{fg}                 {faint}│{fg}    {head}work{fg}       {dim}all day{fg}      On call                                                  
 {fg}                                                                                                                        
 {fg}  {dim}Sat 5 Dec · 1 event{fg}                                                                       sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm {dim}mail · {fg}? {dim}help{fg}                                                
+{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm F1 {dim}mail · {fg}? {dim}help{fg}                                             

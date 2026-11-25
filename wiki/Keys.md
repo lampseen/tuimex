@@ -21,7 +21,7 @@ key on it is in that table.
 | `u` | undo the last action |
 | `A` | what the agent can do here |
 | `^l` | redraw |
-| `gc` | the calendar |
+| `gc` `F2` | the calendar |
 
 No key quits: `:q` does.
 
@@ -61,20 +61,22 @@ The list's action keys work here too.
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | who it is from, on From |
+| `h` `l` | who it is from, on From; `Left` `Right` do the same |
 | `Enter` | write the text in your editor |
 | `^a` `^s` `^d` | attach a file, the send summary, save the draft |
 
 ## In the calendar
 
-`gc` opens the calendar and `gm` returns to mail; each keeps where it
-was. A key that mail uses means the same here, except `h` and `l`.
+`gc` or `F2` opens the calendar and `gm` or `F1` returns to mail; each
+keeps where it was. A key that mail uses means the same here, except `h`
+and `l`.
 [Calendar](Calendar) says what each does at length.
 
 | key | does |
 |---|---|
 | `h` `l` | previous, next day |
-| `j` `k` | in the month, a week down or up; elsewhere the next, previous event |
+| `j` `k` | in the month's grid, a week down or up; elsewhere the next, previous event |
+| `Alt-l` `Alt-h` | in the month, focus the list of events beside the grid; back to the grid. `Alt-j` and `Alt-k` do the same |
 | `[` `]` | previous, next page: a month, a week or a day |
 | `J` `K` | next, previous event; in the month, the next day that has one |
 | `I` | the next invitation that waits for an answer |
@@ -91,7 +93,7 @@ was. A key that mail uses means the same here, except `h` and `l`.
 | `d` | delete the selected event. One that repeats asks: `t` this one, `a` all of them |
 | `u` | take back the last thing done in the calendar |
 | `gn` | reminders on, off |
-| `gm` | back to mail |
+| `gm` `F1` | back to mail |
 
 On an event's own screen `j` `k` `^d` `^u` `gg` `G` scroll, `zo` and `zc`
 unfold and fold what only some providers send, and `v` opens the mail the
@@ -100,7 +102,7 @@ event came in. In the form:
 | key | does |
 |---|---|
 | `Tab` `S-Tab` | next, previous field |
-| `Left` `Right` | choose, where a field offers choices |
+| `h` `l` | choose, where a field offers choices; `Left` `Right` do the same. In a field you type into they are letters |
 | `Enter` | write the notes in your editor |
 | `^s` | save; guests are mailed after a question |
 | `Esc` | close; with changes, keep or discard |

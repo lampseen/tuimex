@@ -7,7 +7,11 @@ use crate::app::tests::{after, foot, press, screen};
 use crate::calendar::form::{Field, Form};
 use crate::keymap::Key;
 
-const HINT: &str = "Tab next field · Left Right choose · Enter notes · ^s save · Esc close";
+/// The hint on a field that is typed into, and on one that is chosen from.
+const HINT: &str = "Tab next field · Enter notes · ^s save · Esc close";
+const CHOOSING: &str = "Tab next field · h l choose · Enter notes · ^s save · Esc close";
+/// And on Starts and Ends, where what is typed is merged with what is held.
+const DATING: &str = "Tab next field · 14:30 or fri is enough · Enter notes · ^s save · Esc close";
 
 fn form(app: &App) -> &Form {
     app.cal.form.form.as_ref().expect("the form is open")
@@ -91,6 +95,61 @@ fn tab_moves_through_the_fields_and_left_and_right_choose() {
     assert_eq!(foot(&mut app).1, "E Right: Title has nothing to choose from");
 }
 
+/// `h` and `l` are Left and Right wherever a field is chosen from, and the
+/// hint names them there. In a field that is typed into they are letters.
+#[test]
+fn h_and_l_choose_on_a_field_that_is_chosen_from_and_are_letters_where_text_is_typed() {
+    let mut app = after("gclllchl\t");
+    assert_eq!(screen(&mut app, 120, 40)[2], "    Title    hl", "typed into the title");
+    assert_eq!(foot(&mut app).1, CHOOSING, "on Calendar the hint names them");
+    press(&mut app, "l");
+    assert_eq!(form(&app).calendar, 1);
+    assert_eq!(screen(&mut app, 120, 40)[3], "▌   Calendar personal local   work local");
+    press(&mut app, "hh");
+    assert_eq!(form(&app).calendar, 1, "round the end, as Left goes");
+    // Starts is typed into: the letters are words of a date that names none.
+    press(&mut app, "\thl");
+    assert_eq!(form(&app).starts_words.as_deref(), Some("hl"));
+    assert_eq!(foot(&mut app).1, DATING, "and the hint names no key that would type");
+    press(&mut app, "^u\t\tl");
+    assert_eq!(screen(&mut app, 120, 40)[6], "▌   All day  yes");
+    press(&mut app, "\tlll");
+    assert_eq!(screen(&mut app, 120, 40)[7], "▌   Repeats  every weekday");
+    press(&mut app, "h");
+    assert_eq!(screen(&mut app, 120, 40)[7], "▌   Repeats  weekly");
+    press(&mut app, "\thl\t\th");
+    assert_eq!(form(&app).place, "hl", "Where is typed into");
+    assert_eq!(screen(&mut app, 120, 40)[10], "▌   Reminder 5 minutes before");
+    // At a question a key of the form's is no answer, on either kind of
+    // field: it leaves the question and nothing else.
+    press(&mut app, "\x1b");
+    assert!(foot(&mut app).1.starts_with("Keep the changes?"));
+    press(&mut app, "l");
+    assert_eq!(foot(&mut app).1, CHOOSING);
+    assert_eq!(screen(&mut app, 120, 40)[10], "▌   Reminder 5 minutes before", "and chose nothing");
+}
+
+/// Bryan made an event for an account whose calendar had never had a
+/// write tried on it, and nothing said how that could change.
+#[test]
+fn an_event_kept_local_for_want_of_a_write_check_says_setup_can_try_one() {
+    let mut app = after("");
+    app.set_unwritten_calendars(vec![AccountId("personal".to_string())]);
+    press(&mut app, "gclllcDentist^s");
+    let setup = "tuimex setup can try writing to its calendar";
+    assert_eq!(foot(&mut app).1, format!("✓ Added Dentist to personal, local · {setup} · u to undo"));
+    // Of an account read from a feed, or with no calendar, it is not said.
+    let mut app = after("");
+    app.set_unwritten_calendars(vec![AccountId("personal".to_string())]);
+    press(&mut app, "gclllgtgtcDentist^s");
+    assert_eq!(foot(&mut app).1, "✓ Added Dentist to work, local · u to undo");
+    // A change says what it did before, wherever the event is kept.
+    let mut app = after("");
+    app.set_unwritten_calendars(vec![AccountId("work".to_string())]);
+    press(&mut app, "gclll\rjjjE!^s");
+    assert_eq!(foot(&mut app).1, "✓ Changed Staging migration window! · u to undo");
+}
+
 #[test]
 fn a_field_is_edited_with_the_command_line_s_keys() {
     let mut app = after("gclllcOffsite planning^w");
@@ -116,7 +175,7 @@ fn the_status_line_says_what_a_date_was_taken_to_mean_and_words_that_name_none_a
     press(&mut app, "teatime^s");
     assert_eq!(
         foot(&mut app),
-        (String::new(), "E ^s: Ends: not a date: \"teatime\" · 2026-12-05, 5 dec, fri, +2w".into())
+        ("not a date or a time".into(), "E ^s: Ends: not a date: \"teatime\" · 2026-12-05, 5 dec, fri, +2w".into())
     );
     assert!(app.form_is_open(), "and the form stays");
 }

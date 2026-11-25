@@ -22,6 +22,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId]) -> Scene<'a> {
         view: View::Day,
         cursor: fx::THU,
         picked: None,
+        focus: false,
         accounts,
         colours: &[Tok::Link, Tok::Head],
         words: Tok::Agent,

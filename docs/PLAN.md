@@ -557,21 +557,24 @@ thread · `J K` next, previous in the list · `o` links (then a number, or
 `j k Enter`) · `a` attachments (then `Enter` save, `O` open) · `B` browser
 copy · `e d s m M r R f` as in the list · `q Esc` back, cursor kept.
 
-**Compose:** `Tab S-Tab` between fields · `Enter` on the body opens
+**Compose:** `Tab S-Tab` between fields · `h l` or `Left Right` the
+identity, on From · `Enter` on the body opens
 `$EDITOR` (TUI suspended, restored after) · `^a` attach (path with
 completion) · `^s` send summary · `^d` save draft · `Esc` asks: keep the
 draft or discard.
 
-**Calendar**, after `gc` (ADR-054), as the design delivered it: `h l`
-previous, next day · `j k` a week in the month, else an event · `[ ]`
-page · `J K` next, previous event · `n N` match · `I` next invitation to
+**Calendar**, after `gc` or `F2` (ADR-054), as the design delivered it: `h l`
+previous, next day · `j k` a week in the month's grid, else an event ·
+`Alt-l Alt-h` (or `Alt-j Alt-k`) into the month's list of events and back
+to its grid · `[ ]` page · `J K` next, previous event · `n N` match · `I` next invitation to
 answer · `t` today · `gd` go to a date · `Tab S-Tab` and `1 2 3` the view
 · `Enter` deeper, `Esc` back · `/` find · `gt gT` account · `C` calendars
 (then `j k`, `Space`) · `o` links · `i` answer (then `a t d p x`) · `c`
 new event · `E` edit · `d` delete (a repeat asks `t` this one, `a` all) ·
-`u` undo · `gn` reminders · `gm` mail. On an event: `j k ^d ^u gg G`
+`u` undo · `gn` reminders · `gm` or `F1` mail. On an event: `j k ^d ^u gg G`
 scroll, `zo zc`, `v` the mail it came in. In the form: `Tab S-Tab`,
-`Left Right`, `Enter` notes in `$EDITOR`, `^s` save, `Esc`.
+`h l` or `Left Right` on a field that is chosen from, `Enter` notes in
+`$EDITOR`, `^s` save, `Esc`.
 `docs/keymap.md` is the table itself.
 
 **Command and confirm:** as pullpen's §6.2, unchanged: `Tab S-Tab` complete,

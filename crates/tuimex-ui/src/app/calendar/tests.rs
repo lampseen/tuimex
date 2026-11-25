@@ -7,6 +7,9 @@ use crate::app::App;
 use crate::app::tests::{after, app as fresh, foot, press, screen};
 use crate::calendar::Calendar;
 use crate::calendar::tests::design as calendar;
+use crate::keymap::Key;
+use crate::palette::Tok;
+use crate::span::Line;
 
 /// The left of the status line after `keys`. Today is Monday 23 November.
 fn at(keys: &str) -> String {
@@ -17,7 +20,7 @@ fn said(keys: &str) -> String {
     foot(&mut after(keys)).1
 }
 
-const MONTH: &str = "Enter open · J K next event · t today · c new event · gm mail · ? help";
+const MONTH: &str = "Enter open · J K next event · t today · c new event · gm F1 mail · ? help";
 
 #[test]
 fn gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was() {
@@ -34,6 +37,146 @@ fn gc_opens_the_calendar_on_today_and_gm_returns_with_each_side_where_it_was() {
     press(&mut app, "gm");
     assert_eq!(foot(&mut app).0, "5 of 24 · 1 message");
     assert!(app.asks().is_empty(), "moving about asks for nothing");
+}
+
+/// F2 and F1 are `gc` and `gm` by one key each: read where those are, and
+/// nowhere else. Where letters are typed a function key types nothing.
+#[test]
+fn f2_opens_the_calendar_and_f1_returns_to_mail_wherever_gc_and_gm_do() {
+    let top = |app: &mut App| screen(app, 120, 40)[0].clone();
+    let mut app = after("jjj");
+    app.key(Key::F(1));
+    assert_eq!(foot(&mut app).0, "4 of 24 · thread of 3", "F1 in mail is where it already is");
+    app.key(Key::F(2));
+    assert!(top(&mut app).starts_with("  Month"), "{}", top(&mut app));
+    press(&mut app, "lll");
+    app.key(Key::F(2));
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 4 events · 1 to answer", "F2 in the calendar changes nothing");
+    app.key(Key::F(1));
+    assert_eq!(foot(&mut app).0, "4 of 24 · thread of 3", "mail's cursor is where it was");
+    // From the reader, and back to the message; and from an event's screen.
+    let mut app = after("\r");
+    app.key(Key::F(2));
+    assert!(top(&mut app).starts_with("  Month"));
+    press(&mut app, "lll\r\r");
+    assert!(top(&mut app).starts_with("  Standup"), "{}", top(&mut app));
+    app.key(Key::F(1));
+    assert!(top(&mut app).starts_with("  Invitation: Q4 roadmap review"), "{}", top(&mut app));
+    // The form, compose, the command line and a prompt take neither.
+    for typing in ["gcc", "c", ":", "gcgd", "/"] {
+        let mut app = after(typing);
+        let was = screen(&mut app, 120, 40);
+        app.key(Key::F(1));
+        app.key(Key::F(2));
+        assert_eq!(screen(&mut app, 120, 40), was, "after {typing:?}");
+    }
+}
+
+/// The month's hint while its list has the focus, on an event with a link.
+const LISTED: &str = "Enter open · o links · E edit · d delete · Alt-h grid · ? help";
+
+/// The colour of the cursor in the month's grid, which is left of the bar.
+fn grid_cursor(app: &mut App) -> Tok {
+    let cursor = |line: &Line| {
+        let bar = line.iter().position(|span| span.text == "│")?;
+        line[..bar].iter().find(|span| span.text == "▌").map(|span| span.fg)
+    };
+    app.lines(120, 40).iter().find_map(cursor).expect("the grid has a cursor")
+}
+
+/// As the preview takes the focus in mail: by either Alt key that goes
+/// toward it, and back by either of the others or by Esc.
+#[test]
+fn alt_l_focuses_the_month_s_list_of_events_and_alt_h_or_esc_returns_to_the_grid() {
+    let mut app = after("gclll");
+    assert_eq!(grid_cursor(&mut app), Tok::Acc);
+    press(&mut app, "⌥l");
+    assert_eq!(foot(&mut app), ("Thu 26 Nov · 1 of 4 · 1 to answer".to_string(), LISTED.to_string()));
+    let rows = screen(&mut app, 120, 40);
+    assert!(rows[3].contains("│▌   work       09:30-09:45  Standup"), "the day's first event is selected: {}", rows[3]);
+    assert!(rows[8].contains("▌26"), "the grid's cursor stays on its day: {}", rows[8]);
+    assert_eq!(grid_cursor(&mut app), Tok::Dim, "and is dim while the list has the focus");
+    press(&mut app, "⌥h");
+    assert_eq!(foot(&mut app), ("Thu 26 Nov · 4 events · 1 to answer".to_string(), MONTH.to_string()));
+    assert_eq!(grid_cursor(&mut app), Tok::Acc);
+    assert!(!screen(&mut app, 120, 40)[3].contains('▌'), "the grid selects a day and no event");
+    press(&mut app, "⌥j");
+    assert_eq!(foot(&mut app).1, LISTED, "Alt-j focuses too");
+    press(&mut app, "⌥k");
+    assert_eq!(foot(&mut app).1, MONTH, "and Alt-k returns");
+    press(&mut app, "⌥l\x1b");
+    assert_eq!(foot(&mut app).1, MONTH, "Esc leaves the list first");
+    press(&mut app, "\x1bj");
+    assert!(screen(&mut app, 120, 40)[0].starts_with("  Month"), "and then has nothing to leave");
+    assert_eq!(foot(&mut app).0, "Thu 3 Dec · 2 events", "j is a week in the grid again");
+}
+
+/// Bryan's rule that every key stays consistent: with the focus in the
+/// month's list, each key is what it is in the day view.
+#[test]
+fn the_month_s_list_focused_moves_and_acts_as_the_day_view_does() {
+    let mut app = after("gclll⌥lj");
+    let answering = "Enter open · i answer · o links · E edit · d delete · Alt-h grid · ? help";
+    assert_eq!(foot(&mut app), ("Thu 26 Nov · 2 of 4 · 1 to answer".to_string(), answering.to_string()));
+    press(&mut app, "jjj");
+    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer", "j goes on across days");
+    let rows = screen(&mut app, 120, 40);
+    assert!(rows[8].contains("▌27"), "and the grid's cursor follows: {}", rows[8]);
+    assert_eq!(rows[2].split('│').nth(1), Some("  Fri 27 November"), "as does the day the list begins on");
+    press(&mut app, "k");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 4 of 4 · 1 to answer");
+    press(&mut app, "l");
+    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 1 of 4 · 1 to answer", "l is still a day, and selects its first event");
+    press(&mut app, "h");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 1 of 4 · 1 to answer");
+    press(&mut app, "JJK");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer", "J and K step as j and k do");
+    press(&mut app, "I");
+    assert_eq!(foot(&mut app).0, "Fri 27 Nov · 3 of 4 · 1 to answer", "I selects the next that waits");
+    press(&mut app, "th");
+    let empty = "Enter open · J K next event · t today · c new event · Alt-h grid · ? help";
+    assert_eq!(foot(&mut app), ("Sun 22 Nov · 0 events".to_string(), empty.to_string()), "a day with nothing on it");
+    press(&mut app, "j");
+    assert_eq!(foot(&mut app).0, "Mon 23 Nov · 1 of 2", "and j from it is the next event there is");
+
+    // Enter opens the selected event, and Esc is back in the list on it.
+    let mut app = after("gclll⌥lj\r");
+    assert!(screen(&mut app, 120, 40)[0].starts_with("  Q4 roadmap review"));
+    press(&mut app, "\x1b");
+    assert_eq!(foot(&mut app), ("Thu 26 Nov · 2 of 4 · 1 to answer".to_string(), answering.to_string()));
+    // o, i, E and d are the selected event's.
+    assert_eq!(foot(&mut after("gclll⌥lo")).0, "opens https://meet.example.org/r/standup");
+    assert!(foot(&mut after("gclll⌥lji")).1.starts_with("Answer?"));
+    assert_eq!(screen(&mut after("gclll⌥ljjjE"), 120, 40)[0], "  Staging migration window");
+    let mut app = after("gclll⌥ljjjd");
+    assert_eq!(foot(&mut app).1, "✓ Deleted Staging migration window · u to undo");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 3 events · 1 to answer");
+}
+
+#[test]
+fn the_focus_is_in_the_grid_after_another_view_and_only_the_month_has_a_list_to_focus() {
+    let mut app = after("gclll⌥l21");
+    assert_eq!(foot(&mut app).1, MONTH, "the week and back");
+    let mut app = after("gch⌥l\r");
+    assert_eq!(screen(&mut app, 120, 40)[2], "  Sun 22 November", "Enter with nothing selected is the day");
+    press(&mut app, "\x1b");
+    assert_eq!(foot(&mut app).1, MONTH, "and Esc from there is the grid");
+    for view in ["2", "3"] {
+        let mut app = after(&format!("gclll{view}"));
+        let was = screen(&mut app, 120, 40);
+        press(&mut app, "⌥l⌥h");
+        assert_eq!(screen(&mut app, 120, 40), was, "nothing lies beside view {view}");
+    }
+    let mut app = after("");
+    app.set_calendar(Calendar::empty(fx::NOW));
+    press(&mut app, "gc⌥l");
+    assert_eq!(foot(&mut app).1, "gm F1 mail · ? help", "with no calendar there is no list");
+    // A search shown over the focused list gives it back as it was.
+    let mut app = after("gclll⌥lj/call\r");
+    assert!(screen(&mut app, 120, 40)[0].contains("Search call"));
+    press(&mut app, "\x1b");
+    assert_eq!(foot(&mut app).0, "Thu 26 Nov · 2 of 4 · 1 to answer");
+    assert!(foot(&mut app).1.ends_with("Alt-h grid · ? help"));
 }
 
 #[test]
@@ -360,14 +503,14 @@ fn export_asks_for_the_local_events_to_be_written_and_says_where_they_went() {
 #[test]
 fn the_calendar_has_its_commands_and_refuses_the_ones_that_take_rows_of_mail() {
     let mut app = after(":calendar week\r");
-    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "the week, a column to a day");
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("▌Mon 23"), "the week, a column to a day");
     press(&mut app, ":archive\r");
     assert_eq!(foot(&mut app).1, "E :archive: the calendar is open · gm returns to mail");
     assert!(app.asks().is_empty());
     press(&mut app, ":mail\r");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
     press(&mut app, ":calendar\r");
-    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("Mon 23"), "alone, where it was");
+    assert!(screen(&mut app, 120, 40)[2].trim_start().starts_with("▌Mon 23"), "alone, where it was");
     assert_eq!(said(":calendar year\r"), "E :calendar: it takes month, week or day · Tab completes");
     press(&mut app, ":calendar month\r\r\r");
     assert_eq!(screen(&mut app, 120, 40)[0], format!("  Standup{}1 of 2 on Mon 23 Nov", " ".repeat(89)));

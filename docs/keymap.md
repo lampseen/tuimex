@@ -17,7 +17,7 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `u` | undo the last action |
 | `A` | what the agent can do |
 | `^l` | redraw |
-| `gc` | the calendar |
+| `gc F2` | the calendar |
 
 ## List
 
@@ -108,8 +108,10 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `h l` | previous, next day |
-| `j k` | month: week; else: event |
+| `j k` | grid: week; else: event |
 | `[ ]` | previous, next page |
+| `Alt-j Alt-l` | month: focus the events |
+| `Alt-k Alt-h` | back to the grid |
 | `J K` | next, previous event |
 | `n N` | next, previous match |
 | `I` | next invite to answer |
@@ -127,7 +129,7 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | `E` | edit the event |
 | `d` | delete the event |
 | `gn` | reminders on, off |
-| `gm` | back to mail |
+| `gm F1` | back to mail |
 
 ## Event
 
@@ -151,7 +153,8 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `Tab S-Tab` | next, previous field |
-| `Left Right` | choose, where offered |
+| `h l` | choose, where offered |
+| `Left Right` | as h and l |
 | `Enter` | edit notes in $EDITOR |
 | `^s` | save; guests get mail |
 | `Esc` | close; keep or discard |
@@ -161,7 +164,8 @@ table. A sequence such as `gg` waits 500 ms for its second key.
 | key | does |
 |---|---|
 | `Tab S-Tab` | next, previous field |
-| `Left Right` | identity, on From |
+| `h l` | identity, on From |
+| `Left Right` | as h and l |
 | `Enter` | edit body in $EDITOR |
 | `^a` | attach a file |
 | `^s` | send summary |

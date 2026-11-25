@@ -104,6 +104,20 @@ impl Change for Event {
     }
 }
 
+/// `busy` of the design's `build()`: four more events on Thursday, of the
+/// personal account's own calendar, which make it a day with more on it
+/// than a short list has rows for.
+pub fn busy() -> Vec<Event> {
+    let more = [
+        ("Lunch with Greta", (12, 30), (13, 15)),
+        ("Call the plumber", (15, 0), (15, 30)),
+        ("Climbing", (17, 30), (18, 30)),
+        ("Dinner", (18, 45), (19, 30)),
+    ];
+    let event = |(i, (title, from, to))| timed(&format!("busy-{i}"), title, THU, from, to);
+    more.into_iter().enumerate().map(event).collect()
+}
+
 /// `EVENTS`, each in the one of `CALENDARS` that holds it.
 pub fn calendars() -> Vec<Kept> {
     let (yes, no, maybe, nothing) = (Said::Accepted, Said::Declined, Said::Tentative, Said::Nothing);

@@ -213,7 +213,7 @@ fn a_date_is_typed_as_words_and_moving_the_start_moves_the_end() {
     let two = fx::FRI * DAY + 14 * HOUR;
     assert_eq!((form.starts, form.ends, form.starts_words.as_deref()), (two, two + HOUR, None));
     assert_eq!(text(&form.value(Field::Starts)[0]), "Fri 27 Nov 2026 14:00");
-    // A time alone is on the day the event starts.
+    // A time alone is on the day the field held.
     type_in(&mut form, "16:30");
     assert_eq!(text(&form.left()), "ends Fri 27 Nov 2026 16:30");
     form.step(true);
@@ -221,12 +221,86 @@ fn a_date_is_typed_as_words_and_moving_the_start_moves_the_end() {
     assert_eq!(text(&form.left()), "not saved");
 }
 
+/// Bryan: "I shouldn't have to type anything except the time." What is
+/// typed is merged with what the field held.
+#[test]
+fn a_time_alone_keeps_the_date_and_a_date_alone_keeps_the_time() {
+    let at = |day: i64, hour: i64, minute: i64| day * DAY + hour * HOUR + minute * 60;
+    let mut form = fresh();
+    to(&mut form, Field::Starts);
+    for (words, minute) in [("14:30", 870), ("1430", 870), ("2pm", 840), ("2:30pm", 870), ("9", 540), ("930", 570)] {
+        form.starts_words = Some(words.to_string());
+        assert_eq!(form.meaning(Field::Starts), Some(fx::THU * DAY + minute * 60), "{words}");
+    }
+    form.starts_words = None;
+    type_in(&mut form, "1430");
+    assert_eq!(text(&form.value(Field::Starts)[0]), "1430", "while it is typed the field shows what is typed");
+    assert_eq!(text(&form.left()), "starts Thu 26 Nov 2026 14:30");
+    form.step(true);
+    assert_eq!((form.starts, form.ends), (at(fx::THU, 14, 30), at(fx::THU, 15, 30)), "and the end moved as far");
+    assert_eq!(text(&form.value(Field::Starts)[0]), "Thu 26 Nov 2026 14:30", "left, it is written whole again");
+    form.step(false);
+    type_in(&mut form, "fri");
+    form.step(true);
+    assert_eq!((form.starts, form.ends), (at(fx::FRI, 14, 30), at(fx::FRI, 15, 30)), "a date alone keeps the time");
+    // An end over midnight keeps its own day when only its time is typed,
+    // and a step is from the day the field held.
+    type_in(&mut form, "sat 1:00");
+    form.step(true);
+    form.step(false);
+    type_in(&mut form, "2:15");
+    assert_eq!(form.meaning(Field::Ends), Some(at(fx::FRI + 1, 2, 15)));
+    form.ends_words = Some("+1d".to_string());
+    assert_eq!(form.meaning(Field::Ends), Some(at(fx::FRI + 2, 1, 0)));
+    form.ends_words = Some("sun 18:00".to_string());
+    assert_eq!(form.meaning(Field::Ends), Some(at(fx::FRI + 2, 18, 0)), "both typed change both");
+}
+
+/// Backspace on a date that has not been typed into leaves no words, and
+/// no words are no change.
+#[test]
+fn a_date_left_empty_keeps_what_it_held() {
+    let mut form = fresh();
+    to(&mut form, Field::Starts);
+    assert!(form.edit_with(|typed| {
+        typed.pop();
+        true
+    }));
+    assert_eq!(text(&form.value(Field::Starts)[0]), "", "nothing is typed yet");
+    assert_eq!(text(&form.left()), "starts Thu 26 Nov 2026 09:00", "and the status line says what it still is");
+    assert!(saved(&form).is_ok(), "it can be saved as it is");
+    form.step(true);
+    assert_eq!((form.starts, form.starts_words.as_deref()), (fx::THU * DAY + 9 * HOUR, None));
+    assert_eq!(text(&form.value(Field::Starts)[0]), "Thu 26 Nov 2026 09:00");
+}
+
+/// A time typed into an event that lasts all day says it does not; a
+/// date typed there leaves it lasting all day.
+#[test]
+fn a_time_typed_into_an_all_day_event_ends_its_being_all_day() {
+    let mut form = fresh();
+    to(&mut form, Field::AllDay);
+    form.choose(true);
+    to(&mut form, Field::Starts);
+    type_in(&mut form, "fri");
+    assert_eq!(text(&form.left()), "starts Fri 27 Nov 2026");
+    form.step(true);
+    form.step(false);
+    assert!(form.all_day, "a date alone moves the day");
+    type_in(&mut form, "14:30");
+    assert_eq!(text(&form.left()), "starts Fri 27 Nov 2026 14:30", "the status line says the time it will have");
+    form.step(true);
+    assert!(!form.all_day);
+    assert_eq!(text(&form.value(Field::AllDay)[0]), "no");
+    assert_eq!((form.starts, form.ends), (fx::FRI * DAY + 14 * HOUR + 30 * 60, fx::FRI * DAY + 15 * HOUR + 30 * 60));
+}
+
 #[test]
 fn words_that_name_no_date_are_marked_and_refused() {
     let mut form = fresh();
     to(&mut form, Field::Starts);
     type_in(&mut form, "someday");
-    assert_eq!(text(&form.left()), "", "as gd says nothing of words that name no day");
+    assert_eq!(text(&form.left()), "not a date or a time");
     form.step(true);
     assert_eq!(form.starts_words.as_deref(), Some("someday"), "the words stay");
     let shown = &form.value(Field::Starts)[0][0];

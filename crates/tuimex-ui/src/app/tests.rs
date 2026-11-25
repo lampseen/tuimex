@@ -169,7 +169,7 @@ fn every_key_of_the_table_does_something() {
         ("command.cancel", _) => ":",
         ("confirm.yes" | "confirm.no" | "confirm.other", _) => ":empty-trash work\r",
         // A new message opens on To: five fields on is From, four the body.
-        ("compose.identity", _) => "c\t\t\t\t\t",
+        ("compose.identity" | "compose.identity-arrows", _) => "c\t\t\t\t\t",
         ("compose.editor", _) => "c\t\t\t\t",
         (id, _) if id.starts_with("compose.") => "c",
         // The first Halden message is longer than the screen and is one
@@ -194,10 +194,13 @@ fn every_key_of_the_table_does_something() {
         ("calendar.match", "N") => "gc/call\rn",
         ("calendar.match", _) => "gc/call\r",
         ("calendar.today", _) => "gcl",
+        ("calendar.focus-grid", _) => "gc⌥l",
         ("calendar.view-number", "1") => "gc2",
         ("calendar.answer", _) => "gcI\r",
         ("calendar.links" | "calendar.edit" | "calendar.delete", _) => "gc\r",
         (id, _) if id.starts_with("calendar.") => "gc",
+        // One field on from the title is Calendar, which is chosen from.
+        ("event-form.choice" | "event-form.choice-arrows", _) => "gcc\t",
         (id, _) if id.starts_with("event-form.") => "gcc",
         // The roadmap review has fields under More; every event fits whole
         // at this size, so a key that scrolls says so.
@@ -609,7 +612,7 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     let mut app = after("?");
     let rows = screen(&mut app, 120, 40);
     assert_eq!((rows[0].as_str(), rows[39].as_str()), ("  Help", "  type to filter · ^d ^u scroll · Esc back"));
-    assert_eq!(rows[38].split("   ").next(), Some("  140 keys and commands · lines 1-35 of 70"));
+    assert_eq!(rows[38].split("   ").next(), Some("  144 keys and commands · lines 1-35 of 70"));
     // Scrolled to the end, then filtered to less than a page: the page
     // is shown from its top, and says no lines.
     press(&mut app, "^d^d^dagent");
@@ -621,18 +624,18 @@ fn help_shows_only_what_matches_what_is_typed_under_its_headings_and_esc_closes_
     assert_eq!(shown[3..6], agent, "a section whose heading matches is shown whole");
     assert_eq!(shown[8..10], ["Commands", ":agent reply|tidy|link   reply, tidy or link: hand text to the agent"]);
     assert!(rows[14..37].iter().all(|row| row.is_empty()), "what does not match is not drawn: {rows:#?}");
-    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 140 shown"), "  /agent"));
+    assert_eq!((rows[38].split("   ").next(), rows[39].as_str()), (Some("  5 of 144 shown"), "  /agent"));
     press(&mut app, "\x7f\x7f\x7f\x7f\x7fQq\x7f");
     assert!(!app.quit, "q is typed, not obeyed");
     let rows = screen(&mut app, 120, 40);
     assert_eq!(
         (rows[38].split("   ").next(), rows[39].as_str()),
-        (Some("  2 of 140 shown"), "  /Q"),
+        (Some("  2 of 144 shown"), "  /Q"),
         "whatever the case"
     );
     press(&mut app, "zzz");
     let rows = screen(&mut app, 120, 40);
-    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 140 shown"), "{rows:#?}");
+    assert!(rows[2..37].iter().all(|row| row.is_empty()) && rows[38].starts_with("  0 of 144 shown"), "{rows:#?}");
     press(&mut app, "\x1b");
     assert!(screen(&mut app, 120, 40)[0].starts_with("  Inbox 9"));
 }

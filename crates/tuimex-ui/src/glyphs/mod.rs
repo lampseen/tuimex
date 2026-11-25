@@ -17,6 +17,7 @@ pub const DOT: char = '·';
 pub const SHADE: char = '░';
 pub const FEW: char = '∙';
 pub const MANY: char = '⋮';
+pub const BLOCK: char = '┃';
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum Glyphs {
@@ -54,6 +55,7 @@ fn ascii(c: char) -> char {
         '░' => ':',
         '∙' => '.',
         '⋮' => '#',
+        '┃' => '#',
         c => c,
     }
 }

@@ -23,6 +23,7 @@ fn scene<'a>(calendar: &'a Calendar, accounts: &'a [AccountId], cursor: i64, pic
         view: View::Day,
         cursor,
         picked,
+        focus: false,
         accounts,
         colours: &[Tok::Link, Tok::Head],
         words: Tok::Agent,

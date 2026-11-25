@@ -141,6 +141,7 @@ fn main() -> Result<ExitCode> {
     let mut app = App::new(theme, mailbox);
     app.set_up(live::identities(&config), agent.is_some());
     app.set_writable_calendars(calendar::writable(&config).into_iter().map(AccountId).collect());
+    app.set_unwritten_calendars(calendar::unwritten(&config).into_iter().map(AccountId).collect());
     app.set_delay(delay);
     app.set_colours(colours);
     app.set_preview(preview);

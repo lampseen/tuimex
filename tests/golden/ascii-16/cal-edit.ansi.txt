@@ -37,4 +37,4 @@
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}  {brightblack}not saved{default}                                                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
-{default}  Tab {brightblack}next field - {default}Left Right {brightblack}choose - {default}Enter {brightblack}notes - {default}^s {brightblack}save - {default}Esc {brightblack}close{default}                                                
+{default}  Tab {brightblack}next field - {default}Enter {brightblack}notes - {default}^s {brightblack}save - {default}Esc {brightblack}close{default}                                                                    

@@ -1579,6 +1579,81 @@ carries the word `local` before it is stored anywhere. And the design
 draws no cancelled event, so an event its organizer cancels is removed,
 and a line on the command line and in `:messages` says so.
 
+*2026-11-24, after Bryan used it.* Seven changes he asked for, each in
+`design/tui.js` first. The agent leading the build approved them under the
+authority above.
+
+1. **F2 opens the calendar and F1 returns to mail.** Each is listed beside
+   `gc` and `gm` in the keymap, so it is read exactly where its sequence
+   is: the list, the reader, the calendar and an event's screen. In the
+   event form, compose, the command line and a prompt `gc` and `gm` are
+   letters, so there F1 and F2 do nothing. The month's hint names both
+   keys, `gm F1 mail`.
+2. **`h` and `l` choose on a field that takes no typed text**: Calendar,
+   All day, Repeats and Reminder in the event form, and From in compose,
+   which takes none either. The arrows still do. In a field that is typed
+   into they are letters. The arrows are a row of their own in the keymap
+   (`as h and l`), because one row holding all four keys made the help
+   wider than 120 columns. Decided where the brief was silent: a form's
+   hint names `h l` only while the focus is on a field they choose in. It
+   used to offer `Left Right` on every field, where on most they chose
+   nothing.
+3. **Alt-l and Alt-h move the focus between the month's grid and the list
+   beside it**, as they do between the list and the preview in mail.
+   Alt-j and Alt-k are bound too, as in mail, where either key of a pair
+   works wherever the preview lies; the hint names Alt-h, because the list
+   is beside the grid at every width and never under it. The grid's cursor
+   is dim while the list has the focus. Esc returns to the grid first. The
+   focus goes back to the grid whenever another view is shown, and with no
+   calendar there is no list to focus.
+4. **Focused, the list moves as the day view does.** `j` `k` `J` `K` step
+   through events across days and the grid's cursor follows, `Enter` opens
+   the selected event, and `o` `i` `E` `d` act on it. `h` and `l` still
+   move by a day and select its first event, as they do in the day view,
+   which keeps the one exception this record began with. The day view has
+   no `gg` or `G`, so the list has none. On a day with nothing on it no
+   event is selected and `j` goes to the next there is, as in the day
+   view. A day with more events than the list has rows scrolls: the
+   selected event is the last row and the rows above it follow. That rule
+   is in the one function both views draw their list with, so the day
+   view, which could lose its selected event below the last row on a
+   short terminal, scrolls the same way.
+5. **What is kept local for want of a write check says so.** A new event
+   or an answer kept local for an account whose calendar is read over
+   CalDAV and not written (ADR-062) ends its result with `tuimex setup can
+   try writing to its calendar`. Of a feed, which nothing can write, of an
+   account with no calendar, and of a change to an event it is not said.
+6. **In Starts and Ends only what changes is typed.** What is typed is
+   merged with what the field held: a time alone keeps the date, a date
+   alone keeps the time, a step is from the field's own day. `2pm` and
+   `2:30pm` are times wherever a time is read; an hour alone and a time
+   with no colon (`9`, `1430`) are times only in these two fields, because
+   after a date four digits are its year and `gd 9` should stay an error.
+   Chosen where two ways were offered: an end before the start is refused
+   on save, as it already was, and is not moved to the next day, since a
+   long event made by a slip of one digit is worse than a refusal that
+   says why. A time typed into an event that lasts all day turns All day
+   off, the reader having said it has a time. A field left empty keeps
+   what it held, which is what Backspace on an untouched date now comes
+   to; Esc still closes the form, as it does in compose.
+7. **The week is a grid, and an event in it a block.** A faint rule down
+   the left of each day and a dotted line across at each hour; the
+   cursor's column a step brighter (`dim` for `faint`) with its header
+   filled as the month's cursor is; today's header in the accent as in
+   the month, and the half hour it is now a line in the accent across
+   today's column. An event keeps one palette (ADR-003): no tint was
+   added, so its block is a heavy edge in its account's colour on every
+   row, a new glyph, with the title in the text's own colour and no grid
+   behind it. The week no longer dims what has ended: a past week was
+   grey from edge to edge, and the line of the present says what is past.
+   The header's cursor dims once an event is selected. A rule parts what
+   lasts all day from the hours. In sixteen colours `dim` and `faint` are
+   one, so there the cursor's column is told by its header alone. Below
+   120 columns it is three days, drawn the same way, and every row fits
+   at each width from 80 up. Not done: a start time beside the title of
+   an event one row long, which would cost most of the title at 120
+   columns.
+
 ## ADR-055 — An event made here is a file; a provider's copy is a cache
 
 This is ADR-013 again, for events. An event tuimex itself holds (one

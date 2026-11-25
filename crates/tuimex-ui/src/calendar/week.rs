@@ -1,17 +1,23 @@
 //! The week view: the design's `weekScreen`, days as columns against the
-//! clock. An event is a bar in its account's colour down the rows it
-//! lasts, its title beside the first row, its hours beside the second and
-//! what is most not normal about it beside the third. One that begins
-//! while another runs is drawn `CAL_STEP` cells in, over the other's rows,
-//! so both titles stay whole and the first one's bar still shows how long
-//! it lasts; two that begin together halve the column.
+//! clock, on a grid in the faintest tone: a rule down the left of each day
+//! and a dotted line across at each hour, a step brighter in the cursor's
+//! column. The half hour it is now is a line in the accent across today.
+//!
+//! An event is a block: a heavy edge in its account's colour down the rows
+//! it lasts and no grid behind it, its title beside the first row, its
+//! hours beside the second and what is most not normal about it beside
+//! the third. What has ended is not dimmed here: the line of the present
+//! says what is past. One that begins while another runs is drawn
+//! `CAL_STEP` cells in, over the other's rows, so both titles stay whole
+//! and the first one's edge still shows how long it lasts; two that begin
+//! together halve the column.
 
 use tuimex_core::calendar::{DAY, civil_from_days, weekday_of};
 use unicode_width::UnicodeWidthChar;
 
 use super::Entry;
 use super::parts::{self, MONTH_NAMES, Scene, clock, event_words};
-use crate::glyphs::{BAR, CURSOR};
+use crate::glyphs::{BAR, BLOCK, CURSOR, DOT, RULE};
 use crate::layout::{CAL_AXIS, CAL_DAY_FROM, CAL_SLOT, CAL_STEP, CAL_WEEK_FROM, MARGIN};
 use crate::palette::Tok;
 use crate::span::{Line, Span, fill, fit, gap, run};
@@ -148,12 +154,9 @@ fn overlay(base: &mut Line, x: usize, top: &[Span]) {
 /// Row `y` of an event's block, `w` cells wide.
 fn block(o: &Scene, entry: &Entry, y: i64, w: usize) -> Line {
     let selected = o.picked.is_some_and(|picked| entry.is(picked));
-    let lead = if selected { run(CURSOR, Tok::Acc) } else { run(BAR, o.colour_of(entry.account)) };
+    let lead = if selected { run(CURSOR, Tok::Acc) } else { run(BLOCK, o.colour_of(entry.account)) };
     let text = match y {
-        0 => {
-            let tone = if o.ended(entry) { Tok::Dim } else { Tok::Fg };
-            vec![Span { bold: entry.waiting(), ..run(entry.event.summary.as_str(), tone) }]
-        }
+        0 => vec![Span { bold: entry.waiting(), ..run(entry.event.summary.as_str(), Tok::Fg) }],
         1 if !entry.all_day => vec![run(format!("{}-{}", clock(entry.start), clock(entry.end)), Tok::Dim)],
         2 => event_words(entry).into_iter().take(1).map(|(word, own)| run(word, own.unwrap_or(Tok::Dim))).collect(),
         _ => Vec::new(),
@@ -181,19 +184,32 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let days = o.days(first, first + count as i64);
     let today = o.calendar.today();
 
+    // The grid of a day, a step brighter in the cursor's column: the rule
+    // down its left, and what lies across the rest of an empty cell.
+    let tone = |day: i64| if day == o.cursor { Tok::Dim } else { Tok::Faint };
+    let empty =
+        |day: i64, across: Option<Span>| vec![run(BAR, tone(day)), across.unwrap_or(gap(col.saturating_sub(1)))];
+    let across = |glyph: char, fg: Tok| run(glyph.to_string().repeat(col.saturating_sub(1)), fg);
+    let entry = o.entry();
+
     let mut head = vec![gap(MARGIN + CAL_AXIS)];
     for &day in &shown {
         let (_, _, dom) = civil_from_days(day);
         let label = format!("{} {dom}", DAYS[weekday_of(day) as usize]);
-        let tone = if day == today {
-            Tok::Acc
-        } else if day == o.cursor {
-            Tok::Fg
-        } else {
-            Tok::Dim
+        let on = day == o.cursor;
+        let fg = match (day == today, on) {
+            (true, _) => Tok::Acc,
+            (false, true) => Tok::Fg,
+            (false, false) => Tok::Dim,
         };
-        let label = Span { bold: day == today || day == o.cursor, ..run(label, tone) };
-        head.extend(fit(&[gap(1), label], col));
+        let label = Span { bold: day == today || on, ..run(label, fg) };
+        // The cursor is on a day until an event is selected, and is then
+        // dim here, as a pane's is while another has the focus.
+        let cursor = run(CURSOR, if entry.is_some() { Tok::Dim } else { Tok::Acc });
+        match on {
+            true => head.extend(fill(fit(&[cursor, label], col), Tok::Sel)),
+            false => head.extend(fit(&[gap(1), label], col)),
+        }
     }
 
     let all_day: Vec<Vec<&Entry>> =
@@ -202,10 +218,10 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let all_rows = (0..most).map(|y| {
         let mut row = vec![gap(MARGIN)];
         row.extend(fit(&if y == 0 { vec![run("all day", Tok::Dim)] } else { Vec::new() }, CAL_AXIS));
-        for list in &all_day {
+        for (list, &day) in all_day.iter().zip(&shown) {
             match list.get(y) {
                 Some(entry) => row.extend(block(o, entry, 0, col)),
-                None => row.push(gap(col)),
+                None => row.extend(empty(day, None)),
             }
         }
         row
@@ -231,6 +247,7 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let picked = o.picked.and_then(|picked| timed.iter().flat_map(|(list, _)| list).find(|p| p.entry.is(picked)));
     let from = window(slots, picked.map(|p| (p.from, p.to)));
     let now = shown.contains(&today).then(|| o.calendar.wall().rem_euclid(DAY) / 3600 * 60);
+    let present = o.calendar.wall().rem_euclid(DAY) / 60 / CAL_SLOT * CAL_SLOT;
 
     let grid = (0..slots as i64).map(|s| {
         let at = from + s * CAL_SLOT;
@@ -243,8 +260,13 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
         };
         let mut row = vec![gap(MARGIN)];
         row.extend(fit(&label, CAL_AXIS));
-        for (list, lanes) in &timed {
-            let mut cell = explode(&[gap(col)]);
+        for ((list, lanes), &day) in timed.iter().zip(&shown) {
+            let line = match (day == today && at == present, at % 60) {
+                (true, _) => Some(across(RULE, Tok::Acc)),
+                (false, 0) => Some(across(DOT, tone(day))),
+                (false, _) => None,
+            };
+            let mut cell = explode(&empty(day, line));
             for p in list.iter().filter(|p| p.from <= at && at < p.to) {
                 let half = col / lanes;
                 let x = match (p.lane.shares, p.lane.abreast) {
@@ -272,10 +294,11 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     };
     let mut content = vec![head];
     content.extend(all_rows.iter().cloned());
+    // A rule parts what lasts all day from the hours.
     if most > 0 {
-        content.push(Line::new());
+        content.push(vec![gap(MARGIN + CAL_AXIS), run(RULE.to_string().repeat(count * col), Tok::Faint)]);
     }
     content.extend(grid);
     let content = content.iter().map(|row| fit(row, width)).collect();
-    parts::frame(o, width, &title, content, parts::day_status(o, o.cursor), parts::hint(o.entry().as_ref()))
+    parts::frame(o, width, &title, content, parts::day_status(o, o.cursor), parts::hint(entry.as_ref(), false))
 }

@@ -36,5 +36,5 @@
 {default}                                                                                                                        
 {default}                                                                                                                        
 {default}                                                                                                                        
-{default}  {brightblack}5 of 140 shown{default}                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}5 of 144 shown{default}                                                                            sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  /agent{black bg=magenta} {default}                                                                                                               

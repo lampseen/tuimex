@@ -37,4 +37,4 @@
                                   |                                                                                     
                                                                                                                         
   Thu 26 Nov - 4 events - 1 to answer     sending in 6s - 1 not sent - personal's calendar not read - last read 2h ago  
-  Enter open - J K next event - t today - c new event - gm mail - ? help                                                
+  Enter open - J K next event - t today - c new event - gm F1 mail - ? help                                             

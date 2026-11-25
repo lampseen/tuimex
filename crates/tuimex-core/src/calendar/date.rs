@@ -37,14 +37,42 @@ fn named(names: &[&str], word: &str) -> Option<usize> {
     names.iter().position(|name| word.len() >= 3 && name.starts_with(word))
 }
 
-/// `14:00` as a minute of the day.
+/// `14:00`, `2pm` or `2:30pm` as a minute of the day.
 fn minute(word: &str) -> Option<i64> {
-    let (hour, minute) = word.split_once(':')?;
     let digits =
         |text: &str, least: usize| (least..=2).contains(&text.len()) && text.bytes().all(|b| b.is_ascii_digit());
+    let half = word.strip_suffix("am").map(|rest| (rest, 0)).or(word.strip_suffix("pm").map(|rest| (rest, 12)));
+    let (clock, noon) = half.map_or((word, None), |(rest, noon)| (rest, Some(noon)));
+    let (hour, minute) = match (clock.split_once(':'), noon) {
+        (Some(parts), _) => parts,
+        (None, Some(_)) => (clock, "00"),
+        (None, None) => return None,
+    };
     if !digits(hour, 1) || !digits(minute, 2) {
         return None;
     }
+    let (hour, minute) = (hour.parse::<i64>().ok()?, minute.parse::<i64>().ok()?);
+    let hour = match noon {
+        // Twelve is the hour the half begins with.
+        Some(noon) if (1..=12).contains(&hour) => hour % 12 + noon,
+        Some(_) => return None,
+        None => hour,
+    };
+    (hour < 24 && minute < 60).then_some(hour * 60 + minute)
+}
+
+/// The minute of the day `words` name when they are a time and nothing
+/// else: what `minute` reads, and also an hour alone (`9`) and a time with
+/// no colon (`930`, `1430`). Those two are a time only where a time is
+/// what is asked for: after a date, digits are its year.
+pub fn time(words: &str) -> Option<i64> {
+    let word = words.trim().to_lowercase();
+    let bare = (1..=4).contains(&word.len()) && word.bytes().all(|b| b.is_ascii_digit());
+    if !bare {
+        return minute(&word);
+    }
+    // Of three digits or four the last two are the minutes.
+    let (hour, minute) = if word.len() > 2 { word.split_at(word.len() - 2) } else { (word.as_str(), "0") };
     let (hour, minute) = (hour.parse::<i64>().ok()?, minute.parse::<i64>().ok()?);
     (hour < 24 && minute < 60).then_some(hour * 60 + minute)
 }

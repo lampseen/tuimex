@@ -37,4 +37,4 @@
 {fg}                                                                                                                        
 {fg}                                                                                                                        
 {fg}  {dim}not saved{fg}                                                                                 sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Tab {dim}next field · {fg}Left Right {dim}choose · {fg}Enter {dim}notes · {fg}^s {dim}save · {fg}Esc {dim}close{fg}                                                
+{fg}  Tab {dim}next field · {fg}Enter {dim}notes · {fg}^s {dim}save · {fg}Esc {dim}close{fg}                                                                    

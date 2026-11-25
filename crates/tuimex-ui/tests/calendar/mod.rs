@@ -3,7 +3,8 @@
 //! it. Today is Monday 23 November, so three days on from where `gc` opens
 //! is the Thursday the design puts its cursor on.
 //!
-//! The month's outputs are here. Each other view and the flows have a file
+//! The month's outputs are here, with those of the list beside its grid
+//! when that has the focus. Each other view and the flows have a file
 //! of their own, with the outputs it draws and the tests that compare them.
 
 mod day;
@@ -21,9 +22,15 @@ use tuimex_ui::span::Line;
 use super::{DEFAULT, both, check, press, usual_mail};
 
 /// The outputs drawn here; `drawn` adds those of the other files.
-const DRAWN: [&str; 9] = [
+const DRAWN: [&str; 15] = [
     "cal-month",
     "cal-month-80-ascii",
+    "cal-month-list-focus",
+    "cal-month-wide-list-focus",
+    "cal-list-0",
+    "cal-list-1",
+    "cal-list-2",
+    "cal-list-3",
     "cal-month-account",
     "cal-empty",
     "cal-unread",
@@ -40,6 +47,8 @@ pub fn drawn() -> Vec<&'static str> {
 
 /// To Thursday the 26th from where `gc` opens.
 const TO_THURSDAY: &str = "gclll";
+/// And from its grid into the list beside it, by Alt and `l`.
+const LISTED: &str = "gclll⌥l";
 
 /// The design's `CALENDARS` and `EVENTS`, read when its `read` says.
 fn calendar() -> Calendar {
@@ -79,6 +88,18 @@ fn cut(lines: Vec<Line>, n: usize) -> Vec<Line> {
 pub fn draw(name: &str, width: usize, height: usize) -> Option<Vec<Line>> {
     Some(match name.strip_suffix("-80-ascii").unwrap_or(name) {
         "cal-month" => typed(TO_THURSDAY).lines(width, height),
+        "cal-month-list-focus" | "cal-month-wide-list-focus" => typed(LISTED).lines(width, height),
+        "cal-list-0" => cut(typed(LISTED).lines(120, 40), 11),
+        "cal-list-1" => cut(typed(&format!("{LISTED}j")).lines(120, 40), 11),
+        "cal-list-2" => cut(typed(&format!("{LISTED}l")).lines(120, 40), 11),
+        "cal-list-3" => {
+            // The design's `busy` Thursday, on a screen with eight rows for
+            // it, and down to the last of its eight events.
+            let mut calendar = calendar();
+            let own = calendar.shelves.iter_mut().find(|shelf| shelf.account.0 == "personal" && !shelf.local).unwrap();
+            own.events.extend(fx::busy());
+            over(calendar, &format!("{LISTED}jjjjjjj")).lines(120, 13)
+        }
         "cal-month-account" => typed("gclllgt").lines(width, height),
         "cal-empty" => over(Calendar::empty(fx::NOW), "gc").lines(width, height),
         "cal-unread" => {
@@ -128,4 +149,13 @@ fn help_calendar() {
 fn cal_month_steps() {
     both("cal-zoom-0");
     both("cal-goto-2");
+}
+
+/// The focus in the list beside the grid, at each width the design draws
+/// it at, and the flow that moves it.
+#[test]
+fn cal_month_list() {
+    both("cal-month-list-focus");
+    both("cal-month-wide-list-focus");
+    (0..4).for_each(|step| both(&format!("cal-list-{step}")));
 }

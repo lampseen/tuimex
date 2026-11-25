@@ -37,4 +37,4 @@
                                                                                                                         
                                                                                                                         
   draft saved 13:58                                                                         sending in 6s · 1 not sent  
-  Tab next field · Left Right identity · Enter edit · A agent · ^s send · Esc close                                     
+  Tab next field · h l identity · Enter edit · A agent · ^s send · Esc close                                            

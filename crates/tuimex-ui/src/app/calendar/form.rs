@@ -14,6 +14,7 @@ use crate::calendar::change::{Item, Patch};
 use crate::calendar::form::{self, Form, Saved, Target};
 use crate::calendar::parts::Scene;
 use crate::editor::Editor;
+use crate::glyphs::DOT;
 use crate::keymap::{self, Found, Key};
 use crate::palette::Tok;
 use crate::say::{self, Question};
@@ -38,6 +39,9 @@ pub(in crate::app) struct State {
     asking: Option<Asking>,
     /// The accounts whose own calendar tuimex can write over CalDAV.
     writable: Vec<AccountId>,
+    /// The accounts whose own calendar is read over CalDAV and has had no
+    /// write tried on it.
+    pub(super) unwritten: Vec<AccountId>,
 }
 
 impl State {
@@ -53,8 +57,22 @@ impl App {
         self.cal.form.writable = accounts;
     }
 
+    /// The accounts whose own calendar is read over CalDAV and not
+    /// written. What is kept local for one of them says that `tuimex
+    /// setup` can find out whether it need be; of a feed, which nothing
+    /// can write, that is never said.
+    pub fn set_unwritten_calendars(&mut self, accounts: Vec<AccountId>) {
+        self.cal.form.unwritten = accounts;
+    }
+
     pub(in crate::app) fn form_is_open(&self) -> bool {
         self.cal.form.form.is_some()
+    }
+
+    /// Whether the binding `id` is a letter to type where the form's focus
+    /// is: `h` and `l` choose only on a field nothing is typed into.
+    pub(super) fn form_types(&self, id: &str) -> bool {
+        id == "event-form.choice" && self.cal.form.form.as_ref().is_some_and(|form| form.focus.typed())
     }
 
     /// Every calendar an event can be saved to, by account in the config's
@@ -130,7 +148,7 @@ impl App {
         let Some(mut form) = self.cal.form.form.take() else { return };
         match id {
             "event-form.field" => form.step(i == 0),
-            "event-form.choice" => {
+            "event-form.choice" | "event-form.choice-arrows" => {
                 if !form.choose(i == 1) {
                     self.say(say::err(format!(
                         "{}: {} has nothing to choose from",
@@ -222,7 +240,10 @@ impl App {
         if let Some(picked) = saved(self.day()).or_else(|| saved(starts)) {
             (self.cal.cursor, self.cal.picked) = (Some(picked.day), Some(picked));
         }
-        self.say(say::ok(said).key("u to undo"));
+        self.say(match self.could_write(&to).filter(|_| replaces.is_none()) {
+            Some(setup) => say::ok(said).then(format!("{setup} {DOT} u to undo")),
+            None => say::ok(said).key("u to undo"),
+        });
     }
 
     /// A key the form's table does not name: an answer to the question

@@ -17,6 +17,8 @@ pub enum Key {
     Down,
     Left,
     Right,
+    /// A function key, by its number.
+    F(u8),
 }
 
 /// How long the first key of `gg` or `zo` waits for the second.
@@ -56,7 +58,7 @@ pub const KEYMAP: &[Table] = &[
             b("global.undo", "u", "undo the last action", "undo"),
             b("global.agent", "A", "what the agent can do", "agent"),
             b("global.redraw", "^l", "redraw", ""),
-            b("global.calendar", "gc", "the calendar", "calendar"),
+            b("global.calendar", "gc F2", "the calendar", "calendar"),
         ],
     },
     Table {
@@ -157,8 +159,10 @@ pub const KEYMAP: &[Table] = &[
         title: "Calendar (after gc)",
         keys: &[
             b("calendar.day", "h l", "previous, next day", ""),
-            b("calendar.move", "j k", "month: week; else: event", ""),
+            b("calendar.move", "j k", "grid: week; else: event", ""),
             b("calendar.period", "[ ]", "previous, next page", ""),
+            b("calendar.focus-list", "Alt-j Alt-l", "month: focus the events", ""),
+            b("calendar.focus-grid", "Alt-k Alt-h", "back to the grid", "grid"),
             b("calendar.event", "J K", "next, previous event", "next event"),
             b("calendar.match", "n N", "next, previous match", "next match"),
             b("calendar.waiting", "I", "next invite to answer", "next to answer"),
@@ -176,7 +180,7 @@ pub const KEYMAP: &[Table] = &[
             b("calendar.edit", "E", "edit the event", "edit"),
             b("calendar.delete", "d", "delete the event", "delete"),
             b("calendar.reminders", "gn", "reminders on, off", ""),
-            b("calendar.mail", "gm", "back to mail", "mail"),
+            b("calendar.mail", "gm F1", "back to mail", "mail"),
         ],
     },
     Table {
@@ -203,7 +207,8 @@ pub const KEYMAP: &[Table] = &[
         title: "Event form",
         keys: &[
             b("event-form.field", "Tab S-Tab", "next, previous field", ""),
-            b("event-form.choice", "Left Right", "choose, where offered", "choose"),
+            b("event-form.choice", "h l", "choose, where offered", "choose"),
+            b("event-form.choice-arrows", "Left Right", "as h and l", ""),
             b("event-form.notes", "Enter", "edit notes in $EDITOR", "notes"),
             b("event-form.save", "^s", "save; guests get mail", "save"),
             b("event-form.close", "Esc", "close; keep or discard", "close"),
@@ -214,7 +219,8 @@ pub const KEYMAP: &[Table] = &[
         title: "Compose",
         keys: &[
             b("compose.field", "Tab S-Tab", "next, previous field", ""),
-            b("compose.identity", "Left Right", "identity, on From", "identity"),
+            b("compose.identity", "h l", "identity, on From", "identity"),
+            b("compose.identity-arrows", "Left Right", "as h and l", ""),
             b("compose.editor", "Enter", "edit body in $EDITOR", "edit"),
             b("compose.attach", "^a", "attach a file", "attach"),
             b("compose.summary", "^s", "send summary", "send"),
@@ -249,9 +255,12 @@ pub const KEYMAP: &[Table] = &[
 /// it is not a key to look up.
 const ANY_OTHER: &str = "confirm.other";
 
-/// The presses one name of the table stands for: `gg` is two and `^d` is
-/// one. `1-9` is a range, which `find` matches itself.
+/// The presses one name of the table stands for: `gg` is two and `^d` and
+/// `F2` are one. `1-9` is a range, which `find` matches itself.
 pub(crate) fn presses(name: &str) -> Vec<Key> {
+    if let Some(n) = name.strip_prefix('F').and_then(|n| n.parse().ok()) {
+        return vec![Key::F(n)];
+    }
     match name {
         "Space" => vec![Key::Char(' ')],
         "Enter" => vec![Key::Enter],

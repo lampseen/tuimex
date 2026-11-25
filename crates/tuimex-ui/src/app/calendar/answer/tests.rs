@@ -56,6 +56,23 @@ fn an_answer_says_where_the_event_went() {
     );
 }
 
+/// An answer kept local because nobody has tried writing the account's
+/// own CalDAV calendar says what would try. Kept local for any other
+/// reason, a feed among them, it says what it always did.
+#[test]
+fn an_answer_kept_local_for_want_of_a_write_check_says_setup_can_try_one() {
+    let mut app = fresh();
+    app.set_unwritten_calendars(vec![AccountId("work".to_string())]);
+    press(&mut app, &format!("{ROADMAP}ia"));
+    let setup = "tuimex setup can try writing to its calendar";
+    assert_eq!(foot(&mut app).1, format!("✓ Accepted Q4 roadmap review · in work, local · {setup} · u to undo"));
+    assert_eq!(actions(&mut app), [answered(named(false), Answer::Accept, None)], "what is asked is the same");
+    let mut app = fresh();
+    app.set_unwritten_calendars(vec![AccountId("personal".to_string())]);
+    press(&mut app, &format!("{ROADMAP}ia"));
+    assert_eq!(foot(&mut app).1, "✓ Accepted Q4 roadmap review · in work, local · u to undo", "another account's");
+}
+
 #[test]
 fn an_answer_names_the_mail_the_invitation_came_in_when_that_is_known() {
     let mut calendar = design();

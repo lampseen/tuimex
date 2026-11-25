@@ -37,4 +37,4 @@
 {fg}                                  {faint}│{fg}                                                                                     
 {fg}                                                                                                                        
 {fg}  {dim}Thu 26 Nov · 4 events · {warn}1 to answer{fg}                                                       sending in 6s{dim} · {err}1 not sent{fg}  
-{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm {dim}mail · {fg}? {dim}help{fg}                                                
+{fg}  Enter {dim}open · {fg}J K {dim}next event · {fg}t {dim}today · {fg}c {dim}new event · {fg}gm F1 {dim}mail · {fg}? {dim}help{fg}                                             

@@ -10,7 +10,7 @@
 {default}    u           {brightblack}undo the last action{default}     V            {brightblack}mark a range{default}            B                {brightblack}sealed browser copy{default}      
 {default}    A           {brightblack}what the agent can do{default}    Enter        {brightblack}open; a draft, to edit{default}  e d s m M r R f  {brightblack}as in the list{default}           
 {default}    ^l          {brightblack}redraw{default}                   p            {brightblack}show or hide preview{default}                                              
-{default}    gc          {brightblack}the calendar{default}             P            {brightblack}preview beside, below{default}   {default b}Preview, focused{default}                          
+{default}    gc F2       {brightblack}the calendar{default}             P            {brightblack}preview beside, below{default}   {default b}Preview, focused{default}                          
 {default}                                         B            {brightblack}sealed browser copy{default}     j k ^d ^u gg G   {brightblack}scroll{default}                   
 {default}    {default b}Command line{default}                         Alt-j Alt-l  {brightblack}focus the preview{default}       Alt-k Alt-h      {brightblack}back to the list{default}         
 {default}    Tab S-Tab   {brightblack}complete, cycle{default}          gt gT        {brightblack}next, previous account{default}                                            
@@ -26,15 +26,15 @@
 {default}                                         zo           {brightblack}unfold a thread{default}         Esc              {brightblack}close{default}                    
 {default}    {default b}Compose{default}                              zc           {brightblack}fold a thread{default}                                                     
 {default}    Tab S-Tab   {brightblack}next, previous field{default}                                          {default b}Agent (after A){default}                           
-{default}    Left Right  {brightblack}identity, on From{default}                                             r                {brightblack}write a reply{default}            
-{default}    Enter       {brightblack}edit body in $EDITOR{default}                                          t                {brightblack}tidy, in compose{default}         
-{default}    ^a          {brightblack}attach a file{default}                                                 l                {brightblack}review a link, in links{default}  
-{default}    ^s          {brightblack}send summary{default}                                                                                            
-{default}    ^d          {brightblack}save the draft{default}                                                {default b}Invitation (after i){default}                      
-{default}    Esc         {brightblack}close; keep or discard{default}                                        a                {brightblack}accept{default}                   
-{default}                                                                              t                {brightblack}tentative{default}                
-{default}    {default b}Help (after ?){default}                                                            d                {brightblack}decline{default}                  
-{default}    ^d ^u       {brightblack}scroll{default}                                                        p                {brightblack}propose another time{default}     
+{default}    h l         {brightblack}identity, on From{default}                                             r                {brightblack}write a reply{default}            
+{default}    Left Right  {brightblack}as h and l{default}                                                    t                {brightblack}tidy, in compose{default}         
+{default}    Enter       {brightblack}edit body in $EDITOR{default}                                          l                {brightblack}review a link, in links{default}  
+{default}    ^a          {brightblack}attach a file{default}                                                                                           
+{default}    ^s          {brightblack}send summary{default}                                                  {default b}Invitation (after i){default}                      
+{default}    ^d          {brightblack}save the draft{default}                                                a                {brightblack}accept{default}                   
+{default}    Esc         {brightblack}close; keep or discard{default}                                        t                {brightblack}tentative{default}                
+{default}                                                                              d                {brightblack}decline{default}                  
+{default}    {default b}Help (after ?){default}                                                            p                {brightblack}propose another time{default}     
 {default}                                                                                                                        
-{default}  {brightblack}140 keys and commands - lines 1-35 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}144 keys and commands - lines 1-35 of 70{default}                                                  sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              
