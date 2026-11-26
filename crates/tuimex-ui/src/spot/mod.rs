@@ -4,6 +4,7 @@
 
 use std::ops::Range;
 
+use crate::calendar::parts::View;
 use crate::compose::Field;
 use crate::keymap::Key;
 use crate::places::Place;
@@ -29,6 +30,22 @@ pub enum Target {
     Answer(Key),
     /// A field of compose, and its rows.
     Field(Field),
+    /// A view's tab in the calendar.
+    CalView(View),
+    /// A day: its cell in the month's grid, or its column's head in the week.
+    Day(i64),
+    /// An event a view drew, by its place in the events the view says it
+    /// drew beside its spots.
+    Occasion(usize),
+    /// An entry of the panel open over the calendar, counted as its cursor
+    /// counts them.
+    CalEntry(usize),
+    /// A field of the event form, by its place in `FIELDS`.
+    FormField(usize),
+    /// The month's grid and the list of events, where nothing else of them
+    /// is: what the wheel is over.
+    CalGrid,
+    CalList,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

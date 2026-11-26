@@ -2285,7 +2285,7 @@ The rules that follow from those:
 No crate is added: `crossterm`'s events already carry the pointer
 (ADR-005).
 
-**What it covers so far.** The bar of places and the mail list: tabs,
+**What it covers.** The bar of places and the mail list: tabs,
 rows, the preview, the wheel. The reader: a `[n]` in the text lists the
 links with that one chosen, an entry of the links or the files is chosen
 and then is Enter, and the wheel scrolls the text, help and `:messages`.
@@ -2294,8 +2294,22 @@ open, so of the rule above, what a question leaves read is its choices.
 Compose: a field takes the focus as Tab gives it, and a press on the
 focused one does nothing. The menus over the list (completion, `A`'s
 agent menu, `:messages`'s entries) take no press: `A` picks by letter
-and its pick sends text out of the machine (ADR-031). The calendar is to
-follow; until then a press there does nothing.
+and its pick sends text out of the machine (ADR-031).
+
+**In the calendar.** A press on a view's tab opens it; on a day of the
+month's grid or the head of a week's column it moves the cursor there; on
+an event in a list or a block of the week it selects it; on an entry of
+the Calendars or links panel it moves that panel's cursor; on a field of
+the form it moves the focus there as Tab would, typing nothing. On what is
+already selected it is that place's Enter, and in the Calendars panel its
+Space, which shows or hides a calendar and is undone by another. A link
+pressed twice is assessed as Enter has it assessed (ADR-018). The wheel is
+`j` and `k`: a week over the grid, and in a list or the week one event a
+notch, since an event is a selection and three would pass over events
+never seen; the event's screen scrolls three lines. Over the part of the
+month without the focus the wheel does nothing, as the same key would move
+the other part. While a panel is open only its entries take a press, and
+while a question is open nothing does.
 
 **What it costs.** Text selection, for whoever turns it on. A map from
 cells to what was drawn there, which every screen that wants the pointer

@@ -948,9 +948,10 @@ Proton Bridge pinned.
 **Exit:** round trips against a scratch `GNUPGHOME` made by the test.
 
 ### M11 — Polish and release
-`NO_COLOR`; mouse (click row, tab, wheel: *built for the mail list, the
-reader, questions and compose*, off unless `ui.mouse` asks, ADR-065; the
-calendar is to follow); `[keys]` remapping; notifications (§6.6); `config.example.toml`. Written ahead of the rest, when the
+`NO_COLOR`; mouse (click row, tab, wheel: *built* for mail and the
+calendar, off until `ui.mouse` or `:mouse` asks, ADR-065); `[keys]`
+remapping; notifications (§6.6); `config.example.toml`. Written ahead of
+the rest, when the
 repository was published (ADR-051): the release workflow with attested
 artifacts and checksums, the two-step `make release` / `make release-tag`,
 copied from pullpen, the weekly dependency check and a Homebrew formula

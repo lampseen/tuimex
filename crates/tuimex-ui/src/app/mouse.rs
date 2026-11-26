@@ -10,7 +10,7 @@ use crate::places::PLACES;
 use crate::spot::{self, Mouse, Target};
 
 /// The lines one notch of the wheel moves by.
-const NOTCH: usize = 3;
+pub(in crate::app) const NOTCH: usize = 3;
 
 impl App {
     /// `ui.mouse`: whether the pointer is read from the start.
@@ -73,7 +73,7 @@ impl App {
         match on {
             Some(Target::Place(place)) => self.place_clicked(place),
             Some(target) if self.listing() => self.list_clicked(target),
-            Some(_) if self.cal.open => {}
+            Some(target) if self.cal.open => self.calendar_clicked(target),
             Some(target) if self.compose.is_some() => self.field_clicked(target),
             Some(target) => self.reader_clicked(target),
             None => {}
@@ -82,10 +82,12 @@ impl App {
 
     fn wheeled(&mut self, on: Option<Target>, down: bool) {
         let i = usize::from(!down);
-        if self.listing() {
+        if self.cal.open {
+            self.calendar_wheeled(on, down);
+        } else if self.listing() {
             let id = if on == Some(Target::Pane) { "preview.scroll" } else { "list.move" };
             (0..NOTCH).for_each(|_| self.run(id, i));
-        } else if !self.cal.open && self.compose.is_none() {
+        } else if self.compose.is_none() {
             (0..NOTCH).for_each(|_| self.reader_run("reader.scroll", i));
         }
     }
@@ -153,4 +155,4 @@ impl App {
 }
 
 #[cfg(test)]
-mod tests;
+pub(in crate::app) mod tests;

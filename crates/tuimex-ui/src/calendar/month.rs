@@ -7,13 +7,14 @@
 use tuimex_core::calendar::{civil_from_days, days_from_civil, days_in_month, weekday_of};
 
 use super::Days;
-use super::parts::{self, MONTH_NAMES, Scene};
+use super::parts::{self, Drawn, MONTH_NAMES, Pressed, Scene};
 use crate::glyphs::{BAR, CURSOR, FEW, MANY};
 use crate::keymap;
 use crate::layout::{CAL_CELL, INDENT, MARGIN};
 use crate::list;
 use crate::palette::Tok;
-use crate::span::{Line, Span, fill, fit, gap, run};
+use crate::span::{Line, Span, cells, fill, fit, gap, run};
+use crate::spot::{Spot, Target};
 
 const WEEK: [&str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 /// The most months the column ever holds.
@@ -35,7 +36,8 @@ fn rows_of(year: i64, month: i64) -> usize {
 /// One month, seven days wide. A day is bright when something is on it and
 /// the accent when it is today; its mark says how much (one, two, more)
 /// and is the warning colour while an invitation on it waits for an answer.
-fn month_rows(o: &Scene, days: &Days, year: i64, month: i64, current: bool) -> Vec<Line> {
+/// Beside the rows are the cells of each day.
+fn month_rows(o: &Scene, days: &Days, year: i64, month: i64, current: bool) -> (Vec<Line>, Vec<Spot>) {
     let first = days_from_civil(year, month, 1);
     let (length, lead) = (days_in_month(year, month), (weekday_of(first) + 6) % 7);
     let title = format!("{} {year}", MONTH_NAMES[(month - 1) as usize]);
@@ -69,17 +71,25 @@ fn month_rows(o: &Scene, days: &Days, year: i64, month: i64, current: bool) -> V
             false => vec![gap(1), number, mark],
         }
     };
-    let mut at = -lead;
+    let (mut at, mut spots) = (-lead, Vec::new());
     while at < length {
-        rows.push((1..=7).flat_map(|i| cell(at + i)).collect());
+        let mut row = Line::new();
+        for dom in at + 1..=at + 7 {
+            let from = cells(&row);
+            row.extend(cell(dom));
+            if (1..=length).contains(&dom) {
+                spots.push(Spot { row: rows.len(), cols: from..cells(&row), target: Target::Day(first + dom - 1) });
+            }
+        }
+        rows.push(row);
         at += 7;
     }
-    rows.into_iter().map(|row| fit(&row, 7 * CAL_CELL)).collect()
+    (rows.into_iter().map(|row| fit(&row, 7 * CAL_CELL)).collect(), spots)
 }
 
 /// The cursor's month and as many of the months after it as fit whole in
-/// `room` rows, a blank row between them.
-fn months_column(o: &Scene, room: usize) -> Vec<Line> {
+/// `room` rows, a blank row between them, and the cells of their days.
+fn months_column(o: &Scene, room: usize) -> (Vec<Line>, Vec<Spot>) {
     let mut fits = 0;
     let mut used = 0;
     while fits < MOST {
@@ -92,33 +102,47 @@ fn months_column(o: &Scene, room: usize) -> Vec<Line> {
     }
     let (first, end) = (month_after(o.cursor, 0), month_after(o.cursor, fits));
     let days = o.days(days_from_civil(first.0, first.1, 1), days_from_civil(end.0, end.1, 1));
-    let mut rows = Vec::new();
+    let (mut rows, mut spots) = (Vec::new(), Vec::new());
     for i in 0..fits {
         let (year, month) = month_after(o.cursor, i);
         if i > 0 {
             rows.push(Line::new());
         }
-        rows.extend(month_rows(o, &days, year, month, i == 0));
+        let (more, its) = month_rows(o, &days, year, month, i == 0);
+        spots.extend(its.into_iter().map(|spot| spot.moved(rows.len(), 0)));
+        rows.extend(more);
     }
-    rows
+    (rows, spots)
 }
 
 /// The whole screen. With no calendar at all the grid still moves, and
 /// the list says how one is added.
-pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
+pub fn screen(o: &Scene, width: usize, height: usize) -> Drawn {
     let room = o.room(height);
-    let months = months_column(o, room);
+    let (months, days) = months_column(o, room);
     let left_width = INDENT + 7 * CAL_CELL + MARGIN;
     let pane_width = width.saturating_sub(left_width + 1);
     let none = o.calendar.shelves.is_empty();
-    let pane = match none {
-        true => vec![
-            Line::new(),
-            vec![gap(MARGIN), run("No calendar yet.", Tok::Fg)],
-            vec![gap(MARGIN), run("`tuimex setup` asks each account for the address of its calendar.", Tok::Dim)],
-        ],
+    let (pane, listed) = match none {
+        true => (
+            vec![
+                Line::new(),
+                vec![gap(MARGIN), run("No calendar yet.", Tok::Fg)],
+                vec![gap(MARGIN), run("`tuimex setup` asks each account for the address of its calendar.", Tok::Dim)],
+            ],
+            Pressed::default(),
+        ),
         false => parts::agenda(o, o.listed_from, room, pane_width, o.picked.filter(|_| o.focus)),
     };
+    // The grid and the list are each under what is drawn on them.
+    let whole =
+        |cols: std::ops::Range<usize>, target| (0..room).map(move |row| Spot { row, cols: cols.clone(), target });
+    let mut spots: Vec<Spot> = whole(0..left_width, Target::CalGrid).collect();
+    spots.extend(days.into_iter().map(|spot| spot.moved(0, INDENT)));
+    spots.extend(whole(left_width + 1..left_width + 1 + pane_width, Target::CalList));
+    let listed = listed.moved(0, left_width + 1);
+    spots.extend(listed.spots);
+    let pressed = Pressed { spots, events: listed.events };
     let blank = Line::new();
     let content = (0..room).map(|y| {
         let month = [vec![gap(INDENT)], months.get(y).cloned().unwrap_or_default()].concat();
@@ -133,5 +157,5 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
         true => (Line::new(), list::hint(&[keymap::hint("global.help")])),
         false => (parts::day_status(o, o.cursor), parts::hint(o.entry().filter(|_| o.focus).as_ref(), o.focus)),
     };
-    parts::frame(o, width, &title, content.collect(), left, idle)
+    parts::frame(o, width, &title, (content.collect(), pressed), left, idle)
 }

@@ -86,6 +86,29 @@ A key that mail uses means the same here, with one exception: `h` and
 rows of mail is refused while the calendar is open, and says `gm` returns
 to mail.
 
+### The mouse
+
+With the mouse turned on ([Keys](Keys#the-mouse)), a press selects what it
+is on and a second press on the same thing does what `Enter` does there.
+
+| press or wheel | does |
+|---|---|
+| `Month` `Week` `Day` | opens that view |
+| a day in the month's grid | moves the cursor there; on the cursor's day, opens the day |
+| a day's head in the week | moves the cursor there |
+| an event in a list or in the week | selects it; on the selected event, opens it |
+| a calendar in the `C` panel | chooses it; on the chosen one, shows or hides it as `Space` does |
+| a link in the `o` panel | chooses it; on the chosen one, opens it as `Enter` does, asking first where `Enter` would |
+| a field of the event form | moves there as `Tab` would; nothing is typed |
+| wheel over the month's grid | a week down or up |
+| wheel over a list of events, or in the week | the next or previous event |
+| wheel on an event's screen | scrolls three lines |
+
+The wheel moves the part of the month that has the focus and does nothing
+over the other part. While a panel is open only its entries take a press,
+and while a date or a search is being typed or a question is open none
+does.
+
 ## Answering an invitation
 
 `i` on an event you were asked to, or on an invitation's card in the

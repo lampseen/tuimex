@@ -8,14 +8,14 @@ use crate::keymap::Key;
 use crate::list::Preview;
 use crate::spot::{Mouse, Target};
 
-const SIZE: (usize, usize) = (120, 41);
+pub(in crate::app) const SIZE: (usize, usize) = (120, 41);
 
 /// The design's mailbox with the mouse on.
-fn app() -> App {
+pub(in crate::app) fn app() -> App {
     after("")
 }
 
-fn after(keys: &str) -> App {
+pub(in crate::app) fn after(keys: &str) -> App {
     let mut app = keyed::after(keys);
     app.set_mouse(true);
     app
@@ -27,12 +27,12 @@ fn reading(key: &str, keys: &str) -> App {
     app
 }
 
-fn texts(app: &mut App, (width, height): (usize, usize)) -> Vec<String> {
+pub(in crate::app) fn texts(app: &mut App, (width, height): (usize, usize)) -> Vec<String> {
     app.lines(width, height).iter().map(|line| line.iter().map(|span| span.text.as_str()).collect()).collect()
 }
 
 /// The first cell of `text` where a screen of `size` shows it.
-fn cell(app: &mut App, size: (usize, usize), text: &str) -> (usize, usize) {
+pub(in crate::app) fn cell(app: &mut App, size: (usize, usize), text: &str) -> (usize, usize) {
     let rows = texts(app, size);
     let found = rows.iter().enumerate().find_map(|(row, line)| Some((line.find(text)?, row, line)));
     let (byte, row, line) = found.unwrap_or_else(|| panic!("{text:?} is not on the screen: {rows:#?}"));
@@ -40,7 +40,7 @@ fn cell(app: &mut App, size: (usize, usize), text: &str) -> (usize, usize) {
 }
 
 /// Presses the pointer on `text`, as a screen of `size` shows it.
-fn click_at(app: &mut App, size: (usize, usize), text: &str) {
+pub(in crate::app) fn click_at(app: &mut App, size: (usize, usize), text: &str) {
     let (col, row) = cell(app, size, text);
     app.mouse(Mouse::Click { col, row });
 }
@@ -49,7 +49,7 @@ fn click(app: &mut App, text: &str) {
     click_at(app, SIZE, text);
 }
 
-fn wheel(app: &mut App, size: (usize, usize), text: &str, down: bool) {
+pub(in crate::app) fn wheel(app: &mut App, size: (usize, usize), text: &str, down: bool) {
     let (col, row) = cell(app, size, text);
     app.mouse(Mouse::Wheel { col, row, down });
 }
@@ -467,6 +467,7 @@ fn every_spot_lies_on_the_text_it_names_at_any_size() {
                         let label: String = said(spot).chars().skip(4).take(9).collect();
                         assert!(["", format!("{field:?}").as_str()].contains(&label.trim()), "{at}: {:?}", said(spot));
                     }
+                    other => panic!("{at}: mail draws no {other:?}"),
                 }
             }
             // Every line a row was drawn on is one a press finds a row on.

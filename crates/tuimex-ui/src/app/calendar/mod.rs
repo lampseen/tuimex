@@ -11,6 +11,7 @@ mod change;
 mod event;
 mod form;
 mod join;
+mod mouse;
 #[cfg(test)]
 mod tests;
 
@@ -21,7 +22,7 @@ use tuimex_core::{AccountId, Action, Event, Timestamp};
 
 use super::read::Advised;
 use super::{App, Mode};
-use crate::calendar::parts::{self, AHEAD, Scene, View};
+use crate::calendar::parts::{self, AHEAD, Pressed, Scene, View};
 use crate::calendar::{self, Calendar, Due, Entry, Picked};
 use crate::command::COMMANDS;
 use crate::editor::Editor;
@@ -30,6 +31,7 @@ use crate::list;
 use crate::palette::Tok;
 use crate::say;
 use crate::span::{Line, run};
+use crate::spot::{Spot, Target};
 
 /// What is typed after `gd` and after `/`: each is its prompt's label.
 const GOTO: &str = "Go to: ";
@@ -110,6 +112,9 @@ pub(super) struct Place {
     answering: Option<answer::Asked>,
     pub event: event::State,
     pub form: form::State,
+    /// The events the last frame drew where the pointer can pick them,
+    /// which `Target::Occasion` counts.
+    shown: Vec<Picked>,
 }
 
 impl Place {
@@ -136,6 +141,7 @@ impl Place {
             answering: None,
             event: event::State::default(),
             form: form::State::default(),
+            shown: Vec::new(),
         }
     }
 }
@@ -364,11 +370,16 @@ impl App {
             (None, false) => all.iter().rev().find(|picked| picked.day < cursor),
         };
         if let Some(next) = next.cloned() {
-            // The month's list stays where it began, but for an event
-            // before its first day.
-            self.cal.listed_from = Some(self.listed_from().min(next.day));
-            (self.cal.cursor, self.cal.picked) = (Some(next.day), Some(next));
+            self.pick(next);
         }
+    }
+
+    /// Selects `next`, an event the view lists, and moves the cursor to its
+    /// day. The month's list stays where it began, but for an event before
+    /// its first day.
+    fn pick(&mut self, next: Picked) {
+        self.cal.listed_from = Some(self.listed_from().min(next.day));
+        (self.cal.cursor, self.cal.picked) = (Some(next.day), Some(next));
     }
 
     /// `I`: the next invitation from today on that waits for an answer,
@@ -804,31 +815,38 @@ impl App {
             command: None,
         };
         let entry = base.entry();
+        // A panel's entries in sight, with the place of the first among all
+        // of them.
         let window = |entries: Vec<Line>, at: usize| {
             let at = at.min(entries.len().saturating_sub(1));
             let from = (at + 1).saturating_sub(fits);
-            (entries.into_iter().skip(from).take(fits).collect::<Vec<_>>(), Some(at - from))
+            let shown: Vec<Line> = entries.into_iter().skip(from).take(fits).collect();
+            (shown.len(), from, Some(at - from), shown)
         };
         let keys = |ids: &[&str]| list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>());
         let opens = |url: &str| vec![run("opens", Tok::Dim), run(format!(" {url}"), Tok::Fg)];
-        let (panel, left, hint) = match (place.panel, &entry) {
+        let (panel, left, hint, mut listed) = match (place.panel, &entry) {
             (Panel::Calendars(at), _) => {
-                let (entries, at) = window(parts::sources(&base), at);
+                let (n, from, at, entries) = window(parts::sources(&base), at);
                 let hint = keys(&["calendars.choose", "calendars.toggle", "calendars.close"]);
-                (list::panel("Calendars", entries, at, width), Some(Line::new()), Some(hint))
+                (list::panel("Calendars", entries, at, width), Some(Line::new()), Some(hint), (from, n))
             }
             (Panel::Links(at), Some(entry)) => {
                 let (rows, urls) = parts::links(entry);
-                let (entries, shown) = window(rows, at);
+                let (n, from, shown, entries) = window(rows, at);
                 let hint = keys(&["links.number", "links.choose", "global.agent", "links.close"]);
                 let mut panel = list::panel("Links", entries, shown, width);
                 panel.extend(place.advised.lines());
-                (panel, Some(opens(urls.get(at).map_or("", String::as_str))), Some(hint))
+                (panel, Some(opens(urls.get(at).map_or("", String::as_str))), Some(hint), (from, n))
             }
-            (Panel::Answer, _) => (Vec::new(), None, Some(say::answer().line(width))),
-            (Panel::Which(which), _) => (Vec::new(), None, Some(say::which_ones(which.verb()).line(width))),
-            _ => (Vec::new(), None, None),
+            (Panel::Answer, _) => (Vec::new(), None, Some(say::answer().line(width)), (0, 0)),
+            (Panel::Which(which), _) => (Vec::new(), None, Some(say::which_ones(which.verb()).line(width)), (0, 0)),
+            _ => (Vec::new(), None, None, (0, 0)),
         };
+        // The menu of a command being typed takes the panel's rows.
+        if !menu.is_empty() {
+            listed.1 = 0;
+        }
         // The address a link opens stays in sight while it is asked about
         // and as it opens.
         let asked = match (&self.mode, &entry) {
@@ -846,14 +864,32 @@ impl App {
             command: command.or(hint),
             ..base
         };
-        match (&entry, place.view) {
-            _ if self.form_is_open() => self.form_lines(&o, width, height),
-            (Some(entry), _) if self.event_is_open() => self.event_lines(&o, entry, width, height),
+        let panel_rows = o.panel.len();
+        let (lines, mut pressed) = match (&entry, place.view) {
+            _ if self.form_is_open() => {
+                let (lines, spots) = self.form_lines(&o, width, height);
+                (lines, Pressed { spots, events: Vec::new() })
+            }
+            (Some(entry), _) if self.event_is_open() => {
+                (self.event_lines(&o, entry, width, height), Pressed::default())
+            }
             _ if place.searching => calendar::day::screen(&o, width, height),
             (_, View::Month) => calendar::month::screen(&o, width, height),
             (_, View::Week) => calendar::week::screen(&o, width, height),
             (_, View::Day) => calendar::day::screen(&o, width, height),
-        }
+        };
+        // Every calendar screen ends with its panel, a blank row, the status
+        // line and the command line; a panel's entries follow its blank row
+        // and its title.
+        let entries = lines.len().saturating_sub(3 + panel_rows) + 2;
+        let (first, n) = listed;
+        let entry = |i: usize| Spot { row: entries + i, cols: 0..width, target: Target::CalEntry(first + i) };
+        pressed.spots.extend((0..n).map(entry));
+        // What is cut off at the edge of the screen cannot be pressed.
+        let seen = |spot: &Spot| spot.row < height.min(lines.len()) && spot.cols.end <= width && !spot.cols.is_empty();
+        pressed.spots.retain(seen);
+        (self.spots, self.cal.shown) = (pressed.spots, pressed.events);
+        lines
     }
 }
 

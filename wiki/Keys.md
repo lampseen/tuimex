@@ -130,7 +130,7 @@ tuimex and no longer selects text by dragging; most terminals still do
 while Shift is held. `:mouse` again turns it off, and `:mouse on` and
 `:mouse off` say which. What `:mouse` sets lasts until tuimex is left.
 
-It does nothing a key does not, and so far only in mail:
+It does nothing a key does not. In mail:
 
 | press or wheel | does |
 |---|---|
@@ -153,8 +153,9 @@ is asked about as one opened by its number is. The hint line at the
 bottom names keys and is not pressed. While a question is open only its
 answers are read, and a press anywhere else leaves it open. While a line
 is being typed a press does nothing. The menus that open over the list,
-such as `A`'s, take no press. In the calendar a press does nothing yet,
-apart from the bar of places.
+such as `A`'s, take no press.
+
+What it does in the calendar is on [the calendar's page](Calendar#the-mouse).
 
 ---
 

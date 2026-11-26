@@ -14,6 +14,7 @@ use crate::layout::{INDENT, MARGIN};
 use crate::list::{heading, hint, status_row};
 use crate::palette::Tok;
 use crate::span::{Line, fit, gap, run, wrap};
+use crate::spot::{self, Spot};
 
 #[cfg(test)]
 mod tests;
@@ -530,17 +531,20 @@ fn blank() -> Event {
 }
 
 /// The form's screen. `asked` is a question on the command line, which
-/// takes the caret away until it is answered.
-pub fn screen(o: &Scene, form: &Form, asked: Option<Line>, width: usize, height: usize) -> Vec<Line> {
+/// takes the caret away until it is answered. Beside the lines are the
+/// rows of each field.
+pub fn screen(o: &Scene, form: &Form, asked: Option<Line>, width: usize, height: usize) -> (Vec<Line>, Vec<Spot>) {
     let typing = asked.is_none();
     let mut head = vec![heading(vec![run(form.heading.as_str(), Tok::Fg).bold()]), Line::new()];
-    for field in FIELDS {
+    let mut spots = Vec::new();
+    for (at, field) in FIELDS.into_iter().enumerate() {
         let on = field == form.focus;
         let mut values = form.value(field);
         if let Some(last) = values.last_mut().filter(|_| on && typing && field.typed()) {
             last.push(run(" ", Tok::Bg).on(Tok::Acc));
         }
         for (i, value) in values.into_iter().enumerate() {
+            spots.push(Spot { row: head.len(), cols: 0..width, target: spot::Target::FormField(at) });
             head.push(field_row(on && i == 0, if i == 0 { field.label() } else { "" }, value));
         }
     }
@@ -568,5 +572,5 @@ pub fn screen(o: &Scene, form: &Form, asked: Option<Line>, width: usize, height:
     let idle = || hint(&keys);
     let command = asked.or_else(|| o.command.clone()).unwrap_or_else(idle);
     let foot = [o.panel.clone(), vec![Line::new(), status_row(width, &left, &o.right), command]].concat();
-    frame(head, body, foot, height)
+    (frame(head, body, foot, height), spots)
 }

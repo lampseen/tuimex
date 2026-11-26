@@ -92,6 +92,10 @@ table at the end of this page says where each stands.
 | A time is placed on the clock only when its zone is known, from the calendar and then from the system; otherwise it is shown as written | `a_written_time_is_placed_only_when_its_zone_is_known` |
 | An event held by the provider and by a local answer is one event on screen, with the answer given here until the provider's copy has one | `the_same_uid_held_twice_is_one_event_with_the_answer_given_here_until_the_provider_has_one`, `an_answered_occurrence_joins_the_series_the_provider_holds` |
 | A calendar kept on disk is shown whatever its provider says, and one that cannot be fetched says so with how old it is; why it could not be read is kept for `:messages`, once for each failure | `a_calendar_kept_on_disk_is_shown_and_one_that_cannot_be_fetched_says_so`, `why_a_calendar_could_not_be_read_is_kept_for_messages_once` |
+| With the mouse on, a press on a view's tab opens it, on a day of the grid or a week's day moves the cursor there, and on an event selects it; on what is already selected it is `Enter`; a weekday, a month's name, a blank cell, a day's heading and a blank line take no press | `a_click_on_a_view_opens_it`, `a_click_on_a_day_moves_the_cursor_there`, `a_click_on_an_event_picks_it_and_a_second_opens_it`, `a_click_on_a_week_s_day_moves_there` |
+| With the mouse on, a press in the `C` panel chooses a calendar and a second shows or hides it; in the `o` panel it chooses a link and a second opens it as `Enter` does, asking first where `Enter` asks | `a_click_on_a_calendar_selects_it_and_a_second_shows_or_hides_it`, `a_click_on_an_event_s_link_selects_it_and_a_second_is_assessed_as_enter_is` |
+| With the mouse on, a press on a field of the event form moves the focus there as `Tab` does and types nothing; the wheel is a week over the grid, an event in a list or the week, and three lines on an event's screen | `a_click_on_a_form_field_moves_the_focus_there_and_changes_nothing`, `the_wheel_moves_through_the_agenda_and_by_weeks_over_the_month` |
+| With the mouse on, the pointer is not read while a date or a search is typed or a question is open, and every place a press is looked up lies on what it names at every size | `the_pointer_is_not_read_while_a_date_is_typed_or_a_question_asked`, `every_calendar_spot_lies_on_what_it_names_at_any_size` |
 
 ### Answering an invitation
 
@@ -305,8 +309,8 @@ above.
 
 ## Not built
 
-OpenPGP (signing, encrypting, verifying, decrypting), the mouse in the
-calendar, `NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
+OpenPGP (signing, encrypting, verifying, decrypting), `NO_COLOR`,
+remapping keys under `[keys]`, new-mail notifications, and
 `ui.glyphs` and `ui.colors` in the config. Each is planned; none is
 claimed anywhere on these pages.
 
