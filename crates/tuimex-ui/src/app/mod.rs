@@ -605,7 +605,7 @@ impl App {
             Mode::Filter(editor) => (Some(list::typed(&format!("/{}", editor.text))), no_panel),
             Mode::Prompt(label, editor) => (Some(list::typed(&format!("{label}{}", editor.text))), no_panel),
             Mode::Confirm(question, _) => {
-                (Some(self.images_question(width).unwrap_or_else(|| question.line(width))), no_panel)
+                (Some(self.images_question(width).unwrap_or_else(|| question.clone()).line(width)), no_panel)
             }
             Mode::Command(editor) => {
                 let panel = editor.menu.as_ref().map_or(no_panel, |menu| {
@@ -634,6 +634,22 @@ impl App {
                 (Some(list::hint(&keys)), list::panel("Messages", entries, None, width))
             }
         }
+    }
+
+    /// The cells of each choice of the question `Mode::Confirm` has open,
+    /// as `command_row` draws it.
+    fn confirm_answers(&self, width: usize) -> Vec<Spot> {
+        let Mode::Confirm(question, _) = &self.mode else { return Vec::new() };
+        self.images_question(width).unwrap_or_else(|| question.clone()).drawn(width).1
+    }
+
+    /// The choices of a question drawn on the command line, which is the
+    /// last line of every screen under the bar. A choice past the screen's
+    /// edge is not on it.
+    fn answers_at(&mut self, lines: &[Line], answers: Vec<Spot>, width: usize) {
+        let row = lines.len().saturating_sub(1);
+        let shown = answers.into_iter().filter(|spot| spot.cols.end <= width);
+        self.spots.extend(shown.map(|spot| spot.moved(row, 0)));
     }
 
     /// The screen, one line to a row: the bar of places, and under it
@@ -765,6 +781,8 @@ impl App {
                 *row += first;
             }
         }
+        let answers = self.confirm_answers(width);
+        self.answers_at(&drawn.lines, answers, width);
         // A preview that is not drawn cannot hold the focus.
         self.focus &= typing || drawn.place != Place::Off;
         if !typing {

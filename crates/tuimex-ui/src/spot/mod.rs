@@ -4,6 +4,8 @@
 
 use std::ops::Range;
 
+use crate::compose::Field;
+use crate::keymap::Key;
 use crate::places::Place;
 use crate::span::{Span, cells};
 
@@ -17,6 +19,16 @@ pub enum Target {
     Row(usize),
     /// The preview.
     Pane,
+    /// A `[n]` in the reader's text, by the number of its link.
+    Reference(usize),
+    /// An entry of the reader's list of links, or of files, counted from 0
+    /// as the panel's cursor counts them.
+    Link(usize),
+    File(usize),
+    /// A choice of the question that is open: the key that answers it.
+    Answer(Key),
+    /// A field of compose, and its rows.
+    Field(Field),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

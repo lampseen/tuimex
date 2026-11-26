@@ -209,6 +209,13 @@ pub fn panel(title: &str, entries: Vec<Line>, selected: Option<usize>, width: us
     out
 }
 
+/// Where `panel` puts each of `entries` entries: the whole of its row,
+/// under the blank row and the title.
+pub fn panel_spots(entries: usize, width: usize, target: impl Fn(usize) -> Target) -> Vec<Spot> {
+    let row = |i: usize| Spot { row: 2 + i, cols: 0..width, target: target(i) };
+    if width == 0 { Vec::new() } else { (0..entries).map(row).collect() }
+}
+
 /// The command line while something is typed on it: the text, then the
 /// caret.
 pub fn typed(text: &str) -> Line {

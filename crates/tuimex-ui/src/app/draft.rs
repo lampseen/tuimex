@@ -17,15 +17,14 @@ use crate::list;
 use crate::palette::Tok;
 use crate::say::{self, count};
 use crate::span::{Line, run};
+use crate::spot::Spot;
 
 #[cfg(test)]
 mod tests;
 
-/// A question on the command line, then its keys.
-fn question(text: &str, keys: &[(&str, &str)]) -> Line {
-    let mut line = list::hint(keys);
-    line.splice(1..1, [run(text, Tok::Fg), run("  ", Tok::Dim)]);
-    line
+/// A question on the command line, then its keys, and where each is.
+fn question(text: &str, keys: &[(&str, &str)]) -> (Line, Vec<Spot>) {
+    say::choices(list::heading(vec![run(text, Tok::Fg), run("  ", Tok::Dim)]), keys)
 }
 
 impl App {
@@ -100,7 +99,8 @@ impl App {
         on.is_some_and(|m| matches!(m.sending, Some(tuimex_core::Sending::Failed { .. })))
     }
 
-    pub(super) fn compose_lines(&self, width: usize, height: usize) -> Option<Vec<Line>> {
+    /// The compose screen, and where on it a press means something.
+    pub(super) fn compose_lines(&mut self, width: usize, height: usize) -> Option<Vec<Line>> {
         let c = self.compose.as_ref()?;
         let fits = (height / 3).min(13).saturating_sub(2).max(1);
         let (said, mut panel) = self.command_row(width, fits);
@@ -110,24 +110,35 @@ impl App {
             let thread = compose::thread(&self.mailbox.mail, &draft.id.account, c.in_reply_to.as_deref());
             let (agent, signing, right) = (c.agent.as_ref(), &Signing::Neither, &self.alerts());
             let summary = Summary { draft: &draft, agent, thread: &thread, signing, delay: self.delay, right };
-            return Some(summary::screen(&summary, width, height));
+            let (lines, answers) = (summary::screen(&summary, width, height), summary::ask(&summary).1);
+            self.answers_at(&lines, answers, width);
+            return Some(lines);
         }
-        let asked = match &c.stage {
+        let (asked, mut answers) = match &c.stage {
             Stage::Attach(prompt) => {
                 if let Some((found, at)) = &prompt.menu {
                     let from = (at + 1).saturating_sub(fits);
                     let entries = found.iter().skip(from).take(fits).map(|path| vec![run(path.as_str(), Tok::Fg)]);
                     panel = list::panel("Files", entries.collect(), Some(at - from), width);
                 }
-                Some(list::typed(&format!("attach {}", prompt.text)))
+                (Some(list::typed(&format!("attach {}", prompt.text))), Vec::new())
             }
-            Stage::Closing => Some(question("Keep this draft?", &[("y", "keep"), ("n", "discard"), ("Esc", "back")])),
-            Stage::Working { .. } => Some(list::hint(&[("Esc", "cancel")])),
-            Stage::Fields | Stage::Summary => None,
+            Stage::Closing => {
+                let (line, answers) = question("Keep this draft?", &[("y", "keep"), ("n", "discard"), ("Esc", "back")]);
+                (Some(line), answers)
+            }
+            Stage::Working { .. } => (Some(list::hint(&[("Esc", "cancel")])), Vec::new()),
+            Stage::Fields | Stage::Summary => (None, self.confirm_answers(width)),
         };
+        if matches!(self.mode, Mode::Command(_)) {
+            answers.clear();
+        }
         let command = if matches!(self.mode, Mode::Command(_)) { said } else { asked.or(said) };
         let (identities, left) = (&self.identities, self.agent_unsent());
-        Some(c.screen(&View { identities, left, right: self.alerts(), command, panel }, width, height))
+        let (lines, spots) = c.draw(&View { identities, left, right: self.alerts(), command, panel }, width, height);
+        self.spots = spots;
+        self.answers_at(&lines, answers, width);
+        Some(lines)
     }
 
     /// The draft as a row of Drafts and as what is handed on, or the

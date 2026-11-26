@@ -2269,8 +2269,10 @@ The rules that follow from those:
   no modifier held. Presses and the wheel are all the terminal is asked
   to report (modes 1000 and 1006): where the pointer merely is would be an
   event for every cell it crossed.
-- While a question is open or a line is being typed the pointer is not
-  read at all.
+- While a line is being typed the pointer is not read at all. While a
+  question is open only its choices take a press, and a press beside
+  them leaves it open: unlike a key, it may have been aimed at the
+  terminal.
 - The bar of places is pressed where its function keys are read, and
   nowhere else.
 - A press means what the last frame showed. Several events read together
@@ -2284,9 +2286,16 @@ No crate is added: `crossterm`'s events already carry the pointer
 (ADR-005).
 
 **What it covers so far.** The bar of places and the mail list: tabs,
-rows, the preview, the wheel. The reader, its panels, questions, compose
-and the calendar are to follow, each with its tests; until then a press
-there does nothing.
+rows, the preview, the wheel. The reader: a `[n]` in the text lists the
+links with that one chosen, an entry of the links or the files is chosen
+and then is Enter, and the wheel scrolls the text, help and `:messages`.
+Questions: a choice is its key and a press elsewhere leaves the question
+open, so of the rule above, what a question leaves read is its choices.
+Compose: a field takes the focus as Tab gives it, and a press on the
+focused one does nothing. The menus over the list (completion, `A`'s
+agent menu, `:messages`'s entries) take no press: `A` picks by letter
+and its pick sends text out of the machine (ADR-031). The calendar is to
+follow; until then a press there does nothing.
 
 **What it costs.** Text selection, for whoever turns it on. A map from
 cells to what was drawn there, which every screen that wants the pointer

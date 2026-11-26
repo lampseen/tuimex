@@ -8,8 +8,9 @@ use crate::glyphs::{AGENT, DOT, NOTICE};
 use crate::list;
 use crate::palette::Tok;
 use crate::reader::size_text;
-use crate::say::count;
+use crate::say::{choices, count};
 use crate::span::{Line, cells, fit, gap, run};
+use crate::spot::Spot;
 use crate::when::{span_of, stamp};
 
 /// The column the outside-the-thread mark starts at, after the indent and
@@ -91,15 +92,14 @@ pub fn screen(o: &Summary, width: usize, height: usize) -> Vec<Line> {
         let when = then(format!("{}{files}", stamp(mark.at)));
         rows.extend([Line::new(), vec![gap(INDENT), run(format!("{AGENT} {what}"), Tok::Agent), when]]);
     }
-    let to = count(draft.to.len() + draft.cc.len() + draft.bcc.len(), "recipient");
-    let ask = list::heading(vec![
-        run(format!("Send to {to}?"), Tok::Fg),
-        run("  ", Tok::Dim),
-        run("y ", Tok::Fg),
-        run(format!("send, held {} {DOT} ", span_of(o.delay)), Tok::Dim),
-        run("n ", Tok::Fg),
-        run("back", Tok::Dim),
-    ]);
     let head = rows.iter().map(|row| fit(row, width)).collect();
-    frame(head, Vec::new(), vec![Line::new(), list::status_row(width, &[], o.right), ask], height)
+    frame(head, Vec::new(), vec![Line::new(), list::status_row(width, &[], o.right), ask(o).0], height)
+}
+
+/// What the summary asks on its last line, and the cells of each answer.
+pub fn ask(o: &Summary) -> (Line, Vec<Spot>) {
+    let to = count(o.draft.to.len() + o.draft.cc.len() + o.draft.bcc.len(), "recipient");
+    let held = format!("send, held {}", span_of(o.delay));
+    let asked = list::heading(vec![run(format!("Send to {to}?"), Tok::Fg), run("  ", Tok::Dim)]);
+    choices(asked, &[("y", held.as_str()), ("n", "back")])
 }

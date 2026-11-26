@@ -130,7 +130,7 @@ tuimex and no longer selects text by dragging; most terminals still do
 while Shift is held. `:mouse` again turns it off, and `:mouse on` and
 `:mouse off` say which. What `:mouse` sets lasts until tuimex is left.
 
-It does nothing a key does not, and so far only in mail's list:
+It does nothing a key does not, and so far only in mail:
 
 | press or wheel | does |
 |---|---|
@@ -140,12 +140,21 @@ It does nothing a key does not, and so far only in mail's list:
 | the preview | moves the focus into it, as `Alt-j` or `Alt-l` does |
 | wheel over the rows | moves the cursor three rows |
 | wheel over the preview | scrolls it three lines |
+| a `[1]` in a message | lists the links with that one chosen; nothing opens |
+| an entry of the links or the files | chooses it; on the one chosen, does what `Enter` does there |
+| wheel over a message | scrolls it three lines |
+| wheel over help or `:messages` | scrolls them as their keys do |
+| a question's answer, such as `y yes` | answers it as that key does |
+| a field of compose | moves the focus there, as `Tab` does; nothing is typed |
 
 A first press only ever moves the cursor, so the press that brings the
-terminal's window to the front opens nothing. The hint line at the bottom
-names keys and is not pressed. While a question is open or a line is being
-typed the pointer is not read. In the reader, in compose and in the
-calendar a press does nothing yet, apart from the bar of places.
+terminal's window to the front opens nothing: a link opened by pressing
+is asked about as one opened by its number is. The hint line at the
+bottom names keys and is not pressed. While a question is open only its
+answers are read, and a press anywhere else leaves it open. While a line
+is being typed a press does nothing. The menus that open over the list,
+such as `A`'s, take no press. In the calendar a press does nothing yet,
+apart from the bar of places.
 
 ---
 

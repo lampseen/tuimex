@@ -14,6 +14,7 @@ use crate::list::{heading, hint, status_row};
 use crate::palette::Tok;
 use crate::say::count;
 use crate::span::{Line, Span, cells, fit, gap, left_right, run};
+use crate::spot::{Spot, Target};
 use crate::when::{clock, date, long_date};
 
 const MARGIN: usize = 2;
@@ -271,6 +272,8 @@ pub struct Reader<'a> {
     pub top: usize,
     /// What `list::panel` made, and any lines under it.
     pub panel: Vec<Line>,
+    /// What can be pressed in `panel`, counted from its first line.
+    pub panel_spots: Vec<Spot>,
     /// The left of the status line, in place of the scroll position.
     pub left: Option<Line>,
     pub right: Line,
@@ -288,6 +291,16 @@ pub struct Drawn {
     /// Each picture's place on the screen: `row` and `col` count from the
     /// screen's first cell, and one partly scrolled off is left out.
     pub pictures: Vec<Placed>,
+    /// Each `[n]` of the body in sight, and what the panel has.
+    pub spots: Vec<Spot>,
+}
+
+/// Where `line`, on `row`, has a link's number: the `[n]` of `references`.
+fn numbers(row: usize, line: &[Span], width: usize) -> Vec<Spot> {
+    let number = |span: &Span| span.text.strip_prefix('[')?.strip_suffix(']')?.parse().ok();
+    let on = line.iter().enumerate().filter(|(_, span)| span.fg == Tok::Link);
+    let spots = on.filter_map(|(at, span)| Some(Spot::over(row, &line[..at], span, Target::Reference(number(span)?))));
+    spots.filter(|spot| spot.cols.end <= width).collect()
 }
 
 fn reader_hint(o: &Reader) -> Line {
@@ -343,11 +356,14 @@ pub fn screen(o: &Reader, width: usize, height: usize) -> Drawn {
         middle.pop();
     }
     middle.resize(room, Line::new());
+    let mut spots: Vec<Spot> =
+        middle.iter().enumerate().flat_map(|(at, line)| numbers(head_rows + at, line, width)).collect();
     lines.extend(middle);
+    spots.extend(o.panel_spots.iter().map(|spot| spot.clone().moved(lines.len(), 0)));
     lines.extend(o.panel.iter().cloned());
     let command = o.command.clone().unwrap_or_else(|| reader_hint(o));
     lines.extend([Line::new(), status_row(width, o.left.as_ref().unwrap_or(&scroll), &o.right), command]);
-    Drawn { lines, top, last_top, room, pictures }
+    Drawn { lines, top, last_top, room, pictures, spots }
 }
 
 #[cfg(test)]

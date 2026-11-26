@@ -1,5 +1,7 @@
 use tuimex_fixtures::design as fx;
 
+use tuimex_core::Action;
+
 use crate::app::App;
 use crate::app::tests::{self as keyed, bar, foot, press, screen};
 use crate::keymap::Key;
@@ -15,6 +17,12 @@ fn app() -> App {
 
 fn after(keys: &str) -> App {
     let mut app = keyed::after(keys);
+    app.set_mouse(true);
+    app
+}
+
+fn reading(key: &str, keys: &str) -> App {
+    let mut app = keyed::reading(key, keys);
     app.set_mouse(true);
     app
 }
@@ -193,16 +201,184 @@ fn a_click_on_the_preview_takes_the_focus_there_and_on_a_row_gives_it_back() {
 }
 
 #[test]
-fn the_pointer_is_not_read_while_a_question_is_open_or_a_line_is_typed() {
+fn a_press_off_a_question_s_choices_or_while_a_line_is_typed_does_nothing() {
     for keys in [":", "/nov", ":messages\r", ":empty-trash work\r", "A"] {
         let mut app = after(keys);
         let was = texts(&mut app, SIZE);
         click(&mut app, "Lars Lindqvist");
         click(&mut app, "Flagged");
         click(&mut app, "Calendar");
-        wheel(&mut app, SIZE, "Lars Lindqvist", true);
+        // The wheel scrolls `:messages`, which is not typed into.
+        if keys != ":messages\r" {
+            wheel(&mut app, SIZE, "Lars Lindqvist", true);
+        }
         assert_eq!(texts(&mut app, SIZE), was, "{keys}");
+        assert!(app.asks().is_empty(), "{keys}");
     }
+    // Over the reader and compose too: a question stays open, and a line
+    // being typed is not left.
+    for (mut app, text) in [(reading("bank", "o1"), "Contact us"), (after("c\t\t\t\t\t:"), "Subject")] {
+        let was = texts(&mut app, SIZE);
+        click(&mut app, text);
+        wheel(&mut app, SIZE, text, true);
+        assert_eq!(texts(&mut app, SIZE), was);
+        assert!(app.asks().is_empty());
+    }
+}
+
+#[test]
+fn a_click_on_a_link_reference_lists_the_links_and_opens_nothing() {
+    let mut app = reading("newsletter", "");
+    click(&mut app, "[2]");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("newsletter", "oj"), SIZE));
+    assert!(app.asks().iter().all(|ask| !matches!(ask.action, Action::OpenLink(_))), "nothing was opened");
+    // With the list open a reference only moves its cursor.
+    click(&mut app, "[1]");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("newsletter", "o"), SIZE));
+    assert!(app.asks().is_empty());
+}
+
+#[test]
+fn a_clicked_link_is_assessed_as_a_typed_one_is() {
+    let mut app = reading("bank", "");
+    click(&mut app, "[1]");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("bank", "o"), SIZE), "the list, on the first link");
+    // The second press is Enter on it, which asks before a deceptive link.
+    click(&mut app, " 1  bank.example.com.device-check");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("bank", "o\r"), SIZE));
+    assert!(foot(&mut app).1.starts_with("▲ Text says bank.example.com; opens bank.example.com.device-check"));
+    assert!(app.asks().is_empty(), "nothing is opened before the answer");
+    click(&mut app, "y yes");
+    assert_eq!(foot(&mut app).1, "Opening bank.example.com.device-check.example.net");
+    assert_eq!(app.asks().pop().unwrap().action, Action::OpenLink(1));
+    // A link that deceives nobody opens on the second press, as Enter
+    // opens it.
+    let mut app = reading("bank", "o");
+    click(&mut app, " 2  examplebank.example.net");
+    assert!(app.asks().is_empty(), "the first press chooses it");
+    click(&mut app, " 2  examplebank.example.net");
+    let mut keyed = reading("bank", "oj\r");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut keyed, SIZE));
+    assert_eq!(app.asks().pop().unwrap().action, Action::OpenLink(2));
+}
+
+#[test]
+fn a_click_on_a_file_moves_the_cursor_and_a_second_does_what_enter_does() {
+    let mut app = reading("photos", "a");
+    click(&mut app, " 3  group-shot.heic");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("photos", "ajj"), SIZE));
+    assert!(app.asks().is_empty(), "the first press saves nothing");
+    click(&mut app, " 3  group-shot.heic");
+    assert_eq!(foot(&mut app).1, "Saving group-shot.heic");
+    assert_eq!(app.asks().pop().unwrap().action, Action::SaveAttachment(2, "".into()));
+    // The hint line under the list is not a file.
+    let mut app = reading("photos", "a");
+    let was = texts(&mut app, SIZE);
+    click(&mut app, "Enter save");
+    assert_eq!(texts(&mut app, SIZE), was);
+    assert!(app.asks().is_empty());
+}
+
+#[test]
+fn the_wheel_scrolls_the_reader_help_and_messages() {
+    // A screen the newsletter is longer than, drawn before the keys it is
+    // compared with, as the pointer's is.
+    let small = (120, 25);
+    let keyed = |keys: &str| {
+        let mut app = reading("newsletter", "");
+        texts(&mut app, small);
+        press(&mut app, keys);
+        texts(&mut app, small)
+    };
+    let mut app = reading("newsletter", "");
+    wheel(&mut app, small, "Winter routes", true);
+    assert_eq!(texts(&mut app, small), keyed("jjj"));
+    assert!(texts(&mut app, small)[23].starts_with("  lines 4-"), "{}", texts(&mut app, small)[23]);
+    wheel(&mut app, small, "Fernway Weekly", false);
+    assert_eq!(texts(&mut app, small), keyed(""));
+
+    let mut app = after("?");
+    wheel(&mut app, SIZE, "Everywhere", true);
+    let mut keyed = after("?");
+    texts(&mut keyed, SIZE);
+    press(&mut keyed, "^d");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut keyed, SIZE));
+    assert_ne!(texts(&mut app, SIZE), texts(&mut after("?"), SIZE));
+    wheel(&mut app, SIZE, "Help", false);
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("?"), SIZE));
+
+    let said = ":link 1\r".repeat(8);
+    let mut app = after(&format!("{said}:messages\r"));
+    wheel(&mut app, SIZE, "Messages", true);
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after(&format!("{said}:messages\rjjj")), SIZE));
+    assert_ne!(texts(&mut app, SIZE), texts(&mut after(&format!("{said}:messages\r")), SIZE));
+}
+
+#[test]
+fn a_question_is_answered_by_a_click_on_its_choice_and_a_click_elsewhere_leaves_it_open() {
+    let mut app = after(":empty-trash work\r");
+    let was = texts(&mut app, SIZE);
+    click(&mut app, "Lars Lindqvist");
+    click(&mut app, "Trash for good?");
+    assert_eq!(texts(&mut app, SIZE), was, "still asking");
+    click(&mut app, "y yes");
+    let mut keyed = after(":empty-trash work\ry");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut keyed, SIZE));
+    assert_eq!(app.asks(), keyed.asks());
+    // A no closes the question, and the list of links it was asked over,
+    // as `n` does.
+    let mut app = reading("bank", "o1");
+    click(&mut app, "n no");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("bank", "o1n"), SIZE));
+    assert!(app.asks().is_empty());
+    // The third way out of a deceptive link is the agent's.
+    let mut app = reading("bank", "o1");
+    click(&mut app, "ask the agent");
+    let mut keyed = reading("bank", "o1A");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut keyed, SIZE));
+    assert_eq!(app.asks(), keyed.asks());
+    // An invitation's answers, and compose's own questions.
+    let mut app = reading("invite", "i");
+    click(&mut app, "Esc cancel");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut reading("invite", "i\x1b"), SIZE));
+    let mut app = after("cx\x1b");
+    click(&mut app, "Keep this draft?");
+    click(&mut app, "n discard");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("cx\x1bn"), SIZE));
+    let mut app = after("cmei@example.org^s");
+    click(&mut app, "Send to");
+    click(&mut app, "n back");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("cmei@example.org^sn"), SIZE));
+    // The hint line names keys and answers nothing.
+    let mut app = reading("bank", "");
+    let was = texts(&mut app, SIZE);
+    click(&mut app, "r reply");
+    assert_eq!(texts(&mut app, SIZE), was);
+}
+
+#[test]
+fn a_click_on_a_compose_field_moves_the_focus_there() {
+    let mut app = after("c");
+    click(&mut app, "Subject");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("c\t\t\t"), SIZE));
+    click(&mut app, "From");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("c\t\t\t\t\t"), SIZE));
+    // A press on the body takes the focus there; on the field that has
+    // it, it types nothing and starts no editor.
+    let (_, row) = cell(&mut app, SIZE, "Subject");
+    app.mouse(Mouse::Click { col: 30, row: row + 6 });
+    let mut keyed = after("c\t\t\t\t");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut keyed, SIZE));
+    app.mouse(Mouse::Click { col: 30, row: row + 6 });
+    click(&mut app, "Subject");
+    click(&mut app, "Subject");
+    assert_eq!(texts(&mut app, SIZE), texts(&mut after("c\t\t\t"), SIZE));
+    assert!(app.asks().is_empty(), "no editor was asked for");
+    // While a file's path is typed the fields are not pressed.
+    let mut app = after("c^a");
+    let was = texts(&mut app, SIZE);
+    click(&mut app, "Subject");
+    assert_eq!(texts(&mut app, SIZE), was);
 }
 
 #[test]
@@ -239,21 +415,39 @@ fn a_press_ends_a_sequence_that_was_begun() {
     assert_eq!(foot(&mut app).0, "6 of 24 · 1 message", "the g before the press was not the first of gg");
 }
 
+/// What a key is called on the screen: the name a question writes it by.
+fn named(key: Key) -> String {
+    match key {
+        Key::Char(c) => c.to_string(),
+        other => format!("{other:?}"),
+    }
+}
+
 /// A spot is where its thing was drawn: every row the list shows is under
-/// one, and a tab's cells spell its name.
+/// one, a tab's cells spell its name, a reference its number, an entry of
+/// a list its number, a choice its key and a field's rows its label.
 #[test]
 fn every_spot_lies_on_the_text_it_names_at_any_size() {
     let names: Vec<String> = fx::sections().into_iter().map(|section| section.name).collect();
-    for keys in ["", "G", "jjjjjjjjjjjj", "3", "⌥j", "zo"] {
+    let listed = ["", "G", "jjjjjjjjjjjj", "3", "⌥j", "zo"].map(|keys| (keys, None));
+    let read = [("", "newsletter"), ("o", "newsletter"), ("ojjj", "newsletter"), ("a", "photos"), ("o1", "bank")];
+    let elsewhere =
+        [":empty-trash work\r", "c", "cmei@example.org, lars@example.org\t\tSubject", "cx\x1b", "cmei@example.org^s"];
+    let states =
+        listed.into_iter().chain(read.map(|(keys, key)| (keys, Some(key)))).chain(elsewhere.map(|k| (k, None)));
+    for (keys, key) in states {
+        let make = || key.map_or_else(|| after(keys), |key| reading(key, keys));
         for (width, height) in (0..=180).step_by(12).flat_map(|w| (0..=45).step_by(3).map(move |h| (w, h))) {
-            let mut app = after(keys);
+            let mut app = make();
             let rows = texts(&mut app, (width, height));
             let said = |spot: &crate::spot::Spot| -> String {
                 rows[spot.row].chars().skip(spot.cols.start).take(spot.cols.len()).collect()
             };
             for spot in &app.spots {
-                let at = format!("{keys:?} at {width}x{height}: {spot:?}");
+                let at = format!("{key:?} {keys:?} at {width}x{height}: {spot:?}");
                 assert!(spot.row < rows.len() && spot.cols.end <= width && !spot.cols.is_empty(), "{at}");
+                let entry =
+                    |at: usize| said(spot).trim_start_matches('▌').trim_start().starts_with(&(at + 1).to_string());
                 match spot.target {
                     // The last thing a narrow row has room for is cut short.
                     _ if spot.cols.end == width && said(spot).ends_with('…') => {}
@@ -263,7 +457,16 @@ fn every_spot_lies_on_the_text_it_names_at_any_size() {
                     }
                     Target::Place(_) => assert!(said(spot).starts_with('F'), "{at}"),
                     Target::Row(_) => assert!(said(spot).chars().nth(4).is_some_and(|c| c != ' '), "{at}"),
-                    Target::Pane => {}
+                    Target::Pane | Target::Field(crate::compose::Field::Body) => {}
+                    Target::Reference(n) => assert_eq!(said(spot), format!("[{n}]"), "{at}"),
+                    Target::Link(n) | Target::File(n) => assert!(entry(n), "{at}: {:?}", said(spot)),
+                    Target::Answer(key) => {
+                        assert!(said(spot).starts_with(&format!("{} ", named(key))), "{at}: {:?}", said(spot))
+                    }
+                    Target::Field(field) => {
+                        let label: String = said(spot).chars().skip(4).take(9).collect();
+                        assert!(["", format!("{field:?}").as_str()].contains(&label.trim()), "{at}: {:?}", said(spot));
+                    }
                 }
             }
             // Every line a row was drawn on is one a press finds a row on.
@@ -272,11 +475,21 @@ fn every_spot_lies_on_the_text_it_names_at_any_size() {
                 let margin: String = cells.by_ref().take(4).collect();
                 ["    ", "▌   "].contains(&margin.as_str()) && cells.next().is_some_and(char::is_alphabetic)
             };
+            let list = key.is_none() && !keys.starts_with('c');
             let listed = rows.iter().enumerate().skip(3).take_while(|(_, row)| !row.starts_with('─'));
-            for (row, line) in listed.filter(|(row, line)| is_row(line) && row + 3 < height && width >= 40) {
+            for (row, line) in listed.filter(|(row, line)| list && is_row(line) && row + 3 < height && width >= 40) {
                 let on = crate::spot::at(&app.spots, 4, row);
                 assert!(matches!(on, Some(Target::Row(_))), "{keys:?} {width}x{height}: {line}");
             }
         }
     }
+    // Each kind of spot was among those walked over.
+    let mut walked = Vec::new();
+    for mut app in [reading("newsletter", "o"), reading("photos", "a"), reading("bank", "o1"), after("c")] {
+        texts(&mut app, SIZE);
+        walked.extend(app.spots.iter().map(|spot| std::mem::discriminant(&spot.target)));
+    }
+    let kinds = [Target::Reference(1), Target::Link(0), Target::File(0), Target::Answer(Key::Esc)];
+    let kinds = kinds.into_iter().chain([Target::Field(crate::compose::Field::To)]);
+    assert!(kinds.map(|kind| std::mem::discriminant(&kind)).all(|kind| walked.contains(&kind)));
 }

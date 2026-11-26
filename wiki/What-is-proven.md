@@ -196,7 +196,7 @@ program raise one.
 | With a palette file loaded, the accounts take its accents in the order that keeps them furthest apart for normal, protan and deutan sight, and a row's words take a spare accent or, with none that would show, are told apart by brightness; `color = "…"` under an `[[account]]` fixes one account's | `separation_and_contrast_are_the_design_s_for_a_table_of_colour_pairs`, `a_loaded_palette_orders_the_account_colours_by_the_design_s_rule`, `the_words_take_the_free_accent_that_shows_or_fall_back_to_brightness`, `three_accounts_with_a_loaded_palette_take_the_order_its_colours_give`, `words_with_no_colour_that_would_show_are_told_apart_by_brightness`, `a_color_in_the_config_fixes_one_account_and_the_rest_keep_their_turn`, `an_account_s_color_is_one_of_the_four_accents_accounts_take` |
 | With the mouse on, a press on a row moves the cursor there and a second opens it; a press on a date label, a blank line, the rule, the status line or the hint line does nothing | `a_click_on_a_row_moves_the_cursor_there_and_a_second_click_opens_it`, `a_click_anywhere_in_a_row_is_on_that_row_and_past_its_last_cell_is_on_none`, `a_click_on_a_date_label_a_blank_line_or_the_rule_does_nothing`, `a_click_on_the_hint_line_or_the_status_line_does_nothing` |
 | A press on a tab opens that section, on a place goes there where its function key is read, and on the preview moves the focus into it | `a_click_on_a_tab_opens_that_section_and_on_the_open_one_does_nothing`, `a_click_on_a_place_goes_there_as_its_function_key_does`, `the_bar_is_not_pressed_where_its_keys_are_not_read`, `a_click_on_the_preview_takes_the_focus_there_and_on_a_row_gives_it_back` |
-| The wheel moves the cursor over the rows and scrolls the preview over that; the pointer is not read while a question is open or a line is typed, and a press ends a key sequence that was begun | `the_wheel_moves_the_cursor_over_the_list_and_scrolls_the_preview_over_it`, `the_pointer_is_not_read_while_a_question_is_open_or_a_line_is_typed`, `a_press_ends_a_sequence_that_was_begun` |
+| The wheel moves the cursor over the rows and scrolls the preview over that; while a line is typed the pointer does nothing, while a question is open it does nothing but answer it, and a press ends a key sequence that was begun | `the_wheel_moves_the_cursor_over_the_list_and_scrolls_the_preview_over_it`, `a_press_off_a_question_s_choices_or_while_a_line_is_typed_does_nothing`, `a_press_ends_a_sequence_that_was_begun` |
 | What a press finds on a cell is what was drawn there, at every size | `every_spot_lies_on_the_text_it_names_at_any_size`, `a_spot_is_the_cells_of_its_span_counted_as_a_terminal_counts_them`, `a_cell_is_what_was_last_drawn_on_it_and_nothing_where_nothing_was` |
 
 ## The reader, links and files
@@ -218,6 +218,8 @@ program raise one.
 | Where the terminal has an image protocol (kitty, sixel, iTerm2) the picture's own bytes are handed to it over the placeholder; nothing is fetched. No test has a terminal to see the result on, and `--fixtures` has no picture bytes, so it has not been seen drawn | `an_attached_picture_is_sized_placed_and_drawn_from_the_message_s_own_bytes`, `a_terminal_with_a_protocol_gets_the_picture_over_its_placeholder`, `the_placeholder_stays_where_no_picture_can_be_drawn` |
 | Only png, jpeg, gif and webp are decoded, never one over 8192 pixels on a side, and damaged bytes fail without a panic | `another_format_is_not_a_picture`, `a_picture_claiming_more_than_the_cap_is_never_decoded`, `damaged_bytes_decode_or_fail_and_never_panic` |
 | A signed or encrypted message nobody verified says so and is never drawn as good; verifying is not built | `a_signed_message_without_a_verdict_claims_none` |
+| With the mouse on, a press on a `[n]` in the text lists the links with that one chosen and opens nothing; a press on an entry of the links or the files chooses it, and a second does what Enter does, so a link is assessed and asked about as a typed one is; the wheel scrolls the reader, help and `:messages` as their keys do | `a_click_on_a_link_reference_lists_the_links_and_opens_nothing`, `a_clicked_link_is_assessed_as_a_typed_one_is`, `a_click_on_a_file_moves_the_cursor_and_a_second_does_what_enter_does`, `the_wheel_scrolls_the_reader_help_and_messages` |
+| With the mouse on, a press on a question's choice is that choice's key, and a press anywhere else leaves the question open | `a_question_is_answered_by_a_click_on_its_choice_and_a_click_elsewhere_leaves_it_open` |
 | An invitation's card answers once the message has been read and its event handed over, and only an invitation to answer is: a cancellation or a reply has no event to answer. [Calendars](#answering-an-invitation) has what an answer then does | `a_message_read_tells_the_card_its_event_when_it_is_an_invitation_to_answer`, `an_invitation_s_card_in_the_reader_answers_once_its_message_has_been_read`, `the_reader_s_card_answers_the_event_its_message_carries`, `a_card_whose_event_was_not_handed_over_says_it_could_not_be_read` |
 
 ## Writing and sending
@@ -231,6 +233,7 @@ program raise one.
 | An address that does not parse stops the summary and is named | `an_address_that_does_not_parse_stops_the_summary_and_is_named` |
 | The send summary lists every recipient on a line and marks one whose domain is nowhere in the thread; only `y` sends | `a_recipient_from_outside_the_thread_is_marked_by_registrable_domain`, `only_y_sends_and_the_draft_is_handed_on_before_the_send` |
 | `^d` saves the draft, and `Esc` asks whether to keep one that changed | `ctrl_d_saves_the_draft_into_drafts_and_hands_it_on`, `esc_asks_keep_or_discard_only_when_something_changed`, and on a pseudo-terminal `a_session_writes_a_message_reads_its_summary_and_saves_the_draft` |
+| With the mouse on, a press on a field of compose moves the focus there as Tab does, and types nothing and starts no editor; the send summary's and the keep-or-discard question's choices take a press as their keys | `a_click_on_a_compose_field_moves_the_focus_there`, `a_question_is_answered_by_a_click_on_its_choice_and_a_click_elsewhere_leaves_it_open` |
 | Compose, the send summary and the `:agent` screens match the design cell for cell | `compose`, `send_summary`, `compose_agent`, `agent_reply` and `agent_failed` of the golden tests |
 
 ## `:agent`, inside tuimex
@@ -302,8 +305,8 @@ above.
 
 ## Not built
 
-OpenPGP (signing, encrypting, verifying, decrypting), the mouse outside
-mail's list (the reader, compose and the calendar), `NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
+OpenPGP (signing, encrypting, verifying, decrypting), the mouse in the
+calendar, `NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
 `ui.glyphs` and `ui.colors` in the config. Each is planned; none is
 claimed anywhere on these pages.
 

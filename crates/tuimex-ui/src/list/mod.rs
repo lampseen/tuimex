@@ -11,7 +11,8 @@ use tuimex_core::{AccountId, Check, Envelope, Folder, Listed, MessageId, Role, S
 
 pub(crate) use self::chrome::thousands;
 pub use self::chrome::{
-    AccountSync, Sync, Tab, alerts, heading, hint, list_hint, panel, position, status_row, tabs_row, target, typed,
+    AccountSync, Sync, Tab, alerts, heading, hint, list_hint, panel, panel_spots, position, status_row, tabs_row,
+    target, typed,
 };
 use crate::glyphs::{BAR, CURSOR, DOT, FLAG, FOLDED, MARK, RULE, UNFOLDED};
 use crate::keymap;
