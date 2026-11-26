@@ -7,6 +7,7 @@ mod calendar;
 mod draft;
 mod filter;
 mod find;
+mod mouse;
 mod read;
 
 use std::cell::{Cell, RefCell};
@@ -30,6 +31,7 @@ use crate::paint::{Theme, paint};
 use crate::palette::Tok;
 use crate::say::{self, Said};
 use crate::span::{Line, run};
+use crate::spot::{Spot, Target};
 use crate::{help, places, when};
 
 /// The tab that is there while a message is waiting to go or was refused.
@@ -176,6 +178,11 @@ pub struct App {
     focus: bool,
     pane_of: Option<MessageId>,
     pane: (Place, usize, usize, usize),
+    /// What the last frame drew that the pointer can be on.
+    spots: Vec<Spot>,
+    /// Whether the terminal is to report the pointer: `ui.mouse`, then
+    /// `:mouse` (ADR-065).
+    pointing: bool,
     /// The search being shown in place of a section, and where the cursor
     /// and the scroll were when `/` was pressed, which typing moves.
     search: Option<find::Search>,
@@ -251,6 +258,8 @@ impl App {
             focus: false,
             pane_of: None,
             pane: (Place::Off, 0, 0, 0),
+            spots: Vec::new(),
+            pointing: false,
             search: None,
             sought_from: (0, 0),
             said: None,
@@ -596,7 +605,7 @@ impl App {
             Mode::Filter(editor) => (Some(list::typed(&format!("/{}", editor.text))), no_panel),
             Mode::Prompt(label, editor) => (Some(list::typed(&format!("{label}{}", editor.text))), no_panel),
             Mode::Confirm(question, _) => {
-                (Some(self.images_question(width).unwrap_or_else(|| question.line(width))), no_panel)
+                (Some(self.images_question(width).unwrap_or_else(|| question.clone()).line(width)), no_panel)
             }
             Mode::Command(editor) => {
                 let panel = editor.menu.as_ref().map_or(no_panel, |menu| {
@@ -627,6 +636,22 @@ impl App {
         }
     }
 
+    /// The cells of each choice of the question `Mode::Confirm` has open,
+    /// as `command_row` draws it.
+    fn confirm_answers(&self, width: usize) -> Vec<Spot> {
+        let Mode::Confirm(question, _) = &self.mode else { return Vec::new() };
+        self.images_question(width).unwrap_or_else(|| question.clone()).drawn(width).1
+    }
+
+    /// The choices of a question drawn on the command line, which is the
+    /// last line of every screen under the bar. A choice past the screen's
+    /// edge is not on it.
+    fn answers_at(&mut self, lines: &[Line], answers: Vec<Spot>, width: usize) {
+        let row = lines.len().saturating_sub(1);
+        let shown = answers.into_iter().filter(|spot| spot.cols.end <= width);
+        self.spots.extend(shown.map(|spot| spot.moved(row, 0)));
+    }
+
     /// The screen, one line to a row: the bar of places, and under it
     /// whatever is open.
     pub fn lines(&mut self, width: usize, height: usize) -> Vec<Line> {
@@ -637,6 +662,8 @@ impl App {
         let mut lines = vec![places::bar(here, !typing, width)];
         lines.extend(self.lines_under(width, height.saturating_sub(1)));
         self.reading.pictures.iter_mut().for_each(|placed| placed.row += 1);
+        let under = std::mem::take(&mut self.spots).into_iter().map(|spot| spot.moved(1, 0));
+        self.spots = places::spots(here, !typing, width).into_iter().chain(under).collect();
         lines
     }
 
@@ -645,6 +672,7 @@ impl App {
         // A picture is where this frame's reader put it; a frame that draws
         // anything else over the reader has no picture to report.
         self.reading.pictures.clear();
+        self.spots.clear();
         let right = self.alerts();
         if let Mode::Help(needle, top) = &self.mode {
             let drawn = help::screen(needle, *top, self.cal.open, &right, width, height);
@@ -745,6 +773,16 @@ impl App {
         let drawn = list::draw(&list, width, height);
         drop(rows);
         (self.top, self.room, self.pane_of) = (top, room, shown);
+        // The rows made are the ones near the cursor, and a row is pressed
+        // by its place among them all.
+        self.spots = drawn.spots;
+        for spot in &mut self.spots {
+            if let Target::Row(row) = &mut spot.target {
+                *row += first;
+            }
+        }
+        let answers = self.confirm_answers(width);
+        self.answers_at(&drawn.lines, answers, width);
         // A preview that is not drawn cannot hold the focus.
         self.focus &= typing || drawn.place != Place::Off;
         if !typing {
@@ -1160,6 +1198,7 @@ impl App {
             Some("preview") => ("Preview".to_string(), plain(vec!["auto", "right", "below", "off"])),
             Some("calendar") => ("Views".to_string(), plain(vec!["month", "week", "day"])),
             Some("notify") => ("Reminders".to_string(), plain(vec!["on", "off"])),
+            Some("mouse") => ("Mouse".to_string(), plain(vec!["on", "off"])),
             Some("invite") => {
                 ("Answers".to_string(), plain(vec!["accept", "tentative", "decline", "propose", "ignore"]))
             }
@@ -1221,6 +1260,14 @@ impl App {
                 Some(preview) => self.set_preview(preview),
                 None => self.offer(say::err(":preview: it takes auto, right, below or off"), "preview "),
             },
+            "mouse" if ["", "on", "off"].contains(&rest) => {
+                self.pointing = if rest.is_empty() { !self.pointing } else { rest == "on" };
+                self.say(match self.pointing {
+                    true => say::plain("Mouse on").key("hold Shift to select text"),
+                    false => say::plain("Mouse off"),
+                });
+            }
+            "mouse" => self.offer(say::err(":mouse: it takes on or off, or nothing"), "mouse "),
             "sync" => self.sync(rest == "all"),
             "empty-trash" => self.ask_empty_trash(rest),
             "messages" => self.mode = Mode::Messages(0),

@@ -7,6 +7,7 @@ use crate::layout::MARGIN;
 use crate::list::heading;
 use crate::palette::Tok;
 use crate::span::{Line, cells, fit, gap, run};
+use crate::spot::{Spot, Target};
 
 /// The cells between places.
 pub const GAP: usize = 3;
@@ -94,6 +95,18 @@ pub fn bar(here: Place, keys: bool, width: usize) -> Line {
         }
     }
     fit(&line, width)
+}
+
+/// The cells of the bar that go to a place when the pointer is pressed on
+/// them, which is what the function key written there does: where `keys`
+/// says those are not read, nothing on the bar is pressed either.
+pub fn spots(here: Place, keys: bool, width: usize) -> Vec<Spot> {
+    if !keys {
+        return Vec::new();
+    }
+    let line = bar(here, keys, width);
+    let said = line.iter().enumerate().filter(|(_, span)| !span.text.trim().is_empty());
+    said.zip(&PLACES).map(|((at, span), named)| Spot::over(0, &line[..at], span, Target::Place(named.place))).collect()
 }
 
 #[cfg(test)]

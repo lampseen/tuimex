@@ -7,6 +7,8 @@
 use tuimex_core::AccountId;
 use tuimex_core::calendar::{DAY, Said, Standing, civil_from_days, links_of, weekday_of};
 
+use std::ops::Range;
+
 use super::{Calendar, Days, Entry, Picked};
 use crate::glyphs::{CURSOR, DOT, NOTICE};
 use crate::keymap;
@@ -15,6 +17,7 @@ use crate::list::{self, Preview, account_label, heading, status_row};
 use crate::palette::Tok;
 use crate::reader;
 use crate::span::{Line, Span, cells, fill, fit, gap, highlight, left_right, run};
+use crate::spot::{Spot, Target};
 use crate::when::{DAYS, MONTHS, span_of};
 
 pub const MONTH_NAMES: [&str; 12] = [
@@ -137,6 +140,32 @@ impl<'a> Scene<'a> {
     }
 }
 
+/// What a view drew that the pointer can be on (ADR-065), in the rows and
+/// columns of what drew it: the spots, and the events an `Occasion` among
+/// them is counted in.
+#[derive(Clone, Debug, Default)]
+pub struct Pressed {
+    pub spots: Vec<Spot>,
+    pub events: Vec<Picked>,
+}
+
+impl Pressed {
+    /// The event `picked`, drawn on `cols` of `row`. An event drawn over
+    /// several rows is one event.
+    pub fn event(&mut self, row: usize, cols: Range<usize>, picked: Picked) {
+        let at = self.events.iter().position(|other| *other == picked).unwrap_or(self.events.len());
+        if at == self.events.len() {
+            self.events.push(picked);
+        }
+        self.spots.push(Spot { row, cols, target: Target::Occasion(at) });
+    }
+
+    pub fn moved(mut self, rows: usize, cols: usize) -> Pressed {
+        self.spots = self.spots.into_iter().map(|spot| spot.moved(rows, cols)).collect();
+        self
+    }
+}
+
 /// `Thu 26 Nov`.
 pub fn day_short(day: i64) -> String {
     let (_, month, dom) = civil_from_days(day);
@@ -166,17 +195,24 @@ pub fn clock(wall: i64) -> String {
 }
 
 /// The views as tabs, and at the right what the page shows. A search
-/// takes the place of the active tab, after the others.
-pub fn tabs(o: &Scene, width: usize, title: &str) -> Line {
-    let mut tabs = Line::new();
+/// takes the place of the active tab, after the others. With the row come
+/// the cells of each view's name that the title leaves.
+pub fn tabs(o: &Scene, width: usize, title: &str) -> (Line, Vec<Spot>) {
+    let (mut tabs, mut spots) = (heading(Line::new()), Vec::new());
+    let right = [gap(2), run(title, Tok::Fg).bold(), gap(MARGIN)];
+    let room = width.saturating_sub(cells(&right));
     for view in View::ALL {
         let on = o.search.is_none() && view == o.view;
-        tabs.extend([Span { bold: on, ..run(view.name(), if on { Tok::Acc } else { Tok::Dim }) }, gap(3)]);
+        let name = Span { bold: on, ..run(view.name(), if on { Tok::Acc } else { Tok::Dim }) };
+        let spot = Spot::over(0, &tabs, &name, Target::CalView(view));
+        spots.push(Spot { cols: spot.cols.start..spot.cols.end.min(room), ..spot });
+        tabs.extend([name, gap(3)]);
     }
     if let Some(query) = o.search {
         tabs.extend([run("Search", Tok::Acc).bold(), gap(1), run(query, Tok::Fg)]);
     }
-    left_right(&heading(tabs), &[gap(2), run(title, Tok::Fg).bold(), gap(MARGIN)], width)
+    spots.retain(|spot| !spot.cols.is_empty());
+    (left_right(&tabs, &right, width), spots)
 }
 
 /// The right of the status line in the calendar: a reminder that is due,
@@ -362,14 +398,14 @@ pub fn event_row(o: &Scene, entry: &Entry, width: usize, look: Look) -> Line {
 /// on a label with no row under it. `selected` is the event drawn with the
 /// cursor, and the days go on as far as its day, however far that is: one
 /// further down than the rows reach is the last row, and the rows above it
-/// follow.
-pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<&Picked>) -> Vec<Line> {
+/// follow. Beside the rows is where each event is among them.
+pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<&Picked>) -> (Vec<Line>, Pressed) {
     let through = selected.map_or(from, |picked| picked.day);
     let to = (from + AHEAD).max(through + 1);
     let days = o.days(from, to);
     let today = o.calendar.today();
-    // Each line, with whether it is a label.
-    let mut lines: Vec<(Line, bool)> = Vec::new();
+    // Each line, with whether it is a label and the event it is.
+    let mut lines: Vec<(Line, bool, Option<Picked>)> = Vec::new();
     let mut at = None;
     for day in from..to {
         if lines.len() >= room && day > through {
@@ -380,11 +416,11 @@ pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<
             continue;
         }
         if !lines.is_empty() {
-            lines.push((Line::new(), false));
+            lines.push((Line::new(), false, None));
         }
-        lines.push((heading(vec![run(day_label(day, today), Tok::Dim).bold()]), true));
+        lines.push((heading(vec![run(day_label(day, today), Tok::Dim).bold()]), true, None));
         if entries.is_empty() {
-            lines.push((vec![gap(INDENT), run("Nothing on this day.", Tok::Dim)], false));
+            lines.push((vec![gap(INDENT), run("Nothing on this day.", Tok::Dim)], false, None));
         }
         for entry in entries {
             let look = Look {
@@ -394,17 +430,22 @@ pub fn agenda(o: &Scene, from: i64, room: usize, width: usize, selected: Option<
             if look.selected {
                 at = Some(lines.len());
             }
-            lines.push((event_row(o, entry, width, look), false));
+            lines.push((event_row(o, entry, width, look), false, Some(entry.pick())));
         }
     }
     lines.drain(..at.map_or(0, |at| (at + 1).saturating_sub(room)));
     lines.truncate(room);
-    while lines.last().is_some_and(|(line, label)| *label || cells(line) == 0) {
+    while lines.last().is_some_and(|(line, label, _)| *label || cells(line) == 0) {
         lines.pop();
     }
-    let mut out: Vec<Line> = lines.into_iter().map(|(line, _)| fit(&line, width)).collect();
+    let mut pressed = Pressed::default();
+    let mut out = Vec::new();
+    for (row, (line, _, picked)) in lines.into_iter().enumerate() {
+        picked.into_iter().for_each(|picked| pressed.event(row, 0..width, picked));
+        out.push(fit(&line, width));
+    }
     out.resize(room, fit(&[], width));
-    out
+    (out, pressed)
 }
 
 /// When an event is, in words, and after a dot how far off its day is:
@@ -497,9 +538,13 @@ pub fn event_fields(o: &Scene, entry: &Entry, brief: bool, width: usize) -> Vec<
 /// rows: the tabs with `title` at their right, the content, the panel, a
 /// blank row, the status line and the command line. The status line says
 /// `left`, after the account the calendar is narrowed to, and the command
-/// line `idle` when nothing else holds it.
-pub fn frame(o: &Scene, width: usize, title: &str, content: Vec<Line>, left: Line, idle: Line) -> Vec<Line> {
-    let mut lines = vec![tabs(o, width, title), Line::new()];
+/// line `idle` when nothing else holds it. What `pressed` says of the
+/// content is moved to where the content is, after the tabs' own.
+pub fn frame(o: &Scene, width: usize, title: &str, content: (Vec<Line>, Pressed), left: Line, idle: Line) -> Drawn {
+    let ((tabs, mut spots), (content, pressed)) = (tabs(o, width, title), content);
+    let pressed = pressed.moved(2, 0);
+    spots.extend(pressed.spots);
+    let mut lines = vec![tabs, Line::new()];
     lines.extend(content);
     lines.extend(o.panel.iter().cloned());
     let mut status = Line::new();
@@ -509,8 +554,11 @@ pub fn frame(o: &Scene, width: usize, title: &str, content: Vec<Line>, left: Lin
     }
     status.extend(o.left.clone().unwrap_or(left));
     lines.extend([Line::new(), status_row(width, &status, &o.right), o.command.clone().unwrap_or(idle)]);
-    lines
+    (lines, Pressed { spots, events: pressed.events })
 }
+
+/// A view's screen, and what of it the pointer can be on.
+pub type Drawn = (Vec<Line>, Pressed);
 
 /// The calendars, each one a row to show or hide: the design's
 /// `calendarEntries`.

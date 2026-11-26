@@ -9,6 +9,7 @@ use crate::keymap;
 use crate::layout::{INDENT, MARGIN};
 use crate::palette::Tok;
 use crate::span::{Line, cells, fill, fit, gap, left_right, run};
+use crate::spot::{Spot, Target};
 use crate::when::{clock, span_of};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -24,21 +25,23 @@ pub struct Tab {
 
 /// `search` is the query of a search being shown: it takes the place of
 /// the active tab, after the others.
-pub fn tabs_row(width: usize, tabs: &[Tab], active: &str, search: Option<&str>) -> Line {
-    let mut line = vec![gap(MARGIN)];
-    for tab in tabs {
-        let on = tab.name == active && search.is_none();
+/// With the row come the cells each tab has in it: its name and its count.
+pub fn tabs_row(width: usize, tabs: &[Tab], active: &str, search: Option<&str>) -> (Line, Vec<Spot>) {
+    let (mut line, mut spots) = (vec![gap(MARGIN)], Vec::new());
+    for (at, tab) in tabs.iter().enumerate() {
+        let (from, on) = (cells(&line), tab.name == active && search.is_none());
         line.push(crate::span::Span { bold: on, ..run(tab.name.as_str(), if on { Tok::Acc } else { Tok::Dim }) });
         if tab.count > 0 {
             let count = run(tab.count.to_string(), tab.tone);
             line.extend([gap(1), if tab.tone == Tok::Fg { count.bold() } else { count }]);
         }
+        spots.push(Spot { row: 0, cols: from..cells(&line).min(width), target: Target::Tab(at) });
         line.push(gap(3));
     }
     if let Some(query) = search {
         line.extend([run("Search", Tok::Acc).bold(), gap(1), run(query, Tok::Fg)]);
     }
-    fit(&line, width)
+    (fit(&line, width), spots)
 }
 
 /// What is not normal about sending and syncing. Healthy accounts and an
@@ -204,6 +207,13 @@ pub fn panel(title: &str, entries: Vec<Line>, selected: Option<usize>, width: us
         out.push(if on { fill(line, Tok::Sel) } else { line });
     }
     out
+}
+
+/// Where `panel` puts each of `entries` entries: the whole of its row,
+/// under the blank row and the title.
+pub fn panel_spots(entries: usize, width: usize, target: impl Fn(usize) -> Target) -> Vec<Spot> {
+    let row = |i: usize| Spot { row: 2 + i, cols: 0..width, target: target(i) };
+    if width == 0 { Vec::new() } else { (0..entries).map(row).collect() }
 }
 
 /// The command line while something is typed on it: the text, then the

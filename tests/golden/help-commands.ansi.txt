@@ -1,7 +1,6 @@
 {fg}  {fg b}Mail{fg}   {dim}Calendar{fg}                                                                                                       
 {fg}  {fg b}Help{fg}                                                                                                                  
 {fg}                                                                                                                        
-{fg}                                                                                                                        
 {fg}    {fg b}Commands{fg}                                                                                                            
 {fg}    :archive                                          {dim}archive what is selected{fg}                                          
 {fg}    :trash                                            {dim}move what is selected to Trash{fg}                                    
@@ -30,11 +29,12 @@
 {fg}    :notify on|off                                    {dim}reminders on or off{fg}                                               
 {fg}    :unsubscribe                                      {dim}prepare an unsubscribe for review{fg}                                 
 {fg}    :preview auto|right|below|off                     {dim}where the preview sits{fg}                                            
+{fg}    :mouse [on|off]                                   {dim}the mouse on or off; alone, the other{fg}                             
 {fg}    :sync [all]                                       {dim}sync this section, or all{fg}                                         
 {fg}    :empty-trash [account]                            {dim}delete an account's Trash for good{fg}                                
 {fg}    :messages                                         {dim}the last results and errors{fg}                                       
 {fg}    :q                                                {dim}quit from the list; back elsewhere{fg}                                
 {fg}    :qa                                               {dim}quit{fg}                                                              
 {fg}                                                                                                                        
-{fg}  {dim}144 keys and commands · lines 37-70 of 70{fg}                                                 sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}145 keys and commands · lines 38-71 of 71{fg}                                                 sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              

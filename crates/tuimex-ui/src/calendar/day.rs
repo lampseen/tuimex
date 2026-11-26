@@ -52,7 +52,7 @@ fn found(o: &Scene) -> usize {
     events.len()
 }
 
-pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
+pub fn screen(o: &Scene, width: usize, height: usize) -> parts::Drawn {
     let entry = o.entry();
     let room = o.room(height);
     let place = if entry.is_some() { list::place(o.preview, width, height) } else { Place::Off };
@@ -66,17 +66,18 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let selected = entry.as_ref().map(Entry::pick);
     let content = match (place, &entry) {
         (Place::Below, Some(entry)) => {
-            let mut content = parts::agenda(o, o.cursor, room - under, width, selected.as_ref());
+            let (mut content, pressed) = parts::agenda(o, o.cursor, room - under, width, selected.as_ref());
             content.push(vec![run(RULE.to_string().repeat(width), Tok::Faint)]);
             content.extend(pane(o, entry, width, under - 1));
-            content
+            (content, pressed)
         }
         (Place::Right, Some(entry)) => {
             let pane_width = layout::preview_width(width);
             let list_width = width.saturating_sub(pane_width + 1);
-            let list = parts::agenda(o, o.cursor, room, list_width, selected.as_ref());
+            let (list, pressed) = parts::agenda(o, o.cursor, room, list_width, selected.as_ref());
             let pane = pane(o, entry, pane_width, room);
-            list.into_iter().zip(pane).map(|(row, beside)| [row, vec![run(BAR, Tok::Faint)], beside].concat()).collect()
+            let beside = |(row, beside): (Line, Line)| [row, vec![run(BAR, Tok::Faint)], beside].concat();
+            (list.into_iter().zip(pane).map(beside).collect(), pressed)
         }
         _ => parts::agenda(o, o.cursor, room, width, selected.as_ref()),
     };

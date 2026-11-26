@@ -6,10 +6,12 @@
 //! server's reason are not this program's text.
 
 use crate::glyphs::{DOT, ELLIPSIS, OK};
+use crate::keymap;
 use crate::layout::MARGIN;
 use crate::list::heading;
 use crate::palette::Tok;
 use crate::span::{Line, cells, fit_middle, run};
+use crate::spot::{Spot, Target};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Said {
@@ -108,17 +110,33 @@ impl Question {
     /// The command line: the keys always show, and a question too wide for
     /// the row loses its middle.
     pub fn line(&self, width: usize) -> Line {
-        let mut keys = vec![run("  ", Tok::Dim)];
-        for (i, (key, does)) in self.keys.iter().enumerate() {
-            if i > 0 {
-                keys.push(run(format!(" {DOT} "), Tok::Dim));
-            }
-            keys.extend([run(format!("{key} "), Tok::Fg), run(does.as_str(), Tok::Dim)]);
-        }
-        let mut line = fit_middle(&heading(self.ask.clone()), width.saturating_sub(cells(&keys) + MARGIN));
-        line.extend(keys);
-        line
+        self.drawn(width).0
     }
+
+    /// The command line, and the cells of each choice on it.
+    pub fn drawn(&self, width: usize) -> (Line, Vec<Spot>) {
+        let gap = || vec![run("  ", Tok::Dim)];
+        let keys = cells(&choices(gap(), &self.keys).0);
+        let ask = fit_middle(&heading(self.ask.clone()), width.saturating_sub(keys + MARGIN));
+        choices([ask, gap()].concat(), &self.keys)
+    }
+}
+
+/// `line`, then each key and what it does, parted by dots; with them the
+/// cells each pair takes, which a press there answers with that key.
+pub fn choices<K: AsRef<str>, D: AsRef<str>>(mut line: Line, keys: &[(K, D)]) -> (Line, Vec<Spot>) {
+    let mut spots = Vec::new();
+    for (i, (key, does)) in keys.iter().enumerate() {
+        if i > 0 {
+            line.push(run(format!(" {DOT} "), Tok::Dim));
+        }
+        let from = cells(&line);
+        line.extend([run(format!("{} ", key.as_ref()), Tok::Fg), run(does.as_ref(), Tok::Dim)]);
+        if let [one] = keymap::presses(key.as_ref())[..] {
+            spots.push(Spot { row: 0, cols: from..cells(&line), target: Target::Answer(one) });
+        }
+    }
+    (line, spots)
 }
 
 /// `ask`, answered by `keys`.
@@ -148,7 +166,7 @@ pub fn loading(rebuilt: Option<(usize, usize)>) -> Vec<Line> {
 /// each answer by its key in the keymap's `invite` table.
 pub fn answer() -> Question {
     let ids = ["invite.accept", "invite.tentative", "invite.decline", "invite.propose", "invite.ignore"];
-    let mut keys: Vec<(&str, &str)> = ids.iter().map(|id| crate::keymap::hint(id)).collect();
+    let mut keys: Vec<(&str, &str)> = ids.iter().map(|id| keymap::hint(id)).collect();
     keys.push(("Esc", "cancel"));
     asked(vec![run("Answer?", Tok::Fg)], &keys)
 }

@@ -2225,3 +2225,99 @@ its own against its own measurement.
 **What it costs.** The second raise of this budget in two days. The
 download is 1 MiB larger than the one released as 0.1.0, and that is
 what a user pays for a calendar they may never open.
+
+## ADR-065 — The mouse does what the keys do, and a press selects before it acts
+
+The terminal reports the pointer unless `ui.mouse = false` or `:mouse`
+turns that off. A press of the left button moves the cursor to what it is
+on, and a press on what the cursor already has is Enter. The wheel moves
+the list's cursor, or scrolls the preview when it is over that. Nothing
+else the pointer does is read.
+
+The strongest argument against building it at all is the north star's
+own: the inbox is cleared from the keyboard, and a second way in is a
+second thing to keep true. Two things answer it. The pointer adds no
+action: a press is looked up in what the last frame drew and then goes
+through the binding a key goes through, so there is one behaviour and two
+ways to reach it. And nothing is drawn for it: no button, no scrollbar, no
+hover. The look is unchanged, so `design/tui.js`, the goldens and the
+keymap table are untouched (ADR-002, ADR-054).
+
+**On unless turned off** (Bryan, 2026-11-26: "this can be enabled
+initially, I don't see how it conflicts with the keyboard nav"). It does
+not: a press goes through a key's binding and no key changes. What it
+costs is not the keyboard's but the terminal's: one that reports the
+pointer stops selecting text by dragging, and in a mail reader copying a
+line out of a message is ordinary. Most terminals still select while
+Shift is held; that is theirs to do and not something tuimex can promise.
+So there are two ways back. `ui.mouse = false` starts a run without it,
+and `:mouse` turns it off and on within one (Bryan, the same day: "I
+should be able to turn on mouse with `:mouse`"), which is not
+remembered: the config says how a run starts (ADR-043 keeps tuimex from
+rewriting it). The first ruling that day was off unless asked for; it
+was changed once the pointer had been tried.
+
+**A press selects first** (Bryan, 2026-11-26). Many terminals deliver the
+press that only brought their window to the front. If one press opened
+what it landed on, that press would open a message, and later a link or a
+file from hostile mail (ADR-008, ADR-018), without anyone having chosen
+it. A first press that only moves the cursor is harmless wherever it
+lands.
+
+**The hint line is not buttons** (Bryan, 2026-11-26). `e archive · d
+trash` reminds what the keys are. A question's `y yes · n no` is a
+dialog, and its choices will take a press when questions do.
+
+The rules that follow from those:
+
+- Only the left button going down and the wheel are read, and only with
+  no modifier held. Presses and the wheel are all the terminal is asked
+  to report (modes 1000 and 1006): where the pointer merely is would be an
+  event for every cell it crossed.
+- While a line is being typed the pointer is not read at all. While a
+  question is open only its choices take a press, and a press beside
+  them leaves it open: unlike a key, it may have been aimed at the
+  terminal.
+- The bar of places is pressed where its function keys are read, and
+  nowhere else.
+- A press means what the last frame showed. Several events read together
+  before one frame (PLAN §9) are each looked up in that frame.
+- The report is switched off wherever the screen is given back: on the
+  way out, around `$EDITOR`, and in a panic before the message prints. A
+  terminal left reporting writes an escape sequence into the shell at
+  every click.
+
+No crate is added: `crossterm`'s events already carry the pointer
+(ADR-005).
+
+**What it covers.** The bar of places and the mail list: tabs,
+rows, the preview, the wheel. The reader: a `[n]` in the text lists the
+links with that one chosen, an entry of the links or the files is chosen
+and then is Enter, and the wheel scrolls the text, help and `:messages`.
+Questions: a choice is its key and a press elsewhere leaves the question
+open, so of the rule above, what a question leaves read is its choices.
+Compose: a field takes the focus as Tab gives it, and a press on the
+focused one does nothing. The menus over the list (completion, `A`'s
+agent menu, `:messages`'s entries) take no press: `A` picks by letter
+and its pick sends text out of the machine (ADR-031).
+
+**In the calendar.** A press on a view's tab opens it; on a day of the
+month's grid or the head of a week's column it moves the cursor there; on
+an event in a list or a block of the week it selects it; on an entry of
+the Calendars or links panel it moves that panel's cursor; on a field of
+the form it moves the focus there as Tab would, typing nothing. On what is
+already selected it is that place's Enter, and in the Calendars panel its
+Space, which shows or hides a calendar and is undone by another. A link
+pressed twice is assessed as Enter has it assessed (ADR-018). The wheel is
+`j` and `k`: a week over the grid, and in a list or the week one event a
+notch, since an event is a selection and three would pass over events
+never seen; the event's screen scrolls three lines. Over the part of the
+month without the focus the wheel does nothing, as the same key would move
+the other part. While a panel is open only its entries take a press, and
+while a question is open nothing does.
+
+**What it costs.** Selecting text by dragging, for everyone who does not
+turn it off. A map from
+cells to what was drawn there, which every screen that wants the pointer
+has to keep true; a test walks the list's at every size. Behaviour inside
+tmux and on macOS is **unverified**.

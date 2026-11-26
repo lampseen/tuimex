@@ -57,6 +57,7 @@ pub const COMMANDS: &[Command] = &[
     c("notify", "on|off", "reminders on or off"),
     c("unsubscribe", "", "prepare an unsubscribe for review"),
     c("preview", "auto|right|below|off", "where the preview sits"),
+    c("mouse", "[on|off]", "the mouse on or off; alone, the other"),
     c("sync", "[all]", "sync this section, or all"),
     c("empty-trash", "[account]", "delete an account's Trash for good"),
     c("messages", "", "the last results and errors"),

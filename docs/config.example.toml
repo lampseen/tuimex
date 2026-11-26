@@ -32,6 +32,7 @@ glyphs = "unicode"             # unicode | ascii | nerd
 colors = "auto"                # auto | 16 | 256 | true
 # palette = "~/.config/tuimex/palette.toml"
 preview = "auto"
+mouse = true                   # a press moves the cursor, a second opens; false leaves the pointer to the terminal (ADR-065)
 
 [[calendar]]                   # absent means no calendar for the account; at most one for each
 account = "personal"           # an [[account]]'s name

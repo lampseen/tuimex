@@ -427,6 +427,7 @@ const COMMANDS = [
   { name: 'notify', args: 'on|off', does: 'reminders on or off' },
   { name: 'unsubscribe', args: '', does: 'prepare an unsubscribe for review' },
   { name: 'preview', args: 'auto|right|below|off', does: 'where the preview sits' },
+  { name: 'mouse', args: '[on|off]', does: 'the mouse on or off; alone, the other' },
   { name: 'sync', args: '[all]', does: 'sync this section, or all' },
   { name: 'empty-trash', args: '[account]', does: 'delete an account\'s Trash for good' },
   { name: 'messages', args: '', does: 'the last results and errors' },

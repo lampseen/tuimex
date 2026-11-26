@@ -68,6 +68,7 @@ what you have typed; `^w` and `^u` delete a word and the line.
 | `:agent tidy` | have the agent clean up the text you wrote |
 | `:agent link <n>` | ask the agent about a link; the agent opens nothing |
 | `:preview auto\|right\|below\|off` | where the preview sits |
+| `:mouse [on\|off]` | the [mouse](Keys#the-mouse) on or off for this run; alone, the other of the two |
 | `:sync [all]` | sync now |
 | `:empty-trash [account]` | delete an account's Trash for good, after a question with the count. `u` does not reach it |
 | `:invite accept\|tentative\|decline\|propose\|ignore` | answer the invitation of the message open in the reader, or of the event selected in the calendar. `propose` then asks for the time |

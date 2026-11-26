@@ -2,12 +2,17 @@ use tuimex_core::AccountId;
 use tuimex_core::calendar::{DAY, Event, Moment};
 use tuimex_fixtures::design as fx;
 
-use super::{Lane, columns, explode, first_day, lanes, overlay, rows_of, screen, window};
+use super::{Lane, columns, explode, first_day, lanes, overlay, rows_of, window};
 use crate::calendar::parts::{Scene, View};
 use crate::calendar::{Calendar, Picked, Shelf};
 use crate::list::Preview;
 use crate::palette::Tok;
 use crate::span::{Line, cells, gap, run};
+
+/// The screen's lines, without where the pointer can be on them.
+fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
+    super::screen(o, width, height).0
+}
 
 fn at(day: i64, hour: i64, minute: i64) -> Moment {
     Moment::Wall { wall: day * DAY + hour * 3600 + minute * 60, zone: None }

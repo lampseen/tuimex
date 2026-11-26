@@ -1,13 +1,14 @@
 use std::time::{Duration, Instant};
 
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
 use ratatui::backend::CrosstermBackend;
 use ratatui::{Terminal, TerminalOptions, Viewport};
 use tuimex_core::{Action, Ask};
 use tuimex_ui::app::App;
 use tuimex_ui::keymap::Key;
+use tuimex_ui::spot::Mouse;
 
-use super::{Backend, Input, convert, event_loop};
+use super::{Backend, Input, convert, event_loop, pointer};
 
 /// A key held down: what a keyboard repeats, each with when it was sent,
 /// and when the loop read each.
@@ -214,6 +215,69 @@ fn the_keys_the_table_names_by_word_arrive_as_themselves() {
     assert_eq!(convert(KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT)), Some(Key::BackTab));
     assert_eq!(plain(KeyCode::F(2)), Some(Key::F(2)));
     assert_eq!(plain(KeyCode::Insert), None, "a key the table has no name for reaches nothing");
+}
+
+fn mouse(kind: MouseEventKind, modifiers: KeyModifiers) -> MouseEvent {
+    MouseEvent { kind, column: 20, row: 9, modifiers }
+}
+
+#[test]
+fn only_the_left_button_going_down_and_the_wheel_are_read_and_with_nothing_held() {
+    let plain = |kind| pointer(mouse(kind, KeyModifiers::NONE));
+    assert_eq!(plain(MouseEventKind::Down(MouseButton::Left)), Some(Mouse::Click { col: 20, row: 9 }));
+    assert_eq!(plain(MouseEventKind::ScrollDown), Some(Mouse::Wheel { col: 20, row: 9, down: true }));
+    assert_eq!(plain(MouseEventKind::ScrollUp), Some(Mouse::Wheel { col: 20, row: 9, down: false }));
+    let left = MouseButton::Left;
+    for kind in [
+        MouseEventKind::Up(left),
+        MouseEventKind::Drag(left),
+        MouseEventKind::Moved,
+        MouseEventKind::Down(MouseButton::Right),
+        MouseEventKind::Down(MouseButton::Middle),
+        MouseEventKind::ScrollLeft,
+        MouseEventKind::ScrollRight,
+    ] {
+        assert_eq!(plain(kind), None, "{kind:?}");
+    }
+    for held in [KeyModifiers::SHIFT, KeyModifiers::CONTROL, KeyModifiers::ALT] {
+        assert_eq!(pointer(mouse(MouseEventKind::Down(left), held)), None, "{held:?}");
+        assert_eq!(pointer(mouse(MouseEventKind::ScrollDown, held)), None, "{held:?}");
+    }
+}
+
+/// Events that are all there to be read, and none after them.
+struct Waiting(std::collections::VecDeque<Event>);
+
+impl Input for Waiting {
+    fn poll(&mut self, _: Duration) -> std::io::Result<bool> {
+        Ok(!self.0.is_empty())
+    }
+
+    fn read(&mut self) -> std::io::Result<Event> {
+        self.0.pop_front().ok_or_else(|| std::io::Error::other("no event is coming"))
+    }
+}
+
+/// The press is on the sixth row of the design's inbox as 120 by 40 shows
+/// it, and the key after it acts on the row the press moved the cursor to.
+#[test]
+fn a_press_and_the_keys_around_it_are_handled_in_the_order_they_came() {
+    let key = |c: char| Event::Key(KeyEvent::new(code(c), KeyModifiers::NONE));
+    let press = Event::Mouse(mouse(MouseEventKind::Down(MouseButton::Left), KeyModifiers::NONE));
+    let moved = Event::Mouse(mouse(MouseEventKind::Moved, KeyModifiers::NONE));
+    let events = [key('j'), press, moved, key('e'), key(':'), key('q'), key('\r')];
+    let viewport = Viewport::Fixed(ratatui::layout::Rect::new(0, 0, 120, 40));
+    let glass = CrosstermBackend::new(Glass(Default::default()));
+    let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
+    let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
+    app.set_mouse(true);
+    let (mut input, mut asked) = (Waiting(events.into()), Asked::default());
+    event_loop(&mut terminal, &mut input, &mut app, &mut asked, &mut no_calendar()).unwrap();
+    let archived: Vec<&Ask> = asked.0.iter().filter(|ask| ask.action == Action::Archive).collect();
+    assert_eq!(archived.len(), 1, "{:?}", asked.0);
+    let rows = tuimex_fixtures::design::inbox();
+    let sixth = tuimex_ui::list::rows(&rows, &[])[5].msg.envelope.id.clone();
+    assert_eq!(archived[0].on, [sixth], "the row the press was on, not the one j moved to");
 }
 
 /// A terminal that keeps every byte written to it.

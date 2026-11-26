@@ -16,11 +16,12 @@ use tuimex_core::calendar::{DAY, civil_from_days, weekday_of};
 use unicode_width::UnicodeWidthChar;
 
 use super::Entry;
-use super::parts::{self, MONTH_NAMES, Scene, clock, event_words};
+use super::parts::{self, Drawn, MONTH_NAMES, Pressed, Scene, clock, event_words};
 use crate::glyphs::{BAR, BLOCK, CURSOR, DOT, RULE};
 use crate::layout::{CAL_AXIS, CAL_DAY_FROM, CAL_SLOT, CAL_STEP, CAL_WEEK_FROM, MARGIN};
 use crate::palette::Tok;
-use crate::span::{Line, Span, fill, fit, gap, run};
+use crate::span::{Line, Span, cells, fill, fit, gap, run};
+use crate::spot::{Spot, Target};
 use crate::when::{DAYS, MONTHS};
 
 #[cfg(test)]
@@ -176,7 +177,7 @@ struct Placed<'a> {
 }
 
 /// The whole screen.
-pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
+pub fn screen(o: &Scene, width: usize, height: usize) -> Drawn {
     let room = o.room(height);
     let (count, col) = columns(width);
     let first = first_day(o.cursor, count);
@@ -192,8 +193,9 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let across = |glyph: char, fg: Tok| run(glyph.to_string().repeat(col.saturating_sub(1)), fg);
     let entry = o.entry();
 
-    let mut head = vec![gap(MARGIN + CAL_AXIS)];
+    let (mut head, mut pressed) = (vec![gap(MARGIN + CAL_AXIS)], Pressed::default());
     for &day in &shown {
+        let from = cells(&head);
         let (_, _, dom) = civil_from_days(day);
         let label = format!("{} {dom}", DAYS[weekday_of(day) as usize]);
         let on = day == o.cursor;
@@ -210,23 +212,28 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
             true => head.extend(fill(fit(&[cursor, label], col), Tok::Sel)),
             false => head.extend(fit(&[gap(1), label], col)),
         }
+        pressed.spots.push(Spot { row: 0, cols: from..cells(&head), target: Target::Day(day) });
     }
 
     let all_day: Vec<Vec<&Entry>> =
         shown.iter().map(|&day| days.on(day).iter().filter(|entry| entry.all_day).collect()).collect();
     let most = all_day.iter().map(Vec::len).max().unwrap_or(0);
-    let all_rows = (0..most).map(|y| {
+    let mut all_rows: Vec<Line> = Vec::new();
+    for y in 0..most {
         let mut row = vec![gap(MARGIN)];
         row.extend(fit(&if y == 0 { vec![run("all day", Tok::Dim)] } else { Vec::new() }, CAL_AXIS));
         for (list, &day) in all_day.iter().zip(&shown) {
             match list.get(y) {
-                Some(entry) => row.extend(block(o, entry, 0, col)),
+                Some(entry) => {
+                    let from = cells(&row);
+                    row.extend(block(o, entry, 0, col));
+                    pressed.event(1 + y, from..cells(&row), entry.pick());
+                }
                 None => row.extend(empty(day, None)),
             }
         }
-        row
-    });
-    let all_rows: Vec<Line> = all_rows.collect();
+        all_rows.push(row);
+    }
 
     let timed: Vec<(Vec<Placed>, usize)> = shown
         .iter()
@@ -249,7 +256,13 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
     let now = shown.contains(&today).then(|| o.calendar.wall().rem_euclid(DAY) / 3600 * 60);
     let present = o.calendar.wall().rem_euclid(DAY) / 60 / CAL_SLOT * CAL_SLOT;
 
-    let grid = (0..slots as i64).map(|s| {
+    let mut content = vec![head];
+    content.extend(all_rows);
+    // A rule parts what lasts all day from the hours.
+    if most > 0 {
+        content.push(vec![gap(MARGIN + CAL_AXIS), run(RULE.to_string().repeat(count * col), Tok::Faint)]);
+    }
+    for s in 0..slots as i64 {
         let at = from + s * CAL_SLOT;
         let label = match at % 60 {
             0 => {
@@ -276,6 +289,8 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
                 };
                 let w = if p.lane.abreast { half } else { col.saturating_sub(x) };
                 let rows = block(o, &p.entry, (at - p.from) / CAL_SLOT, w);
+                let (left, drawn) = (cells(&row), (x + cells(&rows)).min(cell.len()));
+                pressed.event(content.len(), left + x..left + drawn, p.entry.pick());
                 // A blank cell before a block drawn over another parts the two.
                 match x > 0 && !p.lane.abreast {
                     true => overlay(&mut cell, x - 1, &[vec![gap(1)], rows].concat()),
@@ -284,21 +299,15 @@ pub fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
             }
             row.extend(cell);
         }
-        row
-    });
+        content.push(row);
+    }
 
     let (a, b) = (civil_from_days(first), civil_from_days(first + count as i64 - 1));
     let title = match a.1 == b.1 {
         true => format!("{} to {} {} {}", a.2, b.2, MONTH_NAMES[(b.1 - 1) as usize], b.0),
         false => format!("{} {} to {} {} {}", a.2, MONTHS[(a.1 - 1) as usize], b.2, MONTHS[(b.1 - 1) as usize], b.0),
     };
-    let mut content = vec![head];
-    content.extend(all_rows.iter().cloned());
-    // A rule parts what lasts all day from the hours.
-    if most > 0 {
-        content.push(vec![gap(MARGIN + CAL_AXIS), run(RULE.to_string().repeat(count * col), Tok::Faint)]);
-    }
-    content.extend(grid);
     let content = content.iter().map(|row| fit(row, width)).collect();
-    parts::frame(o, width, &title, content, parts::day_status(o, o.cursor), parts::hint(entry.as_ref(), false))
+    let (left, idle) = (parts::day_status(o, o.cursor), parts::hint(entry.as_ref(), false));
+    parts::frame(o, width, &title, (content, pressed), left, idle)
 }

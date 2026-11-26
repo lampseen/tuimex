@@ -11,13 +11,15 @@ use tuimex_core::{AccountId, Check, Envelope, Folder, Listed, MessageId, Role, S
 
 pub(crate) use self::chrome::thousands;
 pub use self::chrome::{
-    AccountSync, Sync, Tab, alerts, heading, hint, list_hint, panel, position, status_row, tabs_row, target, typed,
+    AccountSync, Sync, Tab, alerts, heading, hint, list_hint, panel, panel_spots, position, status_row, tabs_row,
+    target, typed,
 };
 use crate::glyphs::{BAR, CURSOR, DOT, FLAG, FOLDED, MARK, RULE, UNFOLDED};
 use crate::keymap;
 use crate::layout::{self, Cut, INDENT, MARGIN, PREVIEW_MIN_HEIGHT};
 use crate::palette::Tok;
 use crate::span::{Line, Span, cells, fill, fit, gap, highlight, run};
+use crate::spot::{Spot, Target};
 use crate::when::{GROUPS, group_of, short_date, span_of};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -570,8 +572,9 @@ fn colour_of(o: &List, account: &AccountId) -> Tok {
 }
 
 /// As many lines of the rows and their labels as fit in `room`, from
-/// `o.top`, never ending on a label with no row under it.
-fn rows_in_sight(o: &List, width: usize, room: usize) -> Vec<Line> {
+/// `o.top`, never ending on a label with no row under it. Each line is
+/// given with the row it is, which a label or a blank line is not.
+fn rows_in_sight(o: &List, width: usize, room: usize) -> Vec<(Line, Option<usize>)> {
     let draw = |i: usize, row: &Row| {
         let id = &row.msg.envelope.id;
         let look = Look {
@@ -589,36 +592,36 @@ fn rows_in_sight(o: &List, width: usize, room: usize) -> Vec<Line> {
     };
     // Only the lines in sight are made: a section may hold every message
     // of a long mailbox, and a frame shows a screenful of them. Each is
-    // kept with whether it is a label.
-    let (mut body, mut at): (Vec<(Line, bool)>, usize) = (Vec::new(), 0);
-    let mut put = |label: bool, line: &dyn Fn() -> Line| {
+    // kept with whether it is a label, and which row it is.
+    let (mut body, mut at): (Vec<(Line, bool, Option<usize>)>, usize) = (Vec::new(), 0);
+    let mut put = |label: bool, row: Option<usize>, line: &dyn Fn() -> Line| {
         if at >= o.top && body.len() < room {
-            body.push((line(), label));
+            body.push((line(), label, row));
         }
         at += 1;
     };
     if o.rows.is_empty() {
-        put(false, &Line::new);
-        put(false, &|| vec![gap(INDENT), run(o.empty[0].as_str(), Tok::Fg)]);
-        put(false, &|| vec![gap(INDENT), run(o.empty[1].as_str(), Tok::Dim)]);
+        put(false, None, &Line::new);
+        put(false, None, &|| vec![gap(INDENT), run(o.empty[0].as_str(), Tok::Fg)]);
+        put(false, None, &|| vec![gap(INDENT), run(o.empty[1].as_str(), Tok::Dim)]);
     }
     let mut group = None;
     for (i, row) in o.rows.iter().enumerate() {
         let of = group_of(row.newest, o.now);
         if o.grouped && group != Some(of) {
             if group.is_some() {
-                put(false, &Line::new);
+                put(false, None, &Line::new);
             }
-            put(true, &|| vec![gap(MARGIN), run(GROUPS[of], Tok::Dim).bold()]);
+            put(true, None, &|| vec![gap(MARGIN), run(GROUPS[of], Tok::Dim).bold()]);
             group = Some(of);
         }
-        put(false, &|| draw(i, row));
+        put(false, Some(i), &|| draw(i, row));
     }
-    while body.last().is_some_and(|(line, label)| *label || cells(line) == 0) {
+    while body.last().is_some_and(|(line, label, _)| *label || cells(line) == 0) {
         body.pop();
     }
-    let mut lines: Vec<Line> = body.into_iter().map(|(line, _)| line).collect();
-    lines.resize(room, Vec::new());
+    let mut lines: Vec<(Line, Option<usize>)> = body.into_iter().map(|(line, _, row)| (line, row)).collect();
+    lines.resize(room, (Vec::new(), None));
     lines
 }
 
@@ -630,6 +633,8 @@ pub struct Drawn {
     pub pane_top: usize,
     pub pane_last_top: usize,
     pub pane_room: usize,
+    /// The tabs, the rows by their place in `rows`, and the preview.
+    pub spots: Vec<Spot>,
 }
 
 /// The whole screen, one line to a row: the tabs, as many rows as fit, the
@@ -638,12 +643,23 @@ pub struct Drawn {
 pub fn draw(o: &List, width: usize, height: usize) -> Drawn {
     let split = split(o, width, height);
     let selected = o.selected.and_then(|i| o.rows.get(i));
-    let list = rows_in_sight(o, split.list_width, split.list_room);
+    let (list, rows): (Vec<Line>, Vec<Option<usize>>) =
+        rows_in_sight(o, split.list_width, split.list_room).into_iter().unzip();
     let pane = selected.filter(|_| split.place != Place::Off).map(|row| {
         let pane_width = if split.place == Place::Right { layout::preview_width(width) } else { width };
         preview::pane(row.msg, o, pane_width, split.pane_rows)
     });
-    let mut lines = vec![tabs_row(width, o.tabs, o.section, o.search), vec![]];
+    let (tabs, mut spots) = tabs_row(width, o.tabs, o.section, o.search);
+    let under = |line: usize, cols, target| Spot { row: 2 + line, cols, target };
+    let listed = rows.iter().enumerate().filter_map(|(line, row)| Some((line, (*row)?)));
+    spots.extend(listed.map(|(line, row)| under(line, 0..split.list_width, Target::Row(row))));
+    // The preview is under the rows and their rule, or beside them past
+    // the bar between.
+    let (down, across) = if split.place == Place::Right { (0, split.list_width + 1) } else { (list.len() + 1, 0) };
+    let shown = pane.as_ref().map_or(0, |pane| pane.rows.len());
+    spots.extend((0..shown).map(|line| under(down + line, across..width, Target::Pane)));
+    spots.retain(|spot| !spot.cols.is_empty());
+    let mut lines = vec![tabs, vec![]];
     match (split.place, &pane) {
         (Place::Below, Some(pane)) => {
             lines.extend(list);
@@ -684,7 +700,7 @@ pub fn draw(o: &List, width: usize, height: usize) -> Drawn {
     };
     lines.extend([vec![], status_row(width, &left, &o.right), command]);
     let scrolled = pane.as_ref().map_or((0, 0, 0), |pane| (pane.top, pane.last_top, pane.room));
-    Drawn { lines, place: split.place, pane_top: scrolled.0, pane_last_top: scrolled.1, pane_room: scrolled.2 }
+    Drawn { lines, place: split.place, pane_top: scrolled.0, pane_last_top: scrolled.1, pane_room: scrolled.2, spots }
 }
 
 pub fn screen(o: &List, width: usize, height: usize) -> Vec<Line> {

@@ -19,4 +19,5 @@ pub mod places;
 pub mod reader;
 pub mod say;
 pub mod span;
+pub mod spot;
 pub mod when;

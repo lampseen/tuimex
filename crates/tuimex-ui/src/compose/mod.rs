@@ -16,6 +16,7 @@ use crate::list;
 use crate::palette::Tok;
 use crate::reader::size_text;
 use crate::span::{Line, cells, fit, gap, run, wrap};
+use crate::spot::{Spot, Target};
 use crate::when::stamp;
 
 #[cfg(test)]
@@ -176,14 +177,15 @@ impl Compose {
         })
     }
 
-    fn fields(&self, identities: &[Identity]) -> Vec<Line> {
+    /// The rows of the fields, each with the field it is of.
+    fn fields(&self, identities: &[Identity]) -> Vec<(Option<Field>, Line)> {
         let caret = |on: bool| on.then(|| run(" ", Tok::Bg).on(Tok::Acc));
         let mut from = Line::new();
         for (i, identity) in identities.iter().enumerate() {
             let email = run(identity.address.email.as_str(), Tok::Dim);
             from.extend([if i == self.identity { run(email.text, Tok::Fg).bold() } else { email }, gap(3)]);
         }
-        let mut rows = vec![field_row(self.focus == Field::From, "From", from)];
+        let mut rows = vec![(Some(Field::From), field_row(self.focus == Field::From, "From", from))];
         for (field, label, typed) in
             [(Field::To, "To", &self.to), (Field::Cc, "Cc", &self.cc), (Field::Bcc, "Bcc", &self.bcc)]
         {
@@ -199,14 +201,14 @@ impl Compose {
                     _ => vec![run(*piece, Tok::Fg)],
                 };
                 value.extend(caret(on && i == last));
-                rows.push(field_row(on && i == 0, if i == 0 { label } else { "" }, value));
+                rows.push((Some(field), field_row(on && i == 0, if i == 0 { label } else { "" }, value)));
             }
         }
         let on = self.focus == Field::Subject;
         let mut subject = vec![run(self.subject.as_str(), Tok::Fg).bold()];
         subject.extend(caret(on));
-        rows.push(field_row(on, "Subject", subject));
-        rows.extend(file_rows(&self.files));
+        rows.push((Some(Field::Subject), field_row(on, "Subject", subject)));
+        rows.extend(file_rows(&self.files).into_iter().map(|row| (None, row)));
         rows
     }
 
@@ -244,15 +246,24 @@ impl Compose {
     }
 
     pub fn screen(&self, view: &View, width: usize, height: usize) -> Vec<Line> {
+        self.draw(view, width, height).0
+    }
+
+    /// The screen, and the rows of each field, the body's among them.
+    pub fn draw(&self, view: &View, width: usize, height: usize) -> (Vec<Line>, Vec<Spot>) {
         let mut head = vec![title(&self.subject), Line::new()];
-        head.extend(self.fields(view.identities));
+        let (from, fields) = (head.len(), self.fields(view.identities));
+        let on = |row: usize, field: Field| Spot { row, cols: 0..width, target: Target::Field(field) };
+        let mut spots: Vec<Spot> =
+            fields.iter().enumerate().filter_map(|(i, (field, _))| Some(on(from + i, (*field)?))).collect();
+        head.extend(fields.into_iter().map(|(_, row)| row));
         head.push(Line::new());
         if let Some(mark) = self.agent.as_ref().filter(|_| !matches!(self.stage, Stage::Working { .. })) {
             let what = if mark.tidied.is_some() { "Tidied by an agent" } else { "Written by an agent" };
             let when = run(format!(" {DOT} {}", stamp(mark.at)), Tok::Dim);
             head.extend([vec![gap(INDENT), run(format!("{AGENT} {what}"), Tok::Agent), when], Line::new()]);
         }
-        let head = head.iter().map(|row| fit(row, width)).collect();
+        let head: Vec<Line> = head.iter().map(|row| fit(row, width)).collect();
         let body = self.body_rows(MEASURE.min(width.saturating_sub(INDENT + MARGIN)));
         let saved = || self.saved.map(|at| vec![run(format!("draft saved {}", crate::when::clock(at)), Tok::Dim)]);
         let left = view.left.clone().or_else(saved).unwrap_or_default();
@@ -269,7 +280,11 @@ impl Compose {
         let hint = || list::hint(&keys);
         let status = list::status_row(width, &left, &right);
         let foot = [view.panel.clone(), vec![Line::new(), status, view.command.clone().unwrap_or_else(hint)]].concat();
-        frame(head, body, foot, height)
+        let (above, below) = (head.len(), foot.len());
+        let lines = frame(head, body, foot, height);
+        spots.extend((above..lines.len().saturating_sub(below)).map(|row| on(row, Field::Body)));
+        spots.retain(|spot| !spot.cols.is_empty());
+        (lines, spots)
     }
 }
 

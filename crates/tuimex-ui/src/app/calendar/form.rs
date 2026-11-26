@@ -19,6 +19,7 @@ use crate::keymap::{self, Found, Key};
 use crate::palette::Tok;
 use crate::say::{self, Question};
 use crate::span::{Line, run};
+use crate::spot::Spot;
 use crate::when::span_of;
 
 #[cfg(test)]
@@ -306,10 +307,17 @@ impl App {
         Some(Question::line(&question, width))
     }
 
-    pub(super) fn form_lines(&self, o: &Scene, width: usize, height: usize) -> Vec<Line> {
+    pub(super) fn form_lines(&self, o: &Scene, width: usize, height: usize) -> (Vec<Line>, Vec<Spot>) {
         match &self.cal.form.form {
             Some(opened) => form::screen(o, opened, self.form_question(width), width, height),
-            None => Vec::new(),
+            None => (Vec::new(), Vec::new()),
         }
+    }
+
+    /// The field the focus is on, by its place in `FIELDS`, while the form
+    /// waits on no question.
+    pub(super) fn form_field(&self) -> Option<usize> {
+        let form = self.cal.form.form.as_ref().filter(|_| self.cal.form.asking.is_none())?;
+        form::FIELDS.iter().position(|field| *field == form.focus)
     }
 }

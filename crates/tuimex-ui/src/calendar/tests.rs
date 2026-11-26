@@ -245,21 +245,21 @@ fn a_list_of_days_names_the_nearest_passes_over_the_empty_and_ends_on_no_label()
     let (calendar, accounts) = (design(), both());
     let today = calendar.today();
     let o = scene(&calendar, &accounts, today);
-    let rows: Vec<String> = parts::agenda(&o, today, 12, 85, None).iter().map(text).collect();
+    let rows: Vec<String> = parts::agenda(&o, today, 12, 85, None).0.iter().map(text).collect();
     assert_eq!(rows[0], "  Today · Mon 23 November");
     assert_eq!(rows[4], "  Tomorrow · Tue 24 November");
     assert_eq!(rows[8], "  Wed 25 November");
     assert_eq!(rows[11], "", "Thursday's label would have no row under it");
-    assert!(parts::agenda(&o, today, 12, 85, None).iter().all(|row| crate::span::cells(row) == 85));
+    assert!(parts::agenda(&o, today, 12, 85, None).0.iter().all(|row| crate::span::cells(row) == 85));
 
-    let rows: Vec<String> = parts::agenda(&o, today - 1, 6, 85, None).iter().map(text).collect();
+    let rows: Vec<String> = parts::agenda(&o, today - 1, 6, 85, None).0.iter().map(text).collect();
     assert_eq!(rows[..4], ["  Sun 22 November", "    Nothing on this day.", "", "  Today · Mon 23 November"]);
     let found = Scene { needle: Some("gear"), search: Some("Gear"), ..o.clone() };
-    let rows: Vec<String> = parts::agenda(&found, today - 1, 6, 85, None).iter().map(text).collect();
+    let rows: Vec<String> = parts::agenda(&found, today - 1, 6, 85, None).0.iter().map(text).collect();
     assert_eq!(rows[0], "  Sat 5 December", "a search begins on the first day that has a match");
     assert!(rows[1].contains("Gear swap") && rows[2].is_empty());
     let finding = Scene { needle: Some("call"), ..o.clone() };
-    let lines = parts::agenda(&finding, today, 6, 85, None);
+    let lines = parts::agenda(&finding, today, 6, 85, None).0;
     let (standup, call) = (&lines[1], &lines[2]);
     assert!(standup.iter().all(|span| span.text.trim().is_empty() || span.fg == Tok::Faint), "no match is faint");
     assert!(call.iter().any(|span| span.text == "call" && span.underline), "a match is underlined where it matches");
@@ -275,8 +275,9 @@ fn a_selected_event_further_down_its_day_than_the_rows_reach_is_the_last_row() {
     let days = calendar.days(fx::THU, fx::THU + 1, None);
     let picked: Vec<Picked> = days.on(fx::THU).iter().map(Entry::pick).collect();
     assert_eq!(picked.len(), 8);
-    let rows =
-        |at: usize| -> Vec<String> { parts::agenda(&o, fx::THU, 6, 85, Some(&picked[at])).iter().map(text).collect() };
+    let rows = |at: usize| -> Vec<String> {
+        parts::agenda(&o, fx::THU, 6, 85, Some(&picked[at])).0.iter().map(text).collect()
+    };
     let first = rows(0);
     assert_eq!(first[0], "  Thu 26 November");
     assert!(first[1].starts_with('▌') && first[1].contains("Standup"), "{}", first[1]);
@@ -292,24 +293,24 @@ fn a_selected_event_further_down_its_day_than_the_rows_reach_is_the_last_row() {
     let last = rows(7);
     assert!(last[0].contains("Vendor call"), "{}", last[0]);
     assert!(last[5].starts_with('▌') && last[5].contains("Staging migration window"), "{}", last[5]);
-    assert_eq!(parts::agenda(&o, fx::THU, 6, 85, None).iter().map(text).collect::<Vec<_>>()[0], first[0]);
-    assert!(parts::agenda(&o, fx::THU, 0, 85, Some(&picked[7])).is_empty(), "and no rows are no rows");
+    assert_eq!(parts::agenda(&o, fx::THU, 6, 85, None).0.iter().map(text).collect::<Vec<_>>()[0], first[0]);
+    assert!(parts::agenda(&o, fx::THU, 0, 85, Some(&picked[7])).0.is_empty(), "and no rows are no rows");
 }
 
 #[test]
 fn the_month_marks_each_day_with_how_much_is_on_it_and_holds_the_months_that_fit_whole() {
     let (calendar, accounts) = (design(), both());
     let o = scene(&calendar, &accounts, fx::THU);
-    let rows: Vec<String> = month::screen(&o, 120, 40).iter().map(text).collect();
+    let rows: Vec<String> = month::screen(&o, 120, 40).0.iter().map(text).collect();
     let grid = |row: &str| row.split('│').next().unwrap_or("").trim_end().to_string();
     assert_eq!(grid(&rows[2]), "     November 2026");
     assert_eq!(grid(&rows[8]), "     23: 24: 25:▌26⋮ 27⋮ 28∙ 29∙");
     let year = |row: &&String| grid(row).ends_with(" 2026") || grid(row).ends_with(" 2027");
     let named = |rows: &[String]| rows[2..].iter().filter(year).count();
     assert_eq!(named(&rows), 4, "November to February in 35 rows");
-    let short: Vec<String> = month::screen(&o, 120, 24).iter().map(text).collect();
+    let short: Vec<String> = month::screen(&o, 120, 24).0.iter().map(text).collect();
     assert_eq!(named(&short), 2, "and two in 19");
-    let none: Vec<String> = month::screen(&o, 120, 9).iter().map(text).collect();
+    let none: Vec<String> = month::screen(&o, 120, 9).0.iter().map(text).collect();
     assert_eq!(named(&none), 0, "a month that does not fit whole is not begun");
     assert!(none[2].contains("Thu 26 November"), "the list of days still is");
 }

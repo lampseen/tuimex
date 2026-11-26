@@ -1,13 +1,17 @@
 use tuimex_core::AccountId;
 use tuimex_fixtures::design as fx;
 
-use super::screen;
 use crate::calendar::parts::{Scene, View};
 use crate::calendar::tests::design;
 use crate::calendar::{Calendar, Picked};
 use crate::list::Preview;
 use crate::palette::Tok;
 use crate::span::{Line, cells};
+
+/// The screen's lines, without where the pointer can be on them.
+fn screen(o: &Scene, width: usize, height: usize) -> Vec<Line> {
+    super::screen(o, width, height).0
+}
 
 fn text(line: &Line) -> String {
     line.iter().map(|span| span.text.as_str()).collect::<String>().trim_end().to_string()

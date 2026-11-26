@@ -122,6 +122,42 @@ together, which is how most terminals send it. A sequence such as `gg` or
 Keys cannot be remapped yet. The config accepts a `[keys]` table and
 nothing reads it.
 
+## The mouse
+
+On from the start. The terminal hands the pointer to tuimex and no
+longer selects text by dragging; most terminals still do while Shift is
+held. `:mouse` turns it off and `:mouse` again turns it back on; `:mouse
+on` and `:mouse off` say which, and what they set lasts until tuimex is
+left. To start with it off, put `mouse = false` under `[ui]` in the
+config.
+
+It does nothing a key does not. In mail:
+
+| press or wheel | does |
+|---|---|
+| a row | moves the cursor there; on the row the cursor has, opens it as `Enter` does |
+| a tab | opens that section |
+| a place on the top bar | goes there, where `F1` and `F2` are read |
+| the preview | moves the focus into it, as `Alt-j` or `Alt-l` does |
+| wheel over the rows | moves the cursor three rows |
+| wheel over the preview | scrolls it three lines |
+| a `[1]` in a message | lists the links with that one chosen; nothing opens |
+| an entry of the links or the files | chooses it; on the one chosen, does what `Enter` does there |
+| wheel over a message | scrolls it three lines |
+| wheel over help or `:messages` | scrolls them as their keys do |
+| a question's answer, such as `y yes` | answers it as that key does |
+| a field of compose | moves the focus there, as `Tab` does; nothing is typed |
+
+A first press only ever moves the cursor, so the press that brings the
+terminal's window to the front opens nothing: a link opened by pressing
+is asked about as one opened by its number is. The hint line at the
+bottom names keys and is not pressed. While a question is open only its
+answers are read, and a press anywhere else leaves it open. While a line
+is being typed a press does nothing. The menus that open over the list,
+such as `A`'s, take no press.
+
+What it does in the calendar is on [the calendar's page](Calendar#the-mouse).
+
 ---
 
 [Commands](Commands) · [Your first session](Your-first-session)

@@ -21,9 +21,10 @@ use crate::palette::Tok;
 use crate::reader::{self, Look, Placed, Reader};
 use crate::say;
 use crate::span::{Line, cells, gap, run};
+use crate::spot::Target;
 
 #[derive(Debug, Default, PartialEq, Eq)]
-enum Panel {
+pub(super) enum Panel {
     #[default]
     None,
     /// The selected entry, counted from 0.
@@ -158,6 +159,25 @@ impl Reading {
     pub(super) fn id(&self) -> Option<&MessageId> {
         self.open.as_ref().map(|open| &open.id)
     }
+
+    /// The list open over the message, when one is.
+    pub(super) fn panel(&self) -> Option<&Panel> {
+        self.open.as_ref().map(|open| &open.panel)
+    }
+
+    /// Moves the cursor of a list over the message, as `j` and `k` do.
+    pub(super) fn choose(&mut self, panel: Panel) {
+        if let Some(open) =
+            self.open.as_mut().filter(|open| std::mem::discriminant(&open.panel) == std::mem::discriminant(&panel))
+        {
+            open.panel = panel;
+        }
+    }
+
+    /// How many links the message open has, once its body is here.
+    pub(super) fn links(&self) -> usize {
+        self.open.as_ref().and_then(|open| self.bodies.get(&open.id)).map_or(0, |body| body.links.len())
+    }
 }
 
 /// The question a link is opened on: what is wrong with it, when
@@ -253,7 +273,7 @@ impl App {
         self.reading.bodies.get(id).map(|body| (id, body))
     }
 
-    fn files(&self) -> Vec<Attachment> {
+    pub(super) fn files(&self) -> Vec<Attachment> {
         let listed = || self.reading.id().and_then(|id| self.mailbox.mail.iter().find(|m| m.envelope.id == *id));
         self.read_body()
             .map(|(_, b)| b.attachments.clone())
@@ -402,27 +422,39 @@ impl App {
         let body = self.reading.bodies.get(&open.id);
         let fits = (height / 3).max(3);
         let (command, menu) = self.command_row(width, fits.min(13).saturating_sub(2).max(1));
+        // The entries in sight, and the first of them.
         let window = |entries: Vec<Line>, at: usize| {
             let from = (at + 1).saturating_sub(fits);
-            (entries.into_iter().skip(from).take(fits).collect::<Vec<_>>(), Some(at - from))
+            (entries.into_iter().skip(from).take(fits).collect::<Vec<_>>(), from)
         };
         let keys = |ids: &[&str]| list::hint(&ids.iter().map(|id| keymap::hint(id)).collect::<Vec<_>>());
-        let (mut panel, left, hint) = match (&open.panel, body) {
+        let (mut panel, panel_spots, left, hint, mut answers) = match (&open.panel, body) {
             (Panel::Links(at), Some(body)) => {
                 let url = body.links.get(*at).map(|link| reader::look(link, &body.trackers).url);
-                let (entries, at) = window(reader::links(body), *at);
+                let (entries, from) = window(reader::links(body), *at);
+                let spots = list::panel_spots(entries.len(), width, |i| Target::Link(from + i));
                 let opens = vec![run("opens", Tok::Dim), run(format!(" {}", url.unwrap_or_default()), Tok::Fg)];
                 let hint = keys(&["links.number", "links.choose", "global.agent", "links.close"]);
-                (list::panel("Links", entries, at, width), Some(opens), Some(hint))
+                (list::panel("Links", entries, Some(at - from), width), spots, Some(opens), Some(hint), Vec::new())
             }
             (Panel::Files(at), _) => {
                 let shown: Vec<usize> = body.map_or_else(Vec::new, |b| b.pictures.iter().map(|p| p.index).collect());
-                let (entries, at) = window(reader::files(&self.files(), &shown), *at);
+                let (entries, from) = window(reader::files(&self.files(), &shown), *at);
+                let spots = list::panel_spots(entries.len(), width, |i| Target::File(from + i));
                 let hint = keys(&["attachments.save", "attachments.open", "attachments.close"]);
-                (list::panel("Files", entries, at, width), Some(Line::new()), Some(hint))
+                (
+                    list::panel("Files", entries, Some(at - from), width),
+                    spots,
+                    Some(Line::new()),
+                    Some(hint),
+                    Vec::new(),
+                )
             }
-            (Panel::Invite, _) => (Vec::new(), None, Some(say::answer().line(width))),
-            _ => (Vec::new(), None, None),
+            (Panel::Invite, _) => {
+                let (line, answers) = say::answer().drawn(width);
+                (Vec::new(), Vec::new(), None, Some(line), answers)
+            }
+            _ => (Vec::new(), Vec::new(), None, None, Vec::new()),
         };
         panel.extend(open.advised.lines());
         let right = match open.panel {
@@ -431,6 +463,14 @@ impl App {
         };
         let place = open.thread.iter().position(|id| *id == open.id).map_or(1, |at| at + 1);
         let agent = self.agent_unsent();
+        // The panel is drawn first, or not at all where the command line's
+        // menu takes its place.
+        let panel_spots = if agent.is_some() || menu.is_empty() { panel_spots } else { Vec::new() };
+        // What the command line says is drawn over the invitation's
+        // question, and is a question only in `Mode::Confirm`.
+        if command.is_some() {
+            answers = self.confirm_answers(width);
+        }
         let drawn = reader::screen(
             &Reader {
                 msg,
@@ -447,6 +487,7 @@ impl App {
                 } else {
                     menu
                 },
+                panel_spots,
                 left: agent.or_else(|| self.prompt_left()).or(left),
                 right,
                 command: command.or(hint),
@@ -458,6 +499,8 @@ impl App {
         if let Some(open) = &mut self.reading.open {
             open.top = drawn.top;
         }
+        self.spots = drawn.spots;
+        self.answers_at(&drawn.lines, answers, width);
         Some(drawn.lines)
     }
 
@@ -490,7 +533,7 @@ impl App {
         }
     }
 
-    fn reader_run(&mut self, id: &str, i: usize) {
+    pub(super) fn reader_run(&mut self, id: &str, i: usize) {
         let files = self.files().len();
         let Some(open) = &mut self.reading.open else { return };
         let (half, last_top) = ((self.room / 2).max(1), self.reading.last_top);
@@ -669,14 +712,14 @@ impl App {
     }
 
     /// The question `B` asks, worded for the width it is drawn at.
-    pub(super) fn images_question(&self, width: usize) -> Option<Line> {
+    pub(super) fn images_question(&self, width: usize) -> Option<say::Question> {
         let Mode::Confirm(_, Action::Browser { remote: true }) = &self.mode else { return None };
         let body = self.target_body()?;
         // With no room the hosts are only counted, and what is left of
         // that line is everything but their names.
         let counted = say::count(body.image_hosts.len(), "host").len();
         let around = cells(&load_images(body, 0).line(usize::MAX)).saturating_sub(counted);
-        Some(load_images(body, width.saturating_sub(around + MARGIN)).line(width))
+        Some(load_images(body, width.saturating_sub(around + MARGIN)))
     }
 
     /// A key at a confirm that is not a yes. Two questions have a third

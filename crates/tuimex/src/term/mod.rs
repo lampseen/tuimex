@@ -4,12 +4,19 @@
 //! alternate screen before the panic message prints, so a crash never
 //! strands the user in a broken terminal. `restore` runs on every normal
 //! exit path, errors included.
+//!
+//! The pointer is reported unless `ui.mouse` or `:mouse` turned it off
+//! (ADR-065), and that is given back wherever the screen is: a terminal
+//! left reporting writes an escape sequence into the shell at every click.
 
 use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::event::{
+    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
+};
 use crossterm::terminal::{
     BeginSynchronizedUpdate, Clear, ClearType, EndSynchronizedUpdate, EnterAlternateScreen, LeaveAlternateScreen,
     disable_raw_mode, enable_raw_mode,
@@ -22,6 +29,7 @@ use tuimex_ui::app::App;
 use tuimex_ui::keymap::{Key, TIMEOUT_MS};
 use tuimex_ui::paint::{Theme, paint};
 use tuimex_ui::say;
+use tuimex_ui::spot::Mouse;
 
 use crate::diary::Diary;
 use crate::pictures::Painter;
@@ -102,6 +110,29 @@ const TICK: Duration = Duration::from_millis(100);
 /// preview: longer than a keyboard's repeat, shorter than a glance.
 const REST: Duration = Duration::from_millis(150);
 
+/// Whether the terminal has been asked to report the pointer and not yet
+/// to stop, for the ways out that have no loop to ask: a panic and a drop.
+static POINTING: AtomicBool = AtomicBool::new(false);
+
+/// Asks the terminal to report presses and the wheel, in the form that has
+/// no limit on the column (modes 1000 and 1006), or to stop. Where the
+/// pointer merely is goes unasked for: nothing here follows it, and every
+/// movement would be an event to wake for.
+fn point(out: &mut impl Write, report: bool) -> std::io::Result<()> {
+    out.write_all(if report { b"\x1b[?1000h\x1b[?1006h" } else { b"\x1b[?1006l\x1b[?1000l" })?;
+    POINTING.store(report, Ordering::Relaxed);
+    out.flush()
+}
+
+/// Stops the reports on a way out, when they are on.
+fn unpoint() {
+    if POINTING.load(Ordering::Relaxed) {
+        // A terminal that cannot be written to has nothing to be given
+        // back, and the way out is still to be taken.
+        let _ = point(&mut std::io::stdout(), false);
+    }
+}
+
 /// Where what is typed comes from: the terminal, or a test's own keys.
 pub(crate) trait Input {
     /// Whether an event is there to be read, waiting up to `wait` for one.
@@ -140,6 +171,13 @@ impl Opening {
     fn terminal(&mut self) -> Result<&mut ratatui::DefaultTerminal> {
         if self.terminal.is_none() {
             self.terminal = Some(ratatui::try_init()?);
+            // Ahead of the hook `try_init` set, which leaves the screen and
+            // has the panic printed.
+            let leave = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |panic| {
+                unpoint();
+                leave(panic);
+            }));
         }
         // Filled just above when it was empty.
         self.terminal.as_mut().context("the terminal was not taken")
@@ -164,6 +202,7 @@ impl Opening {
 impl Drop for Opening {
     fn drop(&mut self) {
         if self.terminal.is_some() {
+            unpoint();
             ratatui::restore();
         }
     }
@@ -183,6 +222,8 @@ pub(crate) fn event_loop<W: Write>(
     input.poll(Duration::ZERO)?;
     diary.begin(app);
     let mut painter = Painter::default();
+    let mut pointing = false;
+    follow(terminal, app, &mut pointing)?;
     // Debug builds only: lets the panic path be exercised from a test
     // without shipping a crash switch in release binaries.
     #[cfg(debug_assertions)]
@@ -196,6 +237,7 @@ pub(crate) fn event_loop<W: Write>(
         // nothing of its own: it is an event like any other, and ratatui
         // reads the size on each draw. A tick on which nothing happened
         // draws nothing.
+        follow(terminal, app, &mut pointing)?;
         if app.take_redraw() {
             repaint(terminal)?;
             changed = true;
@@ -233,18 +275,29 @@ pub(crate) fn event_loop<W: Write>(
         // would go on playing them out after the key was let go.
         let mut waiting = changed;
         while waiting {
-            if let Event::Key(k) = input.read()?
-                && k.kind != KeyEventKind::Release
-                && let Some(key) = convert(k)
-            {
-                app.key(key);
-                diary.switched(app);
+            match input.read()? {
+                Event::Key(k) if k.kind != KeyEventKind::Release => {
+                    if let Some(key) = convert(k) {
+                        app.key(key);
+                        diary.switched(app);
+                    }
+                }
+                Event::Mouse(m) => {
+                    if let Some(pointed) = pointer(m) {
+                        app.mouse(pointed);
+                        diary.switched(app);
+                    }
+                }
+                _ => {}
             }
             for ask in app.asks() {
                 // `$EDITOR` has the terminal while it runs, as it was
                 // before tuimex drew on it.
                 let edits = matches!(ask.action, Action::Edit(_));
                 if edits {
+                    if pointing {
+                        point(terminal.backend_mut(), false)?;
+                    }
                     disable_raw_mode()?;
                     execute!(std::io::stdout(), LeaveAlternateScreen)?;
                 }
@@ -252,6 +305,9 @@ pub(crate) fn event_loop<W: Write>(
                 if edits {
                     enable_raw_mode()?;
                     execute!(std::io::stdout(), EnterAlternateScreen)?;
+                    if pointing {
+                        point(terminal.backend_mut(), true)?;
+                    }
                     repaint(terminal)?;
                 }
             }
@@ -282,6 +338,17 @@ pub(crate) fn event_loop<W: Write>(
             changed |= diary.tick(app, now);
             changed |= diary.rings();
         }
+    }
+    Ok(())
+}
+
+/// Has the terminal report the pointer or stop, when what the app wants
+/// is not what was last asked: `ui.mouse` at the start, and `:mouse`
+/// whenever it is typed.
+fn follow<W: Write>(terminal: &mut Screen<W>, app: &App, pointing: &mut bool) -> Result<()> {
+    if app.mouse_on() != *pointing {
+        *pointing = app.mouse_on();
+        point(terminal.backend_mut(), *pointing)?;
     }
     Ok(())
 }
@@ -340,6 +407,20 @@ fn convert(k: KeyEvent) -> Option<Key> {
         KeyCode::Left => Some(Key::Left),
         KeyCode::Right => Some(Key::Right),
         KeyCode::F(n) => Some(Key::F(n)),
+        _ => None,
+    }
+}
+
+/// The left button going down, and the wheel, with nothing held: the
+/// terminal keeps a press with Shift for selecting text, and a drag, a
+/// release and the other buttons mean nothing here.
+fn pointer(m: MouseEvent) -> Option<Mouse> {
+    let (col, row) = (usize::from(m.column), usize::from(m.row));
+    match m.kind {
+        _ if !m.modifiers.is_empty() => None,
+        MouseEventKind::Down(MouseButton::Left) => Some(Mouse::Click { col, row }),
+        MouseEventKind::ScrollDown => Some(Mouse::Wheel { col, row, down: true }),
+        MouseEventKind::ScrollUp => Some(Mouse::Wheel { col, row, down: false }),
         _ => None,
     }
 }

@@ -601,6 +601,7 @@ remappable under `[keys]`.
 | `:event [title]` | The form for a new event on the selected day. |
 | `:export [path]` | Every local event as one `.ics`, in the download directory by default, never over a file (ADR-055). |
 | `:notify on\|off` | Reminders (ADR-058). |
+| `:mouse [on\|off]` | Whether the pointer is read; alone, the other of the two. `ui.mouse` is the same setting at start (ADR-065). |
 | `:unsubscribe` | Composes the `mailto` for review, or opens the `https` link after assessment. Never automatic. |
 | `:agent reply [guidance]` `:agent tidy` `:agent link <n>` | Hands redacted text to the configured agent command and takes text back (ADR-031). Only when typed, or picked from the menu `A` opens; `reply` with no draft open starts the reply first. |
 | `:sync [all]` | A pass over every account now. |
@@ -947,8 +948,10 @@ Proton Bridge pinned.
 **Exit:** round trips against a scratch `GNUPGHOME` made by the test.
 
 ### M11 — Polish and release
-`NO_COLOR`; mouse (click row, tab, wheel); `[keys]` remapping; notifications
-(§6.6); `config.example.toml`. Written ahead of the rest, when the
+`NO_COLOR`; mouse (click row, tab, wheel: *built* for mail and the
+calendar, on unless `ui.mouse` or `:mouse` turns it off, ADR-065); `[keys]`
+remapping; notifications (§6.6); `config.example.toml`. Written ahead of
+the rest, when the
 repository was published (ADR-051): the release workflow with attested
 artifacts and checksums, the two-step `make release` / `make release-tag`,
 copied from pullpen, the weekly dependency check and a Homebrew formula
@@ -1081,6 +1084,7 @@ glyphs = "unicode"             # unicode | ascii | nerd
 colors = "auto"                # auto | 16 | 256 | true
 # palette = "~/.config/tuimex/palette.toml"
 preview = "auto"               # auto | right | below | off: beside the list from 160 columns, else below
+mouse = true                   # a press moves the cursor, a second opens; false leaves the pointer to the terminal, which then selects text without Shift (ADR-065)
 
 [notify]
 bell = true                    # new mail: the bell, and

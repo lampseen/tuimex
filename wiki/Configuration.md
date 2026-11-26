@@ -129,6 +129,7 @@ notes, is fetched.
 |---|---|---|
 | `preview` | `"auto"` | `auto`, `right`, `below` or `off`. `auto` is beside the list from 160 columns, else below |
 | `palette` | | a palette file to draw with; see below |
+| `mouse` | `true` | `false` starts with the mouse off, so the terminal selects text by dragging; `:mouse` turns it on and off in a run. See [Keys](Keys#the-mouse) |
 
 `glyphs` and `colors` are accepted here and not read yet: use the
 `--glyphs` and `--colors` options, or let tuimex detect them. See

@@ -93,6 +93,7 @@ fn main() -> Result<ExitCode> {
     let mut config = config(args.config.as_deref(), &dirs)?;
     let ui = config.ui.take();
     let (preview, colours) = (config::preview(ui.as_ref())?, config::colours(&config.accounts)?);
+    let mouse = config::mouse(ui.as_ref());
     if let Some(named) = ui.and_then(|ui| ui.palette) {
         theme.palette.custom = Some(palette::load(&palette::resolve(&named, home.home_dir(), &dirs.config))?);
     }
@@ -121,6 +122,7 @@ fn main() -> Result<ExitCode> {
         // until then, so there is always someone to send to.
         let _ = shown.send(calendar::Handed::Calendar { calendar: Box::new(fixture_calendar()), carried: 0 });
         app.set_preview(preview);
+        app.set_mouse(mouse);
         open(&mut app)?;
         let mut desk = desk::Desk::new(Offline::new(outside), agent, &dirs.cache);
         // No reminders: the design's afternoon has no clock to fall due on.
@@ -145,6 +147,7 @@ fn main() -> Result<ExitCode> {
     app.set_delay(delay);
     app.set_colours(colours);
     app.set_preview(preview);
+    app.set_mouse(mouse);
     let mut desk = desk::Desk::new(live, agent, &dirs.cache);
     // OSC 9 goes to standard output, which is what the frames are written
     // to, from the loop's own thread between two frames: each frame is

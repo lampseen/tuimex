@@ -36,5 +36,5 @@
 {fg}    Esc         {dim}close; keep or discard{fg}                                        t                {dim}tentative{fg}                
 {fg}                                                                              d                {dim}decline{fg}                  
 {fg}                                                                                                                        
-{fg}  {dim}144 keys and commands · lines 1-34 of 70{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
+{fg}  {dim}145 keys and commands · lines 1-34 of 71{fg}                                                  sending in 6s{dim} · {err}1 not sent{fg}  
 {fg}  type {dim}to filter · {fg}^d ^u {dim}scroll · {fg}Esc {dim}back{fg}                                                                              
