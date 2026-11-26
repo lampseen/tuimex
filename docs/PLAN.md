@@ -949,7 +949,7 @@ Proton Bridge pinned.
 
 ### M11 — Polish and release
 `NO_COLOR`; mouse (click row, tab, wheel: *built* for mail and the
-calendar, off until `ui.mouse` or `:mouse` asks, ADR-065); `[keys]`
+calendar, on unless `ui.mouse` or `:mouse` turns it off, ADR-065); `[keys]`
 remapping; notifications (§6.6); `config.example.toml`. Written ahead of
 the rest, when the
 repository was published (ADR-051): the release workflow with attested
@@ -1084,7 +1084,7 @@ glyphs = "unicode"             # unicode | ascii | nerd
 colors = "auto"                # auto | 16 | 256 | true
 # palette = "~/.config/tuimex/palette.toml"
 preview = "auto"               # auto | right | below | off: beside the list from 160 columns, else below
-mouse = false                  # true: a press moves the cursor, a second opens; the terminal then selects text only with Shift held (ADR-065)
+mouse = true                   # a press moves the cursor, a second opens; false leaves the pointer to the terminal, which then selects text without Shift (ADR-065)
 
 [notify]
 bell = true                    # new mail: the bell, and

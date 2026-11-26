@@ -167,10 +167,11 @@ pub fn preview(ui: Option<&Ui>) -> Result<Preview> {
     }
 }
 
-/// `ui.mouse`, which left out is off: a terminal that reports the pointer
-/// no longer selects text with it, and that is the user's to give up.
+/// `ui.mouse`, which left out is on: a press does nothing a key does not,
+/// so it takes nothing from the keyboard. What it does take is selecting
+/// text by dragging, which `false` here, `:mouse` or Shift gives back.
 pub fn mouse(ui: Option<&Ui>) -> bool {
-    ui.and_then(|ui| ui.mouse).unwrap_or(false)
+    ui.and_then(|ui| ui.mouse).unwrap_or(true)
 }
 
 /// `[[account]] color`, for each account that has one. Only an accent

@@ -54,7 +54,7 @@ runs `notify-send` on Linux or `osascript` on macOS, or writes an OSC 9
 sequence for a terminal that shows one. No test runs either program, and
 neither has been seen to raise a notification by anyone here.
 
-The mouse is read only once `:mouse` or `ui.mouse = true` asks for it, and
+The mouse is read unless `ui.mouse = false` or `:mouse` turns it off,
 in mail and in the calendar ([Keys](Keys#the-mouse)). Presses and the wheel are all
 that is asked of the terminal, and that is given back on the way out,
 around `$EDITOR` and in a crash. Nobody has tried it inside tmux or on

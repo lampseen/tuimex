@@ -2226,10 +2226,10 @@ its own against its own measurement.
 download is 1 MiB larger than the one released as 0.1.0, and that is
 what a user pays for a calendar they may never open.
 
-## ADR-065 — The mouse is asked for, and a press selects before it acts
+## ADR-065 — The mouse does what the keys do, and a press selects before it acts
 
-`ui.mouse = true`, or `:mouse` typed in a run, has the terminal report
-the pointer; without either, tuimex is as it was. A press of the left button moves the cursor to what it is
+The terminal reports the pointer unless `ui.mouse = false` or `:mouse`
+turns that off. A press of the left button moves the cursor to what it is
 on, and a press on what the cursor already has is Enter. The wheel moves
 the list's cursor, or scrolls the preview when it is over that. Nothing
 else the pointer does is read.
@@ -2243,14 +2243,19 @@ ways to reach it. And nothing is drawn for it: no button, no scrollbar, no
 hover. The look is unchanged, so `design/tui.js`, the goldens and the
 keymap table are untouched (ADR-002, ADR-054).
 
-**Off unless asked for** (Bryan, 2026-11-26). A terminal that reports the
-pointer stops selecting text with it, and in a mail reader copying a line
-out of a message is ordinary. Most terminals still select while Shift is
-held; that is theirs to do and not something tuimex can promise.
-`:mouse` turns it on and off for the run (Bryan, 2026-11-26: "I should
-be able to turn on mouse with `:mouse`"), so text can be selected the
-plain way without leaving. It is not remembered: the config says how a
-run starts (ADR-043 keeps tuimex from rewriting it).
+**On unless turned off** (Bryan, 2026-11-26: "this can be enabled
+initially, I don't see how it conflicts with the keyboard nav"). It does
+not: a press goes through a key's binding and no key changes. What it
+costs is not the keyboard's but the terminal's: one that reports the
+pointer stops selecting text by dragging, and in a mail reader copying a
+line out of a message is ordinary. Most terminals still select while
+Shift is held; that is theirs to do and not something tuimex can promise.
+So there are two ways back. `ui.mouse = false` starts a run without it,
+and `:mouse` turns it off and on within one (Bryan, the same day: "I
+should be able to turn on mouse with `:mouse`"), which is not
+remembered: the config says how a run starts (ADR-043 keeps tuimex from
+rewriting it). The first ruling that day was off unless asked for; it
+was changed once the pointer had been tried.
 
 **A press selects first** (Bryan, 2026-11-26). Many terminals deliver the
 press that only brought their window to the front. If one press opened
@@ -2311,7 +2316,8 @@ month without the focus the wheel does nothing, as the same key would move
 the other part. While a panel is open only its entries take a press, and
 while a question is open nothing does.
 
-**What it costs.** Text selection, for whoever turns it on. A map from
+**What it costs.** Selecting text by dragging, for everyone who does not
+turn it off. A map from
 cells to what was drawn there, which every screen that wants the pointer
 has to keep true; a test walks the list's at every size. Behaviour inside
 tmux and on macOS is **unverified**.

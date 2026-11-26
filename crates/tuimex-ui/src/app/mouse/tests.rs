@@ -384,7 +384,7 @@ fn a_click_on_a_compose_field_moves_the_focus_there() {
 #[test]
 fn the_mouse_command_turns_the_pointer_on_and_off_and_alone_to_the_other() {
     let mut app = keyed::app();
-    assert!(!app.mouse_on(), "off until it is asked for");
+    assert!(!app.mouse_on(), "off until whoever owns the terminal says");
     click(&mut app, "Lars Lindqvist");
     assert_eq!(foot(&mut app).0, "1 of 24 · 1 message", "and a report nobody asked for is not read");
     press(&mut app, ":mouse\r");

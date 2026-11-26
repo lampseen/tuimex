@@ -157,10 +157,10 @@ fn the_path_is_the_flag_or_the_config_directory_and_never_the_current_one() {
 }
 
 #[test]
-fn ui_mouse_is_off_unless_the_config_says_true() {
+fn ui_mouse_is_on_unless_the_config_says_false() {
     let of = |text: &str| super::mouse(Config::parse(text).unwrap().ui.as_ref());
-    assert!(!of("") && !of("[ui]\nglyphs = \"ascii\"\n") && !of("[ui]\nmouse = false\n"));
-    assert!(of("[ui]\nmouse = true\n"));
+    assert!(of("") && of("[ui]\nglyphs = \"ascii\"\n") && of("[ui]\nmouse = true\n"));
+    assert!(!of("[ui]\nmouse = false\n"));
     assert!(Config::parse("[ui]\nmouse = \"on\"\n").is_err(), "a word is not a yes");
 }
 

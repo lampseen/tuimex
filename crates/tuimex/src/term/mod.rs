@@ -5,8 +5,8 @@
 //! strands the user in a broken terminal. `restore` runs on every normal
 //! exit path, errors included.
 //!
-//! The pointer is reported only once `ui.mouse` or `:mouse` has asked for
-//! it (ADR-065), and that is given back wherever the screen is: a terminal
+//! The pointer is reported unless `ui.mouse` or `:mouse` turned it off
+//! (ADR-065), and that is given back wherever the screen is: a terminal
 //! left reporting writes an escape sequence into the shell at every click.
 
 use std::io::Write;

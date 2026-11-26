@@ -805,11 +805,20 @@ fn a_panic_restores_the_terminal_before_its_message_prints() {
 const POINTER_ON: &str = "\x1b[?1000h\x1b[?1006h";
 const POINTER_OFF: &str = "\x1b[?1006l\x1b[?1000l";
 
-/// A home whose config asks for the pointer (ADR-065).
+/// A home whose config says the pointer is on, as it is when left out
+/// (ADR-065).
 fn pointer_home(test: &str) -> PathBuf {
     let home = scratch_home(test);
     fs::create_dir_all(home.join(".config/tuimex")).unwrap();
     fs::write(home.join(".config/tuimex/config.toml"), "[ui]\nmouse = true\n").unwrap();
+    home
+}
+
+/// A home whose config turns the pointer off.
+fn unpointed_home(test: &str) -> PathBuf {
+    let home = scratch_home(test);
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), "[ui]\nmouse = false\n").unwrap();
     home
 }
 
@@ -822,8 +831,12 @@ fn switched(screen: &str, on: &str, off: &str) -> Vec<bool> {
 }
 
 #[test]
-fn the_pointer_is_reported_only_when_the_config_asks_for_it() {
-    let out = on_a_pty(&scratch_home("pointer-unasked"), QUIT, &["--fixtures"], &[]);
+fn the_pointer_is_reported_unless_the_config_says_not_to() {
+    let out = on_a_pty(&scratch_home("pointer-unsaid"), QUIT, &["--fixtures"], &[]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0));
+    assert_eq!(switched(&screen, POINTER_ON, POINTER_OFF), [true, false], "with no config it is on");
+    let out = on_a_pty(&unpointed_home("pointer-off"), QUIT, &["--fixtures"], &[]);
     let screen = String::from_utf8(out.stdout).unwrap();
     assert_eq!(out.status.code(), Some(0));
     assert!(!screen.contains("\x1b[?100"), "no mode of the pointer is touched: {screen:?}");
@@ -836,11 +849,11 @@ fn the_pointer_is_reported_only_when_the_config_asks_for_it() {
     assert!(said.contains("line 2: expected a boolean"), "{said}");
 }
 
-/// `:mouse` asks for the pointer in a run whose config did not, and gives
-/// it back: the press between them is read and the one after is not.
+/// `:mouse` asks for the pointer in a run whose config turned it off, and
+/// gives it back: the press between them is read and the one after is not.
 #[test]
 fn the_mouse_command_has_the_pointer_reported_from_then_until_it_is_typed_again() {
-    let home = scratch_home("pointer-command");
+    let home = unpointed_home("pointer-command");
     let press = |row: u8| format!("\x1b[<0;20;{row}M\x1b[<0;20;{row}m");
     let keys = [":mouse\r", &press(10), ":mouse\r", &press(6), QUIT].join("|");
     let out = on_a_pty(&home, &keys, &["--fixtures"], &[("ON_PTY_STEPS", "|")]);
