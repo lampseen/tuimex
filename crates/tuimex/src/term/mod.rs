@@ -5,11 +5,12 @@
 //! strands the user in a broken terminal. `restore` runs on every normal
 //! exit path, errors included.
 //!
-//! The pointer is reported only where `ui.mouse` asked for it (ADR-065),
-//! and that is given back wherever the screen is: a terminal left
-//! reporting writes an escape sequence into the shell at every click.
+//! The pointer is reported only once `ui.mouse` or `:mouse` has asked for
+//! it (ADR-065), and that is given back wherever the screen is: a terminal
+//! left reporting writes an escape sequence into the shell at every click.
 
 use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -109,14 +110,27 @@ const TICK: Duration = Duration::from_millis(100);
 /// preview: longer than a keyboard's repeat, shorter than a glance.
 const REST: Duration = Duration::from_millis(150);
 
+/// Whether the terminal has been asked to report the pointer and not yet
+/// to stop, for the ways out that have no loop to ask: a panic and a drop.
+static POINTING: AtomicBool = AtomicBool::new(false);
+
 /// Asks the terminal to report presses and the wheel, in the form that has
 /// no limit on the column (modes 1000 and 1006), or to stop. Where the
 /// pointer merely is goes unasked for: nothing here follows it, and every
 /// movement would be an event to wake for.
-fn point(report: bool) -> std::io::Result<()> {
-    let mut out = std::io::stdout();
+fn point(out: &mut impl Write, report: bool) -> std::io::Result<()> {
     out.write_all(if report { b"\x1b[?1000h\x1b[?1006h" } else { b"\x1b[?1006l\x1b[?1000l" })?;
+    POINTING.store(report, Ordering::Relaxed);
     out.flush()
+}
+
+/// Stops the reports on a way out, when they are on.
+fn unpoint() {
+    if POINTING.load(Ordering::Relaxed) {
+        // A terminal that cannot be written to has nothing to be given
+        // back, and the way out is still to be taken.
+        let _ = point(&mut std::io::stdout(), false);
+    }
 }
 
 /// Where what is typed comes from: the terminal, or a test's own keys.
@@ -146,31 +160,24 @@ type Screen<W> = Terminal<CrosstermBackend<W>>;
 /// this is dropped without one.
 pub struct Opening {
     theme: Theme,
-    /// `ui.mouse`: whether the terminal is asked to report the pointer.
-    mouse: bool,
     terminal: Option<ratatui::DefaultTerminal>,
 }
 
 impl Opening {
-    pub fn new(theme: Theme, mouse: bool) -> Opening {
-        Opening { theme, mouse, terminal: None }
+    pub fn new(theme: Theme) -> Opening {
+        Opening { theme, terminal: None }
     }
 
     fn terminal(&mut self) -> Result<&mut ratatui::DefaultTerminal> {
         if self.terminal.is_none() {
             self.terminal = Some(ratatui::try_init()?);
-            if self.mouse {
-                // Ahead of the hook `try_init` set, which leaves the screen
-                // and has the panic printed.
-                let leave = std::panic::take_hook();
-                std::panic::set_hook(Box::new(move |panic| {
-                    // A terminal that cannot be written to has nothing to
-                    // be given back, and the panic is still to be told.
-                    let _ = point(false);
-                    leave(panic);
-                }));
-                point(true)?;
-            }
+            // Ahead of the hook `try_init` set, which leaves the screen and
+            // has the panic printed.
+            let leave = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |panic| {
+                unpoint();
+                leave(panic);
+            }));
         }
         // Filled just above when it was empty.
         self.terminal.as_mut().context("the terminal was not taken")
@@ -188,19 +195,14 @@ impl Opening {
     }
 
     pub fn run(mut self, app: &mut App, backend: &mut dyn Backend, diary: &mut Diary) -> Result<()> {
-        let mouse = self.mouse;
-        event_loop(self.terminal()?, &mut Tty, app, backend, diary, mouse)
+        event_loop(self.terminal()?, &mut Tty, app, backend, diary)
     }
 }
 
 impl Drop for Opening {
     fn drop(&mut self) {
         if self.terminal.is_some() {
-            if self.mouse {
-                // As `restore` does with its own: there is nobody to tell,
-                // and the screen is still to be left.
-                let _ = point(false);
-            }
+            unpoint();
             ratatui::restore();
         }
     }
@@ -212,7 +214,6 @@ pub(crate) fn event_loop<W: Write>(
     app: &mut App,
     backend: &mut dyn Backend,
     diary: &mut Diary,
-    mouse: bool,
 ) -> Result<()> {
     // crossterm starts listening for a change of size when it is first
     // asked for an event. Asked here, before anything is drawn, a resize
@@ -221,6 +222,8 @@ pub(crate) fn event_loop<W: Write>(
     input.poll(Duration::ZERO)?;
     diary.begin(app);
     let mut painter = Painter::default();
+    let mut pointing = false;
+    follow(terminal, app, &mut pointing)?;
     // Debug builds only: lets the panic path be exercised from a test
     // without shipping a crash switch in release binaries.
     #[cfg(debug_assertions)]
@@ -234,6 +237,7 @@ pub(crate) fn event_loop<W: Write>(
         // nothing of its own: it is an event like any other, and ratatui
         // reads the size on each draw. A tick on which nothing happened
         // draws nothing.
+        follow(terminal, app, &mut pointing)?;
         if app.take_redraw() {
             repaint(terminal)?;
             changed = true;
@@ -291,8 +295,8 @@ pub(crate) fn event_loop<W: Write>(
                 // before tuimex drew on it.
                 let edits = matches!(ask.action, Action::Edit(_));
                 if edits {
-                    if mouse {
-                        point(false)?;
+                    if pointing {
+                        point(terminal.backend_mut(), false)?;
                     }
                     disable_raw_mode()?;
                     execute!(std::io::stdout(), LeaveAlternateScreen)?;
@@ -301,8 +305,8 @@ pub(crate) fn event_loop<W: Write>(
                 if edits {
                     enable_raw_mode()?;
                     execute!(std::io::stdout(), EnterAlternateScreen)?;
-                    if mouse {
-                        point(true)?;
+                    if pointing {
+                        point(terminal.backend_mut(), true)?;
                     }
                     repaint(terminal)?;
                 }
@@ -334,6 +338,17 @@ pub(crate) fn event_loop<W: Write>(
             changed |= diary.tick(app, now);
             changed |= diary.rings();
         }
+    }
+    Ok(())
+}
+
+/// Has the terminal report the pointer or stop, when what the app wants
+/// is not what was last asked: `ui.mouse` at the start, and `:mouse`
+/// whenever it is typed.
+fn follow<W: Write>(terminal: &mut Screen<W>, app: &App, pointing: &mut bool) -> Result<()> {
+    if app.mouse_on() != *pointing {
+        *pointing = app.mouse_on();
+        point(terminal.backend_mut(), *pointing)?;
     }
     Ok(())
 }

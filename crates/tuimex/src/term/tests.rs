@@ -92,7 +92,7 @@ fn typed(bursts: &[&str]) -> (usize, Vec<Ask>, String) {
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut bursts, mut asked) = (Bursts { keys, waiting: Default::default() }, Asked::default());
-        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked, &mut no_calendar(), false).unwrap();
+        event_loop(&mut terminal, &mut bursts, &mut app, &mut asked, &mut no_calendar()).unwrap();
         let lines = app.lines(120, 40);
         let status: String = lines[38].iter().map(|span| span.text.as_str()).collect();
         (frames.borrow().len(), asked.0, status.trim().to_string())
@@ -175,7 +175,7 @@ fn the_preview_s_message_is_read_once_the_cursor_rests_and_not_while_a_key_is_he
         let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
         let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
         let (mut typist, mut asked) = (Typist { keys, next: None, read: Vec::new() }, Asked::default());
-        event_loop(&mut terminal, &mut typist, &mut app, &mut asked, &mut no_calendar(), false).unwrap();
+        event_loop(&mut terminal, &mut typist, &mut app, &mut asked, &mut no_calendar()).unwrap();
         asked.0
     });
     let mail = tuimex_fixtures::design::inbox();
@@ -270,8 +270,9 @@ fn a_press_and_the_keys_around_it_are_handled_in_the_order_they_came() {
     let glass = CrosstermBackend::new(Glass(Default::default()));
     let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
     let mut app = App::new(crate::theme::choose(None, None, |_| None), crate::fixture_mailbox());
+    app.set_mouse(true);
     let (mut input, mut asked) = (Waiting(events.into()), Asked::default());
-    event_loop(&mut terminal, &mut input, &mut app, &mut asked, &mut no_calendar(), true).unwrap();
+    event_loop(&mut terminal, &mut input, &mut app, &mut asked, &mut no_calendar()).unwrap();
     let archived: Vec<&Ask> = asked.0.iter().filter(|ask| ask.action == Action::Archive).collect();
     assert_eq!(archived.len(), 1, "{:?}", asked.0);
     let rows = tuimex_fixtures::design::inbox();
@@ -387,7 +388,7 @@ fn the_bell_is_written_once_after_the_frame_that_shows_what_fell_due() {
     // The reminder fell due a minute ago, for an event nine minutes off.
     let mut clock = Clock(NOON + 360);
     let mut input = Patient { quiet: 4, keys: ":q\r".chars().collect() };
-    event_loop(&mut terminal, &mut input, &mut app, &mut clock, &mut diary, false).unwrap();
+    event_loop(&mut terminal, &mut input, &mut app, &mut clock, &mut diary).unwrap();
 
     let written = tape.borrow();
     let bells: Vec<usize> = (0..written.len()).filter(|&at| written[at] == 0x07).collect();

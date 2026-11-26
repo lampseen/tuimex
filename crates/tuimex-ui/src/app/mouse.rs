@@ -11,12 +11,23 @@ use crate::spot::{self, Mouse, Target};
 const NOTCH: usize = 3;
 
 impl App {
+    /// `ui.mouse`: whether the pointer is read from the start.
+    pub fn set_mouse(&mut self, on: bool) {
+        self.pointing = on;
+    }
+
+    /// Whether whoever owns the terminal is to have it report the pointer.
+    pub fn mouse_on(&self) -> bool {
+        self.pointing
+    }
+
     pub fn mouse(&mut self, mouse: Mouse) {
         // A press is not the next key of a sequence that was begun.
         self.pending.clear();
         // Where a question is open or text is being typed the pointer is
-        // not read: a press there is as likely aimed at the terminal.
-        if !matches!(self.mode, Mode::Normal) {
+        // not read: a press there is as likely aimed at the terminal. Nor
+        // is a report that was not asked for, which is not a terminal's.
+        if !self.pointing || !matches!(self.mode, Mode::Normal) {
             return;
         }
         match mouse {

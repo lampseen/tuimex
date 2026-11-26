@@ -2228,8 +2228,8 @@ what a user pays for a calendar they may never open.
 
 ## ADR-065 — The mouse is asked for, and a press selects before it acts
 
-`ui.mouse = true` has the terminal report the pointer; left out, tuimex
-is as it was. A press of the left button moves the cursor to what it is
+`ui.mouse = true`, or `:mouse` typed in a run, has the terminal report
+the pointer; without either, tuimex is as it was. A press of the left button moves the cursor to what it is
 on, and a press on what the cursor already has is Enter. The wheel moves
 the list's cursor, or scrolls the preview when it is over that. Nothing
 else the pointer does is read.
@@ -2247,6 +2247,10 @@ keymap table are untouched (ADR-002, ADR-054).
 pointer stops selecting text with it, and in a mail reader copying a line
 out of a message is ordinary. Most terminals still select while Shift is
 held; that is theirs to do and not something tuimex can promise.
+`:mouse` turns it on and off for the run (Bryan, 2026-11-26: "I should
+be able to turn on mouse with `:mouse`"), so text can be selected the
+plain way without leaving. It is not remembered: the config says how a
+run starts (ADR-043 keeps tuimex from rewriting it).
 
 **A press selects first** (Bryan, 2026-11-26). Many terminals deliver the
 press that only brought their window to the front. If one press opened

@@ -167,7 +167,7 @@ fn a_session_of_keys_moves_marks_archives_undoes_finds_searches_trashes_and_show
         "1 of 6 - 1 message",
         ":trash",
         "+ Trashed 1 message - u to undo",
-        "144 keys and commands - lines 1-18 of 70",
+        "145 keys and commands - lines 1-18 of 71",
     ];
     let mut last = 0;
     for words in steps {
@@ -834,6 +834,24 @@ fn the_pointer_is_reported_only_when_the_config_asks_for_it() {
     assert_eq!(out.status.code(), Some(1), "ui.mouse is true or false");
     let said = String::from_utf8(out.stderr).unwrap();
     assert!(said.contains("line 2: expected a boolean"), "{said}");
+}
+
+/// `:mouse` asks for the pointer in a run whose config did not, and gives
+/// it back: the press between them is read and the one after is not.
+#[test]
+fn the_mouse_command_has_the_pointer_reported_from_then_until_it_is_typed_again() {
+    let home = scratch_home("pointer-command");
+    let press = |row: u8| format!("\x1b[<0;20;{row}M\x1b[<0;20;{row}m");
+    let keys = [":mouse\r", &press(10), ":mouse\r", &press(6), QUIT].join("|");
+    let out = on_a_pty(&home, &keys, &["--fixtures"], &[("ON_PTY_STEPS", "|")]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0), "the terminal showed {screen:?}");
+    assert_eq!(switched(&screen, POINTER_ON, POINTER_OFF), [true, false]);
+    let frames = frames(&screen);
+    assert!(frames.iter().any(|f| f.contains("Mouse on - hold Shift to select text")), "{:?}", frames.last());
+    let moved = frames.iter().position(|f| f.contains(">   work  Lars Lindqvist")).expect("the cursor on the row");
+    let off = frames.iter().position(|f| f.contains("Mouse off")).expect("it says it is off");
+    assert!(moved < off && frames[off..].iter().all(|f| f.contains(">   work  Lars Lindqvist")), "no press after");
 }
 
 /// A press as a terminal reports it in mode 1006: the left button going

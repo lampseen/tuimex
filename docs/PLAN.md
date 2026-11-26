@@ -601,6 +601,7 @@ remappable under `[keys]`.
 | `:event [title]` | The form for a new event on the selected day. |
 | `:export [path]` | Every local event as one `.ics`, in the download directory by default, never over a file (ADR-055). |
 | `:notify on\|off` | Reminders (ADR-058). |
+| `:mouse [on\|off]` | Whether the pointer is read; alone, the other of the two. `ui.mouse` is the same setting at start (ADR-065). |
 | `:unsubscribe` | Composes the `mailto` for review, or opens the `https` link after assessment. Never automatic. |
 | `:agent reply [guidance]` `:agent tidy` `:agent link <n>` | Hands redacted text to the configured agent command and takes text back (ADR-031). Only when typed, or picked from the menu `A` opens; `reply` with no draft open starts the reply first. |
 | `:sync [all]` | A pass over every account now. |

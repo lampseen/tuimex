@@ -1,12 +1,23 @@
 use tuimex_fixtures::design as fx;
 
 use crate::app::App;
-use crate::app::tests::{after, app, bar, foot, press, screen};
+use crate::app::tests::{self as keyed, bar, foot, press, screen};
 use crate::keymap::Key;
 use crate::list::Preview;
 use crate::spot::{Mouse, Target};
 
 const SIZE: (usize, usize) = (120, 41);
+
+/// The design's mailbox with the mouse on.
+fn app() -> App {
+    after("")
+}
+
+fn after(keys: &str) -> App {
+    let mut app = keyed::after(keys);
+    app.set_mouse(true);
+    app
+}
 
 fn texts(app: &mut App, (width, height): (usize, usize)) -> Vec<String> {
     app.lines(width, height).iter().map(|line| line.iter().map(|span| span.text.as_str()).collect()).collect()
@@ -192,6 +203,30 @@ fn the_pointer_is_not_read_while_a_question_is_open_or_a_line_is_typed() {
         wheel(&mut app, SIZE, "Lars Lindqvist", true);
         assert_eq!(texts(&mut app, SIZE), was, "{keys}");
     }
+}
+
+#[test]
+fn the_mouse_command_turns_the_pointer_on_and_off_and_alone_to_the_other() {
+    let mut app = keyed::app();
+    assert!(!app.mouse_on(), "off until it is asked for");
+    click(&mut app, "Lars Lindqvist");
+    assert_eq!(foot(&mut app).0, "1 of 24 · 1 message", "and a report nobody asked for is not read");
+    press(&mut app, ":mouse\r");
+    assert_eq!((app.mouse_on(), foot(&mut app).1.as_str()), (true, "Mouse on · hold Shift to select text"));
+    press(&mut app, ":mouse\r");
+    assert_eq!((app.mouse_on(), foot(&mut app).1.as_str()), (false, "Mouse off"));
+    press(&mut app, ":mouse off\r");
+    assert!(!app.mouse_on(), "off twice is off");
+    press(&mut app, ":mouse on\r:mouse on\r");
+    assert!(app.mouse_on());
+    press(&mut app, ":mouse maybe\r");
+    assert!(app.mouse_on(), "a word it does not take changes nothing");
+    assert_eq!(foot(&mut app).1, "E :mouse: it takes on or off, or nothing · Tab completes");
+    // In the reader and the calendar too.
+    let mut reading = keyed::after("\r:mouse\r");
+    assert!(reading.mouse_on() && foot(&mut reading).1.starts_with("Mouse on"));
+    app.set_mouse(false);
+    assert!(!app.mouse_on());
 }
 
 #[test]

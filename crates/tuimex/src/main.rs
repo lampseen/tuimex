@@ -122,10 +122,11 @@ fn main() -> Result<ExitCode> {
         // until then, so there is always someone to send to.
         let _ = shown.send(calendar::Handed::Calendar { calendar: Box::new(fixture_calendar()), carried: 0 });
         app.set_preview(preview);
+        app.set_mouse(mouse);
         open(&mut app)?;
         let mut desk = desk::Desk::new(Offline::new(outside), agent, &dirs.cache);
         // No reminders: the design's afternoon has no clock to fall due on.
-        term::Opening::new(theme, mouse).run(&mut app, &mut desk, &mut diary::Diary::new(arriving, None))?;
+        term::Opening::new(theme).run(&mut app, &mut desk, &mut diary::Diary::new(arriving, None))?;
         return Ok(ExitCode::SUCCESS);
     }
     tuimex_ui::when::set_zone(zone);
@@ -136,7 +137,7 @@ fn main() -> Result<ExitCode> {
     }
     // The screen is taken once the config has been found good and before
     // the store is opened, so that a wait for the index is said on it.
-    let mut opening = term::Opening::new(theme, mouse);
+    let mut opening = term::Opening::new(theme);
     let calendar = Some(calendar);
     let (mailbox, live, delay) = live::start(&config, &dirs, downloads, calendar, &mut |rebuilt| opening.say(rebuilt))?;
     let mut app = App::new(theme, mailbox);
@@ -146,6 +147,7 @@ fn main() -> Result<ExitCode> {
     app.set_delay(delay);
     app.set_colours(colours);
     app.set_preview(preview);
+    app.set_mouse(mouse);
     let mut desk = desk::Desk::new(live, agent, &dirs.cache);
     // OSC 9 goes to standard output, which is what the frames are written
     // to, from the loop's own thread between two frames: each frame is

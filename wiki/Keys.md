@@ -124,9 +124,11 @@ nothing reads it.
 
 ## The mouse
 
-Off unless the config has `mouse = true` under `[ui]`. With it on, the
-terminal hands the pointer to tuimex and no longer selects text by
-dragging; most terminals still do while Shift is held.
+Off until `:mouse` is typed, or from the start when the config has
+`mouse = true` under `[ui]`. With it on, the terminal hands the pointer to
+tuimex and no longer selects text by dragging; most terminals still do
+while Shift is held. `:mouse` again turns it off, and `:mouse on` and
+`:mouse off` say which. What `:mouse` sets lasts until tuimex is left.
 
 It does nothing a key does not, and so far only in mail's list:
 

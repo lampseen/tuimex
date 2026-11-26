@@ -180,6 +180,9 @@ pub struct App {
     pane: (Place, usize, usize, usize),
     /// What the last frame drew that the pointer can be on.
     spots: Vec<Spot>,
+    /// Whether the terminal is to report the pointer: `ui.mouse`, then
+    /// `:mouse` (ADR-065).
+    pointing: bool,
     /// The search being shown in place of a section, and where the cursor
     /// and the scroll were when `/` was pressed, which typing moves.
     search: Option<find::Search>,
@@ -256,6 +259,7 @@ impl App {
             pane_of: None,
             pane: (Place::Off, 0, 0, 0),
             spots: Vec::new(),
+            pointing: false,
             search: None,
             sought_from: (0, 0),
             said: None,
@@ -1176,6 +1180,7 @@ impl App {
             Some("preview") => ("Preview".to_string(), plain(vec!["auto", "right", "below", "off"])),
             Some("calendar") => ("Views".to_string(), plain(vec!["month", "week", "day"])),
             Some("notify") => ("Reminders".to_string(), plain(vec!["on", "off"])),
+            Some("mouse") => ("Mouse".to_string(), plain(vec!["on", "off"])),
             Some("invite") => {
                 ("Answers".to_string(), plain(vec!["accept", "tentative", "decline", "propose", "ignore"]))
             }
@@ -1237,6 +1242,14 @@ impl App {
                 Some(preview) => self.set_preview(preview),
                 None => self.offer(say::err(":preview: it takes auto, right, below or off"), "preview "),
             },
+            "mouse" if ["", "on", "off"].contains(&rest) => {
+                self.pointing = if rest.is_empty() { !self.pointing } else { rest == "on" };
+                self.say(match self.pointing {
+                    true => say::plain("Mouse on").key("hold Shift to select text"),
+                    false => say::plain("Mouse off"),
+                });
+            }
+            "mouse" => self.offer(say::err(":mouse: it takes on or off, or nothing"), "mouse "),
             "sync" => self.sync(rest == "all"),
             "empty-trash" => self.ask_empty_trash(rest),
             "messages" => self.mode = Mode::Messages(0),

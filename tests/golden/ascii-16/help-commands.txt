@@ -1,7 +1,6 @@
   Mail   Calendar                                                                                                       
   Help                                                                                                                  
                                                                                                                         
-                                                                                                                        
     Commands                                                                                                            
     :archive                                          archive what is selected                                          
     :trash                                            move what is selected to Trash                                    
@@ -30,11 +29,12 @@
     :notify on|off                                    reminders on or off                                               
     :unsubscribe                                      prepare an unsubscribe for review                                 
     :preview auto|right|below|off                     where the preview sits                                            
+    :mouse [on|off]                                   the mouse on or off; alone, the other                             
     :sync [all]                                       sync this section, or all                                         
     :empty-trash [account]                            delete an account's Trash for good                                
     :messages                                         the last results and errors                                       
     :q                                                quit from the list; back elsewhere                                
     :qa                                               quit                                                              
                                                                                                                         
-  144 keys and commands - lines 37-70 of 70                                                 sending in 6s - 1 not sent  
+  145 keys and commands - lines 38-71 of 71                                                 sending in 6s - 1 not sent  
   type to filter - ^d ^u scroll - Esc back                                                                              

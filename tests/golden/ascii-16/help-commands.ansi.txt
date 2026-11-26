@@ -1,7 +1,6 @@
 {default}  {default b}Mail{default}   {brightblack}Calendar{default}                                                                                                       
 {default}  {default b}Help{default}                                                                                                                  
 {default}                                                                                                                        
-{default}                                                                                                                        
 {default}    {default b}Commands{default}                                                                                                            
 {default}    :archive                                          {brightblack}archive what is selected{default}                                          
 {default}    :trash                                            {brightblack}move what is selected to Trash{default}                                    
@@ -30,11 +29,12 @@
 {default}    :notify on|off                                    {brightblack}reminders on or off{default}                                               
 {default}    :unsubscribe                                      {brightblack}prepare an unsubscribe for review{default}                                 
 {default}    :preview auto|right|below|off                     {brightblack}where the preview sits{default}                                            
+{default}    :mouse [on|off]                                   {brightblack}the mouse on or off; alone, the other{default}                             
 {default}    :sync [all]                                       {brightblack}sync this section, or all{default}                                         
 {default}    :empty-trash [account]                            {brightblack}delete an account's Trash for good{default}                                
 {default}    :messages                                         {brightblack}the last results and errors{default}                                       
 {default}    :q                                                {brightblack}quit from the list; back elsewhere{default}                                
 {default}    :qa                                               {brightblack}quit{default}                                                              
 {default}                                                                                                                        
-{default}  {brightblack}144 keys and commands - lines 37-70 of 70{default}                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
+{default}  {brightblack}145 keys and commands - lines 38-71 of 71{default}                                                 sending in 6s{brightblack} - {red}1 not sent{default}  
 {default}  type {brightblack}to filter - {default}^d ^u {brightblack}scroll - {default}Esc {brightblack}back{default}                                                                              
