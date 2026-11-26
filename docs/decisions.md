@@ -2225,3 +2225,66 @@ its own against its own measurement.
 **What it costs.** The second raise of this budget in two days. The
 download is 1 MiB larger than the one released as 0.1.0, and that is
 what a user pays for a calendar they may never open.
+
+## ADR-065 — The mouse is asked for, and a press selects before it acts
+
+`ui.mouse = true` has the terminal report the pointer; left out, tuimex
+is as it was. A press of the left button moves the cursor to what it is
+on, and a press on what the cursor already has is Enter. The wheel moves
+the list's cursor, or scrolls the preview when it is over that. Nothing
+else the pointer does is read.
+
+The strongest argument against building it at all is the north star's
+own: the inbox is cleared from the keyboard, and a second way in is a
+second thing to keep true. Two things answer it. The pointer adds no
+action: a press is looked up in what the last frame drew and then goes
+through the binding a key goes through, so there is one behaviour and two
+ways to reach it. And nothing is drawn for it: no button, no scrollbar, no
+hover. The look is unchanged, so `design/tui.js`, the goldens and the
+keymap table are untouched (ADR-002, ADR-054).
+
+**Off unless asked for** (Bryan, 2026-11-26). A terminal that reports the
+pointer stops selecting text with it, and in a mail reader copying a line
+out of a message is ordinary. Most terminals still select while Shift is
+held; that is theirs to do and not something tuimex can promise.
+
+**A press selects first** (Bryan, 2026-11-26). Many terminals deliver the
+press that only brought their window to the front. If one press opened
+what it landed on, that press would open a message, and later a link or a
+file from hostile mail (ADR-008, ADR-018), without anyone having chosen
+it. A first press that only moves the cursor is harmless wherever it
+lands.
+
+**The hint line is not buttons** (Bryan, 2026-11-26). `e archive · d
+trash` reminds what the keys are. A question's `y yes · n no` is a
+dialog, and its choices will take a press when questions do.
+
+The rules that follow from those:
+
+- Only the left button going down and the wheel are read, and only with
+  no modifier held. Presses and the wheel are all the terminal is asked
+  to report (modes 1000 and 1006): where the pointer merely is would be an
+  event for every cell it crossed.
+- While a question is open or a line is being typed the pointer is not
+  read at all.
+- The bar of places is pressed where its function keys are read, and
+  nowhere else.
+- A press means what the last frame showed. Several events read together
+  before one frame (PLAN §9) are each looked up in that frame.
+- The report is switched off wherever the screen is given back: on the
+  way out, around `$EDITOR`, and in a panic before the message prints. A
+  terminal left reporting writes an escape sequence into the shell at
+  every click.
+
+No crate is added: `crossterm`'s events already carry the pointer
+(ADR-005).
+
+**What it covers so far.** The bar of places and the mail list: tabs,
+rows, the preview, the wheel. The reader, its panels, questions, compose
+and the calendar are to follow, each with its tests; until then a press
+there does nothing.
+
+**What it costs.** Text selection, for whoever turns it on. A map from
+cells to what was drawn there, which every screen that wants the pointer
+has to keep true; a test walks the list's at every size. Behaviour inside
+tmux and on macOS is **unverified**.

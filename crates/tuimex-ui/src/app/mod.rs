@@ -7,6 +7,7 @@ mod calendar;
 mod draft;
 mod filter;
 mod find;
+mod mouse;
 mod read;
 
 use std::cell::{Cell, RefCell};
@@ -30,6 +31,7 @@ use crate::paint::{Theme, paint};
 use crate::palette::Tok;
 use crate::say::{self, Said};
 use crate::span::{Line, run};
+use crate::spot::{Spot, Target};
 use crate::{help, places, when};
 
 /// The tab that is there while a message is waiting to go or was refused.
@@ -176,6 +178,8 @@ pub struct App {
     focus: bool,
     pane_of: Option<MessageId>,
     pane: (Place, usize, usize, usize),
+    /// What the last frame drew that the pointer can be on.
+    spots: Vec<Spot>,
     /// The search being shown in place of a section, and where the cursor
     /// and the scroll were when `/` was pressed, which typing moves.
     search: Option<find::Search>,
@@ -251,6 +255,7 @@ impl App {
             focus: false,
             pane_of: None,
             pane: (Place::Off, 0, 0, 0),
+            spots: Vec::new(),
             search: None,
             sought_from: (0, 0),
             said: None,
@@ -637,6 +642,8 @@ impl App {
         let mut lines = vec![places::bar(here, !typing, width)];
         lines.extend(self.lines_under(width, height.saturating_sub(1)));
         self.reading.pictures.iter_mut().for_each(|placed| placed.row += 1);
+        let under = std::mem::take(&mut self.spots).into_iter().map(|spot| spot.moved(1, 0));
+        self.spots = places::spots(here, !typing, width).into_iter().chain(under).collect();
         lines
     }
 
@@ -645,6 +652,7 @@ impl App {
         // A picture is where this frame's reader put it; a frame that draws
         // anything else over the reader has no picture to report.
         self.reading.pictures.clear();
+        self.spots.clear();
         let right = self.alerts();
         if let Mode::Help(needle, top) = &self.mode {
             let drawn = help::screen(needle, *top, self.cal.open, &right, width, height);
@@ -745,6 +753,14 @@ impl App {
         let drawn = list::draw(&list, width, height);
         drop(rows);
         (self.top, self.room, self.pane_of) = (top, room, shown);
+        // The rows made are the ones near the cursor, and a row is pressed
+        // by its place among them all.
+        self.spots = drawn.spots;
+        for spot in &mut self.spots {
+            if let Target::Row(row) = &mut spot.target {
+                *row += first;
+            }
+        }
         // A preview that is not drawn cannot hold the focus.
         self.focus &= typing || drawn.place != Place::Off;
         if !typing {

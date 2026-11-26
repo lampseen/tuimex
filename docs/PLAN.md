@@ -947,8 +947,9 @@ Proton Bridge pinned.
 **Exit:** round trips against a scratch `GNUPGHOME` made by the test.
 
 ### M11 — Polish and release
-`NO_COLOR`; mouse (click row, tab, wheel); `[keys]` remapping; notifications
-(§6.6); `config.example.toml`. Written ahead of the rest, when the
+`NO_COLOR`; mouse (click row, tab, wheel: *built for the mail list*, off
+unless `ui.mouse` asks, ADR-065; the reader, compose and the calendar are
+to follow); `[keys]` remapping; notifications (§6.6); `config.example.toml`. Written ahead of the rest, when the
 repository was published (ADR-051): the release workflow with attested
 artifacts and checksums, the two-step `make release` / `make release-tag`,
 copied from pullpen, the weekly dependency check and a Homebrew formula
@@ -1081,6 +1082,7 @@ glyphs = "unicode"             # unicode | ascii | nerd
 colors = "auto"                # auto | 16 | 256 | true
 # palette = "~/.config/tuimex/palette.toml"
 preview = "auto"               # auto | right | below | off: beside the list from 160 columns, else below
+mouse = false                  # true: a press moves the cursor, a second opens; the terminal then selects text only with Shift held (ADR-065)
 
 [notify]
 bell = true                    # new mail: the bell, and

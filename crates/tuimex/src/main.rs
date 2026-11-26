@@ -93,6 +93,7 @@ fn main() -> Result<ExitCode> {
     let mut config = config(args.config.as_deref(), &dirs)?;
     let ui = config.ui.take();
     let (preview, colours) = (config::preview(ui.as_ref())?, config::colours(&config.accounts)?);
+    let mouse = config::mouse(ui.as_ref());
     if let Some(named) = ui.and_then(|ui| ui.palette) {
         theme.palette.custom = Some(palette::load(&palette::resolve(&named, home.home_dir(), &dirs.config))?);
     }
@@ -124,7 +125,7 @@ fn main() -> Result<ExitCode> {
         open(&mut app)?;
         let mut desk = desk::Desk::new(Offline::new(outside), agent, &dirs.cache);
         // No reminders: the design's afternoon has no clock to fall due on.
-        term::Opening::new(theme).run(&mut app, &mut desk, &mut diary::Diary::new(arriving, None))?;
+        term::Opening::new(theme, mouse).run(&mut app, &mut desk, &mut diary::Diary::new(arriving, None))?;
         return Ok(ExitCode::SUCCESS);
     }
     tuimex_ui::when::set_zone(zone);
@@ -135,7 +136,7 @@ fn main() -> Result<ExitCode> {
     }
     // The screen is taken once the config has been found good and before
     // the store is opened, so that a wait for the index is said on it.
-    let mut opening = term::Opening::new(theme);
+    let mut opening = term::Opening::new(theme, mouse);
     let calendar = Some(calendar);
     let (mailbox, live, delay) = live::start(&config, &dirs, downloads, calendar, &mut |rebuilt| opening.say(rebuilt))?;
     let mut app = App::new(theme, mailbox);

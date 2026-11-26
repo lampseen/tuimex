@@ -684,7 +684,7 @@ fn hold(app: &mut App, live: &mut Live, synced: &mut bool, what: &str, key: char
     let mut terminal = Terminal::with_options(glass, TerminalOptions { viewport }).unwrap();
     let mut typist = Typist { keys, next: None, read: Vec::new() };
     let mut counted = Counted { live, refreshes: 0, rows: 0, synced };
-    crate::term::event_loop(&mut terminal, &mut typist, app, &mut counted, &mut no_calendar()).unwrap();
+    crate::term::event_loop(&mut terminal, &mut typist, app, &mut counted, &mut no_calendar(), false).unwrap();
     typing.join().unwrap();
     app.quit = false;
     let frames = frames.borrow();

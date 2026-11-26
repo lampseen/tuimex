@@ -54,7 +54,13 @@ runs `notify-send` on Linux or `osascript` on macOS, or writes an OSC 9
 sequence for a terminal that shows one. No test runs either program, and
 neither has been seen to raise a notification by anyone here.
 
-Not built: the mouse, `NO_COLOR`, and notifications of new mail.
+The mouse is read only when `ui.mouse = true` asks for it, and so far in
+mail's list alone ([Keys](Keys#the-mouse)). Presses and the wheel are all
+that is asked of the terminal, and that is given back on the way out,
+around `$EDITOR` and in a crash. Nobody has tried it inside tmux or on
+macOS.
+
+Not built: `NO_COLOR`, and notifications of new mail.
 
 The screens are compared with the design cell for cell in two renderings:
 truecolor with Unicode, and sixteen colours with ASCII. The 256-colour tier

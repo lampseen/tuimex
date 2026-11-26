@@ -153,6 +153,8 @@ pub struct Ui {
     pub palette: Option<String>,
     /// Where the preview sits: `auto`, `right`, `below` or `off`.
     pub preview: Option<String>,
+    /// Whether the terminal reports the pointer to tuimex (ADR-065).
+    pub mouse: Option<bool>,
 }
 
 /// `ui.preview`, which left out is `auto`. Any other word stops tuimex
@@ -163,6 +165,12 @@ pub fn preview(ui: Option<&Ui>) -> Result<Preview> {
         Some(named) => Preview::from_name(named)
             .with_context(|| format!("ui.preview = {named:?}: it is one of auto, right, below, off")),
     }
+}
+
+/// `ui.mouse`, which left out is off: a terminal that reports the pointer
+/// no longer selects text with it, and that is the user's to give up.
+pub fn mouse(ui: Option<&Ui>) -> bool {
+    ui.and_then(|ui| ui.mouse).unwrap_or(false)
 }
 
 /// `[[account]] color`, for each account that has one. Only an accent

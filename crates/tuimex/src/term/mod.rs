@@ -4,12 +4,18 @@
 //! alternate screen before the panic message prints, so a crash never
 //! strands the user in a broken terminal. `restore` runs on every normal
 //! exit path, errors included.
+//!
+//! The pointer is reported only where `ui.mouse` asked for it (ADR-065),
+//! and that is given back wherever the screen is: a terminal left
+//! reporting writes an escape sequence into the shell at every click.
 
 use std::io::Write;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::event::{
+    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
+};
 use crossterm::terminal::{
     BeginSynchronizedUpdate, Clear, ClearType, EndSynchronizedUpdate, EnterAlternateScreen, LeaveAlternateScreen,
     disable_raw_mode, enable_raw_mode,
@@ -22,6 +28,7 @@ use tuimex_ui::app::App;
 use tuimex_ui::keymap::{Key, TIMEOUT_MS};
 use tuimex_ui::paint::{Theme, paint};
 use tuimex_ui::say;
+use tuimex_ui::spot::Mouse;
 
 use crate::diary::Diary;
 use crate::pictures::Painter;
@@ -102,6 +109,16 @@ const TICK: Duration = Duration::from_millis(100);
 /// preview: longer than a keyboard's repeat, shorter than a glance.
 const REST: Duration = Duration::from_millis(150);
 
+/// Asks the terminal to report presses and the wheel, in the form that has
+/// no limit on the column (modes 1000 and 1006), or to stop. Where the
+/// pointer merely is goes unasked for: nothing here follows it, and every
+/// movement would be an event to wake for.
+fn point(report: bool) -> std::io::Result<()> {
+    let mut out = std::io::stdout();
+    out.write_all(if report { b"\x1b[?1000h\x1b[?1006h" } else { b"\x1b[?1006l\x1b[?1000l" })?;
+    out.flush()
+}
+
 /// Where what is typed comes from: the terminal, or a test's own keys.
 pub(crate) trait Input {
     /// Whether an event is there to be read, waiting up to `wait` for one.
@@ -129,17 +146,31 @@ type Screen<W> = Terminal<CrosstermBackend<W>>;
 /// this is dropped without one.
 pub struct Opening {
     theme: Theme,
+    /// `ui.mouse`: whether the terminal is asked to report the pointer.
+    mouse: bool,
     terminal: Option<ratatui::DefaultTerminal>,
 }
 
 impl Opening {
-    pub fn new(theme: Theme) -> Opening {
-        Opening { theme, terminal: None }
+    pub fn new(theme: Theme, mouse: bool) -> Opening {
+        Opening { theme, mouse, terminal: None }
     }
 
     fn terminal(&mut self) -> Result<&mut ratatui::DefaultTerminal> {
         if self.terminal.is_none() {
             self.terminal = Some(ratatui::try_init()?);
+            if self.mouse {
+                // Ahead of the hook `try_init` set, which leaves the screen
+                // and has the panic printed.
+                let leave = std::panic::take_hook();
+                std::panic::set_hook(Box::new(move |panic| {
+                    // A terminal that cannot be written to has nothing to
+                    // be given back, and the panic is still to be told.
+                    let _ = point(false);
+                    leave(panic);
+                }));
+                point(true)?;
+            }
         }
         // Filled just above when it was empty.
         self.terminal.as_mut().context("the terminal was not taken")
@@ -157,13 +188,19 @@ impl Opening {
     }
 
     pub fn run(mut self, app: &mut App, backend: &mut dyn Backend, diary: &mut Diary) -> Result<()> {
-        event_loop(self.terminal()?, &mut Tty, app, backend, diary)
+        let mouse = self.mouse;
+        event_loop(self.terminal()?, &mut Tty, app, backend, diary, mouse)
     }
 }
 
 impl Drop for Opening {
     fn drop(&mut self) {
         if self.terminal.is_some() {
+            if self.mouse {
+                // As `restore` does with its own: there is nobody to tell,
+                // and the screen is still to be left.
+                let _ = point(false);
+            }
             ratatui::restore();
         }
     }
@@ -175,6 +212,7 @@ pub(crate) fn event_loop<W: Write>(
     app: &mut App,
     backend: &mut dyn Backend,
     diary: &mut Diary,
+    mouse: bool,
 ) -> Result<()> {
     // crossterm starts listening for a change of size when it is first
     // asked for an event. Asked here, before anything is drawn, a resize
@@ -233,18 +271,29 @@ pub(crate) fn event_loop<W: Write>(
         // would go on playing them out after the key was let go.
         let mut waiting = changed;
         while waiting {
-            if let Event::Key(k) = input.read()?
-                && k.kind != KeyEventKind::Release
-                && let Some(key) = convert(k)
-            {
-                app.key(key);
-                diary.switched(app);
+            match input.read()? {
+                Event::Key(k) if k.kind != KeyEventKind::Release => {
+                    if let Some(key) = convert(k) {
+                        app.key(key);
+                        diary.switched(app);
+                    }
+                }
+                Event::Mouse(m) => {
+                    if let Some(pointed) = pointer(m) {
+                        app.mouse(pointed);
+                        diary.switched(app);
+                    }
+                }
+                _ => {}
             }
             for ask in app.asks() {
                 // `$EDITOR` has the terminal while it runs, as it was
                 // before tuimex drew on it.
                 let edits = matches!(ask.action, Action::Edit(_));
                 if edits {
+                    if mouse {
+                        point(false)?;
+                    }
                     disable_raw_mode()?;
                     execute!(std::io::stdout(), LeaveAlternateScreen)?;
                 }
@@ -252,6 +301,9 @@ pub(crate) fn event_loop<W: Write>(
                 if edits {
                     enable_raw_mode()?;
                     execute!(std::io::stdout(), EnterAlternateScreen)?;
+                    if mouse {
+                        point(true)?;
+                    }
                     repaint(terminal)?;
                 }
             }
@@ -340,6 +392,20 @@ fn convert(k: KeyEvent) -> Option<Key> {
         KeyCode::Left => Some(Key::Left),
         KeyCode::Right => Some(Key::Right),
         KeyCode::F(n) => Some(Key::F(n)),
+        _ => None,
+    }
+}
+
+/// The left button going down, and the wheel, with nothing held: the
+/// terminal keeps a press with Shift for selecting text, and a drag, a
+/// release and the other buttons mean nothing here.
+fn pointer(m: MouseEvent) -> Option<Mouse> {
+    let (col, row) = (usize::from(m.column), usize::from(m.row));
+    match m.kind {
+        _ if !m.modifiers.is_empty() => None,
+        MouseEventKind::Down(MouseButton::Left) => Some(Mouse::Click { col, row }),
+        MouseEventKind::ScrollDown => Some(Mouse::Wheel { col, row, down: true }),
+        MouseEventKind::ScrollUp => Some(Mouse::Wheel { col, row, down: false }),
         _ => None,
     }
 }

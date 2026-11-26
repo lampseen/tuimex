@@ -122,6 +122,29 @@ together, which is how most terminals send it. A sequence such as `gg` or
 Keys cannot be remapped yet. The config accepts a `[keys]` table and
 nothing reads it.
 
+## The mouse
+
+Off unless the config has `mouse = true` under `[ui]`. With it on, the
+terminal hands the pointer to tuimex and no longer selects text by
+dragging; most terminals still do while Shift is held.
+
+It does nothing a key does not, and so far only in mail's list:
+
+| press or wheel | does |
+|---|---|
+| a row | moves the cursor there; on the row the cursor has, opens it as `Enter` does |
+| a tab | opens that section |
+| a place on the top bar | goes there, where `F1` and `F2` are read |
+| the preview | moves the focus into it, as `Alt-j` or `Alt-l` does |
+| wheel over the rows | moves the cursor three rows |
+| wheel over the preview | scrolls it three lines |
+
+A first press only ever moves the cursor, so the press that brings the
+terminal's window to the front opens nothing. The hint line at the bottom
+names keys and is not pressed. While a question is open or a line is being
+typed the pointer is not read. In the reader, in compose and in the
+calendar a press does nothing yet, apart from the bar of places.
+
 ---
 
 [Commands](Commands) · [Your first session](Your-first-session)

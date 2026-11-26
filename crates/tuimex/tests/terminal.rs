@@ -801,6 +801,93 @@ fn a_panic_restores_the_terminal_before_its_message_prints() {
     assert!(left < message, "the message printed into the alternate screen and was lost");
 }
 
+/// What asks a terminal to report presses of the pointer, and to stop.
+const POINTER_ON: &str = "\x1b[?1000h\x1b[?1006h";
+const POINTER_OFF: &str = "\x1b[?1006l\x1b[?1000l";
+
+/// A home whose config asks for the pointer (ADR-065).
+fn pointer_home(test: &str) -> PathBuf {
+    let home = scratch_home(test);
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), "[ui]\nmouse = true\n").unwrap();
+    home
+}
+
+/// Whether each `on` or `off` in `screen` was an `on`, in the order written.
+fn switched(screen: &str, on: &str, off: &str) -> Vec<bool> {
+    let mut marks: Vec<(usize, bool)> = screen.match_indices(on).map(|(at, _)| (at, true)).collect();
+    marks.extend(screen.match_indices(off).map(|(at, _)| (at, false)));
+    marks.sort();
+    marks.into_iter().map(|(_, on)| on).collect()
+}
+
+#[test]
+fn the_pointer_is_reported_only_when_the_config_asks_for_it() {
+    let out = on_a_pty(&scratch_home("pointer-unasked"), QUIT, &["--fixtures"], &[]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0));
+    assert!(!screen.contains("\x1b[?100"), "no mode of the pointer is touched: {screen:?}");
+    let home = scratch_home("pointer-refused");
+    fs::create_dir_all(home.join(".config/tuimex")).unwrap();
+    fs::write(home.join(".config/tuimex/config.toml"), "[ui]\nmouse = \"yes\"\n").unwrap();
+    let out = tuimex(&home).arg("--fixtures").output().unwrap();
+    assert_eq!(out.status.code(), Some(1), "ui.mouse is true or false");
+    let said = String::from_utf8(out.stderr).unwrap();
+    assert!(said.contains("line 2: expected a boolean"), "{said}");
+}
+
+/// A press as a terminal reports it in mode 1006: the left button going
+/// down on the sixth row of the inbox at 80 by 24, and coming up again.
+#[test]
+fn a_press_moves_the_cursor_a_second_opens_the_row_and_the_pointer_is_given_back_on_the_way_out() {
+    let home = pointer_home("pointer");
+    let press = "\x1b[<0;20;10M\x1b[<0;20;10m";
+    let keys = format!("{press}|{press}|{QUIT}|{QUIT}");
+    let out = on_a_pty(&home, &keys, &["--fixtures"], &[("ON_PTY_STEPS", "|")]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0), "the terminal showed {screen:?}");
+    assert_eq!(switched(&screen, POINTER_ON, POINTER_OFF), [true, false]);
+    let (entered, on) = (screen.find(ENTER_SCREEN).unwrap(), screen.find(POINTER_ON).unwrap());
+    let (off, left) = (screen.find(POINTER_OFF).unwrap(), screen.rfind(LEAVE_SCREEN).unwrap());
+    assert!(entered < on && off < left, "asked for on the screen tuimex draws, and given back before it is left");
+    let frames = frames(&screen);
+    let moved = frames.iter().position(|f| f.contains(">   work  Lars Lindqvist")).expect("the cursor on the row");
+    assert!(frames[moved].contains("6 of 24 - 1 message"), "{}", frames[moved]);
+    let opened = frames[moved..].iter().any(|f| f.starts_with("  F1 Mail   F2 Calendar\n  Staging database migration"));
+    assert!(opened, "the second press opens the message: {:?}", frames.last());
+    assert_eq!(visible(&screen[left..]).trim(), "", "nothing of a press is left on the terminal");
+}
+
+/// The switch that makes the binary panic exists only in debug builds.
+#[cfg(debug_assertions)]
+#[test]
+fn a_panic_gives_the_pointer_back_before_its_message_prints() {
+    let out = on_a_pty(&pointer_home("pointer-panic"), "", &["--fixtures"], &[("TUIMEX_TEST_PANIC", "1")]);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(101), "a panic's exit status; the terminal showed {screen:?}");
+    let switched = switched(&screen, POINTER_ON, POINTER_OFF);
+    assert!(switched[0] && switched[1..].iter().all(|on| !on), "asked for once and not again: {switched:?}");
+    let message = screen.find("TUIMEX_TEST_PANIC is set").expect("the panic message is shown");
+    assert!(screen.find(POINTER_OFF).unwrap() < message);
+}
+
+#[test]
+fn the_editor_has_a_terminal_that_does_not_report_the_pointer() {
+    let home = pointer_home("pointer-editor");
+    let editor = fake_editor(&home, "Written in the editor.\\n");
+    let env = [("ON_PTY_STEPS", "|"), ("EDITOR", editor.as_str())];
+    let out = on_a_pty(&home, &one_by_one("c\t\t\t\t\r\x1bn:q\r"), &["--fixtures"], &env);
+    let screen = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(out.status.code(), Some(0), "the terminal showed {screen:?}");
+    assert_eq!(fs::read_to_string(home.join("editor-ran")).unwrap(), "on-a-terminal\n");
+    assert_eq!(switched(&screen, POINTER_ON, POINTER_OFF), [true, false, true, false]);
+    let all = [ENTER_SCREEN, POINTER_ON, POINTER_OFF, LEAVE_SCREEN];
+    let mut order: Vec<(usize, &str)> = all.iter().flat_map(|mark| screen.match_indices(mark)).collect();
+    order.sort();
+    let order: Vec<&str> = order.into_iter().map(|(_, mark)| mark).collect();
+    assert_eq!(order, [all, all].concat(), "each time on the screen tuimex draws, and off before it is left");
+}
+
 /// PLAN §11: never a demo in place of the user's mail.
 #[test]
 fn without_fixtures_it_says_why_it_stops_and_draws_nothing() {

@@ -23,6 +23,9 @@ that every name on this page is a test that exists.
 | Before there is a list the screen says `Opening mail`, and an index that has to be rebuilt after an upgrade is counted there, message by message | `a_rebuild_on_open_says_how_many_messages_it_has_indexed_of_how_many`, `an_index_to_rebuild_is_counted_on_the_screen_before_the_list_is_drawn`, and the `loading` goldens |
 | `^l` clears and redraws, also on a terminal that does not say where its cursor is | `ctrl_l_redraws_without_asking_the_terminal_anything` |
 | No key quits: Esc goes back, and `:q` and `:qa` leave | `no_key_quits_and_the_two_commands_do` |
+| The pointer is reported only when `ui.mouse = true`, which is off when left out | `the_pointer_is_reported_only_when_the_config_asks_for_it`, `ui_mouse_is_off_unless_the_config_says_true` |
+| With it on, a press moves the cursor, a second opens the row, and the pointer is given back before the screen is left, around `$EDITOR`, and in a crash | `a_press_moves_the_cursor_a_second_opens_the_row_and_the_pointer_is_given_back_on_the_way_out`, `the_editor_has_a_terminal_that_does_not_report_the_pointer`, `a_panic_gives_the_pointer_back_before_its_message_prints` |
+| Only the left button going down and the wheel are read, with no modifier held, and in the order they came among the keys | `only_the_left_button_going_down_and_the_wheel_are_read_and_with_nothing_held`, `a_press_and_the_keys_around_it_are_handled_in_the_order_they_came` |
 
 ## Setup, signing in, and doctor
 
@@ -191,6 +194,10 @@ program raise one.
 | No word of a message or of its header is cut where it is read: paragraphs, headings, list items, quotes, signature lines and alt text wrap, a table too wide becomes its rows' cells parted by dots, recipients and files are packed whole and stop at two rows in the preview and six in the reader with how many more, and a notice wraps under its own text and keeps the address it warns about | `at_a_narrow_measure_every_kind_of_line_wraps_and_none_is_cut`, `a_table_too_wide_for_the_measure_is_each_row_s_cells_in_a_line_parted_by_dots`, `a_picture_s_placeholder_is_no_wider_than_the_measure_and_keeps_what_fits_of_its_label`, `a_notice_wraps_under_its_own_text_and_keeps_the_address_it_warns_about`, `recipients_are_packed_whole_and_stop_at_two_rows_in_the_preview_and_six_in_the_reader`, `an_address_wider_than_the_row_is_broken_and_every_other_is_kept_whole`, and the `list-wide-recipients` and `list-wide-preview-scrolled` goldens |
 | With several accounts each row names its own in that account's colour, names that begin alike stay apart when cut short, and `gt` and `gT` show each account alone in turn | `three_accounts_have_three_names_in_three_colours_at_every_width_of_the_column`, `account_names_alike_at_their_start_stay_apart_when_cut`, `gt_steps_through_all_three_accounts_and_back_to_all_and_capital_t_steps_the_other_way`, and the `list-three-accounts` and `account-cycle` goldens |
 | With a palette file loaded, the accounts take its accents in the order that keeps them furthest apart for normal, protan and deutan sight, and a row's words take a spare accent or, with none that would show, are told apart by brightness; `color = "…"` under an `[[account]]` fixes one account's | `separation_and_contrast_are_the_design_s_for_a_table_of_colour_pairs`, `a_loaded_palette_orders_the_account_colours_by_the_design_s_rule`, `the_words_take_the_free_accent_that_shows_or_fall_back_to_brightness`, `three_accounts_with_a_loaded_palette_take_the_order_its_colours_give`, `words_with_no_colour_that_would_show_are_told_apart_by_brightness`, `a_color_in_the_config_fixes_one_account_and_the_rest_keep_their_turn`, `an_account_s_color_is_one_of_the_four_accents_accounts_take` |
+| With the mouse on, a press on a row moves the cursor there and a second opens it; a press on a date label, a blank line, the rule, the status line or the hint line does nothing | `a_click_on_a_row_moves_the_cursor_there_and_a_second_click_opens_it`, `a_click_anywhere_in_a_row_is_on_that_row_and_past_its_last_cell_is_on_none`, `a_click_on_a_date_label_a_blank_line_or_the_rule_does_nothing`, `a_click_on_the_hint_line_or_the_status_line_does_nothing` |
+| A press on a tab opens that section, on a place goes there where its function key is read, and on the preview moves the focus into it | `a_click_on_a_tab_opens_that_section_and_on_the_open_one_does_nothing`, `a_click_on_a_place_goes_there_as_its_function_key_does`, `the_bar_is_not_pressed_where_its_keys_are_not_read`, `a_click_on_the_preview_takes_the_focus_there_and_on_a_row_gives_it_back` |
+| The wheel moves the cursor over the rows and scrolls the preview over that; the pointer is not read while a question is open or a line is typed, and a press ends a key sequence that was begun | `the_wheel_moves_the_cursor_over_the_list_and_scrolls_the_preview_over_it`, `the_pointer_is_not_read_while_a_question_is_open_or_a_line_is_typed`, `a_press_ends_a_sequence_that_was_begun` |
+| What a press finds on a cell is what was drawn there, at every size | `every_spot_lies_on_the_text_it_names_at_any_size`, `a_spot_is_the_cells_of_its_span_counted_as_a_terminal_counts_them`, `a_cell_is_what_was_last_drawn_on_it_and_nothing_where_nothing_was` |
 
 ## The reader, links and files
 
@@ -295,8 +302,8 @@ above.
 
 ## Not built
 
-OpenPGP (signing, encrypting, verifying, decrypting), the mouse,
-`NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
+OpenPGP (signing, encrypting, verifying, decrypting), the mouse outside
+mail's list (the reader, compose and the calendar), `NO_COLOR`, remapping keys under `[keys]`, new-mail notifications, and
 `ui.glyphs` and `ui.colors` in the config. Each is planned; none is
 claimed anywhere on these pages.
 
